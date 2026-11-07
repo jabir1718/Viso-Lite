@@ -188,6 +188,7 @@ fun EditorScreen(vm: EditorViewModel = viewModel()) {
                     view.renderer.opacity = state.opacity
                     view.renderer.overlayScale = state.overlayScale
                     view.renderer.overlayOffY = state.overlayY
+                    view.renderer.overlayAspect = state.overlayAspect
                 },
                 modifier = Modifier.fillMaxSize()
             )
