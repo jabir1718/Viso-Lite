@@ -24,6 +24,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.graphics.Color.Companion.Red
+import kotlinx.coroutines.delay
 import com.viso.lite.EditorViewModel
 import com.viso.lite.gl.GlPreviewView
 
@@ -111,6 +113,13 @@ fun EditorScreen(vm: EditorViewModel = viewModel()) {
             }) permissionLauncher.launch(permissions)
     }
 
+    LaunchedEffect(state.error) {
+        if (!state.error.isNullOrBlank()) {
+            delay(5000L)
+            vm.clearError()
+        }
+    }
+
     LaunchedEffect(state.exporting, state.progress, exportSource) {
         val source = exportSource
         if (!state.exporting && state.progress == 100 && source != null && !galleryHandled) {
@@ -193,7 +202,10 @@ fun EditorScreen(vm: EditorViewModel = viewModel()) {
         }
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             listOf("Bars", "Ring", "Wave", "Dots", "Mask").forEachIndexed { index, label ->
-                OutlinedButton(onClick = { vm.setMode(index) }) {
+                OutlinedButton(
+                    onClick = { vm.setMode(index) },
+                    enabled = index != 4 || state.cut != null
+                ) {
                     Text(label, color = if (state.mode == index) Color.Cyan else Color.Gray)
                 }
             }
@@ -201,6 +213,9 @@ fun EditorScreen(vm: EditorViewModel = viewModel()) {
 
         Text("Sensitivity")
         Slider(state.sensitivity, vm::setSensitivity, valueRange = 0.4f..4f)
+        state.error?.let { error ->
+            if (error.isNotBlank()) Text(error, color = Red)
+        }
         Text("Opacity")
         Slider(state.opacity, vm::setOpacity, valueRange = 0f..1f)
         Text("Overlay scale")
