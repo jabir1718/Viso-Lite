@@ -13,6 +13,7 @@ import kotlin.math.hypot
 import kotlin.math.ln
 import kotlin.math.sin
 
+/** Decodes audio to mono PCM and caches synchronized FFT bands for preview/export. */
 class AudioAnalyzer {
     companion object {
         const val FRAME_MS = 33
