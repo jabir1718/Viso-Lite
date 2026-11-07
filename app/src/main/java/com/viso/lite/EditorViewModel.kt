@@ -3,6 +3,8 @@ package com.viso.lite
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.media.MediaPlayer
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
@@ -22,16 +24,20 @@ data class UiState(
     val image: Uri? = null,
     val cut: Bitmap? = null,
     val overlay: Bitmap? = null,
+    val overlayAspect: Float = 1f,
     val mode: Int = 0,
-    val opacity: Float = 1f,
+    val opacity: Float = 0.85f,
     val sensitivity: Float = 1.4f,
-    val overlayScale: Float = 1f,
+    val overlayScale: Float = 0.75f,
     val overlayY: Float = 0f,
     val busy: Boolean = false,
     val exporting: Boolean = false,
     val progress: Int = 0,
-    val exportError: String? = null
+    val exportError: String? = null,
+    val error: String? = null
 )
+
+private data class DecodedImage(val bitmap: Bitmap, val aspect: Float)
 
 class EditorViewModel(app: Application) : AndroidViewModel(app) {
     private val engine = AudioEngine(app)
@@ -39,6 +45,12 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
     private var exportJob: Job? = null
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state
+
+    init {
+        engine.onError = { message ->
+            _state.value = _state.value.copy(error = message)
+        }
+    }
 
     val bands: FloatArray get() = engine.bands
     val pulse: Float get() = engine.bands.getOrElse(1) { 0f }
@@ -57,23 +69,77 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setAudio(uri: Uri) {
         runCatching { engine.load(uri) }
-            .onSuccess { _state.value = _state.value.copy(audio = uri, exportError = null) }
-            .onFailure { _state.value = _state.value.copy(exportError = it.message ?: "Audio load failed") }
+            .onSuccess { _state.value = _state.value.copy(audio = uri, exportError = null, error = null) }
+            .onFailure {
+                _state.value = _state.value.copy(error = it.message ?: "Audio load failed")
+            }
     }
 
     fun setImage(uri: Uri) {
-        _state.value = _state.value.copy(image = uri, cut = null, overlay = null)
+        _state.value = _state.value.copy(
+            image = uri,
+            cut = null,
+            overlay = null,
+            overlayAspect = 1f,
+            error = null
+        )
         viewModelScope.launch {
-            val bitmap = withContext(Dispatchers.IO) { decode(uri) }
-            _state.value = _state.value.copy(overlay = bitmap)
+            val decoded = withContext(Dispatchers.IO) { decode(uri) }
+            if (decoded == null) {
+                _state.value = _state.value.copy(error = "Image load failed or unsupported image format.")
+            } else {
+                _state.value = _state.value.copy(
+                    overlay = decoded.bitmap,
+                    overlayAspect = decoded.aspect,
+                    error = null
+                )
+            }
         }
     }
 
-    private fun decode(uri: Uri): Bitmap? = runCatching {
+    private fun decode(uri: Uri): DecodedImage? = runCatching {
+        val resolver = getApplication<Application>().contentResolver
+        val orientation = resolver.openInputStream(uri)?.use { input ->
+            ExifInterface(input).getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
+        } ?: ExifInterface.ORIENTATION_NORMAL
+
         val options = BitmapFactory.Options().apply { inSampleSize = 2 }
-        getApplication<Application>().contentResolver.openInputStream(uri)?.use {
-            BitmapFactory.decodeStream(it, null, options)
+        val bitmap = resolver.openInputStream(uri)?.use { input ->
+            BitmapFactory.decodeStream(input, null, options)
+        } ?: return@runCatching null
+
+        val matrix = Matrix()
+        when (orientation) {
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.setScale(-1f, 1f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180f)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.setScale(1f, -1f)
+            ExifInterface.ORIENTATION_TRANSPOSE -> {
+                matrix.setRotate(90f)
+                matrix.postScale(-1f, 1f)
+            }
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90f)
+            ExifInterface.ORIENTATION_TRANSVERSE -> {
+                matrix.setRotate(-90f)
+                matrix.postScale(-1f, 1f)
+            }
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(270f)
         }
+
+        val corrected = if (orientation == ExifInterface.ORIENTATION_NORMAL ||
+            orientation == ExifInterface.ORIENTATION_UNDEFINED
+        ) {
+            bitmap
+        } else {
+            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                .also { if (it !== bitmap) bitmap.recycle() }
+        }
+        DecodedImage(
+            bitmap = corrected,
+            aspect = corrected.width.toFloat() / corrected.height.toFloat()
+        )
     }.getOrNull()
 
     fun setMode(mode: Int) { _state.value = _state.value.copy(mode = mode) }
@@ -90,14 +156,26 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
         _state.value = _state.value.copy(sensitivity = value)
     }
 
+    fun clearError() {
+        if (_state.value.error != null) {
+            _state.value = _state.value.copy(error = null)
+        }
+    }
+
     fun cutout() {
         val uri = _state.value.image ?: return
         viewModelScope.launch {
-            _state.value = _state.value.copy(busy = true)
-            val bitmap = withContext(Dispatchers.Default) {
+            _state.value = _state.value.copy(busy = true, error = null)
+            val result = withContext(Dispatchers.Default) {
                 SubjectCutter.cut(getApplication(), uri)
             }
-            _state.value = _state.value.copy(busy = false, cut = bitmap)
+            _state.value = _state.value.copy(
+                busy = false,
+                cut = result.first,
+                error = result.second ?: if (result.first == null) {
+                    "Background removal failed. Model download karo / internet on karo."
+                } else null
+            )
         }
     }
 
