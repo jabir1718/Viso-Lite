@@ -88,28 +88,28 @@ object Shaders {
                 col = col * a + palette(0.55 + uTime * 0.1) * edge * (0.6 + energy * 2.0 + uPulse * 2.0);
             }
 
-            // Keep the visualizer bright and retain a copy for a visible beat glow over the photo.
-            vec3 visualizer = col * 1.6;
-            col = visualizer;
+            col *= 1.6;
+            vec3 base = col;
 
-            float screenAspect = uRes.x / max(uRes.y, 1.0);
+            vec2 ouv = (uv - 0.5 - vec2(0.0, uOverlayOffY)) /
+                (1.0 + uPulse * 0.18) / max(uOverlayScale, 0.05) + 0.5;
+            float sAspect = uRes.x / max(uRes.y, 1.0);
             float imageAspect = max(uOverlayAspect, 0.01);
-            vec2 containFit = vec2(1.0);
-            if (imageAspect > screenAspect) {
-                containFit.y = screenAspect / imageAspect;
+            if (imageAspect > sAspect) {
+                ouv.y = (ouv.y - 0.5) * (imageAspect / sAspect) + 0.5;
             } else {
-                containFit.x = imageAspect / screenAspect;
+                ouv.x = (ouv.x - 0.5) * (sAspect / imageAspect) + 0.5;
             }
 
-            vec2 centeredUv = uv - 0.5 - vec2(0.0, uOverlayOffY);
-            vec2 ouv = centeredUv / containFit / (1.0 + uPulse * 0.18) / max(uOverlayScale, 0.05) + 0.5;
-            float inside = step(0.0, ouv.x) * step(ouv.x, 1.0) * step(0.0, ouv.y) * step(ouv.y, 1.0);
+            float inside = step(0.0, ouv.x) * step(ouv.x, 1.0) *
+                step(0.0, ouv.y) * step(ouv.y, 1.0);
             vec4 img = texture2D(uImage, ouv);
             img.a *= inside;
             if (img.a > 0.01) col = mix(col, img.rgb, img.a * uOpacity);
+
+            col += base * 0.35;
             float ga = smoothstep(0.0, 0.35, img.a) - smoothstep(0.35, 1.0, img.a);
             col += palette(0.2 + uTime * 0.1) * ga * uPulse * 1.6;
-            col += visualizer * 0.35;
 
             gl_FragColor = vec4(col, 1.0);
         }
