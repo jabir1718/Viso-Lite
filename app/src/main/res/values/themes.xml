@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.Viso" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">#08070C</item>
+        <item name="android:navigationBarColor">#08070C</item>
+        <item name="android:windowBackground">#08070C</item>
+    </style>
+</resources>
