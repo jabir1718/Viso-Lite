@@ -16,7 +16,7 @@ object SubjectCutter {
             SubjectSegmenterOptions.Builder()
                 .enableForegroundBitmap()
                 .enableMultipleSubjects(
-                    SubjectSegmenterOptions.MultipleSubjectsOptions.Builder().build()
+                    SubjectSegmenterOptions.SubjectResultOptions.Builder().build()
                 )
                 .build()
         )
