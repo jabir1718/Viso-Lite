@@ -42,8 +42,8 @@ class AudioAnalyzer {
             val spec = fft(pcm, pos)
             val row = FloatArray(BANDS)
             for (b in 0 until BANDS) {
-                val from = (FFT / 2.0 * ln(1 + b) / ln(BANDS.toDouble())).toInt()
-                val to = (FFT / 2.0 * ln(2 + b) / ln(BANDS.toDouble())).toInt().coerceAtLeast(from + 1)
+                val from = (FFT / 2.0 * ln((1 + b).toDouble()) / ln(BANDS.toDouble())).toInt()
+                val to = (FFT / 2.0 * ln((2 + b).toDouble()) / ln(BANDS.toDouble())).toInt().coerceAtLeast(from + 1)
                 var sum = 0f
                 val end = to.coerceAtMost(FFT / 2)
                 for (i in from until end) sum += spec[i]
