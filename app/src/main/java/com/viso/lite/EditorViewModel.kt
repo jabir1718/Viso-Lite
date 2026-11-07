@@ -81,6 +81,10 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
     fun setOverlayScale(value: Float) { _state.value = _state.value.copy(overlayScale = value) }
     fun setOverlayY(value: Float) { _state.value = _state.value.copy(overlayY = value) }
 
+    fun pause() { engine.pause() }
+
+    fun resume() { engine.resume() }
+
     fun setSensitivity(value: Float) {
         engine.setSensitivity(value)
         _state.value = _state.value.copy(sensitivity = value)
