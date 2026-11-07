@@ -32,6 +32,16 @@ class AudioEngine(private val context: Context) {
         vis.enabled = true
     }
 
+    fun pause() {
+        player?.let { if (it.isPlaying) it.pause() }
+        visualizer?.let { if (it.enabled) it.enabled = false }
+    }
+
+    fun resume() {
+        player?.let { if (!it.isPlaying) it.start() }
+        visualizer?.let { if (!it.enabled) it.enabled = true }
+    }
+
     fun setSensitivity(v: Float) { analyzer.sensitivity = v }
 
     fun release() {
