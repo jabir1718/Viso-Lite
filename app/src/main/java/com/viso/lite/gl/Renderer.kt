@@ -21,10 +21,11 @@ class Renderer {
         .apply { put(floatArrayOf(-1f, -1f, 1f, -1f, -1f, 1f, 1f, 1f)); position(0) }
 
     var mode = 0
-    var opacity = 1f
+    var opacity = 0.85f
     var pulse = 0f
-    var overlayScale = 1f
+    var overlayScale = 0.75f
     var overlayOffY = 0f
+    var overlayAspect = 1f
 
     fun init() {
         program = build(Shaders.VERT, Shaders.FRAG)
@@ -68,6 +69,7 @@ class Renderer {
 
     fun setImage(bmp: Bitmap) {
         imageBitmap = bmp
+        overlayAspect = bmp.width.toFloat() / bmp.height.toFloat()
         imageDirty = true
     }
 
@@ -99,6 +101,7 @@ class Renderer {
         GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uPulse"), pulse)
         GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uOverlayScale"), overlayScale.coerceAtLeast(0.05f))
         GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uOverlayOffY"), overlayOffY)
+        GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uOverlayAspect"), overlayAspect.coerceAtLeast(0.01f))
         GLES20.glUniform1fv(GLES20.glGetUniformLocation(program, "uBands"), 6, bands, 0)
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE1)
