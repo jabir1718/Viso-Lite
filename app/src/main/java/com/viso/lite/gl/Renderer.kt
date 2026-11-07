@@ -8,23 +8,31 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 
 class Renderer {
-
     private var program = 0
     private var maskTex = 0
     private var imageTex = 0
+    private var maskBitmap: Bitmap? = null
+    private var imageBitmap: Bitmap? = null
+    private var maskDirty = false
+    private var imageDirty = false
     private var aPos = 0
-    private val quad: FloatBuffer = ByteBuffer
-        .allocateDirect(8 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer()
+    private val quad: FloatBuffer = ByteBuffer.allocateDirect(8 * 4)
+        .order(ByteOrder.nativeOrder()).asFloatBuffer()
         .apply { put(floatArrayOf(-1f, -1f, 1f, -1f, -1f, 1f, 1f, 1f)); position(0) }
 
     var mode = 0
     var opacity = 1f
+    var pulse = 0f
+    var overlayScale = 1f
+    var overlayOffY = 0f
 
     fun init() {
         program = build(Shaders.VERT, Shaders.FRAG)
         aPos = GLES20.glGetAttribLocation(program, "aPos")
         maskTex = newTex()
         imageTex = newTex()
+        maskDirty = maskBitmap != null
+        imageDirty = imageBitmap != null
     }
 
     private fun build(vs: String, fs: String): Int {
@@ -36,25 +44,32 @@ class Renderer {
     }
 
     private fun compile(type: Int, src: String): Int {
-        val s = GLES20.glCreateShader(type)
-        GLES20.glShaderSource(s, src)
-        GLES20.glCompileShader(s)
-        return s
+        val shader = GLES20.glCreateShader(type)
+        GLES20.glShaderSource(shader, src)
+        GLES20.glCompileShader(shader)
+        return shader
     }
 
     private fun newTex(): Int {
-        val t = IntArray(1)
-        GLES20.glGenTextures(1, t, 0)
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, t[0])
+        val ids = IntArray(1)
+        GLES20.glGenTextures(1, ids, 0)
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, ids[0])
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
-        return t[0]
+        return ids[0]
     }
 
-    fun setMask(bmp: Bitmap) = upload(maskTex, bmp)
-    fun setImage(bmp: Bitmap) = upload(imageTex, bmp)
+    fun setMask(bmp: Bitmap) {
+        maskBitmap = bmp
+        maskDirty = true
+    }
+
+    fun setImage(bmp: Bitmap) {
+        imageBitmap = bmp
+        imageDirty = true
+    }
 
     private fun upload(tex: Int, bmp: Bitmap) {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tex)
@@ -67,10 +82,22 @@ class Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
         GLES20.glUseProgram(program)
 
+        if (maskDirty) {
+            maskBitmap?.let { upload(maskTex, it) }
+            maskDirty = false
+        }
+        if (imageDirty) {
+            imageBitmap?.let { upload(imageTex, it) }
+            imageDirty = false
+        }
+
         GLES20.glUniform2f(GLES20.glGetUniformLocation(program, "uRes"), width.toFloat(), height.toFloat())
         GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uTime"), time)
         GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uMode"), mode.toFloat())
         GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uOpacity"), opacity)
+        GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uPulse"), pulse.coerceIn(0f, 1f))
+        GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uOverlayScale"), overlayScale.coerceAtLeast(0.05f))
+        GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uOverlayOffY"), overlayOffY)
         GLES20.glUniform1fv(GLES20.glGetUniformLocation(program, "uBands"), 6, bands, 0)
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE1)
