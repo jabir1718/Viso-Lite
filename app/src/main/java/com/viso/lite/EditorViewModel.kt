@@ -24,7 +24,7 @@ data class UiState(
     val image: Uri? = null,
     val cut: Bitmap? = null,
     val overlay: Bitmap? = null,
-    val overlayAspect: Float = 1f,
+    val aspect: Float = 1f,
     val mode: Int = 0,
     val opacity: Float = 0.85f,
     val sensitivity: Float = 1.4f,
@@ -37,7 +37,6 @@ data class UiState(
     val error: String? = null
 )
 
-private data class DecodedImage(val bitmap: Bitmap, val aspect: Float)
 
 class EditorViewModel(app: Application) : AndroidViewModel(app) {
     private val engine = AudioEngine(app)
@@ -80,36 +79,36 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
             image = uri,
             cut = null,
             overlay = null,
-            overlayAspect = 1f,
+            aspect = 1f,
             error = null
         )
         viewModelScope.launch {
-            val decoded = withContext(Dispatchers.IO) { decode(uri) }
-            if (decoded == null) {
+            val bitmap = withContext(Dispatchers.IO) { decode(uri) }
+            if (bitmap == null) {
                 _state.value = _state.value.copy(error = "Image load failed or unsupported image format.")
             } else {
                 _state.value = _state.value.copy(
-                    overlay = decoded.bitmap,
-                    overlayAspect = decoded.aspect,
+                    overlay = bitmap,
+                    aspect = bitmap.width.toFloat() / bitmap.height.toFloat(),
                     error = null
                 )
             }
         }
     }
 
-    private fun decode(uri: Uri): DecodedImage? = runCatching {
+    private fun decode(uri: Uri): Bitmap? = runCatching {
         val resolver = getApplication<Application>().contentResolver
+        val opts = BitmapFactory.Options().apply { inSampleSize = 2 }
+        val bitmap = resolver.openInputStream(uri)?.use {
+            BitmapFactory.decodeStream(it, null, opts)
+        } ?: return@runCatching null
+
         val orientation = resolver.openInputStream(uri)?.use { input ->
             ExifInterface(input).getAttributeInt(
                 ExifInterface.TAG_ORIENTATION,
                 ExifInterface.ORIENTATION_NORMAL
             )
         } ?: ExifInterface.ORIENTATION_NORMAL
-
-        val options = BitmapFactory.Options().apply { inSampleSize = 2 }
-        val bitmap = resolver.openInputStream(uri)?.use { input ->
-            BitmapFactory.decodeStream(input, null, options)
-        } ?: return@runCatching null
 
         val matrix = Matrix()
         when (orientation) {
@@ -128,7 +127,7 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
             ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(270f)
         }
 
-        val corrected = if (orientation == ExifInterface.ORIENTATION_NORMAL ||
+        if (orientation == ExifInterface.ORIENTATION_NORMAL ||
             orientation == ExifInterface.ORIENTATION_UNDEFINED
         ) {
             bitmap
@@ -136,10 +135,6 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
             Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
                 .also { if (it !== bitmap) bitmap.recycle() }
         }
-        DecodedImage(
-            bitmap = corrected,
-            aspect = corrected.width.toFloat() / corrected.height.toFloat()
-        )
     }.getOrNull()
 
     fun setMode(mode: Int) { _state.value = _state.value.copy(mode = mode) }
@@ -172,11 +167,13 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
             _state.value = _state.value.copy(
                 busy = false,
                 cut = result.first,
-                error = result.second ?: if (result.first == null) {
-                    "Background removal failed. Model download karo / internet on karo."
-                } else null
+                error = result.second
             )
         }
+    }
+
+    fun clearError() {
+        _state.value = _state.value.copy(error = null)
     }
 
     fun export(uri: Uri, mode: Int, outUri: Uri) {
