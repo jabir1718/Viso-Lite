@@ -14,7 +14,7 @@ class GlPreviewView(context: Context) : GLSurfaceView(context) {
 
     init {
         setEGLContextClientVersion(2)
-        setRenderer(object : Renderer() {
+        setRenderer(object : GLSurfaceView.Renderer {
             override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) { renderer.init() }
             override fun onSurfaceChanged(gl: GL10?, w: Int, h: Int) {
                 GLES20.glViewport(0, 0, w, h)
