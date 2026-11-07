@@ -151,12 +151,6 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
         _state.value = _state.value.copy(sensitivity = value)
     }
 
-    fun clearError() {
-        if (_state.value.error != null) {
-            _state.value = _state.value.copy(error = null)
-        }
-    }
-
     fun cutout() {
         val uri = _state.value.image ?: return
         viewModelScope.launch {
