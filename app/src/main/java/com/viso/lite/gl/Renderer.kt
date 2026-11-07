@@ -26,6 +26,8 @@ class Renderer {
     var overlayScale = 0.75f
     var overlayOffY = 0f
     var overlayAspect = 1f
+    var vizScale = 1f
+    var hue = 0f
 
     fun init() {
         program = build(Shaders.VERT, Shaders.FRAG)
@@ -62,11 +64,7 @@ class Renderer {
         return ids[0]
     }
 
-    fun setMask(bmp: Bitmap) {
-        maskBitmap = bmp
-        maskDirty = true
-    }
-
+    fun setMask(bmp: Bitmap) { maskBitmap = bmp; maskDirty = true }
     fun setImage(bmp: Bitmap) {
         imageBitmap = bmp
         overlayAspect = bmp.width.toFloat() / bmp.height.toFloat()
@@ -83,15 +81,8 @@ class Renderer {
         GLES20.glClearColor(0.03f, 0.027f, 0.047f, 1f)
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
         GLES20.glUseProgram(program)
-
-        if (maskDirty) {
-            maskBitmap?.let { upload(maskTex, it) }
-            maskDirty = false
-        }
-        if (imageDirty) {
-            imageBitmap?.let { upload(imageTex, it) }
-            imageDirty = false
-        }
+        if (maskDirty) { maskBitmap?.let { upload(maskTex, it) }; maskDirty = false }
+        if (imageDirty) { imageBitmap?.let { upload(imageTex, it) }; imageDirty = false }
 
         GLES20.glUniform2f(GLES20.glGetUniformLocation(program, "uRes"), width.toFloat(), height.toFloat())
         GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uTime"), time)
@@ -102,12 +93,13 @@ class Renderer {
         GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uOverlayScale"), overlayScale.coerceAtLeast(0.05f))
         GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uOverlayOffY"), overlayOffY)
         GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uOverlayAspect"), overlayAspect.coerceAtLeast(0.01f))
+        GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uVizScale"), vizScale.coerceIn(0.4f, 2f))
+        GLES20.glUniform1f(GLES20.glGetUniformLocation(program, "uHue"), hue.coerceIn(0f, 1f))
         GLES20.glUniform1fv(GLES20.glGetUniformLocation(program, "uBands"), 6, bands, 0)
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE1)
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, maskTex)
         GLES20.glUniform1i(GLES20.glGetUniformLocation(program, "uMask"), 1)
-
         GLES20.glActiveTexture(GLES20.GL_TEXTURE2)
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, imageTex)
         GLES20.glUniform1i(GLES20.glGetUniformLocation(program, "uImage"), 2)

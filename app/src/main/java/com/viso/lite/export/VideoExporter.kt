@@ -1,6 +1,7 @@
 package com.viso.lite.export
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaExtractor
@@ -12,6 +13,7 @@ import android.opengl.EGLConfig
 import android.opengl.EGLContext
 import android.opengl.EGLDisplay
 import android.opengl.EGLSurface
+import android.opengl.EGLExt
 import android.view.Surface
 import com.viso.lite.gl.Renderer
 import java.io.File
@@ -23,22 +25,26 @@ class VideoExporter(
     private val height: Int = 1920,
     private val fps: Int = 30
 ) {
-    @Volatile
-    private var cancelRequested = false
-
-    fun cancel() {
-        cancelRequested = true
-    }
+    @Volatile private var cancelRequested = false
+    fun cancel() { cancelRequested = true }
 
     fun export(
         audio: Uri,
         durationMs: Long,
-        bandsProvider: () -> FloatArray,
+        bandsProvider: (Int) -> FloatArray,
         mode: Int,
+        overlay: Bitmap?,
+        mask: Bitmap?,
+        opacity: Float,
+        overlayScale: Float,
+        overlayOffY: Float,
+        overlayAspect: Float,
+        vizScale: Float,
+        hue: Float,
         onProgress: (Int) -> Unit
     ): File? {
         cancelRequested = false
-        val out = File(context.getExternalFilesDir(null), "viso_${System.currentTimeMillis()}.mp4")
+        val out = File(context.getExternalFilesDir(null), "viso_\${System.currentTimeMillis()}.mp4")
         var encoder: MediaCodec? = null
         var muxer: MediaMuxer? = null
         var egl: EglHelper? = null
@@ -46,7 +52,6 @@ class VideoExporter(
         var pfd: android.os.ParcelFileDescriptor? = null
         var muxerStarted = false
         var completed = false
-
         try {
             val audioFd = context.contentResolver.openFileDescriptor(audio, "r") ?: return null
             pfd = audioFd
@@ -55,10 +60,7 @@ class VideoExporter(
             var audioTrack = -1
             for (i in 0 until extractor.trackCount) {
                 val mime = extractor.getTrackFormat(i).getString(MediaFormat.KEY_MIME)
-                if (mime?.startsWith("audio/") == true) {
-                    audioTrack = i
-                    break
-                }
+                if (mime?.startsWith("audio/") == true) { audioTrack = i; break }
             }
             if (audioTrack < 0) return null
             extractor.selectTrack(audioTrack)
@@ -69,24 +71,32 @@ class VideoExporter(
             format.setInteger(MediaFormat.KEY_BIT_RATE, 8_000_000)
             format.setInteger(MediaFormat.KEY_FRAME_RATE, fps)
             format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2)
-
             encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
             encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
             val input = encoder.createInputSurface()
             encoder.start()
             egl = EglHelper(input).also { it.makeCurrent() }
-
             muxer = MediaMuxer(out.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
-            val renderer = Renderer().also { it.init(); it.mode = mode }
+            val renderer = Renderer().also {
+                it.init()
+                it.mode = mode
+                it.opacity = opacity
+                it.overlayScale = overlayScale
+                it.overlayOffY = overlayOffY
+                it.overlayAspect = overlayAspect
+                it.vizScale = vizScale
+                it.hue = hue
+                overlay?.let(it::setImage)
+                mask?.let(it::setMask)
+            }
             val info = MediaCodec.BufferInfo()
             val totalFrames = (durationMs / 1000.0 * fps).toInt().coerceAtLeast(1)
             var videoTrack = -1
             var outAudioTrack = -1
             var frame = 0
-
             while (frame < totalFrames && !cancelRequested) {
-                if (frame % 10 == 0 && cancelRequested) return null
-                renderer.draw(width, height, frame.toFloat() / fps, bandsProvider())
+                renderer.draw(width, height, frame.toFloat() / fps, bandsProvider(frame))
+                egl.setPresentationTime(frame * 1_000_000_000L / fps)
                 egl.swap()
 
                 var idle = false
@@ -117,7 +127,6 @@ class VideoExporter(
                 frame++
                 if (frame % 10 == 0) onProgress(frame * 90 / totalFrames)
             }
-
             if (cancelRequested) return null
             encoder.signalEndOfInputStream()
             var eos = false
@@ -142,6 +151,7 @@ class VideoExporter(
             val audioInfo = MediaCodec.BufferInfo()
             val durationUs = durationMs * 1000L
             while (!cancelRequested) {
+                audioBuffer.clear()
                 val size = extractor.readSampleData(audioBuffer, 0)
                 if (size < 0) break
                 val pts = extractor.sampleTime
@@ -158,9 +168,9 @@ class VideoExporter(
             onProgress(100)
             completed = true
             return out
-        } catch (e: Exception) {
+        } catch (error: Exception) {
             out.delete()
-            throw e
+            throw error
         } finally {
             runCatching { encoder?.stop() }
             runCatching { encoder?.release() }
@@ -183,11 +193,8 @@ private class EglHelper(surface: Surface) {
         val version = IntArray(2)
         check(EGL14.eglInitialize(display, version, 0, version, 1))
         val attributes = intArrayOf(
-            EGL14.EGL_RED_SIZE, 8,
-            EGL14.EGL_GREEN_SIZE, 8,
-            EGL14.EGL_BLUE_SIZE, 8,
-            EGL14.EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
-            EGL14.EGL_NONE
+            EGL14.EGL_RED_SIZE, 8, EGL14.EGL_GREEN_SIZE, 8, EGL14.EGL_BLUE_SIZE, 8,
+            EGL14.EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT, EGL14.EGL_NONE
         )
         val configs = arrayOfNulls<EGLConfig>(1)
         val count = IntArray(1)
@@ -201,14 +208,9 @@ private class EglHelper(surface: Surface) {
         check(context != EGL14.EGL_NO_CONTEXT && eglSurface != EGL14.EGL_NO_SURFACE)
     }
 
-    fun makeCurrent() {
-        check(EGL14.eglMakeCurrent(display, eglSurface, eglSurface, context))
-    }
-
-    fun swap() {
-        check(EGL14.eglSwapBuffers(display, eglSurface))
-    }
-
+    fun makeCurrent() { check(EGL14.eglMakeCurrent(display, eglSurface, eglSurface, context)) }
+    fun setPresentationTime(nanos: Long) { check(EGLExt.eglPresentationTimeANDROID(display, eglSurface, nanos)) }
+    fun swap() { check(EGL14.eglSwapBuffers(display, eglSurface)) }
     fun release() {
         EGL14.eglDestroySurface(display, eglSurface)
         EGL14.eglDestroyContext(display, context)

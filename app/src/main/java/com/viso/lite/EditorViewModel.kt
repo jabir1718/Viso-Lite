@@ -5,10 +5,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ExifInterface
-import android.media.MediaPlayer
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.viso.lite.audio.AudioAnalyzer
 import com.viso.lite.audio.AudioEngine
 import com.viso.lite.export.VideoExporter
 import com.viso.lite.image.SubjectCutter
@@ -30,6 +30,8 @@ data class UiState(
     val sensitivity: Float = 1.4f,
     val overlayScale: Float = 0.75f,
     val overlayY: Float = 0f,
+    val vizScale: Float = 1f,
+    val hue: Float = 0f,
     val busy: Boolean = false,
     val exporting: Boolean = false,
     val progress: Int = 0,
@@ -37,51 +39,45 @@ data class UiState(
     val error: String? = null
 )
 
-
 class EditorViewModel(app: Application) : AndroidViewModel(app) {
     private val engine = AudioEngine(app)
+    private val analyzer = AudioAnalyzer()
     private val exporter = VideoExporter(app)
     private var exportJob: Job? = null
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state
 
-    init {
-        engine.onError = { message ->
-            _state.value = _state.value.copy(error = message)
-        }
-    }
+    val bands: FloatArray get() = analyzer.at(engine.positionMs())
+    val pulse: Float get() = bands.getOrElse(1) { 0f }
 
-    val bands: FloatArray get() = engine.bands
-    val pulse: Float get() = engine.bands.getOrElse(1) { 0f }
-
-    fun durationMs(): Long {
-        val audioUri = _state.value.audio ?: return 0L
-        val player = MediaPlayer()
-        return try {
-            player.setDataSource(getApplication<Application>(), audioUri)
-            player.prepare()
-            player.duration.toLong()
-        } finally {
-            player.release()
-        }
-    }
+    fun durationMs(): Long = analyzer.durationMs
 
     fun setAudio(uri: Uri) {
-        runCatching { engine.load(uri) }
-            .onSuccess { _state.value = _state.value.copy(audio = uri, exportError = null, error = null) }
-            .onFailure {
-                _state.value = _state.value.copy(error = it.message ?: "Audio load failed")
+        analyzer.clear()
+        engine.release()
+        _state.value = _state.value.copy(busy = true, audio = null, exportError = null, error = null)
+        viewModelScope.launch {
+            try {
+                val ok = withContext(Dispatchers.Default) {
+                    analyzer.analyze(getApplication(), uri, _state.value.sensitivity)
+                }
+                if (!ok) error("Audio could not be decoded or contains no usable PCM data.")
+                withContext(Dispatchers.IO) { engine.play(uri) }
+                _state.value = _state.value.copy(audio = uri, busy = false, error = null)
+            } catch (error: Exception) {
+                analyzer.clear()
+                engine.release()
+                _state.value = _state.value.copy(
+                    audio = null,
+                    busy = false,
+                    error = error.message ?: "Audio analysis or playback failed"
+                )
             }
+        }
     }
 
     fun setImage(uri: Uri) {
-        _state.value = _state.value.copy(
-            image = uri,
-            cut = null,
-            overlay = null,
-            aspect = 1f,
-            error = null
-        )
+        _state.value = _state.value.copy(image = uri, cut = null, overlay = null, aspect = 1f, error = null)
         viewModelScope.launch {
             val bitmap = withContext(Dispatchers.IO) { decode(uri) }
             if (bitmap == null) {
@@ -96,58 +92,58 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private fun decode(uri: Uri): Bitmap? = runCatching {
+    private fun decode(uri: Uri): Bitmap? {
         val resolver = getApplication<Application>().contentResolver
         val opts = BitmapFactory.Options().apply { inSampleSize = 2 }
-        val bitmap = resolver.openInputStream(uri)?.use {
-            BitmapFactory.decodeStream(it, null, opts)
-        } ?: return@runCatching null
+        val bitmap = try {
+            resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, opts) }
+        } catch (_: Exception) {
+            null
+        } ?: return null
 
-        val orientation = resolver.openInputStream(uri)?.use { input ->
-            ExifInterface(input).getAttributeInt(
-                ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_NORMAL
-            )
-        } ?: ExifInterface.ORIENTATION_NORMAL
+        val orientation = try {
+            resolver.openInputStream(uri)?.use { input ->
+                ExifInterface(input).getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL
+                )
+            } ?: ExifInterface.ORIENTATION_NORMAL
+        } catch (_: Exception) {
+            ExifInterface.ORIENTATION_NORMAL
+        }
 
         val matrix = Matrix()
         when (orientation) {
             ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.setScale(-1f, 1f)
             ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180f)
             ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.setScale(1f, -1f)
-            ExifInterface.ORIENTATION_TRANSPOSE -> {
-                matrix.setRotate(90f)
-                matrix.postScale(-1f, 1f)
-            }
+            ExifInterface.ORIENTATION_TRANSPOSE -> { matrix.setRotate(90f); matrix.postScale(-1f, 1f) }
             ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90f)
-            ExifInterface.ORIENTATION_TRANSVERSE -> {
-                matrix.setRotate(-90f)
-                matrix.postScale(-1f, 1f)
-            }
+            ExifInterface.ORIENTATION_TRANSVERSE -> { matrix.setRotate(-90f); matrix.postScale(-1f, 1f) }
             ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(270f)
         }
-
-        if (orientation == ExifInterface.ORIENTATION_NORMAL ||
-            orientation == ExifInterface.ORIENTATION_UNDEFINED
-        ) {
-            bitmap
-        } else {
+        if (orientation == ExifInterface.ORIENTATION_NORMAL || orientation == ExifInterface.ORIENTATION_UNDEFINED) {
+            return bitmap
+        }
+        return try {
             Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
                 .also { if (it !== bitmap) bitmap.recycle() }
+        } catch (_: Exception) {
+            bitmap
         }
-    }.getOrNull()
+    }
 
     fun setMode(mode: Int) { _state.value = _state.value.copy(mode = mode) }
     fun setOpacity(value: Float) { _state.value = _state.value.copy(opacity = value) }
     fun setOverlayScale(value: Float) { _state.value = _state.value.copy(overlayScale = value) }
     fun setOverlayY(value: Float) { _state.value = _state.value.copy(overlayY = value) }
-
+    fun setVizScale(value: Float) { _state.value = _state.value.copy(vizScale = value) }
+    fun setHue(value: Float) { _state.value = _state.value.copy(hue = value) }
     fun pause() { engine.pause() }
-
     fun resume() { engine.resume() }
 
     fun setSensitivity(value: Float) {
-        engine.setSensitivity(value)
+        analyzer.setSensitivity(value)
         _state.value = _state.value.copy(sensitivity = value)
     }
 
@@ -155,35 +151,41 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
         val uri = _state.value.image ?: return
         viewModelScope.launch {
             _state.value = _state.value.copy(busy = true, error = null)
-            val result = withContext(Dispatchers.Default) {
-                SubjectCutter.cut(getApplication(), uri)
-            }
-            _state.value = _state.value.copy(
-                busy = false,
-                cut = result.first,
-                error = result.second
-            )
+            val result = withContext(Dispatchers.Default) { SubjectCutter.cut(getApplication(), uri) }
+            _state.value = _state.value.copy(busy = false, cut = result.first, error = result.second)
         }
     }
 
-    fun clearError() {
-        _state.value = _state.value.copy(error = null)
-    }
+    fun clearError() { _state.value = _state.value.copy(error = null) }
 
     fun export(uri: Uri, mode: Int, outUri: Uri) {
         if (_state.value.exporting) return
         exportJob = viewModelScope.launch {
             _state.value = _state.value.copy(exporting = true, progress = 0, exportError = null)
             try {
-                val duration = withContext(Dispatchers.Default) { durationMs() }
-                require(duration > 0L) { "Audio duration is unavailable" }
+                val snapshot = _state.value
+                val duration = analyzer.durationMs
+                require(duration > 0L) { "Audio analysis duration is unavailable" }
                 val file = withContext(Dispatchers.Default) {
-                    exporter.export(uri, duration, { engine.bands.copyOf() }, mode) { value ->
+                    exporter.export(
+                        audio = uri,
+                        durationMs = duration,
+                        bandsProvider = { frame -> analyzer.frameAt(frame) },
+                        mode = mode,
+                        overlay = snapshot.overlay,
+                        mask = snapshot.cut,
+                        opacity = snapshot.opacity,
+                        overlayScale = snapshot.overlayScale,
+                        overlayOffY = snapshot.overlayY,
+                        overlayAspect = snapshot.aspect,
+                        vizScale = snapshot.vizScale,
+                        hue = snapshot.hue
+                    ) { value ->
                         _state.value = _state.value.copy(progress = value.coerceIn(0, 100))
                     }
                 }
                 if (file == null) {
-                    _state.value = _state.value.copy(exporting = false)
+                    _state.value = _state.value.copy(exporting = false, exportError = "Export was cancelled or produced no file.")
                     return@launch
                 }
                 withContext(Dispatchers.IO) {
@@ -207,13 +209,10 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
         _state.value = _state.value.copy(exporting = false)
     }
 
-    fun setProgress(value: Int) {
-        _state.value = _state.value.copy(progress = value.coerceIn(0, 100))
-    }
-
     override fun onCleared() {
         exporter.cancel()
         engine.release()
+        analyzer.clear()
         super.onCleared()
     }
 }
