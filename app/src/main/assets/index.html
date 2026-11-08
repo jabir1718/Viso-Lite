@@ -53,9 +53,9 @@
     <label><span>Quality</span><input id="sQuality" type="range" min="40" max="160" value="100"></label>
     <div id="exportInfo" class="status">1080 · 30 FPS · best available format</div>
   </div>
-  <div class="sec"><h4>Song + recording monitor</h4>
+  <div class="sec"><h4>Song + export monitor</h4>
     <div id="songInfo" class="status">Song: not loaded · 00:00 / 00:00</div>
-    <div id="recInfo" class="status">Recording: ready · 00:00</div>
+    <div id="recInfo" class="status">Export: ready · 00:00</div>
     <div class="row"><button id="bLoop" class="on">Loop song: ON</button><button id="bStopAtEnd">Stop recording at song end: OFF</button></div>
   </div>
   <div class="sec"><h4>History</h4>
@@ -141,7 +141,7 @@
     <label><span>Gradient</span><input id="sDir" type="range" min="0" max="100" value="0"></label>
   </div>
   <div class="sec"><h4>Export</h4>
-    <div class="row"><button id="bShot">Save frame PNG</button><button id="bRec" class="prim">Record video</button></div>
+    <div class="row"><button id="bShot">Save frame PNG</button><button id="bRec" class="prim">Export video</button></div>
   </div>
 </div>
 <input id="fA" type="file" accept="audio/*"><input id="fI" type="file" accept="image/*">
@@ -394,10 +394,10 @@ function updateSongInfo(){
 }
 setInterval(()=>{
   updateSongInfo();
-  if(rec&&rec.state==='recording')$('recInfo').textContent='Recording: LIVE · '+clockText((Date.now()-recStarted)/1000);
+  if(rec&&rec.state==='recording')$('recInfo').textContent='Exporting · '+clockText((Date.now()-recStarted)/1000);
 },250);
 $('bRec').onclick=()=>{
-  if(!window.MediaRecorder||!c.captureStream){$('recInfo').textContent='Recording unavailable in this WebView';return;}
+  if(!window.MediaRecorder||!c.captureStream){$('recInfo').textContent='Video export unavailable in this WebView';return;}
   if(rec&&rec.state==='recording'){rec.stop();return;}
   const st=c.captureStream(FPS);
   if(streamDest)streamDest.stream.getAudioTracks().forEach(t=>st.addTrack(t));
@@ -417,16 +417,16 @@ $('bRec').onclick=()=>{
     clearInterval(recClock);recClock=null;
     const blob=new Blob(chunks,{type:mime.split(';')[0]});
     dl(blob,'viso_'+Date.now()+'.'+ext);
-    $('bRec').textContent='Record video';$('bRec').classList.add('prim');
-    $('recInfo').textContent='Saved · '+clockText((Date.now()-recStarted)/1000)+' · '+ext.toUpperCase();
+    $('bRec').textContent='Export video';$('bRec').classList.add('prim');
+    $('recInfo').textContent='Export saved · '+clockText((Date.now()-recStarted)/1000)+' · '+ext.toUpperCase();
     st.getTracks().forEach(t=>t.stop());
   };
-  rec.onerror=e=>{$('recInfo').textContent='Recording error: '+(e.error?.message||'unknown');};
+  rec.onerror=e=>{$('recInfo').textContent='Export error: '+(e.error?.message||'unknown');};
   rec.start(500);recStarted=Date.now();
-  $('bRec').textContent='Stop';$('bRec').classList.remove('prim');
-  $('recInfo').textContent='Recording: LIVE · 00:00';
+  $('bRec').textContent='Finish export';$('bRec').classList.remove('prim');
+  $('recInfo').textContent='Exporting · 00:00';
   if(recClock)clearInterval(recClock);
-  recClock=setInterval(()=>{$('recInfo').textContent='Recording: LIVE · '+clockText((Date.now()-recStarted)/1000);},250);
+  recClock=setInterval(()=>{$('recInfo').textContent='Exporting · '+clockText((Date.now()-recStarted)/1000);},250);
   if(audio&&!playing){$('bP').click();}
 };
 function snap(){undo.push(JSON.stringify({colors,mstate,shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp}));
