@@ -404,11 +404,14 @@ $('bRec').onclick=()=>{
   const candidates=formatChoice==='webm'
     ?['video/webm;codecs=vp9,opus','video/webm']
     :['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'];
-  const mime=candidates.find(t=>MediaRecorder.isTypeSupported(t));
-  if(!mime){$('recInfo').textContent='No supported video encoder found';return;}
+  let mime='';
+  for(const candidate of candidates){
+    if(!MediaRecorder.isTypeSupported(candidate))continue;
+    try{rec=new MediaRecorder(st,{mimeType:candidate,videoBitsPerSecond:BIT});mime=candidate;break;}
+    catch(_){rec=null;}
+  }
+  if(!rec||!mime){$('recInfo').textContent='No compatible MP4/WebM encoder found';return;}
   const ext=mime.includes('mp4')?'mp4':'webm';
-  try{rec=new MediaRecorder(st,{mimeType:mime,videoBitsPerSecond:BIT});}
-  catch(err){$('recInfo').textContent='Recorder error: '+err.message;return;}
   const chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
   rec.onstop=()=>{
     clearInterval(recClock);recClock=null;
