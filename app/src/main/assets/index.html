@@ -182,6 +182,9 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <label><span>BG hue</span><input id="sBgHue" type="range" min="-180" max="180" value="0"></label>
     <label><span>BG position X</span><input id="sBgX" type="range" min="-100" max="100" value="0"></label>
     <label><span>BG position Y</span><input id="sBgY" type="range" min="-100" max="100" value="0"></label>
+    <label><span>BG pattern</span><select id="selBgPattern"><option value="none">None</option><option value="grid">Grid</option><option value="dots">Dots</option><option value="diagonal">Diagonal</option></select></label>
+    <label><span>BG pattern amount</span><input id="sBgPattern" type="range" min="0" max="100" value="0"></label>
+    <label><span>BG pattern scale</span><input id="sBgPatternScale" type="range" min="8" max="100" value="32"></label>
     <label><span>BG viz mix</span><input id="sBvo" type="range" min="0" max="100" value="85"></label>
     <label><span>BG viz power</span><input id="sBvp" type="range" min="20" max="300" value="140"></label>
     <div class="row"><button id="tBvm" class="on">BG viz on BG shape</button></div>
@@ -517,6 +520,7 @@ let studioText2='',studioText2On=false,studioText2Size=32,studioText2Pos=88,stud
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
 let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,bvp=140;
 let bgColor='#050810',bgTintColor='#ffffff',bgTintAmount=0,bgBrightness=100,bgContrast=100,bgSaturation=100,bgHue=0,bgPosX=0,bgPosY=0;
+let bgPattern='none',bgPatternAmount=0,bgPatternScale=32;
 let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
@@ -590,6 +594,7 @@ bind('sDim',v=>dim=v);bind('sSplit',v=>split=v);bind('sBgb',v=>bgb=v);
 bind('sBvo',v=>bvo=v);bind('sBvp',v=>bvp=v);
 bind('sBgTint',v=>bgTintAmount=v);bind('sBgBright',v=>bgBrightness=v);bind('sBgContrast',v=>bgContrast=v);
 bind('sBgSat',v=>bgSaturation=v);bind('sBgHue',v=>bgHue=v);bind('sBgX',v=>bgPosX=v);bind('sBgY',v=>bgPosY=v);
+bind('sBgPattern',v=>bgPatternAmount=v);bind('sBgPatternScale',v=>bgPatternScale=v);$('selBgPattern').onchange=e=>bgPattern=e.target.value;
 $('bgColor').oninput=e=>bgColor=e.target.value;$('bgTintColor').oninput=e=>bgTintColor=e.target.value;
 bind('sMsc',v=>{mSc=v/100;maskDirty=true;});bind('sLint',v=>lint=v);bind('sLsz',v=>lsz=v);
 
@@ -1568,9 +1573,9 @@ function registerVISOEffectTool(def){
  return tool;
 }
 function resetVISOBackgroundGrade(){
- bgColor='#050810';bgTintColor='#ffffff';bgTintAmount=0;bgBrightness=100;bgContrast=100;bgSaturation=100;bgHue=0;bgPosX=0;bgPosY=0;
+ bgColor='#050810';bgTintColor='#ffffff';bgTintAmount=0;bgBrightness=100;bgContrast=100;bgSaturation=100;bgHue=0;bgPosX=0;bgPosY=0;bgPattern='none';bgPatternAmount=0;bgPatternScale=32;
  if($('bgColor'))$('bgColor').value=bgColor;if($('bgTintColor'))$('bgTintColor').value=bgTintColor;
- [['sBgTint',bgTintAmount],['sBgBright',bgBrightness],['sBgContrast',bgContrast],['sBgSat',bgSaturation],['sBgHue',bgHue],['sBgX',bgPosX],['sBgY',bgPosY]].forEach(([id,v])=>{if($(id))$(id).value=v;});
+ [['sBgTint',bgTintAmount],['sBgBright',bgBrightness],['sBgContrast',bgContrast],['sBgSat',bgSaturation],['sBgHue',bgHue],['sBgX',bgPosX],['sBgY',bgPosY]].forEach(([id,v])=>{if($(id))$(id).value=v;});if($('selBgPattern'))$('selBgPattern').value=bgPattern;[['sBgPattern',bgPatternAmount],['sBgPatternScale',bgPatternScale]].forEach(([id,v])=>{if($(id))$(id).value=v;});
 }
 function collectVISORegistryState(){
  const state={};Object.values(VISO_TOOL_REGISTRY).forEach(tool=>{if(typeof tool.serialize==='function')state[tool.id]=tool.serialize();});return state;
@@ -1694,6 +1699,19 @@ function drawVISOBackground(ctx,b,dt){
       ctx.globalAlpha=bvo/100;ctx.drawImage(paintLayer(1.3,bgVizMask,curBbg),0,0);ctx.globalAlpha=1;
     }
     if(bgTintAmount>0){ctx.save();ctx.globalAlpha=bgTintAmount/100;ctx.fillStyle=bgTintColor;ctx.fillRect(0,0,W,clipH);ctx.restore();}
+    if(bgPattern!=='none'&&bgPatternAmount>0){
+      ctx.save();ctx.globalAlpha=bgPatternAmount/100;ctx.strokeStyle=bgTintColor;ctx.fillStyle=bgTintColor;ctx.lineWidth=Math.max(1,bgPatternScale*.035);
+      const step=Math.max(8,bgPatternScale);
+      if(bgPattern==='grid'){
+        for(let px=0;px<=W;px+=step){ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px,clipH);ctx.stroke();}
+        for(let py=0;py<=clipH;py+=step){ctx.beginPath();ctx.moveTo(0,py);ctx.lineTo(W,py);ctx.stroke();}
+      }else if(bgPattern==='dots'){
+        for(let py=step/2;py<clipH;py+=step)for(let px=step/2;px<W;px+=step){ctx.beginPath();ctx.arc(px,py,Math.max(1,step*.045),0,Math.PI*2);ctx.fill();}
+      }else if(bgPattern==='diagonal'){
+        for(let px=-clipH;px<W;px+=step){ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px+clipH,clipH);ctx.stroke();}
+      }
+      ctx.restore();
+    }
     ctx.restore();
   }
   if(clipH>0&&clipH<H){ctx.fillStyle='#fff';ctx.fillRect(0,clipH,W,H-clipH);}
