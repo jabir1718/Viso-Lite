@@ -1387,7 +1387,36 @@ function drawProgress(ctx){if(!progOn||!audio)return;
    ctx.globalAlpha=.95;ctx.fillStyle=progRemaining;roundRect(x0,y,barW,h,radius);ctx.fill();
    ctx.globalAlpha=1;ctx.fillStyle=g;roundRect(x0,y,Math.max(0,barW*p),h,radius);ctx.fill();
   }
+  if(beatMarkersOn&&bpm>0&&audio.duration>0){
+    const interval=60/bpm,count=Math.min(600,Math.floor(audio.duration/interval));
+    if(count>0){
+      ctx.save();ctx.globalAlpha=.88;ctx.shadowBlur=0;
+      if(progStyle==='circle'){
+        const r=Math.min(W,H)*.43;
+        for(let i=0;i<=count;i++){
+          const a=-Math.PI/2+Math.PI*2*i/count,major=downbeatOn&&i%4===0;
+          ctx.strokeStyle=major?beatColor:'rgba(255,255,255,.65)';ctx.lineWidth=major?2.5:1;
+          ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*(r-th*.8),cy+Math.sin(a)*(r-th*.8));
+          ctx.lineTo(cx+Math.cos(a)*(r+th*.8),cy+Math.sin(a)*(r+th*.8));ctx.stroke();
+        }
+      }else{
+        for(let i=0;i<=count;i++){
+          const px=x0+barW*i/count,major=downbeatOn&&i%4===0;
+          ctx.strokeStyle=major?beatColor:'rgba(255,255,255,.65)';ctx.lineWidth=major?2.5:1;
+          ctx.beginPath();ctx.moveTo(px,y-th*.35);ctx.lineTo(px,y+th*1.35);ctx.stroke();
+        }
+      }
+      ctx.restore();
+    }
+  }
   ctx.restore();
+}
+function drawBeatIndicator(ctx){
+ if(!metronomeOn||!audio||!playing||!bpm||bpm<=0)return;
+ const interval=60/bpm,beatPos=audio.currentTime/interval,beatIndex=Math.floor(beatPos),phase=beatPos-beatIndex;
+ const down=downbeatOn&&beatIndex%4===0,active=phase<.14,r=active?(down?12:9):6;
+ ctx.save();ctx.globalAlpha=active?1:.28;ctx.fillStyle=beatColor;ctx.shadowColor=beatColor;ctx.shadowBlur=active?18:4;
+ ctx.beginPath();ctx.arc(W-22,22,r,0,Math.PI*2);ctx.fill();ctx.restore();
 }
 function drawCustomLogo(ctx){
   if(!logoImg)return;
@@ -1550,6 +1579,7 @@ const VISO_RENDER_MODULES={
  'Overlay Effects · Motion FX':{stage:'overlay',order:20,render:(ctx,b)=>drawMotionFx(ctx,b)},
  'Film & Vintage':{stage:'overlay',order:30,render:(ctx,b)=>drawFilmEffect(ctx,b)},
  'Atmosphere FX':{stage:'overlay',order:40,render:(ctx,b)=>drawAtmosphere(ctx,b)},
+ 'Beat · BPM Sync':{stage:'overlay',order:75,render:ctx=>drawBeatIndicator(ctx)},
  'Text · Logo Studio':{stage:'overlay',order:80,render:(ctx,b)=>drawStudioText(ctx,b)},
  'Surface Reflection':{stage:'post',order:90,render:ctx=>drawSurfaceReflection(ctx)}
 };
@@ -1768,8 +1798,8 @@ function frame(t){
   if(specOn)specBands();
   const bass=b[0];avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
-  pulse=Math.max(pulse*.85,bass);
-  beatFlash=Math.max(beatFlash*.9,bass>.34?1:0);
+  pulse=Math.max(pulse*.85,bass*(1+beatScale/100*.35));
+  const beatThreshold=Math.max(.08,.55-beatSensitivity*.0062);beatFlash=Math.max(beatFlash*.9,bass>beatThreshold?1:0);
   if(driftAmt>0&&bpm>0){const ph=performance.now()/1000*(bpm/60);
     driftX=Math.sin(ph*6.2832)*driftAmt*2.4;driftY=Math.cos(ph*3.1416)*driftAmt*1.6;}hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
   if(autoOn){autoT+=dt;if(autoT>autoEvery*1000){autoT=0;autoStep();}}
@@ -1796,7 +1826,7 @@ function frame(t){
   bx.filter='blur(12px)';bx.drawImage(c,0,0,bl.width,bl.height);bx.filter='none';
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
-  if(flashAmt>0&&beatFlash>0){x.fillStyle='rgba(255,255,255,'+(beatFlash*flashAmt/100*.22)+')';x.fillRect(0,0,W,H);}
+  if(flashAmt>0&&beatFlash>0){x.save();x.globalAlpha=beatFlash*flashAmt/100*.22;x.fillStyle=beatColor;x.fillRect(0,0,W,H);x.restore();}
   renderVISOStage('overlay',x,b,dt);
     x.restore();
   renderVISOStage('post',x,b,dt);
