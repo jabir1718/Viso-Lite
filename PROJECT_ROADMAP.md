@@ -255,3 +255,12 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - CI asserts the background control IDs; HTML/JS, ZIP, manifest, registry, render-stage/cache tests passed. Android build #102 succeeded.
 - Latest APK: run `42714423022` (run #102), artifact ID `13717107759`, archive digest `sha256:9ac843cb0ece559d268ea093c4cc1de1f05b03ad6f76851765ad571bda2f8a79`; APK 84,461,475 bytes; SHA-256 `9c943ac1a5c1979df9dc9f2c3ea20dd0da710fe23637dd1618d50f8c0dd7b7e6`.
 - Device visual QA remains pending, especially color-filter support, X/Y crop behaviour, pattern readability, and project save/open migration. Continue parity audit for remaining logo, spectrum, beat and visualizer controls.
+
+
+## 19. Beat analysis and metronome controls — 2026-11-10
+
+- Latest branch head: `cb83c8b420717f9614db507e1833f2fe940186df`; HTML asset blob: `1e9ca18a7be0f1d4496c2d15f38485ca7d0059a6` (173,135 characters, 2,212 lines, 273 unique element IDs, no duplicate IDs).
+- Added beat-analysis controls for beat sensitivity and scale, beat markers, metronome indicator, downbeat option and beat-reactive background drift; BPM information is surfaced in the control panel. These are in addition to the existing bass/mids/treble response and audio-reactive visualizer controls.
+- CI now asserts the beat/metronome module controls and settings. Latest workflow run `42714993773` completed successfully on the exact branch head; HTML/JavaScript validation, project archive/registry tests, Android SDK setup, debug APK build and artifact upload all passed.
+- Latest verified APK artifact ID `13716499790`, archive ZIP integrity passed; extracted APK size 84,462,407 bytes; SHA-256 `9d4fae02889e00ca93382d4d15280b42c032c7262b09c7cf78a8e2f68f1cf503`.
+- Device QA remains pending. Next priorities: complete spectrum mode and vocal/bass separation audit, logo animation/effect parity, verify every newly added background/beat control changes both preview and export, then test `.viso` project and template media round-trip on a real Android device.
