@@ -1728,7 +1728,7 @@ function applyVisoProject(p){
  if(!p||!['viso-project-v1','viso-project-v2','viso-project-v3'].includes(p.schema))throw new Error('Unsupported VISO project');
  const t=p.settings||{};
  if(t.template&&VISO_TEMPLATES[t.template]){const v=VISO_TEMPLATES[t.template];vigOn=!!v.vig;progOn=!!v.prog;progStyle=v.progStyle;progSz=v.progSz;progPos=v.progPos;bgDriftOn=v.drift;bgDriftSpeed=v.speed;bgDriftRot=v.rot;bgDriftTravel=v.travel;flashAmt=v.flash;studioTextOn=v.studio;studioText=v.text;studioTextAnim=v.anim;studioTextGlow=v.glow;studioTextStroke=v.stroke;vhsOn=v.vhs;shockOn=v.shock;lensOn=v.lens;
-  surfaceReflectionOn=false;filmOn=t.template==='vhs';filmGrain=filmOn?58:24;filmDust=filmOn?32:12;filmScratches=filmOn?44:8;filmFlicker=filmOn?35:10;filmSepia=filmOn?22:0;filmWeave=filmOn?42:6;
+  surfaceReflectionOn=false;atmosphereOn=false;hazeStrength=24;hazeAngle=25;hazeSpeed=30;smokeAmount=18;smokeSize=48;smokeSpeed=24;smokeColor='#c5d7d0';filmOn=t.template==='vhs';filmGrain=filmOn?58:24;filmDust=filmOn?32:12;filmScratches=filmOn?44:8;filmFlicker=filmOn?35:10;filmSepia=filmOn?22:0;filmWeave=filmOn?42:6;
   studioText2='';studioText2On=false;studioText2Size=32;studioText2Pos=88;studioText2Alpha=85;studioText2Color='#ffffff';studioText2X=50;studioText2Rot=0;studioText2Stroke=2;studioText2Glow=12;studioText2Anim='none';studioText2Align='center';studioText2Plate=false;
   $('studioText2').value='';$('bText2On').textContent='Text 2: OFF';$('bText2On').classList.remove('on');}
  if(t.state)apply(JSON.stringify(t.state));
