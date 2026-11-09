@@ -126,6 +126,8 @@ vm.runInNewContext(
 );
 const registry = registrySandbox.__registry;
 assert.equal(registry.modules['Background'].stage, 'background');
+assert.equal(registry.modules['Media'].stage, 'media');
+assert.equal(registry.modules['Media'].order, 10);
 assert.equal(registry.modules['Background'].order, 10);
 assert.equal(registry.modules['Layers · Tools box'].stage, 'scene');
 assert.equal(registry.modules['Layers · Tools box'].order, 10);
