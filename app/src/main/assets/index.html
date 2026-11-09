@@ -509,7 +509,7 @@ function setPreviewCanvasSize(){
 }
 function setExportCanvasSize(){setCanvasSize(targetW,targetH,Math.min(1080,targetW),Math.min(1920,targetH));}
 function setVideoRenderCanvasSize(){
-  const heavy=specOn&&['tunnel','mirror','dual'].includes(specMode),maxW=heavy?360:540,maxH=heavy?640:960;
+  const heavy=specOn&&['tunnel','mirror','dual'].includes(specMode),maxW=heavy?540:720,maxH=heavy?960:1280;
   const scale=Math.min(1,maxW/targetW,maxH/targetH);
   setCanvasSize(Math.max(1,Math.round(targetW*scale)),Math.max(1,Math.round(targetH*scale)));
 }
