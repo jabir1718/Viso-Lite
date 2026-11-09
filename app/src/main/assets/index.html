@@ -1545,16 +1545,16 @@ function drawSpectrum(ctx,scale){
     glow.addColorStop(0,'rgba(255,255,255,'+(.08*gl)+')');glow.addColorStop(1,'transparent');
     ctx.fillStyle=glow;ctx.beginPath();ctx.ellipse(cx,cy,R0,ry,0,0,6.2832);ctx.fill();
   } else if(M==='tunnel'){
-    const base=Math.min(W,H)*(specRad/100)*.12,rings=4,stride=Math.max(1,Math.ceil(n/48));
+    const base=Math.min(W,H)*(specRad/100)*.12,rings=3,stride=Math.max(1,Math.ceil(n/32));
     for(let ring=0;ring<rings;ring++){
-      const depth=(ring+1)/rings,radius=base+depth*Math.min(W,H)*.38,alpha=.18+depth*.55;
+      const depth=(ring+1)/rings,radius=base+depth*Math.min(W,H)*.38,alpha=.22+depth*.52;
       ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=Math.max(1,thick*.3);
       ctx.beginPath();ctx.ellipse(cx,cy,radius,radius*.72,0,0,6.2832);ctx.stroke();
       for(let i=0;i<n;i+=stride){
         const a=rot+(i/n)*6.2832+ring*.055,v=specSmooth[i]/255;
         const spike=v*Math.min(W,H)*(.035+.055*depth);
         const r1=radius,r2=radius+spike;
-        ctx.strokeStyle=col(i);ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=thick*1.35*gl*depth;ctx.lineWidth=Math.max(1,thick*(.25+.55*depth));
+        ctx.strokeStyle=col(i);ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=thick*.65*gl*depth;ctx.lineWidth=Math.max(1,thick*(.25+.55*depth));
         ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1*.72);
         ctx.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2*.72);ctx.stroke();
       }
