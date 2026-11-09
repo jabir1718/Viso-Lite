@@ -304,3 +304,12 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - The first two intermediate commits correctly failed CI syntax validation because the branch boundary was incomplete; the issue was corrected before proceeding. Final workflow run `42718700849` (run #120), exact commit `57e2d97c647062a981d096bb45710f11c4c91136`, passed HTML/JavaScript validation, archive/manifest/registry/spectrum tests, Android debug APK build and artifact upload.
 - Verified artifact ID `13719043384`; archive digest `sha256:35b1b110f4429daf29443706a2136174efb0299e9ed93ceab43856dd68b6d36e`. ZIP integrity passed. Extracted APK size: 84,463,147 bytes; APK SHA-256: `6475febfab8312a1feef4dcce673560c0b33f2490f4cbe805265c33c17eab374`.
 - This fixes the identified rendering logic at source/build level. Visual tuning, actual audio response and performance still require runtime testing on an Android device.
+
+
+## 24. Dual spectrum geometry and APK package verification — 2026-11-10
+
+- Further spectrum review found the Dual mode passed its horizontal bar length as rectangle height and used the narrow band width as rectangle width. Corrected both mirrored rectangles so they extend horizontally from the centre, and added a CI assertion for the corrected geometry.
+- Strengthened the Android workflow with a post-build APK verification step: checks APK ZIP integrity, extracts the packaged `assets/index.html`, byte-compares it with the checked-out source HTML, and verifies the application package name is exactly `com.viso.lite` using Android `aapt`.
+- Latest workflow run `42719273173` (run #124), exact commit `48294451ede9f69ff278caa68f616a64291f14b7`, passed HTML/JavaScript validation, archive/manifest/registry/spectrum tests, Android debug APK build, APK package/source verification, and artifact upload.
+- Verified artifact ID `13719596657`; archive digest `sha256:6e49d021863042910fac11abc52f8160f82652f8b86bb937d11145edc570b8f0`. ZIP integrity passed. Extracted APK size: 84,463,147 bytes; APK SHA-256: `7cfb6258be5b765c10714d9fa5f420ba80b90626f09a0324ecc4683fec5cca8b`. The extracted APK contains both the audio-reactive Ring renderer and corrected Dual geometry.
+- Device runtime QA remains unconfirmed; the workflow verifies source/build packaging but cannot substitute for playback, rendering and export tests on the target phone.
