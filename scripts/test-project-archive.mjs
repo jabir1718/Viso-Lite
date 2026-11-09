@@ -111,7 +111,7 @@ assert.throws(() => validate({
 }, { 'assets/../outside.bin': new Uint8Array([1]) }), /invalid project asset record/i);
 
 
-const registryStart = html.indexOf('const VISO_TOOL_REGISTRY=Object.create(null);');
+const registryStart = html.indexOf('const VISO_RENDER_MODULES=');
 const registryEnd = html.indexOf('function visoToolCategory', registryStart);
 assert(registryStart >= 0 && registryEnd > registryStart, 'tool registry hooks must exist');
 const registrySandbox = {
@@ -120,7 +120,7 @@ const registrySandbox = {
 };
 vm.runInNewContext(
   html.slice(registryStart, registryEnd) +
-    '\nglobalThis.__registry = { registerVISOEffectTool, collectVISORegistryState, restoreVISORegistryState };',
+    '\nglobalThis.__registry = { registerVISOEffectTool, collectVISORegistryState, restoreVISORegistryState, renderVISOStage };',
   registrySandbox,
   { timeout: 2000 }
 );
@@ -148,5 +148,16 @@ registry.restoreVISORegistryState(registryState);
 assert.equal(rangeControl.value, '22', 'default tool restore for range');
 assert.equal(checkControl.checked, true, 'default tool restore for checkbox');
 assert.deepEqual(dispatched, ['input', 'change', 'input', 'change'], 'restore dispatches control events');
+const renderOrder = [];
+registry.registerVISOEffectTool({
+  id: 'late-render', name: 'Late Render', category: 'overlay', panel: fakePanel, controls: [],
+  renderStage: 'overlay', renderOrder: 20, render: () => renderOrder.push('late')
+});
+registry.registerVISOEffectTool({
+  id: 'early-render', name: 'Early Render', category: 'overlay', panel: fakePanel, controls: [],
+  renderStage: 'overlay', renderOrder: 10, render: () => renderOrder.push('early')
+});
+registry.renderVISOStage('overlay', {}, new Float32Array(3), 16);
+assert.deepEqual(renderOrder, ['early', 'late'], 'effect modules render in declared order');
 
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
