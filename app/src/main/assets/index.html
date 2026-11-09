@@ -1299,7 +1299,7 @@ function drawCustomLogo(ctx){
   ctx.shadowColor=grad(.5);ctx.shadowBlur=lw*.32*(logoGlow/100);
   ctx.drawImage(logoImg,-lw/2,-lh/2,lw,lh);ctx.restore();
   if(logoReflection>0){
-   ctx.save();ctx.globalAlpha=logoAlpha/100*logoReflection/100*.28;ctx.translate(lx,ly+lh*.58);ctx.scale(1,-1);
+   ctx.save();ctx.globalAlpha=logoAlpha/100*logoReflection/100*.28;ctx.translate(lx,ly+lh);ctx.scale(1,-1);
    ctx.drawImage(logoImg,-lw/2,-lh/2,lw,lh);ctx.restore();
   }
   if(logoParticles>0){
