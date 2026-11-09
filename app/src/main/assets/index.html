@@ -1512,6 +1512,13 @@ function autoStep(){
 }
 
 // VISO Tool Registry v1 — stable IDs and parameter metadata for future effect modules.
+const VISO_RENDER_MODULES={
+ 'Overlay':{stage:'overlay',order:10,render:ctx=>{drawVignette(ctx);drawProgress(ctx);drawCustomLogo(ctx);}},
+ 'Overlay Effects · Motion FX':{stage:'overlay',order:20,render:(ctx,b)=>drawMotionFx(ctx,b)},
+ 'Film & Vintage':{stage:'overlay',order:30,render:(ctx,b)=>drawFilmEffect(ctx,b)},
+ 'Atmosphere FX':{stage:'overlay',order:40,render:(ctx,b)=>drawAtmosphere(ctx,b)},
+ 'Surface Reflection':{stage:'post',order:90,render:ctx=>drawSurfaceReflection(ctx)}
+};
 const VISO_TOOL_REGISTRY=Object.create(null);
 const VISO_TOOL_CATEGORIES=['all','media','visualizer','audio','elements','background','logo','overlay','export','templates'];
 const VISO_FAV_KEY='viso.toolFavorites.v1';
@@ -1524,6 +1531,7 @@ function registerVISOEffectTool(def){
  const controls=(def.controls||[]).map(c=>Object.freeze({...c}));
  const elements=[...def.panel.querySelectorAll('input,select')].filter(el=>el.id&&el.type!=='file');
  const defaults=def.defaults||Object.fromEntries(controls.filter(c=>c.id).map(c=>[c.id,c.defaultValue]));
+ const module=VISO_RENDER_MODULES[def.name]||{};
  const serialize=typeof def.serialize==='function'?def.serialize:()=>Object.fromEntries(elements.map(el=>[el.id,el.type==='checkbox'?el.checked:el.value]));
  const restore=typeof def.restore==='function'?def.restore:state=>{
   if(!state||typeof state!=='object')return;
@@ -1533,7 +1541,8 @@ function registerVISOEffectTool(def){
   });
  };
  VISO_TOOL_REGISTRY[def.id]=Object.freeze({...def,version:def.version||1,defaults:Object.freeze({...defaults}),controls:Object.freeze(controls),
-  render:typeof def.render==='function'?def.render:null,serialize,restore});
+  render:typeof def.render==='function'?def.render:(module.render||null),renderStage:def.renderStage||module.stage||'overlay',
+  renderOrder:Number.isFinite(def.renderOrder)?def.renderOrder:(module.order??100),serialize,restore});
  return VISO_TOOL_REGISTRY[def.id];
 }
 function collectVISORegistryState(){
@@ -1542,6 +1551,9 @@ function collectVISORegistryState(){
 function restoreVISORegistryState(state){
  if(!state||typeof state!=='object')return;
  Object.values(VISO_TOOL_REGISTRY).forEach(tool=>{const saved=state[tool.id];if(saved&&typeof saved==='object'&&typeof tool.restore==='function')tool.restore(saved);});
+}
+function renderVISOStage(stage,ctx,b,dt){
+ Object.values(VISO_TOOL_REGISTRY).filter(tool=>tool.render&&tool.renderStage===stage).sort((a,b)=>a.renderOrder-b.renderOrder).forEach(tool=>tool.render(ctx,b,dt));
 }
 function visoToolCategory(title){
  const t=title.toLowerCase();
@@ -1711,10 +1723,10 @@ function frame(t){
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
   if(flashAmt>0&&beatFlash>0){x.fillStyle='rgba(255,255,255,'+(beatFlash*flashAmt/100*.22)+')';x.fillRect(0,0,W,H);}
-  drawVignette(x);drawProgress(x);drawCustomLogo(x);drawMotionFx(x,b);drawFilmEffect(x,b);drawAtmosphere(x,b);
+  renderVISOStage('overlay',x,b,dt);
   drawStudioText(x,b);
   x.restore();
-  drawSurfaceReflection(x);
+  renderVISOStage('post',x,b,dt);
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
     x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
     x.fillText('Photo / Video / PNG chuno',cx,cy);}
