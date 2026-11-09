@@ -86,24 +86,26 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <div id="recInfo" class="status">Export: ready · 00:00</div></div>
     <div class="row"><button id="bLoop" class="on">Loop song: ON</button><button id="bStopAtEnd">Stop export at song end: OFF</button></div></div>
 <div id="bar">
-<div class="sec panel open" id="mediaPanel"><h4>Media + Export</h4>
+<div class="sec panel open" id="mediaPanel"><h4>Media</h4>
     <div class="row">
-      <button id="bA">MP3</button><button id="bI">Photo</button><button id="bV">Video</button>
-      <button id="bO">+ PNG</button><button id="bDel">× PNG</button>
-      <button id="bP" class="prim">Play</button><button id="bR">Center</button>
+      <button id="bA">MP3 / Audio</button><button id="bI">Photo</button><button id="bV">Video</button>
+      <button id="bO">+ PNG / Overlay</button><button id="bDel">× Remove PNG</button>
     </div>
-<div class="subhead">Quick social presets</div>
-    <div class="row" id="socialPresets"><button data-social="tiktok">TikTok</button><button data-social="reels">Reels</button><button data-social="youtube">YouTube</button><button data-social="square">Square</button><button data-social="story4k">Story 4K</button></div>
-    <div class="subhead">Social export format</div>
+    <div class="row"><button id="bP" class="prim">Play</button><button id="bR">Center media</button><button id="bUndo">Undo</button><button id="bRedo">Redo</button><button id="bReset">Reset</button></div>
+    <div class="status">Choose your song, photo, video or transparent PNG. Your canvas stays visible above.</div>
+</div>
+<div class="sec panel open" id="exportPanel"><h4>Export Studio</h4>
+    <div class="subhead">One-tap social formats</div>
+    <div class="row" id="socialPresets"><button data-social="tiktok">TikTok</button><button data-social="reels">Reels</button><button data-social="youtube">YouTube</button><button data-social="square">Square</button><button data-social="portrait">Portrait 4:5</button><button data-social="story4k">Story 4K</button></div>
+    <div class="subhead">Custom export settings</div>
     <div class="row" id="aspect"></div>
     <div class="row" id="res"></div>
     <div class="row" id="fps"></div>
     <div class="row" id="format"></div>
     <label><span>Quality</span><input id="sQuality" type="range" min="40" max="160" value="100"></label>
     <div id="exportInfo" class="status">1080 · 30 FPS · best available format</div>
-</div><div class="sec panel"><h4>History</h4>
-    <div class="row"><button id="bUndo">⟲ Undo</button><button id="bRedo">Redo ⟳</button><button id="bReset">Reset all</button></div>
-  </div>
+    <div class="row"><button id="bShot">Save frame PNG</button><button id="bRec" class="prim">Export video</button></div>
+</div>
   <div class="sec panel"><h4>Background</h4>
     <div class="row"><button id="bBgI">BG image</button><button id="bBgV">BG video</button>
       <button id="bBgX">BG off</button><button id="bBgViz">BG visualizer</button></div>
@@ -203,9 +205,6 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <label><span>Treble</span><input id="sHighGain" type="range" min="0" max="250" value="100"></label>
     <div class="row"><button id="bFreqReset">Reset frequency</button></div>
   </div>
-  <div class="sec panel"><h4>Export</h4>
-    <div class="row"><button id="bShot">Save frame PNG</button><button id="bRec" class="prim">Export video</button></div>
-  </div>
 </div>
 </div>
 <input id="fA" type="file" accept="audio/*"><input id="fI" type="file" accept="image/*">
@@ -215,7 +214,7 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
 <video id="bvid" playsinline muted loop style="display:none"></video>
 
 <script>
-document.querySelectorAll('.panel').forEach(p=>{if(p.id!=='mediaPanel')p.classList.add('collapsed');const h=p.querySelector('h4');if(h){h.setAttribute('role','button');h.setAttribute('tabindex','0');h.addEventListener('click',()=>p.classList.toggle('collapsed'));h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();p.classList.toggle('collapsed');}});}});
+document.querySelectorAll('.panel').forEach(p=>{if(p.id!=='mediaPanel'&&p.id!=='exportPanel')p.classList.add('collapsed');const h=p.querySelector('h4');if(h){h.setAttribute('role','button');h.setAttribute('tabindex','0');h.addEventListener('click',()=>p.classList.toggle('collapsed'));h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();p.classList.toggle('collapsed');}});}});
 </script>
 <script>
 "use strict";
@@ -277,6 +276,7 @@ const socialProfiles={
   reels:{aspect:'9:16',res:1080,fps:30,label:'Instagram Reels · 1080p · 30 FPS'},
   youtube:{aspect:'16:9',res:1080,fps:30,label:'YouTube · 1080p · 30 FPS'},
   square:{aspect:'1:1',res:1080,fps:30,label:'Square · 1080p · 30 FPS'},
+  portrait:{aspect:'4:5',res:1080,fps:30,label:'Portrait post · 1080p · 30 FPS'},
   story4k:{aspect:'9:16',res:2160,fps:30,label:'Story · 4K · 30 FPS'}
 };
 function applySocialProfile(key){
