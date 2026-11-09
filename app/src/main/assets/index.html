@@ -89,7 +89,7 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
 <div class="sec panel open" id="mediaPanel"><h4>Media</h4>
     <div class="row">
       <button id="bA">MP3 / Audio</button><button id="bI">Photo</button><button id="bV">Video</button>
-      <button id="bO">+ PNG / Overlay</button><button id="bDel">× Remove PNG</button>
+      <button id="bO">+ PNG / Overlay</button><button id="bDel">× Remove selected PNG</button><button id="bMediaClear">Remove photo/video</button>
     </div>
     <div class="row"><button id="bP" class="prim">Play</button><button id="bR">Center media</button><button id="bUndo">Undo</button><button id="bRedo">Redo</button><button id="bReset">Reset</button></div>
     <div class="status">Choose your song, photo, video or transparent PNG. Your canvas stays visible above.</div>
@@ -262,10 +262,15 @@ aspectItems.forEach((a,i)=>{const b=document.createElement('button');b.textConte
 $('sQuality').oninput=e=>{quality=+e.target.value;updateBitrate();};
 function supportedVideoType(){
   if(!window.MediaRecorder||!MediaRecorder.isTypeSupported)return '';
-  const types=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'];
+  const types=formatChoice==='webm'
+    ?['video/webm;codecs=vp9,opus','video/webm']
+    :['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'];
   return types.find(t=>MediaRecorder.isTypeSupported(t))||'';
 }
-function actualFormatLabel(){const t=supportedVideoType();return t.includes('mp4')?'MP4':'WebM (compatible)';}
+function actualFormatLabel(){
+  const t=supportedVideoType();
+  return t.includes('mp4')?'MP4':t.includes('webm')?'WebM':'Not supported';
+}
 const fmtButton=document.createElement('button');fmtButton.textContent='Auto format';fmtButton.className='on';
 fmtButton.onclick=()=>{formatChoice=formatChoice==='auto'?'webm':'auto';fmtButton.textContent=formatChoice==='auto'?'Auto format':'WebM';fmtButton.classList.toggle('on',formatChoice==='auto');updateBitrate();};
 $('format').appendChild(fmtButton);
@@ -386,6 +391,7 @@ $('bL').onclick=()=>{ix-=70;};$('bRt').onclick=()=>{ix+=70;};
 $('bU').onclick=()=>{iy-=70;};$('bD').onclick=()=>{iy+=70;};
 $('bBig').onclick=()=>{isc=Math.min(5,isc*1.12);};$('bSm').onclick=()=>{isc=Math.max(.15,isc/1.12);};
 $('bDel').onclick=()=>{if(selObj>=0){objects.splice(selObj,1);selObj=-1;}};
+$('bMediaClear').onclick=()=>{img=null;useVid=false;vid.pause();vid.removeAttribute('src');vid.load();ix=0;iy=0;isc=1;irot=0;maskDirty=true;};
 $('mL').onclick=()=>{mX-=60;};$('mR').onclick=()=>{mX+=60;};
 $('mU').onclick=()=>{mY-=60;};$('mD').onclick=()=>{mY+=60;};
 $('mBig').onclick=()=>{mSc=Math.min(3,mSc*1.1);$('sMsc').value=mSc*100;};
