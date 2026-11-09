@@ -281,7 +281,7 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Added CI coverage for both missing individual tool values and a completely absent tool state, including range and checkbox default restoration.
 - Added `Audio-reactive size` to the Custom Logo panel. The uploaded logo now scales subtly with the live bass/pulse level, in addition to its existing glow, bounce, shake, rotation, reflection and orbiting particles. The new setting is included in advanced project state, undo/redo snapshots, restore UI synchronization and reset defaults.
 - CI asserts the new logo control, saved-state wiring, restore sync and actual render expression. Latest workflow run `42716373393` (run #114), exact commit `beeaa776b8428b769d7de0d521171894e2b2d16f`, completed successfully: HTML/JavaScript validation, project archive/manifest/registry tests, Android SDK setup, debug APK build and artifact upload all passed.
-- Latest source HTML blob: `5541c3cb532d9368c141b79a4e06a4f74b2021b0` (173,467 characters, 2,213 lines, 274 unique element IDs, no duplicate IDs). The original uploaded baseline's 129 IDs were previously confirmed preserved.
+- Latest source HTML blob: `5541c3cb532d9368c141b79a4e06a4f74b2021b0` (173,467 characters, 2,213 lines, 272 unique element IDs, no duplicate IDs). The original uploaded baseline's 129 IDs were previously confirmed preserved.
 - Latest APK artifact ID `13718116880`; ZIP digest `sha256:61ccf6ede647c9af309aa4ed29ba563342bf0a9d2e58789624367895ea94f257`. Extracted APK size 84,462,535 bytes; SHA-256 `de24f093b9377ff9a81c4a76cdd4557e888ddfc751e720bea3e4b69681b46c2f`.
 - Device QA is still pending. CI success is not a claim of installation or physical-device testing. Next: test the new logo response and spectrum/background effects with actual audio, verify export capture and `.viso` asset round-trip on Android, and continue the reference-app parity audit.
 
@@ -294,3 +294,13 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Artifact ID `13718576660`; archive digest `sha256:4111daa4ce6853f401493827f8a7f1ed87325e94d1e89bdd13b0355fd08d8d7b`. Downloaded archive passed ZIP integrity check. Extracted APK size: 84,462,535 bytes; APK SHA-256: `2f67be5c0761b162faaa2dc5d3eec3be3b26f243a59d7c69aaa86a77ac1168ad`.
 - Static source review confirms the Android WebView file picker, project/media save bridge, and MediaStore output path are present. This is code review, not on-device runtime verification.
 - Physical-device QA remains unconfirmed. Outstanding: verify audio/media selection, project/template asset round-trip, audio-reactive logo and spectrum/background effects with real audio, preview/export parity, saved video/audio output, startup/performance and stability on the target Android phone. Continue the Aspectrum reference-app screen-by-screen parity audit and add CI coverage for any uncovered behaviour.
+
+
+## 23. Spectrum visual-mode behaviour fix — 2026-11-10
+
+- Code audit found that the Ring visualizer used a fixed bar length instead of live spectrum amplitude, while Sphere and Tunnel shared the same renderer as Radial and therefore were not distinct modes.
+- Split Radial, Ring, Sphere and Tunnel into separate rendering branches. Ring bars now expand/contracts with live audio amplitude around a base ring; Sphere has an elliptical spherical shell with latitude guides and depth-scaled bars; Tunnel draws six perspective depth rings with audio-reactive spikes. Existing Radial, Mirror, Dual, Wave and LED branches remain.
+- Added CI assertions for the dedicated Ring/Sphere/Tunnel renderers, live-amplitude expression in Ring, and multi-ring Tunnel geometry.
+- The first two intermediate commits correctly failed CI syntax validation because the branch boundary was incomplete; the issue was corrected before proceeding. Final workflow run `42718700849` (run #120), exact commit `57e2d97c647062a981d096bb45710f11c4c91136`, passed HTML/JavaScript validation, archive/manifest/registry/spectrum tests, Android debug APK build and artifact upload.
+- Verified artifact ID `13719043384`; archive digest `sha256:35b1b110f4429daf29443706a2136174efb0299e9ed93ceab43856dd68b6d36e`. ZIP integrity passed. Extracted APK size: 84,463,147 bytes; APK SHA-256: `6475febfab8312a1feef4dcce673560c0b33f2490f4cbe805265c33c17eab374`.
+- This fixes the identified rendering logic at source/build level. Visual tuning, actual audio response and performance still require runtime testing on an Android device.
