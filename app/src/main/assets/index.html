@@ -1881,6 +1881,8 @@ function visoSafeFileName(name){return (name||'asset').replace(/[^a-zA-Z0-9._-]/
 function collectVisoProject(){return {schema:'viso-project-v3',name:'VISO Custom Project',settings:{state:captureProjectState(),template:null,layers:{objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin}))}},assets:[]};}
 async function downloadVISOProject(project,fileName){
  const specs=[['audio',VISO_ASSET_FILES.audio],['media-image',VISO_ASSET_FILES.mediaImage],['media-video',VISO_ASSET_FILES.mediaVideo],['background-image',VISO_ASSET_FILES.backgroundImage],['background-video',VISO_ASSET_FILES.backgroundVideo],['logo',VISO_ASSET_FILES.logo],['font',VISO_ASSET_FILES.font],...(objects.map((o,i)=>['overlay-'+i,o.file||VISO_ASSET_FILES.overlays[i]||null]))].filter(x=>x[1]);
+ const overlayAssetCount=specs.filter(x=>x[0].startsWith('overlay-')).length;
+ if(overlayAssetCount!==objects.length)throw new Error('Every overlay layer must have its original image file available before saving the project.');
  const total=specs.reduce((n,x)=>n+x[1].size,0);if(total>180*1024*1024)throw new Error('Project assets exceed 180 MB. Reduce large video files and save again.');
  const files=[],manifest=[];
  for(let i=0;i<specs.length;i++){
