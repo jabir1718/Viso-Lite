@@ -35,9 +35,17 @@
   .chip{min-height:32px;font-size:10.5px;padding:0 10px;border-radius:9px}
   .status{font-size:10px;color:#d5d1e2;background:#ffffff0b;border:1px solid #ffffff12;
     border-radius:9px;padding:8px 10px;font-variant-numeric:tabular-nums;line-height:1.4}
+
+  /* App themes affect controls only; canvas visualizer colours remain independent. */
+  body[data-theme="white"]{color:#20242b;background:linear-gradient(180deg,#f7f9fc,#e9eef5)}body[data-theme="white"] .sec{background:#fff;border-color:#dce3ec;box-shadow:0 2px 8px #1522380c}body[data-theme="white"] .sec h4{color:#53657d}body[data-theme="white"] button{background:#eef2f7;color:#263345;border-color:#d5deea}body[data-theme="white"] button.on{background:#dce8ff;border-color:#4778c7;color:#173c75}body[data-theme="white"] button.prim{background:linear-gradient(180deg,#477fd0,#285ca8);color:#fff;border-color:#477fd0}body[data-theme="white"] label,body[data-theme="white"] .mline b{color:#526176}body[data-theme="white"] input[type=text]{background:#fff;color:#20242b;border-color:#cbd5e1}body[data-theme="white"] .status{background:#f4f7fb;color:#35445a;border-color:#dce3ec}body[data-theme="white"] input[type=range]{accent-color:#477fd0}
+  body[data-theme="yellow"]{color:#fff7cc;background:linear-gradient(180deg,#302600,#100e05)}body[data-theme="yellow"] .sec{background:#241d08;border-color:#6e570e}body[data-theme="yellow"] .sec h4{color:#ffd84d}body[data-theme="yellow"] button{background:#3b300d;color:#fff0a6;border-color:#796019}body[data-theme="yellow"] button.on{background:#69520c;border-color:#ffe066;color:#fff9d5}body[data-theme="yellow"] button.prim{background:linear-gradient(180deg,#f3c928,#a97900);color:#241900;border-color:#ffe066}body[data-theme="yellow"] label,body[data-theme="yellow"] .mline b{color:#d8c77e}body[data-theme="yellow"] input[type=text]{background:#332a0d;color:#fff5c4;border-color:#796019}body[data-theme="yellow"] .status{background:#2e260d;color:#fff0b0;border-color:#5e4b13}body[data-theme="yellow"] input[type=range]{accent-color:#ffd52e}
+  body[data-theme="green"]{color:#d9ffe9;background:linear-gradient(180deg,#062b20,#04110e)}body[data-theme="green"] .sec{background:#09251d;border-color:#145b43}body[data-theme="green"] .sec h4{color:#48e69a}body[data-theme="green"] button{background:#10372a;color:#d9ffeb;border-color:#1b7654}body[data-theme="green"] button.on{background:#145b40;border-color:#4bf0a5;color:#effff6}body[data-theme="green"] button.prim{background:linear-gradient(180deg,#19b978,#08764d);color:#fff;border-color:#4bf0a5}body[data-theme="green"] label,body[data-theme="green"] .mline b{color:#9ed8bd}body[data-theme="green"] input[type=text]{background:#10372a;color:#e5fff1;border-color:#1b7654}body[data-theme="green"] .status{background:#0b3024;color:#d9ffeb;border-color:#145b43}body[data-theme="green"] input[type=range]{accent-color:#35d995}
+  body[data-theme="banana"]{color:#332b08;background:linear-gradient(180deg,#fff4a8,#f4d94b)}body[data-theme="banana"] .sec{background:#fff9d7;border-color:#e3c638;box-shadow:0 2px 8px #66500018}body[data-theme="banana"] .sec h4{color:#806400}body[data-theme="banana"] button{background:#fff0a5;color:#453700;border-color:#dfc13a}body[data-theme="banana"] button.on{background:#ffe05b;border-color:#997900;color:#332700}body[data-theme="banana"] button.prim{background:linear-gradient(180deg,#f5d52c,#d4a900);color:#332700;border-color:#b38c00}body[data-theme="banana"] label,body[data-theme="banana"] .mline b{color:#756018}body[data-theme="banana"] input[type=text]{background:#fffdf0;color:#332b08;border-color:#dfc13a}body[data-theme="banana"] .status{background:#fff9d7;color:#4c3d08;border-color:#e3c638}body[data-theme="banana"] input[type=range]{accent-color:#bd9700}
+  #themePick{max-width:100%;min-height:36px;border-radius:10px;padding:0 10px;background:#ffffff12;color:inherit;border:1px solid #ffffff2b;font-size:11px}body[data-theme="white"] #themePick,body[data-theme="banana"] #themePick{background:#fff;color:#263345;border-color:#cbd5e1}
 </style>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
 <div id="bar">
+  <div class="sec"><h4>App appearance</h4><label><span>App theme</span><select id="themePick"><option value="dark">Original Dark</option><option value="white">White</option><option value="yellow">Yellow Neon</option><option value="green">Green Neon</option><option value="banana">Banana Yellow</option></select></label><div class="status">App theme changes panels and controls only — visualizer colours stay separate.</div></div>
   <div class="sec"><h4>Media</h4>
     <div class="row">
       <button id="bA">MP3</button><button id="bI">Photo</button><button id="bV">Video</button>
@@ -160,6 +168,9 @@ const bl=document.createElement('canvas'),bx=bl.getContext('2d');
 mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=W>>1;bl.height=H>>1;
 const $=id=>document.getElementById(id);
 const vid=$('vid'),bvid=$('bvid');
+const themePick=$('themePick');
+try{const savedTheme=localStorage.getItem('viso-app-theme')||'dark';document.body.dataset.theme=savedTheme;themePick.value=savedTheme;}catch(_){document.body.dataset.theme='dark';}
+themePick.onchange=()=>{const value=themePick.value;document.body.dataset.theme=value;try{localStorage.setItem('viso-app-theme',value);}catch(_){}};
 
 let FPS=30,BIT=8000000,baseRes=1080,aspect='9:16',quality=100,formatChoice='auto';
 function outputSize(){
@@ -178,7 +189,7 @@ function setRes(){
   maskDirty=true;updateBitrate();
 }
 const aspectItems=['9:16','16:9','1:1','4:5'];
-aspectItems.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a+(a==='9:16'?' TikTok':a==='16:9'?' YouTube':'');
+aspectItems.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a+(a==='9:16'?' TikTok / Reels':a==='16:9'?' YouTube':a==='1:1'?' Square':' Instagram Feed');
   if(i===0)b.classList.add('on');
   b.onclick=()=>{aspect=a;document.querySelectorAll('#aspect button').forEach(q=>q.classList.remove('on'));b.classList.add('on');setRes();};
   $('aspect').appendChild(b);});
