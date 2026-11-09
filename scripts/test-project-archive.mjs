@@ -28,6 +28,13 @@ assert(html.includes("if(overlayAssetCount!==objects.length)"), 'every editable 
 assert(html.includes("restoreVISOProjectAssets(project,entries)"), 'project import must restore embedded media assets');
 assert(html.includes("downloadVISOProject(project,'VISO-'+key+'.viso')"), 'built-in templates must download as complete editable project packages');
 assert(html.includes("renderVISOStage('overlay'"), 'overlay render stage must remain in the preview frame');
+const frameStart = html.indexOf('function frame(t){');
+const frameEnd = html.indexOf('requestAnimationFrame(frame)', frameStart);
+const frameSource = html.slice(frameStart, frameEnd);
+const stageOrder = [...frameSource.matchAll(/renderVISOStage\('(background|media|scene|overlay|post)'/g)].map(match => match[1]);
+assert.deepEqual(stageOrder, ['background', 'media', 'scene', 'overlay', 'post'], 'preview render stages must execute in deterministic compositing order');
+assert(html.includes('const st=c.captureStream(FPS)'), 'video export must capture the composited preview canvas');
+assert(html.includes("render:(ctx,b)=>drawStudioText(ctx,b)"), 'text studio layers must render through the shared export canvas pipeline');
 const start = html.indexOf('const VISO_CRC_TABLE=');
 const end = html.indexOf('function visoSafeFileName', start);
 assert(start >= 0 && end > start, 'VISO ZIP/CRC functions must exist in the studio source');
