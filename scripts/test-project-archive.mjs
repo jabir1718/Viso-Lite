@@ -23,6 +23,7 @@ assert(spectrumSource.includes('outer=R0+v*amp'), 'Ring spectrum bars must respo
 assert(spectrumSource.includes("else if(M==='sphere')"), 'Sphere spectrum must have its own renderer');
 assert(spectrumSource.includes("else if(M==='tunnel')"), 'Tunnel spectrum must have its own renderer');
 assert(spectrumSource.includes('for(let ring=0;ring<6;ring++)'), 'Tunnel spectrum must render multiple depth rings');
+assert(spectrumSource.includes('ctx.fillRect(cx-len,yl,len,bh*.86);ctx.fillRect(cx,yr,len,bh*.86)'), 'Dual spectrum bars must extend horizontally from the centre');
 assert(html.includes('id="sLogoPulse"'), 'custom logo audio-reactive size control must exist');
 assert(html.includes('logoPulse,logoRotation'), 'logo pulse must be included in saved advanced state');
 assert(html.includes('sync(\'sLogoPulse\',logoPulse)'), 'logo pulse must restore its UI value');
