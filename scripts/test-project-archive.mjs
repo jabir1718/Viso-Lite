@@ -4,6 +4,9 @@ import vm from 'node:vm';
 import { TextDecoder, TextEncoder } from 'node:util';
 
 const html = fs.readFileSync('app/src/main/assets/index.html', 'utf8');
+for (const id of ['bgColor', 'bgTintColor', 'sBgTint', 'sBgBright', 'sBgContrast', 'sBgSat', 'sBgHue', 'sBgX', 'sBgY']) {
+  assert(html.includes('id="' + id + '"'), 'background control must exist: ' + id);
+}
 const start = html.indexOf('const VISO_CRC_TABLE=');
 const end = html.indexOf('function visoSafeFileName', start);
 assert(start >= 0 && end > start, 'VISO ZIP/CRC functions must exist in the studio source');
@@ -137,11 +140,11 @@ assert.equal(typeof registry.modules['Text · Logo Studio'].render, 'function');
 assert.equal(registry.modules['Surface Reflection'].stage, 'post');
 const dispatched = [];
 const rangeControl = {
-  id: 'rangeA', type: 'range', value: '22',
+  id: 'rangeA', type: 'range', value: '22', defaultValue: '12',
   dispatchEvent: event => dispatched.push(event.type)
 };
 const checkControl = {
-  id: 'checkA', type: 'checkbox', checked: true,
+  id: 'checkA', type: 'checkbox', checked: true, defaultChecked: false,
   dispatchEvent: event => dispatched.push(event.type)
 };
 const fakePanel = { querySelectorAll: () => [rangeControl, checkControl] };
@@ -158,6 +161,11 @@ registry.restoreVISORegistryState(registryState);
 assert.equal(rangeControl.value, '22', 'default tool restore for range');
 assert.equal(checkControl.checked, true, 'default tool restore for checkbox');
 assert.deepEqual(dispatched, ['input', 'change', 'input', 'change'], 'restore dispatches control events');
+rangeControl.value = '77';
+checkControl.checked = true;
+registry.restoreVISORegistryState({ 'test-tool': {} });
+assert.equal(rangeControl.value, '12', 'missing tool values migrate to element defaults');
+assert.equal(checkControl.checked, false, 'missing checkbox values migrate to defaultChecked');
 const renderOrder = [];
 registry.registerVISOEffectTool({
   id: 'late-render', name: 'Late Render', category: 'overlay', panel: fakePanel, controls: [],
