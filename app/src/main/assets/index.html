@@ -1513,6 +1513,7 @@ function autoStep(){
 
 // VISO Tool Registry v1 — stable IDs and parameter metadata for future effect modules.
 const VISO_RENDER_MODULES={
+ 'Layers · Tools box':{stage:'scene',order:10,render:(ctx,b,dt)=>{drawObjects(ctx,b,dt);drawLights(ctx);}},
  'Overlay':{stage:'overlay',order:10,render:ctx=>{drawVignette(ctx);drawProgress(ctx);drawCustomLogo(ctx);}},
  'Overlay Effects · Motion FX':{stage:'overlay',order:20,render:(ctx,b)=>drawMotionFx(ctx,b)},
  'Film & Vintage':{stage:'overlay',order:30,render:(ctx,b)=>drawFilmEffect(ctx,b)},
@@ -1715,8 +1716,7 @@ function frame(t){
     x.globalCompositeOperation='source-over';
   }
 
-  drawObjects(x,b,dt);
-  drawLights(x);
+  renderVISOStage('scene',x,b,dt);
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
     x.drawImage(paintLayer(.7,false),0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;}
   bx.clearRect(0,0,bl.width,bl.height);
