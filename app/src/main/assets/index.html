@@ -1541,7 +1541,7 @@ function drawSpectrum(ctx,scale){
       }
       ctx.restore();
     }
-
+  } else if(M==='mirror'){
     const bw=W/(n*2),base=H*.93;
     for(let i=0;i<n;i++){
       const v=specSmooth[i]/255,h=Math.max(thick,v*H*.62),xl=cx-bw*(i+1),xr=cx+bw*i;
