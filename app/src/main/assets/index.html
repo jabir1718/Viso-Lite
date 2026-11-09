@@ -1863,12 +1863,12 @@ function visoUnzip(bytes){
  const count=view.getUint16(end+10,true),dirOffset=view.getUint32(end+16,true),out={};let p=dirOffset;
  for(let n=0;n<count;n++){
   if(view.getUint32(p,true)!==0x02014b50)throw new Error('Invalid project archive entry');
-  const method=view.getUint16(p+10,true),size=view.getUint32(p+24,true),nameLen=view.getUint16(p+28,true),extraLen=view.getUint16(p+30,true),commentLen=view.getUint16(p+32,true),localOffset=view.getUint32(p+42,true);
+  const crc=view.getUint32(p+16,true),method=view.getUint16(p+10,true),size=view.getUint32(p+24,true),nameLen=view.getUint16(p+28,true),extraLen=view.getUint16(p+30,true),commentLen=view.getUint16(p+32,true),localOffset=view.getUint32(p+42,true);
   const name=new TextDecoder().decode(bytes.slice(p+46,p+46+nameLen));p+=46+nameLen+extraLen+commentLen;
   if(name.endsWith('/'))continue;if(method!==0)throw new Error('Unsupported project compression method');
   if(view.getUint32(localOffset,true)!==0x04034b50)throw new Error('Invalid local project asset');
   const localName=view.getUint16(localOffset+26,true),localExtra=view.getUint16(localOffset+28,true),start=localOffset+30+localName+localExtra;
-  out[name]=bytes.slice(start,start+size);
+  const data=bytes.slice(start,start+size);if(visoCRC32(data)!==crc)throw new Error('Project asset checksum failed: '+name);out[name]=data;
  }
  return out;
 }
@@ -1939,6 +1939,7 @@ $('bProjectOpen').onclick=()=>$('fProjectOpen').click();
 $('fProjectOpen').onchange=async e=>{
  const file=e.target.files[0];if(!file)return;
  try{
+  if(file.size>220*1024*1024)throw new Error('Project package is larger than the supported 220 MB limit');
   const bytes=new Uint8Array(await file.arrayBuffer());let project,entries={};
   if(bytes[0]===0x50&&bytes[1]===0x4b){entries=visoUnzip(bytes);if(!entries['project.json'])throw new Error('project.json missing');project=JSON.parse(new TextDecoder().decode(entries['project.json']));}
   else project=JSON.parse(new TextDecoder().decode(bytes));
