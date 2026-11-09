@@ -1921,20 +1921,21 @@ function clearVISOAssets(){
  ['fA','fI','fV','fBgI','fBgV','fLogo','fFont','fO'].forEach(id=>{const input=$(id);if(input)input.value='';});
 }
 async function restoreVISOProjectAssets(project,entries){
- clearVISOAssets();const assets=project.assets||[],byKind={};
- assets.forEach((meta,i)=>{const data=entries[meta.name];if(data)byKind[meta.kind]={meta,data};});
+ const assets=project.assets||[],byKind={},layerState=project.settings?.layers||{};
+ assets.forEach(meta=>{const data=entries[meta.name];if(data)byKind[meta.kind]={meta,data};});
  const makeFile=({meta,data})=>new File([data],meta.fileName||meta.name.split('/').pop(),{type:meta.mime||'application/octet-stream'});
+ const overlayMeta=assets.filter(a=>a.kind.startsWith('overlay-')),prepared=[];
+ for(let i=0;i<overlayMeta.length;i++){
+  const meta=overlayMeta[i],data=entries[meta.name],file=makeFile({meta,data}),url=URL.createObjectURL(file),im=new Image();
+  try{await new Promise((resolve,reject)=>{im.onload=resolve;im.onerror=()=>reject(new Error('Overlay image failed: '+file.name));im.src=url;});}
+  finally{URL.revokeObjectURL(url);}
+  prepared.push({img:im,file,saved:layerState.objects?.[i]||{}});
+ }
+ clearVISOAssets();
  for(const [kind,id] of [['audio','fA'],['media-image','fI'],['media-video','fV'],['background-image','fBgI'],['background-video','fBgV'],['logo','fLogo'],['font','fFont']]){
   if(byKind[kind])visoSetInputFile(id,makeFile(byKind[kind]));
  }
- const layerState=project.settings?.layers||{},overlayMeta=assets.filter(a=>a.kind.startsWith('overlay-'));
- for(let i=0;i<overlayMeta.length;i++){
-  const meta=overlayMeta[i],data=entries[meta.name];if(!data)continue;
-  const file=makeFile({meta,data}),url=URL.createObjectURL(file),im=new Image();
-  await new Promise((resolve,reject)=>{im.onload=()=>{URL.revokeObjectURL(url);resolve();};im.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Overlay image failed: '+file.name));};im.src=url;});
-  const saved=layerState.objects?.[i]||{};
-  objects.push({img:im,file,x:saved.x??cx,y:saved.y??cy,sc:saved.sc??.32,rot:saved.rot??0,motion:saved.motion||guessMotion(file.name),dir:saved.dir??1,phase:saved.phase??0});
- }
+ prepared.forEach(({img,file,saved})=>objects.push({img,file,x:saved.x??cx,y:saved.y??cy,sc:saved.sc??.32,rot:saved.rot??0,motion:saved.motion||guessMotion(file.name),dir:saved.dir??1,phase:saved.phase??0}));
  (layerState.lights||[]).forEach(l=>lights.push({...l}));
  selObj=objects.length?objects.length-1:-1;maskDirty=true;
  $('templateInfo').textContent='Project restored · '+assets.length+' embedded assets · all imported media and layers are editable';
@@ -1950,15 +1951,20 @@ $('fProjectOpen').onchange=async e=>{
   else project=JSON.parse(new TextDecoder().decode(bytes));
   if(project.schema==='viso-project-v3'){
    if(!Array.isArray(project.assets)||project.assets.length>512)throw new Error('Invalid project asset manifest');
-   const seen=new Set();let total=0;
+   const seen=new Set(),seenKinds=new Set(),allowedKinds=new Set(['audio','media-image','media-video','background-image','background-video','logo','font']);let total=0;
    for(const meta of project.assets){
     if(!meta||typeof meta.name!=='string'||typeof meta.kind!=='string'||!meta.name.startsWith('assets/')||meta.name.includes('\\')||meta.name.split('/').includes('..'))throw new Error('Invalid project asset record');
     if(seen.has(meta.name))throw new Error('Duplicate asset manifest entry: '+meta.name);seen.add(meta.name);
+    if(meta.kind.startsWith('overlay-')){if(!/^overlay-\\d+$/.test(meta.kind))throw new Error('Invalid overlay asset type');}
+    else{if(!allowedKinds.has(meta.kind))throw new Error('Unsupported project asset type: '+meta.kind);if(seenKinds.has(meta.kind))throw new Error('Duplicate project asset type: '+meta.kind);seenKinds.add(meta.kind);}
     const data=entries[meta.name],expected=Number(meta.size);
     if(!data)throw new Error('Project asset is missing: '+(meta.fileName||meta.name));
     if(!Number.isSafeInteger(expected)||expected<0||data.length!==expected)throw new Error('Project asset size mismatch: '+(meta.fileName||meta.name));
     total+=data.length;if(total>180*1024*1024)throw new Error('Project assets exceed the supported 180 MB limit');
    }
+   const layerObjects=project.settings?.layers?.objects;
+   const overlayCount=project.assets.filter(meta=>meta.kind.startsWith('overlay-')).length;
+   if(Array.isArray(layerObjects)&&layerObjects.length!==overlayCount)throw new Error('Project overlay asset count mismatch');
   }
   applyVisoProject(project);
   if(project.schema==='viso-project-v3')await restoreVISOProjectAssets(project,entries);
