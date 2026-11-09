@@ -1955,15 +1955,17 @@ $('fProjectOpen').onchange=async e=>{
    for(const meta of project.assets){
     if(!meta||typeof meta.name!=='string'||typeof meta.kind!=='string'||!meta.name.startsWith('assets/')||meta.name.includes('\\')||meta.name.split('/').includes('..'))throw new Error('Invalid project asset record');
     if(seen.has(meta.name))throw new Error('Duplicate asset manifest entry: '+meta.name);seen.add(meta.name);
-    if(meta.kind.startsWith('overlay-')){if(!/^overlay-\\d+$/.test(meta.kind))throw new Error('Invalid overlay asset type');}
+    if(meta.kind.startsWith('overlay-')){if(!/^overlay-\d+$/.test(meta.kind))throw new Error('Invalid overlay asset type');}
     else{if(!allowedKinds.has(meta.kind))throw new Error('Unsupported project asset type: '+meta.kind);if(seenKinds.has(meta.kind))throw new Error('Duplicate project asset type: '+meta.kind);seenKinds.add(meta.kind);}
     const data=entries[meta.name],expected=Number(meta.size);
     if(!data)throw new Error('Project asset is missing: '+(meta.fileName||meta.name));
     if(!Number.isSafeInteger(expected)||expected<0||data.length!==expected)throw new Error('Project asset size mismatch: '+(meta.fileName||meta.name));
     total+=data.length;if(total>180*1024*1024)throw new Error('Project assets exceed the supported 180 MB limit');
    }
+   const overlayIndexes=project.assets.filter(meta=>meta.kind.startsWith('overlay-')).map(meta=>Number(meta.kind.slice(8))).sort((a,b)=>a-b);
+   if(new Set(overlayIndexes).size!==overlayIndexes.length||overlayIndexes.some((n,i)=>n!==i))throw new Error('Project overlay asset sequence is invalid');
    const layerObjects=project.settings?.layers?.objects;
-   const overlayCount=project.assets.filter(meta=>meta.kind.startsWith('overlay-')).length;
+   const overlayCount=overlayIndexes.length;
    if(Array.isArray(layerObjects)&&layerObjects.length!==overlayCount)throw new Error('Project overlay asset count mismatch');
   }
   applyVisoProject(project);
