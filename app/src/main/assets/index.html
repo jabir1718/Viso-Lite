@@ -173,6 +173,15 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <label><span>BG split</span><input id="sSplit" type="range" min="0" max="100" value="100"></label>
     <label><span>BG dim</span><input id="sDim" type="range" min="0" max="100" value="25"></label>
     <label><span>BG blur</span><input id="sBgb" type="range" min="0" max="40" value="0"></label>
+    <label><span>BG base color</span><input id="bgColor" type="color" value="#050810"></label>
+    <label><span>BG tint color</span><input id="bgTintColor" type="color" value="#ffffff"></label>
+    <label><span>BG tint amount</span><input id="sBgTint" type="range" min="0" max="100" value="0"></label>
+    <label><span>BG brightness</span><input id="sBgBright" type="range" min="20" max="200" value="100"></label>
+    <label><span>BG contrast</span><input id="sBgContrast" type="range" min="20" max="200" value="100"></label>
+    <label><span>BG saturation</span><input id="sBgSat" type="range" min="0" max="200" value="100"></label>
+    <label><span>BG hue</span><input id="sBgHue" type="range" min="-180" max="180" value="0"></label>
+    <label><span>BG position X</span><input id="sBgX" type="range" min="-100" max="100" value="0"></label>
+    <label><span>BG position Y</span><input id="sBgY" type="range" min="-100" max="100" value="0"></label>
     <label><span>BG viz mix</span><input id="sBvo" type="range" min="0" max="100" value="85"></label>
     <label><span>BG viz power</span><input id="sBvp" type="range" min="20" max="300" value="140"></label>
     <div class="row"><button id="tBvm" class="on">BG viz on BG shape</button></div>
@@ -507,6 +516,7 @@ let studioTextX=50,studioTextRot=0,studioTextStroke=7,studioTextGlow=24,studioTe
 let studioText2='',studioText2On=false,studioText2Size=32,studioText2Pos=88,studioText2Alpha=85,studioText2Color='#ffffff',studioText2X=50,studioText2Rot=0,studioText2Stroke=2,studioText2Glow=12,studioText2Anim='none',studioText2Align='center',studioText2Plate=false;
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
 let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,bvp=140;
+let bgColor='#050810',bgTintColor='#ffffff',bgTintAmount=0,bgBrightness=100,bgContrast=100,bgSaturation=100,bgHue=0,bgPosX=0,bgPosY=0;
 let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
@@ -578,6 +588,9 @@ bind('sCyc',v=>cyc=v);bind('sDir',v=>dirG=v);bind('sSwy',v=>swy=v);bind('sSpd',v
 bind('sBri',v=>bri=v);bind('sCon',v=>con=v);bind('sSat',v=>sat=v);bind('sHue',v=>hueSh=v);
 bind('sDim',v=>dim=v);bind('sSplit',v=>split=v);bind('sBgb',v=>bgb=v);
 bind('sBvo',v=>bvo=v);bind('sBvp',v=>bvp=v);
+bind('sBgTint',v=>bgTintAmount=v);bind('sBgBright',v=>bgBrightness=v);bind('sBgContrast',v=>bgContrast=v);
+bind('sBgSat',v=>bgSaturation=v);bind('sBgHue',v=>bgHue=v);bind('sBgX',v=>bgPosX=v);bind('sBgY',v=>bgPosY=v);
+$('bgColor').oninput=e=>bgColor=e.target.value;$('bgTintColor').oninput=e=>bgTintColor=e.target.value;
 bind('sMsc',v=>{mSc=v/100;maskDirty=true;});bind('sLint',v=>lint=v);bind('sLsz',v=>lsz=v);
 
 function drawPals(){$('pals').innerHTML='';colors.forEach((h,i)=>{
@@ -764,7 +777,7 @@ function apply(s){const d=JSON.parse(s);
   $('sTextSize').value=studioTextSize;$('sTextPos').value=studioTextPos;$('sTextAlpha').value=studioTextAlpha;$('studioTextColor').value=studioTextColor;
   $('sTextX').value=studioTextX;$('sTextRot').value=studioTextRot;$('sTextStroke').value=studioTextStroke;$('sTextGlow').value=studioTextGlow;$('sTextAnim').value=studioTextAnim;$('sTextFont').value=studioTextFont;$('sTextAlign').value=studioTextAlign;$('bTextPlate').textContent='Text plate: '+(studioTextPlate?'ON':'OFF');$('bTextPlate').classList.toggle('on',studioTextPlate);
   $('sText2Size').value=studioText2Size;$('sText2Pos').value=studioText2Pos;$('sText2Alpha').value=studioText2Alpha;$('studioText2Color').value=studioText2Color;$('sText2X').value=studioText2X;$('sText2Rot').value=studioText2Rot;$('sText2Stroke').value=studioText2Stroke;$('sText2Glow').value=studioText2Glow;$('sText2Anim').value=studioText2Anim;$('sText2Align').value=studioText2Align;$('bText2Plate').textContent='Text 2 plate: '+(studioText2Plate?'ON':'OFF');$('bText2Plate').classList.toggle('on',studioText2Plate);
-  drawPals();drawMixers();if(d.advanced)restoreAdvancedState(d.advanced);if(d.tools)restoreVISORegistryState(d.tools);}
+  drawPals();drawMixers();if(d.advanced)restoreAdvancedState(d.advanced);if(d.tools)restoreVISORegistryState(d.tools);else resetVISOBackgroundGrade();}
 $('bUndo').onclick=()=>{if(!undo.length)return;const current=JSON.stringify(captureProjectState()),previous=undo.pop();objectSnapshotCache.set(current,objects.map(o=>({...o})));redo.push(current);apply(previous);};
 $('bRedo').onclick=()=>{if(!redo.length)return;const current=JSON.stringify(captureProjectState()),next=redo.pop();objectSnapshotCache.set(current,objects.map(o=>({...o})));undo.push(current);apply(next);};
 $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
@@ -786,7 +799,7 @@ $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
   $('bTextOn').textContent='Text: OFF';$('bTextOn').classList.remove('on');$('sTextSize').value=65;$('sTextPos').value=78;$('sTextAlpha').value=100;$('studioTextColor').value='#ffffff';
   $('sTextX').value=50;$('sTextRot').value=0;$('sTextStroke').value=7;$('sTextGlow').value=24;$('sTextAnim').value='none';$('sTextFont').value='system-ui';$('sTextAlign').value='center';$('bTextPlate').textContent='Text plate: OFF';$('bTextPlate').classList.remove('on');
   $('studioText2').value='';$('bText2On').textContent='Text 2: OFF';$('bText2On').classList.remove('on');$('sText2Size').value=32;$('sText2Pos').value=88;$('sText2Alpha').value=85;$('studioText2Color').value='#ffffff';$('sText2X').value=50;$('sText2Rot').value=0;$('sText2Stroke').value=2;$('sText2Glow').value=12;$('sText2Anim').value='none';$('sText2Align').value='center';$('bText2Plate').textContent='Text 2 plate: OFF';$('bText2Plate').classList.remove('on');
-  drawMixers();resetVISOAdvancedControls();};
+  resetVISOBackgroundGrade();drawMixers();resetVISOAdvancedControls();};
 
 $('studioText').oninput=e=>{studioText=e.target.value.slice(0,36);};
 $('studioText').onchange=()=>{};
@@ -1540,8 +1553,10 @@ function registerVISOEffectTool(def){
  const serialize=typeof def.serialize==='function'?def.serialize:()=>Object.fromEntries(elements.map(el=>[el.id,el.type==='checkbox'?el.checked:el.value]));
  const restore=typeof def.restore==='function'?def.restore:state=>{
   if(!state||typeof state!=='object')return;
-  elements.forEach(el=>{if(!Object.prototype.hasOwnProperty.call(state,el.id))return;
-   if(el.type==='checkbox')el.checked=!!state[el.id];else el.value=state[el.id];
+  elements.forEach(el=>{
+   const value=Object.prototype.hasOwnProperty.call(state,el.id)?state[el.id]:(el.type==='checkbox'?el.defaultChecked:el.defaultValue);
+   if(value===undefined)return;
+   if(el.type==='checkbox')el.checked=!!value;else el.value=value;
    el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));
   });
  };
@@ -1551,6 +1566,11 @@ function registerVISOEffectTool(def){
  VISO_TOOL_REGISTRY[def.id]=tool;
  if(tool.render){const list=VISO_RENDER_CACHE[tool.renderStage]||(VISO_RENDER_CACHE[tool.renderStage]=[]);list.push(tool);list.sort((a,b)=>a.renderOrder-b.renderOrder);}
  return tool;
+}
+function resetVISOBackgroundGrade(){
+ bgColor='#050810';bgTintColor='#ffffff';bgTintAmount=0;bgBrightness=100;bgContrast=100;bgSaturation=100;bgHue=0;bgPosX=0;bgPosY=0;
+ if($('bgColor'))$('bgColor').value=bgColor;if($('bgTintColor'))$('bgTintColor').value=bgTintColor;
+ [['sBgTint',bgTintAmount],['sBgBright',bgBrightness],['sBgContrast',bgContrast],['sBgSat',bgSaturation],['sBgHue',bgHue],['sBgX',bgPosX],['sBgY',bgPosY]].forEach(([id,v])=>{if($(id))$(id).value=v;});
 }
 function collectVISORegistryState(){
  const state={};Object.values(VISO_TOOL_REGISTRY).forEach(tool=>{if(typeof tool.serialize==='function')state[tool.id]=tool.serialize();});return state;
@@ -1649,8 +1669,10 @@ function drawVISOBackground(ctx,b,dt){
   const clipH=Math.max(0,split/100*H);
   if(clipH>0){
     ctx.save();ctx.beginPath();ctx.rect(0,0,W,clipH);ctx.clip();
+    ctx.fillStyle=bgColor;ctx.fillRect(0,0,W,clipH);
     if(bgImg||(bgUseVid&&bvid.readyState>=2)){
       ctx.save();
+      ctx.translate(bgPosX/100*W,bgPosY/100*H);
       if(bgDriftOn){
         const sec=performance.now()/1000,beatRate=bgBeatSync&&bpm>0?bpm/60:1;
         const phase=sec*beatRate*(.18+bgDriftSpeed/55);
@@ -1660,7 +1682,7 @@ function drawVISOBackground(ctx,b,dt){
         const zoom=1+bgDriftTravel/100*.08;
         ctx.translate(cx+dx,cy+dy);ctx.rotate(rot);ctx.scale(zoom,zoom);ctx.translate(-cx,-cy);
       }
-      if(bgb>0)ctx.filter='blur('+bgb+'px)';
+      ctx.filter='brightness('+bgBrightness+'%) contrast('+bgContrast+'%) saturate('+bgSaturation+'%) hue-rotate('+bgHue+'deg)'+(bgb>0?' blur('+bgb+'px)':'');
       if(bgUseVid&&bvid.readyState>=2)cover(ctx,bvid,bvid.videoWidth||W,bvid.videoHeight||H,H);
       else if(bgImg)cover(ctx,bgImg,bgImg.width,bgImg.height,H);
       ctx.filter='none';ctx.restore();
@@ -1671,6 +1693,7 @@ function drawVISOBackground(ctx,b,dt){
     } else if(bgViz){
       ctx.globalAlpha=bvo/100;ctx.drawImage(paintLayer(1.3,bgVizMask,curBbg),0,0);ctx.globalAlpha=1;
     }
+    if(bgTintAmount>0){ctx.save();ctx.globalAlpha=bgTintAmount/100;ctx.fillStyle=bgTintColor;ctx.fillRect(0,0,W,clipH);ctx.restore();}
     ctx.restore();
   }
   if(clipH>0&&clipH<H){ctx.fillStyle='#fff';ctx.fillRect(0,clipH,W,H-clipH);}
