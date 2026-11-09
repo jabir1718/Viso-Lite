@@ -55,7 +55,7 @@ jobs:
               "sLensAmount", "sProgThickness", "sLogoGlow", "bSurfaceReflection",
               "studioText2", "bText2On", "sText2Size", "sText2Glow",
               "bFilm", "sFilmGrain", "sFilmDust", "sFilmScratches",
-              "bAtmosphere", "sHaze", "sSmoke"
+              "bAtmosphere", "sHaze", "sSmoke", "specRangeModes"
           )
           for required in required_ids:
               if required not in ids:
