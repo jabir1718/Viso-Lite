@@ -494,7 +494,7 @@ let autoOn=false,autoT=0,autoEvery=3;
 const lockChip={color:false,vis:false,shape:false,sway:false};
 const objects=[];let selObj=-1;
 const lights=[];let selLight=-1;let lint=60,lsz=100;
-const undo=[],redo=[];
+const undo=[],redo=[],objectSnapshotCache=new Map();
 
 const MODES=['Dust','Aurora','Beams','Bars','Ripple','Grid','Sparkle','Vortex','Ribbon','Bokeh','Neon','Confetti','Comet','Hex','Orbitals','Mirage','Cube3D','Hyper','Depth','Warp3D','Orbit3D','Tunnel3D','Voxel','Parallax','Galaxy','Nebula','Waveform',
   'Prism3D','Fractal4D','Quantum5D','Holo6D','Pulse7D','Vector8D','Matrix9D','Orbit10D','Nebula11D','Omni12D'];
@@ -603,7 +603,7 @@ $('bV').onclick=()=>$('fV').click();
 $('fV').onchange=e=>{const f=e.target.files[0];if(!f)return;
   vid.src=URL.createObjectURL(f);vid.play();useVid=true;img=null;maskDirty=true;};
 $('bO').onclick=()=>$('fO').click();
-$('fO').onchange=e=>{[...e.target.files].forEach(f=>{const im=new Image();
+$('fO').onchange=e=>{if(e.target.files?.length)snap();[...e.target.files].forEach(f=>{const im=new Image();
   im.onload=()=>{objects.push({img:im,file:f,x:Math.random()*W,y:Math.random()*H,sc:.32,rot:0,
     motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28});selObj=objects.length-1;};
   im.src=URL.createObjectURL(f);});};
@@ -709,12 +709,15 @@ $('bRec').onclick=()=>{
   if(audio&&!playing){$('bP').click();}
 };
 function captureProjectState(){return {colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState()};}
-function snap(){undo.push(JSON.stringify(captureProjectState()));
-  if(undo.length>40)undo.shift();redo.length=0;}
+function snap(){const state=JSON.stringify(captureProjectState());undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
+  if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
+  redo.forEach(old=>objectSnapshotCache.delete(old));redo.length=0;}
 function apply(s){const d=JSON.parse(s);
   colors=d.colors;mstate.forEach((m,i)=>{m.on=d.mstate[i].on;m.op=d.mstate[i].op;});
   if(d.bgOn!==undefined)bgOn=!!d.bgOn;if(d.frOn!==undefined)frOn=!!d.frOn;if(d.phOn!==undefined)phOn=!!d.phOn;if(d.maskOn!==undefined)maskOn=!!d.maskOn;if(d.bgViz!==undefined)bgViz=!!d.bgViz;if(d.mediaFront!==undefined)mediaFront=!!d.mediaFront;
-  if(Array.isArray(d.objects)&&d.objects.length===objects.length)d.objects.forEach((o,i)=>Object.assign(objects[i],o));
+  const cachedObjects=objectSnapshotCache.get(s);
+  if(cachedObjects)objects.splice(0,objects.length,...cachedObjects.map(o=>({...o})));
+  else if(Array.isArray(d.objects)&&d.objects.length===objects.length)d.objects.forEach((o,i)=>Object.assign(objects[i],o));
   if(Array.isArray(d.lights)){lights.splice(0,lights.length,...d.lights.map(l=>({...l})));selLight=-1;}
   [['tBg',bgOn],['tFr',frOn],['tPh',phOn],['tMask',maskOn],['bBgViz',bgViz]].forEach(([id,on])=>$(id)?.classList.toggle('on',!!on));
   document.querySelectorAll('#modes button').forEach((q,j)=>q.classList.toggle('on',mstate[j].on));
@@ -741,8 +744,8 @@ function apply(s){const d=JSON.parse(s);
   $('sTextX').value=studioTextX;$('sTextRot').value=studioTextRot;$('sTextStroke').value=studioTextStroke;$('sTextGlow').value=studioTextGlow;$('sTextAnim').value=studioTextAnim;$('sTextFont').value=studioTextFont;$('sTextAlign').value=studioTextAlign;$('bTextPlate').textContent='Text plate: '+(studioTextPlate?'ON':'OFF');$('bTextPlate').classList.toggle('on',studioTextPlate);
   $('sText2Size').value=studioText2Size;$('sText2Pos').value=studioText2Pos;$('sText2Alpha').value=studioText2Alpha;$('studioText2Color').value=studioText2Color;$('sText2X').value=studioText2X;$('sText2Rot').value=studioText2Rot;$('sText2Stroke').value=studioText2Stroke;$('sText2Glow').value=studioText2Glow;$('sText2Anim').value=studioText2Anim;$('sText2Align').value=studioText2Align;$('bText2Plate').textContent='Text 2 plate: '+(studioText2Plate?'ON':'OFF');$('bText2Plate').classList.toggle('on',studioText2Plate);
   drawPals();drawMixers();if(d.advanced)restoreAdvancedState(d.advanced);}
-$('bUndo').onclick=()=>{if(!undo.length)return;const current=JSON.stringify(captureProjectState()),previous=undo.pop();redo.push(current);apply(previous);};
-$('bRedo').onclick=()=>{if(!redo.length)return;const current=JSON.stringify(captureProjectState()),next=redo.pop();undo.push(current);apply(next);};
+$('bUndo').onclick=()=>{if(!undo.length)return;const current=JSON.stringify(captureProjectState()),previous=undo.pop();objectSnapshotCache.set(current,objects.map(o=>({...o})));redo.push(current);apply(previous);};
+$('bRedo').onclick=()=>{if(!redo.length)return;const current=JSON.stringify(captureProjectState()),next=redo.pop();objectSnapshotCache.set(current,objects.map(o=>({...o})));undo.push(current);apply(next);};
 $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
   mstate.forEach((m,i)=>{m.on=i===0;m.op=i===0?.95:.7;});
   specOn=false;$('bSpec').textContent='Spectrum: OFF';$('bSpec').classList.remove('on');
