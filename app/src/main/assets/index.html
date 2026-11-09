@@ -59,6 +59,43 @@ body{height:100dvh;display:flex;flex-direction:column;background:#090b10!importa
 body:has(.sheet:target) #sheetBackdrop{display:block}
 @media(min-width:700px){#wrap{padding:14px 24px}.sheet{left:50%;right:auto;width:min(640px,100%);transform:translateX(-50%)}}
 @media(max-height:650px){#topbar{height:48px;min-height:48px}#bar{top:48px;bottom:60px}#bottomToolbar{height:60px;min-height:60px}#sheetBackdrop{inset:48px 0 60px}.sheet{height:70dvh}}
+
+/* Light palette adapted from the trusted Abc reference.
+   Keep Viso-Lite's mobile-sheet layout, markup, and JavaScript unchanged. */
+body{color:#173b2a!important;background:linear-gradient(155deg,#f8fbf4 0%,#edf7e8 52%,#e5f6ed 100%)!important}
+#topbar{background:linear-gradient(135deg,#ffffff,#f3faef)!important;border-bottom:1px solid #cbdcc7!important}
+#topbar a{color:#173b2a!important}
+#topbar .top-icon{background:#e7f4e3!important;color:#205c32!important}
+#topbar .resolution{background:#f7fbf5!important;border-color:#cbdcc7!important;color:#284b35!important}
+#topbar .export-action{background:linear-gradient(180deg,#8bd65e,#61b94c)!important;border-color:#64ad50!important;color:#123c20!important}
+#wrap{background:transparent!important}
+#c{box-shadow:0 10px 30px #163d251c,0 0 0 1px #9bbba0!important}
+#monitorDock{background:linear-gradient(135deg,#ffffff,#f3faef)!important;border-color:#c8ddc5!important;color:#173b2a!important;box-shadow:0 3px 12px #244b2910!important}
+#monitorDock *{color:#173b2a!important}
+.sheet{background:linear-gradient(155deg,#fbfff8,#edf7e8)!important;border-color:#cbdcc7!important;box-shadow:0 -18px 48px #244b291f!important;color:#173b2a!important}
+.sheet-close{background:#e7f4e3!important;border-color:#b7d99c!important;color:#205c32!important}
+.sheet .sec.panel{background:linear-gradient(180deg,#ffffff,#f5faf1)!important;border-color:#d7e6d1!important;box-shadow:0 2px 9px #244b2909!important;color:#284b35!important}
+.sheet .sec.panel h4{color:#287344!important}
+.sheet button{background:#f7fbf5!important;color:#284b35!important;border-color:#cbdcc7!important}
+.sheet button:active{background:#e5f2df!important}
+.sheet button.on{background:#dff2d5!important;border-color:#83b77b!important;color:#205c32!important}
+.sheet button.lock{background:#e7f4e3!important;border-color:#9acb91!important;color:#2b673a!important}
+.sheet button.prim{background:linear-gradient(180deg,#8bd65e,#61b94c)!important;border-color:#64ad50!important;color:#123c20!important}
+.sheet label,.sheet label span{color:#536b57!important}
+.sheet input[type=range]{accent-color:#58a94d!important}
+.sheet input[type=text],.sheet select{background:#ffffff!important;color:#193e27!important;border-color:#cbdcc7!important}
+.sheet input[type=color]{background:#ffffff!important;border-color:#cbdcc7!important}
+.sheet .pal{border-color:#c8d8c4!important}
+.sheet .pal.on{outline-color:#4d9b4d!important}
+.sheet .mline b{color:#45634b!important}
+.sheet .status{background:#f4f8f1!important;border-color:#dce8d8!important;color:#344d3a!important}
+.sheet .subhead{color:#39764b!important}
+#exportMonitor{background:linear-gradient(135deg,#ffffff,#efffe7)!important;border-color:#b7d99c!important;color:#244a2e!important}
+#bottomToolbar{background:linear-gradient(135deg,#ffffff,#f3faef)!important;border-top-color:#cbdcc7!important}
+#bottomToolbar a{color:#536b57!important}
+#bottomToolbar a:focus,#bottomToolbar a:active{background:#e5f2df!important;color:#205c32!important}
+#sheetBackdrop{background:#173b2a30!important}
+
 </style>
 <header id="topbar">
   <a class="top-icon" href="#" aria-label="Close panel">×</a>
