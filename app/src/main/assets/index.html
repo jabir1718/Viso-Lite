@@ -1724,7 +1724,19 @@ async function downloadVISOProject(project,fileName){
  project.assets=manifest;
  const json=new TextEncoder().encode(JSON.stringify(project));
  files.unshift({name:'project.json',data:json});
- const blob=visoZip(files),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=fileName;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
+ const blob=visoZip(files);
+ if(window.AndroidSave&&typeof window.AndroidSave.beginSave==='function'){
+  if(!AndroidSave.beginSave(fileName,'application/vnd.viso.project+zip'))throw new Error('Android download could not start');
+  const bytes=new Uint8Array(await blob.arrayBuffer()),chunkSize=256*1024;
+  for(let offset=0;offset<bytes.length;offset+=chunkSize){
+   const chunk=bytes.subarray(offset,Math.min(bytes.length,offset+chunkSize));let binary='';
+   for(let i=0;i<chunk.length;i+=0x8000)binary+=String.fromCharCode(...chunk.subarray(i,Math.min(chunk.length,i+0x8000)));
+   if(!AndroidSave.appendChunk(btoa(binary))){AndroidSave.cancelSave();throw new Error('Project download stopped while writing');}
+  }
+  if(!AndroidSave.finishSave())throw new Error('Project download could not be finished');
+ }else{
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=fileName;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
+ }
 }
 function visoSetInputFile(id,file){
  const input=$(id);if(!input||!file)return;
