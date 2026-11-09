@@ -11,7 +11,7 @@
 - Android shell: Kotlin / Jetpack Compose with the studio hosted in Android WebView.
 - Current reference input: user-provided working HTML file named `Viso working Index.html` (uploaded 2026-11-10; 1,133 lines). Treat it as a reference/baseline to compare, not permission to overwrite newer repository work.
 - Reference application package previously inspected: Aspectrum / MP3 Visualizer (Unity Android app, package `com.MDA.MP3Visualizer`, version 2.7.2). The supplied archive is the reference app's package/assets, not a font pack.
-- Latest verified source milestone: `d6ae1314ab4960b7fd779bf32760ce7cb1578baf` — full editable settings capture/restore added to `.viso` projects and undo/redo snapshots. The uploaded working HTML baseline was compared against the branch: all 129 baseline element IDs are retained; the branch has 186 IDs (57 additional controls), with no missing baseline IDs.
+- Latest repository head at this checkpoint: `ca2a75c2893b79ba5874e60173c2766a8c1fc2af`. Latest HTML asset blob: `c4516701bfbb404acc0cfab64197d6401159a8f3` (159,708 characters, 2,050 lines, 255 unique element IDs, no duplicate IDs). The uploaded 1,133-line baseline was compared earlier; all 129 original element IDs remain in the current branch.
 - Main branch must be preserved. Develop on `viso/advanced-studio-ui` unless the owner explicitly directs otherwise.
 
 ## 2. Product goal
@@ -42,7 +42,7 @@ The reference app must not be used as an excuse to reduce VISO to a basic visual
 
 ## 4. Current implementation snapshot (known, not a claim of full completion)
 
-The current working branch already contains a substantial HTML visualizer studio. The current repository asset at the latest verified milestone has blob SHA `60cf9e1e3c07173b9acad9451bd527ab5877fab5`, 105,206 characters and 1,482 lines. Always fetch the latest version and SHA before editing.
+The current working branch already contains a substantial HTML visualizer studio. The current repository asset at this checkpoint has blob SHA `c4516701bfbb404acc0cfab64197d6401159a8f3`, 159,708 characters and 2,050 lines. Always fetch the latest version and SHA before editing.
 
 ### Existing areas present in the current studio
 
@@ -57,19 +57,26 @@ The current working branch already contains a substantial HTML visualizer studio
 - Mask shapes include Media, Circle, Ring, Blob, Frame, Text, Hexagon, Star, Diamond, Triangle, Heart.
 - Lights/tools box and layer controls.
 - Position, sway, shape, gradient, motion and video-grade controls.
-- Text / Logo Studio: text, size, position, opacity, colour, rotation, outline, glow, animation, font, alignment, plate, saved preset slots.
+- Text / Logo Studio: two editable text layers with separate position, size, opacity, colour, rotation, outline, glow, animation, alignment and plate; custom font selection/upload; saved preset slots.
+- Professional workspace navigation: searchable tools, category filters aligned to the reference app's useful editing groups, favourite tools persisted locally.
+- Versioned VISO tool registry: stable tool IDs, categories, schema version, control metadata, defaults and optional render/serialize/restore hooks.
+- Advanced overlay effects: VHS scanlines/noise/jitter/colour bleed; Shockwave strength/speed/thickness/RGB split; Lens glow/focus/bokeh/blur; film grain/dust/scratches/flicker/sepia/weave; haze/smoke atmosphere; adjustable surface reflection with blur/fade/ripples/perspective.
+- Progress Bar Studio: style, progress/remaining colours, thickness, roundness, glow, rotation and horizontal/vertical positioning.
+- Logo Studio: glow, beat-reactive bounce/shake, rotation, reflection and particles in addition to size/position/opacity.
+- Spectrum frequency focus: Full, Low, Balanced, High, Vocals and Changes, separate from visual display styles.
 - Audio frequency response: bass, mids/vocals, treble.
 - Custom logo-only rendering work has been made; continue to verify no watermark code/UI remains.
 
 ### Existing branch work reported in prior build record
 
-- Background Drift UI/settings and drawing transform (including beat-sync-related controls) exist in some form.
-- Progress bar styles include Gradient, Thin, Segments, Circle in the current implementation history.
-- Motion FX include VHS, Shockwave, Lens Glow/Blur-related work in the current implementation history.
+- Background Drift UI/settings and drawing transform (including beat-sync-related controls) exist in some form; effect-specific controls are now grouped in a separate panel from overlay effects.
+- Progress bar styles include Gradient, Thin, Segments, Circle, with colour, remaining colour, glow, rotation, roundness, thickness and position controls added.
+- Motion FX include independently adjustable VHS, Shockwave and Lens effects; Film & Vintage, Atmosphere FX and Surface Reflection panels have also been added. CI checks require these controls/render functions.
 - Templates named Aura Pulse, Soft Romance, Retro VHS, Club Energy, Minimal Wave were added as editable settings presets.
-- Save/Open Project using `.viso` JSON settings exists in some form.
-- Important limitation: those templates were previously only settings presets, not yet proven to be complete downloadable editable projects with bundled media/assets.
-- Latest CI build (run `42706023529`) succeeded for commit `d6ae1314ab4960b7fd779bf32760ce7cb1578baf`; artifact `VISO-Studio-advanced-debug-apk`, artifact ID `13713578045`, extracted APK size 84,441,155 bytes, SHA-256 `32388c78b01f3ce9606bb7991792762d9178436257b928d76b997fa04483d2b3`. This is a CI build result only; installation and real-device testing on the user's Infinix Android phone are not confirmed.
+- Save/Open Project now writes a versioned `.viso` v3 ZIP/store package containing `project.json`, embedded imported audio/image/video/background/logo/font/overlay files, editable layer metadata, and a `preview.png` canvas thumbnail. The importer verifies CRC32 checksums, supports the v3 archive plus legacy v1/v2 JSON projects, and guards 180 MB save / 220 MB import size limits.
+- Template downloads now use the same editable project-package pipeline, so current imported assets and editable settings travel together. Android's native save bridge routes `.viso` packages to `Downloads/Viso` rather than the image gallery.
+- Undo/redo was corrected to capture state before control changes and retain image-object references for layer history; project switches clear old history.
+- Last verified passing build before the current batch: run `42709089380` for commit `a74bebd1963bf28cc361c4f89d88340220d18447`. The current branch has newer source changes; current head `ca2a75c2893b79ba5874e60173c2766a8c1fc2af` is undergoing a fresh CI run. Do not reuse the older APK as the latest build. Installation and real-device testing on the user's Infinix Android phone are not confirmed.
 
 ## 5. Reference feature audit — required work
 
@@ -134,18 +141,18 @@ For every milestone, update the status table below and record commit SHA, build 
 
 | Workstream | Status | Next action |
 |---|---|---|
-| Preserve known-good VISO baseline | Verified | Compared uploaded 1,133-line HTML: all 129 original element IDs are present in the 1,482-line branch source; branch adds 57 more IDs and retains newer features |
-| Reference app reverse audit | In progress | Inspect UI/assets and confirm actual controls, ranges, defaults, and interactions |
+| Preserve known-good VISO baseline | Verified | All 129 original IDs remain; latest branch asset has 255 unique IDs and no duplicates (2,050 lines) |
+| Reference app reverse audit | In progress | Metadata/localized strings indicate navigation groups for Media, Visualizer, Audio, Elements, Background, Logo, Text, Overlay Effects, Templates and Export; continue verifying exact ranges/defaults/behaviour |
 | Reference feature parity | Not complete | Implement and verify each audited feature family |
 | Existing VISO feature regression | Not fully verified | Test all current media, visualizer, text/logo, layer, undo/redo, save/load and export workflows |
-| Logo-only / no-watermark requirement | Implemented in source history; regression check required | Search all source/UI/export paths for watermark remnants |
+| Logo-only / no-watermark requirement | Enforced in current HTML/CI | Current HTML contains no watermark references; CI fails if watermark text/code returns |
 | Background Drift and beat sync | Partial | Verify actual beat response, settings persistence, and controls |
-| Progress bar styles and positioning | Partial | Verify all styles, controls, export rendering and persistence |
-| VHS / Shockwave / Lens effects | Partial | Verify effect rendering and every exposed control |
-| Complete editable template packages | Not complete | Add import/download packages with editable settings and media assets |
-| Modular future-tools architecture | Planned | Introduce registry/schema incrementally |
+| Progress bar styles and positioning | Expanded in source | Four styles plus editable colour, remaining colour, thickness, roundness, glow, rotation and position; export/device QA still required |
+| VHS / Shockwave / Lens effects | Expanded in source | Individual parameters and rendering added; Film, Atmosphere and Surface Reflection panels added; export/device QA still required |
+| Complete editable template packages | Implemented in source; QA pending | `.viso` v3 ZIP package with settings, imported assets, layers, preview thumbnail and CRC checks; verify full round-trip on device |
+| Modular future-tools architecture | Partial implementation | Searchable/favourite tool registry with stable IDs, categories, schema version, defaults and lifecycle hooks; refactor rendering pipeline incrementally |
 | Single integrated Android APK | In progress | Keep one package and one installable app |
-| CI build | Latest build passed | Run `42706023529` passed HTML/JS validation and Android debug APK build for `d6ae1314ab4960b7fd779bf32760ce7cb1578baf` |
+| CI build | Current build in progress | Latest run `42709466043` targets `ca2a75c2893b79ba5874e60173c2766a8c1fc2af`; await validation, Android build and artifact upload |
 | Real-device QA | Not confirmed | Install and test on user's Android device before final release |
 
 ## 9. Required continuity procedure for every new chat
