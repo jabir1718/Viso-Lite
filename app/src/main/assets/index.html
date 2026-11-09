@@ -79,7 +79,63 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
 .pal.on{outline:2px solid #4d9b4d!important}
 @media(max-height:740px){#bar{max-height:35dvh}#monitorDock{padding:6px 8px;gap:4px}#monitorDock button{min-height:29px}}
 
+/* VISO professional workspace shell + searchable tool registry */
+#studioHeader{flex:0 0 auto;padding:9px 12px 7px;background:linear-gradient(135deg,#fbfff9 0%,#f0f8ed 58%,#eaf5ed 100%);border-bottom:1px solid #d6e5d3;box-shadow:0 2px 12px #1b42200b;z-index:5}
+.studioBrand{display:flex;align-items:center;gap:9px;min-height:30px}
+.brandGlyph{width:29px;height:29px;display:grid;place-items:center;border-radius:9px;background:linear-gradient(145deg,#a7e978,#4eaa52);color:#123c22;font-size:17px;font-weight:950;box-shadow:inset 0 1px #ffffffa6,0 2px 6px #4eaa5230}
+.brandCopy{display:flex;flex-direction:column;gap:1px;min-width:0}
+.brandCopy strong{font-size:11px;letter-spacing:.15em;color:#173e28;font-weight:900;line-height:1.1}
+.brandCopy span{font-size:7px;letter-spacing:.13em;color:#739078;font-weight:800}
+.brandLive{margin-left:auto;display:flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid #d6e8d1;border-radius:99px;background:#f6fcf3;color:#47764d;font-size:8px;font-weight:800;letter-spacing:.07em;white-space:nowrap}
+.brandLive i{width:6px;height:6px;border-radius:50%;background:#61bd57;box-shadow:0 0 0 3px #61bd571d}
+.studioNav{display:flex;align-items:center;gap:7px;margin-top:8px}
+.toolSearchWrap{display:flex;align-items:center;gap:5px;min-width:0;flex:1;height:34px;padding:0 7px;border:1px solid #d4e2d0;border-radius:10px;background:#fff;box-shadow:inset 0 1px 2px #173e2808}
+.searchGlyph{font-size:19px;color:#65936a;line-height:1}
+#toolSearch{min-width:0;width:100%;height:30px;border:0!important;outline:0;background:transparent!important;color:#23482e!important;font-size:10px!important;padding:0 3px!important;box-shadow:none!important}
+#toolSearch::placeholder{color:#9aa99a}
+#toolSearchClear{min-height:24px;width:24px;padding:0;border:0!important;background:transparent!important;color:#7b927d!important;font-size:17px}
+.navAction{min-height:34px!important;padding:0 9px!important;background:#f8fcf5!important;border:1px solid #d3e3cf!important;color:#3d6845!important;font-size:9px!important}
+.navAction.active{background:#e3f4da!important;border-color:#86bd77!important;color:#205c32!important}
+#toolCount{font-size:8px;font-weight:900;letter-spacing:.08em;color:#78917a;white-space:nowrap;min-width:39px;text-align:right}
+#toolFilters{display:flex;gap:5px;overflow-x:auto;padding:7px 0 1px;scrollbar-width:none}
+#toolFilters::-webkit-scrollbar{display:none}
+.toolFilter{min-height:26px!important;padding:0 9px!important;border-radius:99px!important;background:#f7fbf4!important;border:1px solid #dce8d8!important;color:#627b65!important;font-size:8.5px!important;font-weight:800!important}
+.toolFilter.active{background:#e2f3d9!important;border-color:#9bc88e!important;color:#285d35!important}
+.panel h4{display:flex;align-items:center;gap:8px}
+.panel h4 .toolHeading{min-width:0;flex:1}
+.panel h4 .toolMeta{font-size:7px;color:#91a491;font-weight:800;letter-spacing:.08em;white-space:nowrap}
+.panel h4 .toolFav{min-height:24px!important;width:27px;padding:0!important;border:1px solid #e1eadc!important;border-radius:7px!important;background:#fbfef9!important;color:#9aa998!important;font-size:13px!important}
+.panel h4 .toolFav.active{color:#c58b22!important;background:#fff8e6!important;border-color:#ead9ad!important}
+.panel.search-hidden{display:none!important}
+#toolEmpty{display:none;margin:7px 9px;padding:15px;border:1px dashed #cbdcc7;border-radius:12px;background:#f9fcf7;color:#65816a;text-align:center;font-size:10px}
+#toolEmpty.show{display:block}
+@media(max-width:390px){#studioHeader{padding:7px 8px 6px}.brandCopy span{font-size:6px}.brandLive{font-size:7px;padding:4px 6px}.navAction{padding:0 7px!important}#toolCount{min-width:30px;font-size:7px}.toolFilter{padding:0 8px!important}}
+@media(max-height:740px){#studioHeader{padding-top:6px;padding-bottom:5px}.studioNav{margin-top:5px}.toolSearchWrap{height:30px}#toolSearch{height:27px}#toolFilters{padding-top:5px}}
 </style>
+<div id="studioHeader">
+  <div class="studioBrand">
+    <div class="brandGlyph">V</div>
+    <div class="brandCopy"><strong>VISO STUDIO</strong><span>ADVANCED VISUAL WORKSPACE</span></div>
+    <div class="brandLive"><i></i> LIVE CANVAS</div>
+  </div>
+  <div class="studioNav">
+    <div class="toolSearchWrap"><span class="searchGlyph">⌕</span><input id="toolSearch" type="search" placeholder="Search tools, effects, controls…" autocomplete="off"><button id="toolSearchClear" type="button" aria-label="Clear search">×</button></div>
+    <button id="toolFavorites" class="navAction" type="button" aria-pressed="false">☆ Favorites</button>
+    <span id="toolCount">TOOLS</span>
+  </div>
+  <div id="toolFilters" aria-label="Tool categories">
+    <button type="button" class="toolFilter active" data-filter="all">All tools</button>
+    <button type="button" class="toolFilter" data-filter="media">Media</button>
+    <button type="button" class="toolFilter" data-filter="visuals">Visuals</button>
+    <button type="button" class="toolFilter" data-filter="audio">Audio</button>
+    <button type="button" class="toolFilter" data-filter="effects">Effects</button>
+    <button type="button" class="toolFilter" data-filter="layers">Layers</button>
+    <button type="button" class="toolFilter" data-filter="background">Background</button>
+    <button type="button" class="toolFilter" data-filter="text">Text</button>
+    <button type="button" class="toolFilter" data-filter="export">Export</button>
+    <button type="button" class="toolFilter" data-filter="project">Projects</button>
+  </div>
+</div>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
 <div id="monitorDock"><div class="subhead">SONG MONITOR</div>
     <div class="monitorStats"><div id="songInfo" class="status">Song: not loaded · 00:00 / 00:00</div></div>
@@ -1325,7 +1381,93 @@ function autoStep(){
 }
 
 function frame(t){
-  requestAnimationFrame(frame);
+  
+// VISO Tool Registry v1 — stable IDs and parameter metadata for future effect modules.
+const VISO_TOOL_REGISTRY=Object.create(null);
+const VISO_TOOL_CATEGORIES=['all','media','visuals','audio','effects','layers','background','text','export','project'];
+const VISO_FAV_KEY='viso.toolFavorites.v1';
+let visoToolFilter='all',visoFavoritesOnly=false;
+let visoFavorites=new Set();
+try{visoFavorites=new Set(JSON.parse(localStorage.getItem(VISO_FAV_KEY)||'[]'));}catch(_){}
+function registerVISOEffectTool(def){
+ if(!def||!def.id||!def.name||!def.category||!def.panel)throw new Error('Tool requires id, name, category and panel');
+ if(VISO_TOOL_REGISTRY[def.id])throw new Error('Duplicate VISO tool id: '+def.id);
+ VISO_TOOL_REGISTRY[def.id]=Object.freeze({...def,controls:(def.controls||[]).slice()});
+ return VISO_TOOL_REGISTRY[def.id];
+}
+function visoToolCategory(title){
+ const t=title.toLowerCase();
+ if(t.includes('media'))return 'media';
+ if(t.includes('export'))return 'export';
+ if(t.includes('template')||t.includes('project'))return 'project';
+ if(t.includes('background'))return 'background';
+ if(t.includes('audio')||t.includes('spectrum')||t.includes('bpm'))return 'audio';
+ if(t.includes('text')||t.includes('logo'))return 'text';
+ if(t.includes('mask')||t.includes('layer')||t.includes('position')||t.includes('light'))return 'layers';
+ if(t.includes('motion')||t.includes('progress')||t.includes('vignette')||t.includes('effect'))return 'effects';
+ return 'visuals';
+}
+function visoSlug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
+function saveVISOFavorites(){try{localStorage.setItem(VISO_FAV_KEY,JSON.stringify([...visoFavorites]));}catch(_){}}
+const visoPanels=[...document.querySelectorAll('#bar .panel')];
+visoPanels.forEach((panel,index)=>{
+ const heading=panel.querySelector('h4');if(!heading)return;
+ const title=heading.textContent.trim().replace(/\s+/g,' ');
+ const id=panel.id||('tool-'+visoSlug(title)+'-'+index);
+ const category=visoToolCategory(title);
+ const controls=[...panel.querySelectorAll('input,select,button')].map(el=>({
+  id:el.id||null,type:el.type||el.tagName.toLowerCase(),label:el.closest('label')?.querySelector('span')?.textContent?.trim()||el.textContent?.trim()||el.getAttribute('aria-label')||'',
+  min:el.min!==''?Number(el.min):null,max:el.max!==''?Number(el.max):null,step:el.step||null,defaultValue:el.defaultValue??el.value??null
+ }));
+ panel.dataset.toolId=id;panel.dataset.toolCategory=category;
+ const titleSpan=document.createElement('span');titleSpan.className='toolHeading';titleSpan.textContent=title;
+ const meta=document.createElement('span');meta.className='toolMeta';meta.textContent=category.toUpperCase();
+ const fav=document.createElement('button');fav.type='button';fav.className='toolFav';fav.textContent='☆';fav.title='Add to favorites';fav.setAttribute('aria-label','Add '+title+' to favorites');
+ if(visoFavorites.has(id)){fav.classList.add('active');fav.textContent='★';}
+ fav.addEventListener('click',ev=>{
+  ev.stopPropagation();
+  if(visoFavorites.has(id)){visoFavorites.delete(id);fav.classList.remove('active');fav.textContent='☆';fav.title='Add to favorites';}
+  else{visoFavorites.add(id);fav.classList.add('active');fav.textContent='★';fav.title='Remove from favorites';}
+  saveVISOFavorites();applyVISOFilters();
+ });
+ heading.textContent='';heading.append(titleSpan,meta,fav);
+ registerVISOEffectTool({id,name:title,category,panel,controls});
+});
+function applyVISOFilters(){
+ const q=($('toolSearch')?.value||'').trim().toLowerCase();let visible=0;
+ visoPanels.forEach(panel=>{
+  const id=panel.dataset.toolId,cat=panel.dataset.toolCategory;
+  const text=panel.textContent.toLowerCase();
+  const matchesText=!q||text.includes(q)||id.includes(q)||cat.includes(q);
+  const matchesCat=visoToolFilter==='all'||cat===visoToolFilter;
+  const matchesFav=!visoFavoritesOnly||visoFavorites.has(id);
+  const show=matchesText&&matchesCat&&matchesFav;
+  panel.classList.toggle('search-hidden',!show);if(show)visible++;
+ });
+ $('toolCount').textContent=visible+' / '+visoPanels.length;
+ $('toolEmpty').classList.toggle('show',visible===0);
+}
+$('toolSearch').addEventListener('input',applyVISOFilters);
+$('toolSearchClear').addEventListener('click',()=>{$('toolSearch').value='';applyVISOFilters();$('toolSearch').focus();});
+$('toolFavorites').addEventListener('click',()=>{
+ visoFavoritesOnly=!visoFavoritesOnly;
+ $('toolFavorites').classList.toggle('active',visoFavoritesOnly);
+ $('toolFavorites').setAttribute('aria-pressed',String(visoFavoritesOnly));
+ $('toolFavorites').textContent=visoFavoritesOnly?'★ Favorites':'☆ Favorites';
+ applyVISOFilters();
+});
+document.querySelectorAll('.toolFilter').forEach(btn=>btn.addEventListener('click',()=>{
+ visoToolFilter=btn.dataset.filter;
+ document.querySelectorAll('.toolFilter').forEach(b=>b.classList.toggle('active',b===btn));
+ applyVISOFilters();
+}));
+const empty=document.createElement('div');empty.id='toolEmpty';empty.textContent='No matching tools. Try another search or choose All tools.';
+$('bar').appendChild(empty);
+window.VISO_TOOL_REGISTRY=VISO_TOOL_REGISTRY;
+window.registerVISOEffectTool=registerVISOEffectTool;
+applyVISOFilters();
+
+requestAnimationFrame(frame);
   const dt=Math.min(50,t-last||16);last=t;frameN++;
   const b=bands();curB=b;curBbg=bands(bvp);
   if(specOn)specBands();
