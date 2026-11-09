@@ -45,14 +45,6 @@
       <button id="bP" class="prim">Play</button><button id="bR">Center</button>
     </div>
   </div>
-  <div class="sec"><h4>Beat + Bass Studio</h4><div class="row"><button id="beatReact">Beat reaction OFF</button><button id="audioBass">Audio bass boost OFF</button></div>
-<label><span>Bass visual boost</span><input id="bassBoost" type="range" min="50" max="300" value="100"></label><label><span>Beat sensitivity</span><input id="beatSense" type="range" min="50" max="250" value="100"></label>
-<label><span>Low / Kick</span><input id="lowGain" type="range" min="0" max="200" value="100"></label><label><span>Mid</span><input id="midGain" type="range" min="0" max="200" value="100"></label><label><span>High</span><input id="highGain" type="range" min="0" max="200" value="100"></label><label><span>Damping / Smooth</span><input id="beatDamping" type="range" min="0" max="95" value="55"></label></div>
-<div class="sec"><h4>Integrated Spectrum</h4><div class="row"><button id="specToggle">Spectrum OFF</button><button id="specBorder">Border OFF</button></div>
-<div class="row"><button id="specBars" class="on">Bars</button><button id="specMirror">Mirror</button><button id="specCircle">Circle</button><button id="specWave">Wave</button></div>
-<label><span>Spectrum size</span><input id="specSize" type="range" min="20" max="100" value="70"></label><label><span>Spectrum position</span><input id="specPosition" type="range" min="10" max="90" value="72"></label><label><span>Border glow</span><input id="specGlow" type="range" min="0" max="100" value="65"></label><label><span>Border thickness</span><input id="specBorderSize" type="range" min="1" max="12" value="3"></label></div>
-<div class="sec"><h4>Custom Colour Studio</h4><div class="row"><input id="customColor" type="color" value="#00ff9d"><input id="customHex" type="text" value="#00FF9D" maxlength="7" placeholder="#RRGGBB"><button id="applyCustomColor">Apply</button><button id="addCustomColor">Add colour</button></div><label><span>Colour hue</span><input id="customHue" type="range" min="0" max="359" value="190"></label></div>
-<div class="sec"><h4>Neon FX</h4><div class="row"><button id="fxOff" class="on">FX Off</button><button id="fxFire">🔥 Burn</button><button id="fxElectric">Electric</button><button id="fxPlasma">Plasma</button><button id="fxWave">Energy Wave</button></div><label><span>FX intensity</span><input id="fxIntensity" type="range" min="0" max="100" value="60"></label><label><span>FX speed</span><input id="fxSpeed" type="range" min="10" max="200" value="100"></label></div>
   <div class="sec"><h4>Export studio · Social formats</h4>
     <div class="row" id="aspect"></div>
     <div class="row" id="res"></div>
@@ -214,7 +206,7 @@ $('format').appendChild(fmtButton);
 updateBitrate();
 
 let img=null,bgImg=null,bgUseVid=false,bgViz=false,maskDirty=true;
-let audio=null,ctxA=null,an=null,buf=null,streamDest=null;let bassFilter=null,beatReact=false,audioBass=false,bassBoost=1,beatSensitivity=1,lowGain=1,midGain=1,highGain=1,beatDamping=.55,beatValues=[0,0,0,0,0,0];let spectrumEnabled=false,spectrumBorderOn=false,spectrumMode='bars',spectrumScale=.7,spectrumY=.72,spectrumGlow=65,spectrumBorderPx=3,neonFx='off',neonIntensity=60,neonSpeed=1;
+let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
 let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,bvp=140;
 let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
@@ -280,22 +272,6 @@ $('bMix').onclick=()=>{snap();colors=[];const n=2+((Math.random()*2)|0);
   bloom=.35+Math.random()*.5;drawMixers();};
 $('bRand').onclick=()=>{scatter(500);};
 
-$('beatReact').onclick=e=>{beatReact=!beatReact;e.currentTarget.classList.toggle('on',beatReact);e.currentTarget.textContent='Beat reaction '+(beatReact?'ON':'OFF');};
-$('audioBass').onclick=e=>{audioBass=!audioBass;if(bassFilter&&ctxA)bassFilter.gain.setTargetAtTime(audioBass?8:0,ctxA.currentTime,.05);e.currentTarget.classList.toggle('on',audioBass);e.currentTarget.textContent='Audio bass boost '+(audioBass?'ON':'OFF');};
-$('bassBoost').oninput=e=>bassBoost=+e.target.value/100;$('beatSense').oninput=e=>beatSensitivity=+e.target.value/100;$('lowGain').oninput=e=>lowGain=+e.target.value/100;$('midGain').oninput=e=>midGain=+e.target.value/100;$('highGain').oninput=e=>highGain=+e.target.value/100;$('beatDamping').oninput=e=>beatDamping=+e.target.value/100;
-$('specToggle').onclick=e=>{spectrumEnabled=!spectrumEnabled;e.currentTarget.classList.toggle('on',spectrumEnabled);e.currentTarget.textContent='Spectrum '+(spectrumEnabled?'ON':'OFF');};$('specBorder').onclick=e=>{spectrumBorderOn=!spectrumBorderOn;e.currentTarget.classList.toggle('on',spectrumBorderOn);e.currentTarget.textContent='Border '+(spectrumBorderOn?'ON':'OFF');};
-[['specBars','bars'],['specMirror','mirror'],['specCircle','circle'],['specWave','wave']].forEach(([id,v])=>$(id).onclick=e=>{spectrumMode=v;document.querySelectorAll('#specBars,#specMirror,#specCircle,#specWave').forEach(q=>q.classList.toggle('on',q===e.currentTarget));});
-$('specSize').oninput=e=>spectrumScale=+e.target.value/100;$('specPosition').oninput=e=>spectrumY=+e.target.value/100;$('specGlow').oninput=e=>spectrumGlow=+e.target.value;$('specBorderSize').oninput=e=>spectrumBorderPx=+e.target.value;
-[['fxOff','off'],['fxFire','fire'],['fxElectric','electric'],['fxPlasma','plasma'],['fxWave','wave']].forEach(([id,v])=>$(id).onclick=e=>{neonFx=v;document.querySelectorAll('#fxOff,#fxFire,#fxElectric,#fxPlasma,#fxWave').forEach(q=>q.classList.toggle('on',q===e.currentTarget));});
-$('fxIntensity').oninput=e=>neonIntensity=+e.target.value;$('fxSpeed').oninput=e=>neonSpeed=+e.target.value/100;
-function drawExtraSpectrum(ctx,b){if(!spectrumEnabled||!playing)return;const w=W*spectrumScale,h=H*.13,l=(W-w)/2,y=H*spectrumY,n=48;ctx.save();ctx.globalCompositeOperation='lighter';if(spectrumBorderOn){ctx.strokeStyle=grad(.35);ctx.shadowColor=grad(.4);ctx.shadowBlur=spectrumGlow*.45;ctx.lineWidth=spectrumBorderPx;ctx.strokeRect(l,y-h/2,w,h);}ctx.shadowBlur=spectrumGlow*.2;
-if(spectrumMode==='circle'){const r=Math.min(w,h)*.27;for(let i=0;i<n;i++){const a=i/n*Math.PI*2-Math.PI/2,v=b[i%6],len=4+v*h*1.2;ctx.strokeStyle=grad(i/n);ctx.lineWidth=Math.max(2,w/n*.4);ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*r,y+Math.sin(a)*r);ctx.lineTo(cx+Math.cos(a)*(r+len),y+Math.sin(a)*(r+len));ctx.stroke();}}
-else if(spectrumMode==='wave'){ctx.beginPath();for(let i=0;i<n;i++){const xx=l+i/(n-1)*w,yy=y+Math.sin(i*.24+performance.now()*.0025)*b[i%6]*h*.85;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.strokeStyle=grad(.4);ctx.lineWidth=4;ctx.stroke();}
-else{const bw=w/n;for(let i=0;i<n;i++){const band=i<16?0:i<32?2:5,g=band===0?lowGain:band===2?midGain:highGain,v=Math.min(1,b[band]*g*bassBoost),bh=4+v*h*.85;ctx.fillStyle=grad(i/(n-1));ctx.fillRect(l+i*bw+bw*.15,y-bh/2,bw*.7,bh);if(spectrumMode==='mirror')ctx.fillRect(l+i*bw+bw*.15,y,bw*.7,bh/2);}}ctx.restore();}
-function drawExtraFX(ctx,b){if(neonFx==='off'||!neonIntensity)return;const t=performance.now()*.001*neonSpeed,p=neonIntensity/100,bass=b[0]||0;ctx.save();ctx.globalCompositeOperation='lighter';
-if(neonFx==='fire'){const base=H*.91;for(let i=0;i<18;i++){const xx=W*(.04+i*.054),ht=(H*(.025+Math.abs(Math.sin(t*2+i*.8))*.07)+bass*H*.1)*p,g=ctx.createLinearGradient(0,base-ht,0,base);g.addColorStop(0,'rgba(255,210,40,0)');g.addColorStop(.5,'rgba(255,90,12,.7)');g.addColorStop(1,'rgba(255,20,5,.12)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(xx-W*.015,base);ctx.quadraticCurveTo(xx-W*.025,base-ht*.45,xx+Math.sin(t*3+i)*W*.01,base-ht);ctx.quadraticCurveTo(xx+W*.02,base-ht*.4,xx+W*.015,base);ctx.fill();}}
-else if(neonFx==='electric'){ctx.lineWidth=2+p*3;for(let j=0;j<4;j++){ctx.strokeStyle=grad(j/4);ctx.beginPath();let xx=W*(.1+j*.23),yy=H*.12;ctx.moveTo(xx,yy);for(let k=0;k<8;k++){xx+=(Math.random()-.5)*W*.07;yy+=H*.09;ctx.lineTo(xx,yy);}ctx.stroke();}}
-else{ctx.lineWidth=2+p*5;for(let j=0;j<5;j++){ctx.strokeStyle=grad(j/5);ctx.beginPath();for(let xx=0;xx<=W;xx+=W/32){const yy=H*(.46+j*.025)+Math.sin(xx*.008+t*2+j)*H*(.02+bass*.06)*p;xx?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.stroke();}}ctx.restore();}
 function bind(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);el.onchange=()=>snap();}
 bind('sCut',v=>{cut=v;maskDirty=true;});bind('sFea',v=>{fea=v;maskDirty=true;});
 bind('sPow',v=>pow=v);bind('sPho',v=>pho=v);bind('sDep',v=>dep=v);
@@ -310,14 +286,6 @@ function drawPals(){$('pals').innerHTML='';colors.forEach((h,i)=>{
   const b=document.createElement('div');b.className='pal'+(i===selColor?' on':'');
   b.style.background='hsl('+h+' 100% 58%)';b.onclick=()=>{selColor=i;drawPals();};$('pals').appendChild(b);});}
 drawPals();
-function hexHue(hex){if(!/^#[0-9a-f]{6}$/i.test(hex))return null;const n=parseInt(hex.slice(1),16),r=((n>>16)&255)/255,g=((n>>8)&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;if(d){if(mx===r)h=((g-b)/d)%6;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;}return Math.round((h*60+360)%360);}
-function applyHue(h){colors[selColor]=((h%360)+360)%360;drawPals();$('customHue').value=colors[selColor];}
-$('customColor').oninput=e=>{$('customHex').value=e.target.value.toUpperCase();const h=hexHue(e.target.value);if(h!==null)applyHue(h);};
-$('customHex').onchange=e=>{if(hexHue(e.target.value)!==null){$('customColor').value=e.target.value;applyHue(hexHue(e.target.value));}};
-$('applyCustomColor').onclick=()=>{const h=hexHue($('customColor').value);if(h!==null){snap();applyHue(h);}};
-$('addCustomColor').onclick=()=>{const h=hexHue($('customColor').value);if(h===null)return;snap();if(colors.length<6)colors.push(h);else colors[selColor]=h;selColor=colors.length-1;drawPals();};
-function hueHex(h){const f=n=>{const k=(n+h/60)%6;return Math.round(255*(1-Math.max(0,Math.min(k,4-k,1))));};return '#'+[f(5),f(3),f(1)].map(v=>v.toString(16).padStart(2,'0')).join('');}
-$('customHue').oninput=e=>{const h=+e.target.value;applyHue(h);$('customColor').value=hueHex(h);$('customHex').value=$('customColor').value.toUpperCase();};
 $('addC').onclick=()=>{snap();if(colors.length<6){colors.push(Math.floor(Math.random()*360));selColor=colors.length-1;drawPals();}};
 $('delC').onclick=()=>{snap();if(colors.length>1){colors.splice(selColor,1);selColor=0;drawPals();}};
 $('tBg').onclick=e=>{bgOn=!bgOn;e.currentTarget.classList.toggle('on',bgOn);};
@@ -372,9 +340,8 @@ $('fA').onchange=e=>{const f=e.target.files[0];if(!f)return;
   if(audio)audio.pause();
   audio=new Audio(URL.createObjectURL(f));audio.loop=loopSong;audio.onloadedmetadata=updateSongInfo;audio.ontimeupdate=updateSongInfo;audio.onended=()=>{updateSongInfo();if(stopAtSongEnd&&rec&&rec.state==='recording')rec.stop();};
   const s=ctxA.createMediaElementSource(audio);
-  bassFilter=ctxA.createBiquadFilter();bassFilter.type='lowshelf';bassFilter.frequency.value=120;bassFilter.gain.value=audioBass?8:0;
   an=ctxA.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.7;
-  s.connect(bassFilter);bassFilter.connect(an);an.connect(ctxA.destination);
+  s.connect(an);an.connect(ctxA.destination);
   streamDest=ctxA.createMediaStreamDestination();an.connect(streamDest);
   buf=new Uint8Array(an.frequencyBinCount);playing=false;$('bP').textContent='Play';updateSongInfo();};
 $('bP').onclick=async()=>{if(!audio)return;
@@ -929,8 +896,8 @@ function autoStep(){
 function frame(t){
   requestAnimationFrame(frame);
   const dt=Math.min(50,t-last||16);last=t;frameN++;
-  let b=bands();curB=b;curBbg=bands(bvp);
-  const rawBass=b[0];if(beatReact||spectrumEnabled||neonFx!=='off'){b=b.map((v,i)=>{const g=i===0?lowGain:i<4?midGain:highGain;beatValues[i]=beatValues[i]*beatDamping+(v*beatSensitivity*g)*(1-beatDamping);return Math.min(1,beatValues[i]*bassBoost);});}const bass=beatReact?b[0]:rawBass;avg=avg*.92+bass*.08;
+  const b=bands();curB=b;curBbg=bands(bvp);
+  const bass=b[0];avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
   pulse=Math.max(pulse*.85,bass);hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
   if(autoOn){autoT+=dt;if(autoT>autoEvery*1000){autoT=0;autoStep();}}
@@ -992,7 +959,6 @@ function frame(t){
   drawLights(x);
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
     x.drawImage(paintLayer(.7,false),0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;}
-  drawExtraFX(x,b);drawExtraSpectrum(x,b);
   bx.clearRect(0,0,bl.width,bl.height);
   bx.filter='blur(12px)';bx.drawImage(c,0,0,bl.width,bl.height);bx.filter='none';
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
