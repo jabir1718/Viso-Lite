@@ -125,6 +125,8 @@ vm.runInNewContext(
   { timeout: 2000 }
 );
 const registry = registrySandbox.__registry;
+assert.equal(registry.modules['Layers · Tools box'].stage, 'scene');
+assert.equal(registry.modules['Layers · Tools box'].order, 10);
 assert.equal(registry.modules['Text · Logo Studio'].stage, 'overlay');
 assert.equal(registry.modules['Text · Logo Studio'].order, 80);
 assert.equal(typeof registry.modules['Text · Logo Studio'].render, 'function');
