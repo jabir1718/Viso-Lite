@@ -138,7 +138,7 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <button type="button" class="toolFilter" data-filter="templates">Templates</button>
   </div>
 </div>
-<div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
+<div id="wrap"><canvas id="c" width="540" height="960"></canvas></div>
 <div id="monitorDock"><div class="subhead">SONG MONITOR</div>
     <div class="monitorStats"><div id="songInfo" class="status">Song: not loaded · 00:00 / 00:00</div></div>
     <div class="row"><button id="bLoop" class="on">Loop song: ON</button></div></div>
@@ -441,7 +441,8 @@ document.querySelectorAll('.panel').forEach(p=>{if(p.id!=='mediaPanel'&&p.id!=='
 <script>
 "use strict";
 const c=document.getElementById('c'),x=c.getContext('2d');
-let W=c.width,H=c.height,cx=W/2,cy=H/2;
+let W=c.width,H=c.height,cx=W/2,cy=H/2,targetW=1080,targetH=1920;
+const PREVIEW_MAX_W=540,PREVIEW_MAX_H=960;
 const mk=document.createElement('canvas'),mx=mk.getContext('2d');
 const o=document.createElement('canvas'),ox=o.getContext('2d');
 const bl=document.createElement('canvas'),bx=bl.getContext('2d');
@@ -458,13 +459,24 @@ function outputSize(){
   return rw<rh?[Math.round(rw*scale),Math.round(rh*scale)]:[Math.round(rw*scale),Math.round(rh*scale)];
 }
 function updateBitrate(){
-  BIT=Math.round(W*H*FPS*0.13*(quality/100));
-  $('exportInfo').textContent=`${W}×${H} · ${FPS} FPS · ${Math.round(BIT/1000000)} Mbps · ${actualFormatLabel()}`;
+  BIT=Math.round(targetW*targetH*FPS*0.13*(quality/100));
+  $('exportInfo').textContent=`${targetW}×${targetH} · ${FPS} FPS · ${Math.round(BIT/1000000)} Mbps · ${actualFormatLabel()}`;
 }
+function setCanvasSize(w,h){
+  W=w;H=h;cx=W/2;cy=H/2;
+  c.width=w;c.height=h;mk.width=w;mk.height=h;o.width=w;o.height=h;
+  bl.width=Math.max(1,w>>1);bl.height=Math.max(1,h>>1);
+  reflectionCanvas.width=w;reflectionCanvas.height=h;
+  maskDirty=true;
+}
+function setPreviewCanvasSize(){
+  const scale=Math.min(1,PREVIEW_MAX_W/targetW,PREVIEW_MAX_H/targetH);
+  setCanvasSize(Math.max(1,Math.round(targetW*scale)),Math.max(1,Math.round(targetH*scale)));
+}
+function setExportCanvasSize(){setCanvasSize(targetW,targetH);}
 function setRes(){
-  const [w,h]=outputSize();W=w;H=h;cx=W/2;cy=H/2;
-  c.width=w;c.height=h;mk.width=w;mk.height=h;o.width=w;o.height=h;bl.width=w>>1;bl.height=h>>1;
-  maskDirty=true;updateBitrate();
+  const [w,h]=outputSize();targetW=w;targetH=h;
+  setPreviewCanvasSize();updateBitrate();
 }
 const aspectItems=['9:16','16:9','1:1','4:5'];
 aspectItems.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a+(a==='9:16'?' TikTok':a==='16:9'?' YouTube':'');
@@ -514,7 +526,7 @@ function applySocialProfile(key){
   document.querySelectorAll('#res button').forEach(q=>q.classList.toggle('on',q.textContent===String(baseRes===2160?'4K':baseRes)));
   document.querySelectorAll('#fps button').forEach(q=>q.classList.toggle('on',q.textContent===FPS+' fps'));
   document.querySelectorAll('#socialPresets button').forEach(q=>q.classList.toggle('on',q.dataset.social===key));
-  setRes();$('exportInfo').textContent=p.label+' · '+W+'×'+H+' · '+actualFormatLabel();
+  setRes();$('exportInfo').textContent=p.label+' · '+targetW+'×'+targetH+' · '+actualFormatLabel();
 }
 document.querySelectorAll('#socialPresets button').forEach(q=>q.addEventListener('click',()=>applySocialProfile(q.dataset.social)));
 
@@ -703,7 +715,12 @@ function dl(blob,name){
   a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
 }
 function exportFileName(ext){const raw=($('exportName').value||'VISO-Export').trim();const base=raw.replace(/[\\\\/:*?"<>|]+/g,'-').replace(/\\s+/g,'-').replace(/-+/g,'-').slice(0,48)||'VISO-Export';return base+'.'+ext;}
-$('bShot').onclick=()=>c.toBlob(b=>{if(b)dl(b,exportFileName('png'));},'image/png');
+$('bShot').onclick=()=>{
+  setExportCanvasSize();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>c.toBlob(b=>{
+    setPreviewCanvasSize();if(b)dl(b,exportFileName('png'));
+  },'image/png')));
+};
 let rec=null,recStarted=0,recClock=null,stopAtSongEnd=false;
 let loopSong=true;
 $('bLoop').onclick=()=>{loopSong=!loopSong;if(audio)audio.loop=loopSong;
@@ -724,6 +741,7 @@ setInterval(()=>{
 $('bRec').onclick=()=>{
   if(!window.MediaRecorder||!c.captureStream){$('recInfo').textContent='Video export unavailable in this WebView';return;}
   if(rec&&rec.state==='recording'){rec.stop();return;}
+  setExportCanvasSize();
   const st=c.captureStream(FPS);
   if(streamDest)streamDest.stream.getAudioTracks().forEach(t=>st.addTrack(t));
   const candidates=formatChoice==='webm'
@@ -735,7 +753,7 @@ $('bRec').onclick=()=>{
     try{rec=new MediaRecorder(st,{mimeType:candidate,videoBitsPerSecond:BIT});mime=candidate;break;}
     catch(_){rec=null;}
   }
-  if(!rec||!mime){$('recInfo').textContent='No compatible MP4/WebM encoder found';return;}
+  if(!rec||!mime){st.getTracks().forEach(t=>t.stop());setPreviewCanvasSize();$('recInfo').textContent='No compatible MP4/WebM encoder found';return;}
   const ext=mime.includes('mp4')?'mp4':'webm';
   const chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
   rec.onstop=()=>{
@@ -745,6 +763,7 @@ $('bRec').onclick=()=>{
     $('bRec').textContent='Export video';$('bRec').classList.add('prim');
     $('recInfo').textContent='Export saved · '+clockText((Date.now()-recStarted)/1000)+' · '+ext.toUpperCase();
     st.getTracks().forEach(t=>t.stop());
+    setPreviewCanvasSize();
   };
   rec.onerror=e=>{$('recInfo').textContent='Export error: '+(e.error?.message||'unknown');};
   rec.start(500);recStarted=Date.now();
