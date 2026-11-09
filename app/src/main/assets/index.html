@@ -211,7 +211,7 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <div class="row"><button id="bFreqReset">Reset frequency</button></div>
   </div>
 <div class="sec panel" id="advancedAudioLab"><h4>Advanced Audio · BPM Sync</h4><div class="row"><button id="bBpmSync" class="on">BPM Sync: ON</button><button id="bDrift">Drift: OFF</button><button id="bShock">Shockwave: OFF</button></div><div class="status" id="bpmReadout">BPM: waiting for music</div><label><span>Drift amount</span><input id="sDrift" type="range" min="0" max="100" value="35"></label><label><span>8D speed</span><input id="s8Speed" type="range" min="0" max="100" value="35"></label><label><span>8D width</span><input id="s8Width" type="range" min="0" max="100" value="75"></label><label><span>8D reverb</span><input id="s8Reverb" type="range" min="0" max="100" value="18"></label><div class="row"><button id="bStickerBehind">Stickers behind: OFF</button></div><label><span>Sticker outline</span><input id="sStickerOutline" type="range" min="0" max="24" value="0"></label><label><span>Sticker saturation</span><input id="sStickerSat" type="range" min="0" max="250" value="100"></label></div>
-<div class="sec panel" id="advancedVisualLab"><h4>Vignette · Progress · Extra Text</h4><div class="row"><button id="bVignette" class="on">Vignette: ON</button><button id="bProgressLine" class="on">Line progress</button><button id="bProgressRing">Ring progress</button></div><label><span>Vignette</span><input id="sVignette" type="range" min="0" max="100" value="42"></label><label><span>Progress size</span><input id="sProgressSize" type="range" min="2" max="24" value="7"></label><div class="row"><button id="bAddTimeText">Add song time</button><button id="bAddArtistText">Add artist text</button><button id="bClearExtraText">Clear extra text</button></div><div class="status" id="extraTextInfo">Extra text layers: 0</div></div>
+<div class="sec panel" id="advancedVisualLab"><h4>Vignette · Progress · Extra Text</h4><div class="row"><button id="bVignette" class="on">Vignette: ON</button><button id="bProgressLine" class="on">Line progress</button><button id="bProgressRing">Ring progress</button></div><label><span>Vignette</span><input id="sVignette" type="range" min="0" max="100" value="42"></label><label><span>Progress size</span><input id="sProgressSize" type="range" min="2" max="24" value="7"></label><div class="row"><button id="bAddTimeText">Add song time</button><button id="bAddArtistText">Add artist text</button><button id="bClearExtraText">Clear extra text</button></div><label><span>Material look</span><select id="sMaterial"><option value="none">Original</option><option value="liquid">Liquid Glass</option><option value="fire">Fire</option><option value="chrome">Chrome</option><option value="frost">Frosted Glass</option><option value="ink">Ink</option></select></label><div class="row"><button id="bAddPoint">Add turning point</button><button id="bClearPoints">Clear points</button></div><div class="status" id="turnPointInfo">Turning points: 0</div><div class="status" id="extraTextInfo">Extra text layers: 0</div></div>
 <div class="sec panel" id="advancedMediaLab"><h4>Custom Font · Project Save/Load</h4><div class="row"><button id="bFontUpload">Upload TTF / OTF font</button><button id="bProjectSave">Save project file</button><button id="bProjectLoad">Load project file</button></div><div class="status" id="projectInfo">Project settings only; reselect media after loading.</div></div>
 </div>
 </div>
@@ -1131,11 +1131,41 @@ $('bFontUpload').onclick=()=>$('fFont').click();
 $('fFont').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(vFontUrl)URL.revokeObjectURL(vFontUrl);vFontUrl=URL.createObjectURL(f);const face=new FontFace('VISOUserFont','url('+vFontUrl+')');await face.load();document.fonts.add(face);vCustomFont='VISOUserFont';studioTextFont=vCustomFont;$('sTextFont').add(new Option('Custom · '+f.name,vCustomFont));$('sTextFont').value=vCustomFont;$('projectInfo').textContent='Custom font loaded for this session.';}catch(e){$('projectInfo').textContent='Font load failed. Use a valid TTF/OTF.';}};
 $('bProjectSave').onclick=saveVISOProject;$('bProjectLoad').onclick=()=>$('fProject').click();$('fProject').onchange=e=>{if(e.target.files[0])loadVISOProject(e.target.files[0]);};
 
+
+let vMaterial='none',vTurningPoints=[],vLastPoint=-1;
+function captureTurningPoint(){
+ const t=audio?audio.currentTime:0;
+ vTurningPoints.push({time:t,colors:colors.slice(),mstate:mstate.map(m=>({on:m.on,op:m.op})),shape,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextColor});
+ vTurningPoints.sort((a,b)=>a.time-b.time);$('turnPointInfo').textContent='Turning points: '+vTurningPoints.length+' · last at '+clockText(t);
+}
+function applyTurningPoints(){
+ if(!audio||!vTurningPoints.length)return;
+ for(let i=vLastPoint+1;i<vTurningPoints.length;i++){const p=vTurningPoints[i];if(audio.currentTime>=p.time){
+  colors=p.colors.slice();mstate.forEach((m,j)=>{if(p.mstate[j]){m.on=p.mstate[j].on;m.op=p.mstate[j].op;}});
+  shape=p.shape;pow=p.pow;cut=p.cut;fea=p.fea;pho=p.pho;dep=p.dep;trla=p.trla;shk=p.shk;pnc=p.pnc;cyc=p.cyc;dirG=p.dirG;
+  studioText=p.studioText;studioTextOn=p.studioTextOn;studioTextSize=p.studioTextSize;studioTextPos=p.studioTextPos;studioTextColor=p.studioTextColor;
+  drawPals();drawMixers();maskDirty=true;vLastPoint=i;
+ }}
+}
+function drawVISOMaterial(ctx){
+ if(vMaterial==='none')return;
+ ctx.save();
+ if(vMaterial==='fire'){ctx.globalCompositeOperation='screen';const g=ctx.createLinearGradient(0,H,0,H*.35);g.addColorStop(0,'rgba(255,65,0,.20)');g.addColorStop(.55,'rgba(255,145,0,.08)');g.addColorStop(1,'rgba(255,240,120,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+ else if(vMaterial==='chrome'){ctx.globalCompositeOperation='screen';const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'rgba(255,255,255,.04)');g.addColorStop(.45,'rgba(160,205,230,.12)');g.addColorStop(.5,'rgba(255,255,255,.2)');g.addColorStop(1,'rgba(30,50,70,.06)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+ else if(vMaterial==='liquid'){ctx.globalCompositeOperation='screen';ctx.strokeStyle='rgba(210,245,255,.22)';ctx.lineWidth=Math.max(2,W*.002);for(let i=0;i<7;i++){ctx.beginPath();ctx.ellipse(cx,cy,H*(.08+i*.055),H*(.025+i*.025),Math.sin(performance.now()*.0003+i)*.15,0,Math.PI*2);ctx.stroke();}}
+ else if(vMaterial==='frost'){ctx.globalCompositeOperation='screen';ctx.fillStyle='rgba(190,225,255,.09)';ctx.fillRect(0,0,W,H);}
+ else if(vMaterial==='ink'){ctx.globalCompositeOperation='multiply';ctx.fillStyle='rgba(25,35,55,.12)';ctx.fillRect(0,0,W,H);}
+ ctx.restore();
+}
+$('sMaterial').onchange=e=>vMaterial=e.target.value;
+$('bAddPoint').onclick=()=>captureTurningPoint();
+$('bClearPoints').onclick=()=>{vTurningPoints=[];vLastPoint=-1;$('turnPointInfo').textContent='Turning points: 0';};
+
 function frame(t){
   requestAnimationFrame(frame);
   const dt=Math.min(50,t-last||16);last=t;frameN++;
   const b=bands();curB=b;curBbg=bands(bvp);
-  detectVISOBeat(t);\n  if(vDriftOn&&vBpm>0)vDriftPhase+=dt*(vBpm/60)*.002*(vDrift/35);
+  detectVISOBeat(t);\n  applyTurningPoints();\n  if(vDriftOn&&vBpm>0)vDriftPhase+=dt*(vBpm/60)*.002*(vDrift/35);
   if(vPanner&&playing)vPanner.pan.setTargetAtTime(Math.sin(performance.now()/1000*(v8Speed/100+.05))*v8Width/100,ctxA.currentTime,.04);\n  const bass=b[0];avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
   pulse=Math.max(pulse*.85,bass);hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
@@ -1204,7 +1234,7 @@ function frame(t){
   bx.filter='blur(12px)';bx.drawImage(c,0,0,bl.width,bl.height);bx.filter='none';
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
-  drawStudioText(x,b);\n  drawVISOExtraTexts(x);\n  drawVISOProgress(x);\n  drawVISOEffects(x,dt);
+  drawStudioText(x,b);\n  drawVISOExtraTexts(x);\n  drawVISOProgress(x);\n  drawVISOEffects(x,dt);\n  drawVISOMaterial(x);
   x.restore();
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
     x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
