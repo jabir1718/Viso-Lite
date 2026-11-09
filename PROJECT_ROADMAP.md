@@ -11,7 +11,7 @@
 - Android shell: Kotlin / Jetpack Compose with the studio hosted in Android WebView.
 - Current reference input: user-provided working HTML file named `Viso working Index.html` (uploaded 2026-11-10; 1,133 lines). Treat it as a reference/baseline to compare, not permission to overwrite newer repository work.
 - Reference application package previously inspected: Aspectrum / MP3 Visualizer (Unity Android app, package `com.MDA.MP3Visualizer`, version 2.7.2). The supplied archive is the reference app's package/assets, not a font pack.
-- Latest known completed source commit before this roadmap: `4a67f30b6a99d84406486e8393ee3e756528d8f3` — “Finalize custom logo-only rendering and remove watermark remnants”.
+- Latest verified source milestone: `d6ae1314ab4960b7fd779bf32760ce7cb1578baf` — full editable settings capture/restore added to `.viso` projects and undo/redo snapshots. The uploaded working HTML baseline was compared against the branch: all 129 baseline element IDs are retained; the branch has 186 IDs (57 additional controls), with no missing baseline IDs.
 - Main branch must be preserved. Develop on `viso/advanced-studio-ui` unless the owner explicitly directs otherwise.
 
 ## 2. Product goal
@@ -42,7 +42,7 @@ The reference app must not be used as an excuse to reduce VISO to a basic visual
 
 ## 4. Current implementation snapshot (known, not a claim of full completion)
 
-The current working branch already contains a substantial HTML visualizer studio. The current repository asset has a known blob SHA recorded when this roadmap was created: `3d0bb7f714afd368e28420d920cdc42092bccbbe`. Always fetch the latest version and SHA before editing.
+The current working branch already contains a substantial HTML visualizer studio. The current repository asset at the latest verified milestone has blob SHA `60cf9e1e3c07173b9acad9451bd527ab5877fab5`, 105,206 characters and 1,482 lines. Always fetch the latest version and SHA before editing.
 
 ### Existing areas present in the current studio
 
@@ -69,7 +69,7 @@ The current working branch already contains a substantial HTML visualizer studio
 - Templates named Aura Pulse, Soft Romance, Retro VHS, Club Energy, Minimal Wave were added as editable settings presets.
 - Save/Open Project using `.viso` JSON settings exists in some form.
 - Important limitation: those templates were previously only settings presets, not yet proven to be complete downloadable editable projects with bundled media/assets.
-- The last known CI build (run `42700249393`) succeeded and produced artifact `VISO-Studio-advanced-debug-apk` for commit `4a67f30b6a99d84406486e8393ee3e756528d8f3`. This is a CI build result only; installation and real-device testing on the user's Infinix Android phone were not confirmed.
+- Latest CI build (run `42706023529`) succeeded for commit `d6ae1314ab4960b7fd779bf32760ce7cb1578baf`; artifact `VISO-Studio-advanced-debug-apk`, artifact ID `13713578045`, extracted APK size 84,441,155 bytes, SHA-256 `32388c78b01f3ce9606bb7991792762d9178436257b928d76b997fa04483d2b3`. This is a CI build result only; installation and real-device testing on the user's Infinix Android phone are not confirmed.
 
 ## 5. Reference feature audit — required work
 
@@ -134,7 +134,7 @@ For every milestone, update the status table below and record commit SHA, build 
 
 | Workstream | Status | Next action |
 |---|---|---|
-| Preserve known-good VISO baseline | In progress | Compare uploaded 1,133-line working HTML with current branch; retain useful changes without rolling back newer work |
+| Preserve known-good VISO baseline | Verified | Compared uploaded 1,133-line HTML: all 129 original element IDs are present in the 1,482-line branch source; branch adds 57 more IDs and retains newer features |
 | Reference app reverse audit | In progress | Inspect UI/assets and confirm actual controls, ranges, defaults, and interactions |
 | Reference feature parity | Not complete | Implement and verify each audited feature family |
 | Existing VISO feature regression | Not fully verified | Test all current media, visualizer, text/logo, layer, undo/redo, save/load and export workflows |
@@ -145,7 +145,7 @@ For every milestone, update the status table below and record commit SHA, build 
 | Complete editable template packages | Not complete | Add import/download packages with editable settings and media assets |
 | Modular future-tools architecture | Planned | Introduce registry/schema incrementally |
 | Single integrated Android APK | In progress | Keep one package and one installable app |
-| CI build | Previous build passed | Re-run after each meaningful milestone |
+| CI build | Latest build passed | Run `42706023529` passed HTML/JS validation and Android debug APK build for `d6ae1314ab4960b7fd779bf32760ce7cb1578baf` |
 | Real-device QA | Not confirmed | Install and test on user's Android device before final release |
 
 ## 9. Required continuity procedure for every new chat
