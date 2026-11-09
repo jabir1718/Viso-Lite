@@ -102,6 +102,19 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleDebug --stacktrace
 
+      - name: Verify packaged APK
+        shell: bash
+        run: |
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          unzip -t "$APK" >/dev/null
+          unzip -p "$APK" assets/index.html > /tmp/viso-apk-index.html
+          cmp app/src/main/assets/index.html /tmp/viso-apk-index.html
+          AAPT="$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -n 1)"
+          test -n "$AAPT"
+          "$AAPT" dump badging "$APK" | grep -q "package: name='com.viso.lite'"
+          echo "APK verified: package com.viso.lite; embedded studio HTML exactly matches source"
+
       - name: Upload VISO Studio APK
         if: success()
         uses: actions/upload-artifact@v4
