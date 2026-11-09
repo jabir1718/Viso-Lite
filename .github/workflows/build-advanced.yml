@@ -17,7 +17,7 @@ jobs:
       - name: Checkout VISO Studio branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ github.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
