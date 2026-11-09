@@ -670,11 +670,13 @@ $('bRec').onclick=()=>{
   recClock=setInterval(()=>{$('recInfo').textContent='Exporting · '+clockText((Date.now()-recStarted)/1000);},250);
   if(audio&&!playing){$('bP').click();}
 };
-function captureProjectState(){return {colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,advanced:collectAdvancedState()};}
+function captureProjectState(){return {colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,advanced:collectAdvancedState()};}
 function snap(){undo.push(JSON.stringify(captureProjectState()));
   if(undo.length>40)undo.shift();redo.length=0;}
 function apply(s){const d=JSON.parse(s);
   colors=d.colors;mstate.forEach((m,i)=>{m.on=d.mstate[i].on;m.op=d.mstate[i].op;});
+  if(d.bgOn!==undefined)bgOn=!!d.bgOn;if(d.frOn!==undefined)frOn=!!d.frOn;if(d.phOn!==undefined)phOn=!!d.phOn;if(d.maskOn!==undefined)maskOn=!!d.maskOn;if(d.bgViz!==undefined)bgViz=!!d.bgViz;if(d.mediaFront!==undefined)mediaFront=!!d.mediaFront;
+  [['tBg',bgOn],['tFr',frOn],['tPh',phOn],['tMask',maskOn],['bBgViz',bgViz]].forEach(([id,on])=>$(id)?.classList.toggle('on',!!on));
   document.querySelectorAll('#modes button').forEach((q,j)=>q.classList.toggle('on',mstate[j].on));
   shape=d.shape;maskDirty=true;
   document.querySelectorAll('#shapes button').forEach((q,j)=>q.classList.toggle('on',SHAPES[j][0]===shape));
@@ -1608,8 +1610,8 @@ const VISO_TEMPLATES={
 function applyVisoProject(p){
  if(!p||!['viso-project-v1','viso-project-v2','viso-project-v3'].includes(p.schema))throw new Error('Unsupported VISO project');
  const t=p.settings||{};
- if(t.state)apply(JSON.stringify(t.state));
  if(t.template&&VISO_TEMPLATES[t.template]){const v=VISO_TEMPLATES[t.template];vigOn=!!v.vig;progOn=!!v.prog;progStyle=v.progStyle;progSz=v.progSz;progPos=v.progPos;bgDriftOn=v.drift;bgDriftSpeed=v.speed;bgDriftRot=v.rot;bgDriftTravel=v.travel;flashAmt=v.flash;studioTextOn=v.studio;studioText=v.text;studioTextAnim=v.anim;studioTextGlow=v.glow;studioTextStroke=v.stroke;vhsOn=v.vhs;shockOn=v.shock;lensOn=v.lens;}
+ if(t.state)apply(JSON.stringify(t.state));
  if(t.progStyle)progStyle=t.progStyle;
  if(t.studioText!==undefined){studioText=t.studioText;$('studioText').value=studioText;}
  if(t.studioTextOn!==undefined)studioTextOn=!!t.studioTextOn;
