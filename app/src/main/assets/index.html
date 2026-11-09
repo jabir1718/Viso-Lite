@@ -404,7 +404,7 @@ $('bA').onclick=()=>$('fA').click();
 $('fA').onchange=e=>{const f=e.target.files[0];if(!f)return;
   if(!ctxA)ctxA=new(window.AudioContext||window.webkitAudioContext)();
   if(audio)audio.pause();
-  audio=new Audio(URL.createObjectURL(f));audio.loop=loopSong;audio.onloadedmetadata=updateSongInfo;audio.ontimeupdate=updateSongInfo;audio.onended=()=>{updateSongInfo();if(stopAtSongEnd&&rec&&rec.state==='recording')rec.stop();};
+  audio=new Audio(URL.createObjectURL(f));audio.loop=loopSong;audio.onloadedmetadata=updateSongInfo;audio.ontimeupdate=updateSongInfo;audio.onended=()=>{updateSongInfo();if(rec&&rec.state==='recording')rec.stop();};
   const s=ctxA.createMediaElementSource(audio);
   an=ctxA.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.7;
   s.connect(an);an.connect(ctxA.destination);
@@ -462,44 +462,59 @@ setInterval(()=>{
   updateSongInfo();
   if(rec&&rec.state==='recording')$('recInfo').textContent='Exporting · '+clockText((Date.now()-recStarted)/1000);
 },250);
-$('bRec').onclick=()=>{
+$('bRec').onclick=async()=>{
+  if(rec&&rec.state==='recording'){return;}
+  if(!audio){$('recInfo').textContent='Pehle MP3/audio select karein';return;}
   if(!window.MediaRecorder||!c.captureStream){$('recInfo').textContent='Video export unavailable in this WebView';return;}
-  if(rec&&rec.state==='recording'){rec.stop();return;}
-  const st=c.captureStream(FPS);
-  if(streamDest)streamDest.stream.getAudioTracks().forEach(t=>st.addTrack(t));
   const mime=chooseMime(formatChoice);
-  if(!mime){$('recInfo').textContent=formatChoice.toUpperCase()+' is not supported by this phone/WebView. Choose Auto or another format.';return;}
-  try{rec=new MediaRecorder(st,{mimeType:mime,videoBitsPerSecond:BIT});}
-  catch(err){$('recInfo').textContent='Encoder could not start: '+(err.message||'unsupported settings');st.getTracks().forEach(t=>t.stop());rec=null;return;}
-  const ext=mime.includes('mp4')?'mp4':'webm';
-  const chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
-  rec.onstop=()=>{
-    clearInterval(recClock);recClock=null;
-    const blob=new Blob(chunks,{type:mime.split(';')[0]});
-    dl(blob,'viso_'+Date.now()+'.'+ext);
-    $('bRec').textContent='Export video';$('bRec').classList.add('prim');
-    $('recInfo').textContent='Export complete · '+clockText((Date.now()-recStarted)/1000)+' · '+ext.toUpperCase()+' · '+W+'×'+H+' · '+FPS+' FPS';
-    $('recProgress').style.width='100%';
-    st.getTracks().forEach(t=>t.stop());
-  };
-  rec.onerror=e=>{$('recInfo').textContent='Export error: '+(e.error?.message||'unknown');};
-  rec.start(500);recStarted=Date.now();
-  $('bRec').textContent='Finish export';$('bRec').classList.remove('prim');
-  $('recInfo').textContent='Exporting · 00:00';
-  if(recClock)clearInterval(recClock);
-  $('recProgress').style.width='0%';
-  recClock=setInterval(()=>{
-    const elapsed=(Date.now()-recStarted)/1000;
-    if(stopAtSongEnd&&audio&&Number.isFinite(audio.duration)&&audio.duration>0){
-      const pct=Math.min(99,elapsed/audio.duration*100);
+  if(!mime){$('recInfo').textContent=formatChoice.toUpperCase()+' is not supported. Choose Auto or another format.';return;}
+  try{
+    if(ctxA&&ctxA.state==='suspended')await ctxA.resume();
+    audio.pause();
+    audio.currentTime=0;
+    const oldLoop=audio.loop;
+    audio.loop=false;
+    if(useVid){try{vid.currentTime=0;}catch(e){}}
+    if(bgUseVid){try{bvid.currentTime=0;}catch(e){}}
+    const st=c.captureStream(FPS);
+    if(streamDest)streamDest.stream.getAudioTracks().forEach(t=>st.addTrack(t));
+    rec=new MediaRecorder(st,{mimeType:mime,videoBitsPerSecond:BIT});
+    const ext=mime.includes('mp4')?'mp4':'webm';
+    const chunks=[];
+    rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+    rec.onstop=()=>{
+      clearInterval(recClock);recClock=null;
+      const blob=new Blob(chunks,{type:mime.split(';')[0]});
+      if(blob.size)dl(blob,'viso_'+Date.now()+'.'+ext);
+      $('bRec').textContent='Export video';$('bRec').classList.add('prim');
+      $('bP').textContent='Play';playing=false;
+      $('recInfo').textContent=blob.size?'Export complete · '+clockText(audio.duration)+' · '+ext.toUpperCase()+' · '+W+'×'+H+' · '+FPS+' FPS':'Export failed · empty video';
+      $('recProgress').style.width='100%';
+      st.getTracks().forEach(t=>t.stop());
+      audio.loop=oldLoop;
+    };
+    rec.onerror=e=>{$('recInfo').textContent='Export error: '+(e.error?.message||'unknown');};
+    rec.start(500);recStarted=Date.now();
+    $('bRec').textContent='Exporting…';$('bRec').classList.remove('prim');
+    $('recInfo').textContent='Exporting full song · 00:00 / '+clockText(audio.duration);
+    $('recProgress').style.width='0%';
+    if(recClock)clearInterval(recClock);
+    recClock=setInterval(()=>{
+      const elapsed=audio.currentTime||0;
+      const duration=audio.duration||0;
+      const pct=duration>0?Math.min(99,elapsed/duration*100):0;
       $('recProgress').style.width=pct+'%';
-      $('recInfo').textContent='Exporting · '+Math.round(pct)+'% · '+clockText(elapsed)+' / '+clockText(audio.duration);
-    }else{
-      $('recProgress').style.width='3%';
-      $('recInfo').textContent='Recording · '+clockText(elapsed)+' · press Finish export when ready';
-    }
-  },250);
-  if(audio&&!playing){$('bP').click();}
+      $('recInfo').textContent='Exporting full song · '+Math.round(pct)+'% · '+clockText(elapsed)+' / '+clockText(duration);
+    },250);
+    if(useVid)vid.play().catch(()=>{});
+    if(bgUseVid)bvid.play().catch(()=>{});
+    await audio.play();
+    playing=true;$('bP').textContent='Pause';
+  }catch(err){
+    if(rec&&rec.state==='recording')rec.stop();
+    $('recInfo').textContent='Export start failed: '+(err.message||'Please try again');
+    $('bRec').textContent='Export video';$('bRec').classList.add('prim');
+  }
 };
 function snap(){undo.push(JSON.stringify({colors,mstate,shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp}));
   if(undo.length>40)undo.shift();redo.length=0;}
