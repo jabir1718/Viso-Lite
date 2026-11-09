@@ -54,7 +54,8 @@ jobs:
               "bProjectSave", "bProjectOpen", "sVhsScan", "sShockStrength",
               "sLensAmount", "sProgThickness", "sLogoGlow", "bSurfaceReflection",
               "studioText2", "bText2On", "sText2Size", "sText2Glow",
-              "bFilm", "sFilmGrain", "sFilmDust", "sFilmScratches"
+              "bFilm", "sFilmGrain", "sFilmDust", "sFilmScratches",
+              "bAtmosphere", "sHaze", "sSmoke"
           )
           for required in required_ids:
               if required not in ids:
