@@ -256,6 +256,12 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
   </div>
   <div class="sec panel"><h4>Progress Bar Studio</h4>
     <div class="row" id="progressStyles"><button data-prog="gradient">Gradient</button><button data-prog="thin">Thin</button><button data-prog="segments">Segments</button><button data-prog="circle">Circle</button></div>
+    <label><span>Thickness</span><input id="sProgThickness" type="range" min="20" max="250" value="100"></label>
+    <label><span>Roundness</span><input id="sProgRound" type="range" min="0" max="100" value="70"></label>
+    <label><span>Glow</span><input id="sProgGlow" type="range" min="0" max="100" value="48"></label>
+    <label><span>Rotation</span><input id="sProgRot" type="range" min="-180" max="180" value="0"></label>
+    <label><span>Horizontal</span><input id="sProgX" type="range" min="-40" max="40" value="0"></label>
+    <div class="row"><label><span>Progress colour</span><input id="progColor" type="color" value="#8b5cf6"></label><label><span>Remaining</span><input id="progRemaining" type="color" value="#dfe8dc"></label></div>
     <div class="status" id="progressInfo">Choose a progress style · enable Progress bar in Overlay</div>
   </div>
   <div class="sec panel"><h4>Templates · Editable Projects</h4>
@@ -1193,6 +1199,7 @@ let panner=null,conv=null,dryG=null,wetG=null,lfo=null,lfoG=null,td=null;
 let speed=100,pitchSemis=0,pitchLock=true,eightD=false,eightW=80,eightS=22,eightR=22;
 let bpm=0,beatFlash=0,flashAmt=0,driftAmt=0,driftX=0,driftY=0,lastOnset=0,onsetGaps=[];
 let sym='off',vigOn=false,vigAmt=45,progOn=false,progSz=12,progPos=96,logoImg=null,logoSize=16,logoX=92,logoY=92,logoAlpha=90,progStyle='gradient';
+let progThickness=100,progRound=70,progGlow=48,progRotation=0,progX=0,progColor='#8b5cf6',progRemaining='#dfe8dc';
 function makeImpulse(sec,decay){const r=ctxA.sampleRate,len=Math.floor(r*sec),b=ctxA.createBuffer(2,len,r);
   for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);
     for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);}
@@ -1256,13 +1263,22 @@ function drawVignette(ctx){if(!vigOn)return;
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
 function drawProgress(ctx){if(!progOn||!audio)return;
   const p=audio.duration?Math.min(1,audio.currentTime/audio.duration):0;
-  const th=Math.max(3,H*progSz/1000),y=H*progPos/100;
-  const g=ctx.createLinearGradient(0,0,W,0);g.addColorStop(0,grad(0));g.addColorStop(1,grad(1));
-  ctx.save();
-  if(progStyle==='thin'){ctx.fillStyle='rgba(255,255,255,.2)';ctx.fillRect(0,y,W,Math.max(2,th*.25));ctx.fillStyle=g;ctx.fillRect(0,y,W*p,Math.max(2,th*.25));}
-  else if(progStyle==='segments'){const count=48,gap=Math.max(2,W*.003),sw=(W-gap*(count-1))/count;for(let i=0;i<count;i++){ctx.globalAlpha=i<count*p?1:.22;ctx.fillStyle=g;ctx.fillRect(i*(sw+gap),y,sw,th);}}
-  else if(progStyle==='circle'){const r=Math.min(W,H)*.43;ctx.lineWidth=Math.max(3,th);ctx.lineCap='round';ctx.strokeStyle='rgba(255,255,255,.2)';ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,Math.PI*1.5);ctx.stroke();ctx.strokeStyle=g;ctx.shadowColor=grad(.5);ctx.shadowBlur=th*2;ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*p);ctx.stroke();}
-  else {ctx.fillStyle='rgba(255,255,255,.2)';ctx.fillRect(0,y,W,th);ctx.fillStyle=g;ctx.shadowColor=grad(.5);ctx.shadowBlur=th*2;ctx.fillRect(0,y,W*p,th);}
+  const th=Math.max(2,H*progSz/1000*progThickness/100),y=H*progPos/100,barW=W*.94,x0=(W-barW)/2+W*progX/100;
+  const radius=Math.min(th/2,th*progRound/100),g=ctx.createLinearGradient(x0,0,x0+barW,0);
+  g.addColorStop(0,progColor);g.addColorStop(1,grad(1));
+  const roundRect=(x,y,w,h,r)=>{r=Math.max(0,Math.min(r,w/2,h/2));ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();};
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(progRotation*Math.PI/180);ctx.translate(-cx,-cy);
+  ctx.shadowColor=progColor;ctx.shadowBlur=th*progGlow/100*2.2;
+  if(progStyle==='circle'){
+   const r=Math.min(W,H)*.43;ctx.lineWidth=Math.max(3,th);ctx.lineCap=progRound>50?'round':'butt';ctx.strokeStyle=progRemaining;ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,Math.PI*1.5);ctx.stroke();ctx.strokeStyle=g;ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*p);ctx.stroke();
+  }else if(progStyle==='segments'){
+   const count=48,gap=Math.max(2,W*.003),sw=(barW-gap*(count-1))/count;
+   for(let i=0;i<count;i++){ctx.globalAlpha=i<count*p?1:.95;ctx.fillStyle=i<count*p?g:progRemaining;roundRect(x0+i*(sw+gap),y,sw,th,radius);ctx.fill();}
+  }else{
+   const h=progStyle==='thin'?Math.max(2,th*.25):th;
+   ctx.globalAlpha=.95;ctx.fillStyle=progRemaining;roundRect(x0,y,barW,h,radius);ctx.fill();
+   ctx.globalAlpha=1;ctx.fillStyle=g;roundRect(x0,y,Math.max(0,barW*p),h,radius);ctx.fill();
+  }
   ctx.restore();
 }
 function drawCustomLogo(ctx){
@@ -1600,6 +1616,8 @@ const VISO_FX_SETTERS={vhsScan:v=>vhsScan=v,vhsNoise:v=>vhsNoise=v,vhsJitter:v=>
  ['sLensAmount','lensAmount'],['sLensFocus','lensFocus'],['sLensBokeh','lensBokeh'],['sLensBlur','lensBlur']]
  .forEach(([id,key])=>$(id).oninput=e=>VISO_FX_SETTERS[key](+e.target.value));
 document.querySelectorAll('#progressStyles button').forEach(q=>q.onclick=()=>{progStyle=q.dataset.prog;document.querySelectorAll('#progressStyles button').forEach(b=>b.classList.toggle('on',b===q));$('progressInfo').textContent='Progress style: '+progStyle;});
+$('sProgThickness').oninput=e=>progThickness=+e.target.value;$('sProgRound').oninput=e=>progRound=+e.target.value;$('sProgGlow').oninput=e=>progGlow=+e.target.value;$('sProgRot').oninput=e=>progRotation=+e.target.value;$('sProgX').oninput=e=>progX=+e.target.value;
+$('progColor').oninput=e=>progColor=e.target.value;$('progRemaining').oninput=e=>progRemaining=e.target.value;
 const VISO_TEMPLATES={
  aura:{name:'Aura Pulse',vig:true,prog:true,progStyle:'gradient',progSz:16,progPos:94,drift:true,speed:34,rot:26,travel:34,flash:55,studio:true,text:'AURA',anim:'pulse',glow:42,stroke:9,vhs:false,shock:true,lens:true},
  romance:{name:'Soft Romance',vig:true,prog:true,progStyle:'thin',progSz:9,progPos:96,drift:true,speed:14,rot:10,travel:15,flash:8,studio:true,text:'LOVE',anim:'float',glow:30,stroke:2,vhs:false,shock:false,lens:true},
@@ -1637,7 +1655,7 @@ document.querySelectorAll('#visoTemplates button').forEach(q=>q.onclick=async()=
  try{await downloadVISOProject(project,'VISO-'+key+'.viso');$('templateInfo').textContent=preset.name+' editable project package downloaded with imported assets';}
  catch(err){$('templateInfo').textContent='Template package failed: '+err.message;}
 });
-function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur};}
+function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining};}
 function restoreAdvancedState(s){
  if(!s)return;
  if(s.speed!==undefined)speed=s.speed;if(s.pitchSemis!==undefined)pitchSemis=s.pitchSemis;if(s.pitchLock!==undefined)pitchLock=s.pitchLock;
@@ -1651,8 +1669,10 @@ function restoreAdvancedState(s){
  if(s.vhsScan!==undefined)vhsScan=s.vhsScan;if(s.vhsNoise!==undefined)vhsNoise=s.vhsNoise;if(s.vhsJitter!==undefined)vhsJitter=s.vhsJitter;if(s.vhsBleed!==undefined)vhsBleed=s.vhsBleed;
  if(s.shockStrength!==undefined)shockStrength=s.shockStrength;if(s.shockSpeed!==undefined)shockSpeed=s.shockSpeed;if(s.shockThickness!==undefined)shockThickness=s.shockThickness;if(s.shockRgb!==undefined)shockRgb=s.shockRgb;
  if(s.lensAmount!==undefined)lensAmount=s.lensAmount;if(s.lensFocus!==undefined)lensFocus=s.lensFocus;if(s.lensBokeh!==undefined)lensBokeh=s.lensBokeh;if(s.lensBlur!==undefined)lensBlur=s.lensBlur;
+ if(s.progThickness!==undefined)progThickness=s.progThickness;if(s.progRound!==undefined)progRound=s.progRound;if(s.progGlow!==undefined)progGlow=s.progGlow;if(s.progRotation!==undefined)progRotation=s.progRotation;if(s.progX!==undefined)progX=s.progX;if(s.progColor!==undefined)progColor=s.progColor;if(s.progRemaining!==undefined)progRemaining=s.progRemaining;
  const sync=(id,val)=>{const el=$(id);if(el&&val!==undefined){el.value=val;el.dispatchEvent(new Event('input'));}};
- [['sSpeed',speed],['sPitch',pitchSemis],['s8w',eightW],['s8s',eightS],['s8r',eightR],['sDrift',driftAmt],['sFlash',flashAmt],['sVig',vigAmt],['sProgSz',progSz],['sProgPos',progPos],['sLogoSize',logoSize],['sLogoX',logoX],['sLogoY',logoY],['sLogoAlpha',logoAlpha],['sSpecBars',specBars],['sSpecRad',specRad],['sSpecThick',specThick],['sSpecGlow',specGlow],['sSpecLevel',specLevel],['sSpecAtk',specAtk*100],['sSpecRel',specRel*100],['sSpecPeak',specPeakHold],['sSpecSpin',specSpin*100],['sBgDriftSpeed',bgDriftSpeed],['sBgDriftRot',bgDriftRot],['sBgDriftTravel',bgDriftTravel],['sMotionFx',motionFx],['sVhsScan',vhsScan],['sVhsNoise',vhsNoise],['sVhsJitter',vhsJitter],['sVhsBleed',vhsBleed],['sShockStrength',shockStrength],['sShockSpeed',shockSpeed],['sShockThickness',shockThickness],['sShockRgb',shockRgb],['sLensAmount',lensAmount],['sLensFocus',lensFocus],['sLensBokeh',lensBokeh],['sLensBlur',lensBlur]].forEach(([id,val])=>sync(id,val));
+ [['sSpeed',speed],['sPitch',pitchSemis],['s8w',eightW],['s8s',eightS],['s8r',eightR],['sDrift',driftAmt],['sFlash',flashAmt],['sVig',vigAmt],['sProgSz',progSz],['sProgPos',progPos],['sLogoSize',logoSize],['sLogoX',logoX],['sLogoY',logoY],['sLogoAlpha',logoAlpha],['sSpecBars',specBars],['sSpecRad',specRad],['sSpecThick',specThick],['sSpecGlow',specGlow],['sSpecLevel',specLevel],['sSpecAtk',specAtk*100],['sSpecRel',specRel*100],['sSpecPeak',specPeakHold],['sSpecSpin',specSpin*100],['sBgDriftSpeed',bgDriftSpeed],['sBgDriftRot',bgDriftRot],['sBgDriftTravel',bgDriftTravel],['sMotionFx',motionFx],['sVhsScan',vhsScan],['sVhsNoise',vhsNoise],['sVhsJitter',vhsJitter],['sVhsBleed',vhsBleed],['sShockStrength',shockStrength],['sShockSpeed',shockSpeed],['sShockThickness',shockThickness],['sShockRgb',shockRgb],['sLensAmount',lensAmount],['sLensFocus',lensFocus],['sLensBokeh',lensBokeh],['sLensBlur',lensBlur],['sProgThickness',progThickness],['sProgRound',progRound],['sProgGlow',progGlow],['sProgRot',progRotation],['sProgX',progX]].forEach(([id,val])=>sync(id,val));
+ sync('progColor',progColor);sync('progRemaining',progRemaining);
  const btn=(id,on,label)=>{const el=$(id);if(!el)return;el.classList.toggle('on',!!on);if(label)el.textContent=label;};
  btn('b8d',eightD,'8D audio: '+(eightD?'ON':'OFF'));btn('bPreserve',pitchLock,'Pitch lock: '+(pitchLock?'ON':'OFF'));
  btn('bVig',vigOn);btn('bProg',progOn);btn('bSpec',specOn,'Spectrum: '+(specOn?'ON':'OFF'));
