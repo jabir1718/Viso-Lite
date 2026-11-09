@@ -1592,10 +1592,11 @@ $('bVhs').onclick=e=>{vhsOn=!vhsOn;e.currentTarget.textContent='VHS: '+(vhsOn?'O
 $('bShock').onclick=e=>{shockOn=!shockOn;e.currentTarget.textContent='Shockwave: '+(shockOn?'ON':'OFF');e.currentTarget.classList.toggle('on',shockOn);};
 $('bLens').onclick=e=>{lensOn=!lensOn;e.currentTarget.textContent='Lens glow: '+(lensOn?'ON':'OFF');e.currentTarget.classList.toggle('on',lensOn);};
 $('sMotionFx').oninput=e=>motionFx=+e.target.value;
+const VISO_FX_SETTERS={vhsScan:v=>vhsScan=v,vhsNoise:v=>vhsNoise=v,vhsJitter:v=>vhsJitter=v,vhsBleed:v=>vhsBleed=v,shockStrength:v=>shockStrength=v,shockSpeed:v=>shockSpeed=v,shockThickness:v=>shockThickness=v,shockRgb:v=>shockRgb=v,lensAmount:v=>lensAmount=v,lensFocus:v=>lensFocus=v,lensBokeh:v=>lensBokeh=v,lensBlur:v=>lensBlur=v};
 [['sVhsScan','vhsScan'],['sVhsNoise','vhsNoise'],['sVhsJitter','vhsJitter'],['sVhsBleed','vhsBleed'],
  ['sShockStrength','shockStrength'],['sShockSpeed','shockSpeed'],['sShockThickness','shockThickness'],['sShockRgb','shockRgb'],
  ['sLensAmount','lensAmount'],['sLensFocus','lensFocus'],['sLensBokeh','lensBokeh'],['sLensBlur','lensBlur']]
- .forEach(([id,key])=>$(id).oninput=e=>{({vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur}[key]=+e.target.value);});
+ .forEach(([id,key])=>$(id).oninput=e=>VISO_FX_SETTERS[key](+e.target.value));
 document.querySelectorAll('#progressStyles button').forEach(q=>q.onclick=()=>{progStyle=q.dataset.prog;document.querySelectorAll('#progressStyles button').forEach(b=>b.classList.toggle('on',b===q));$('progressInfo').textContent='Progress style: '+progStyle;});
 const VISO_TEMPLATES={
  aura:{name:'Aura Pulse',vig:true,prog:true,progStyle:'gradient',progSz:16,progPos:94,drift:true,speed:34,rot:26,travel:34,flash:55,studio:true,text:'AURA',anim:'pulse',glow:42,stroke:9,vhs:false,shock:true,lens:true},
