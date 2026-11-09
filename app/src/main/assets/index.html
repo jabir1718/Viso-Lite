@@ -210,11 +210,15 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <label><span>Treble</span><input id="sHighGain" type="range" min="0" max="250" value="100"></label>
     <div class="row"><button id="bFreqReset">Reset frequency</button></div>
   </div>
+<div class="sec panel" id="advancedAudioLab"><h4>Advanced Audio · BPM Sync</h4><div class="row"><button id="bBpmSync" class="on">BPM Sync: ON</button><button id="bDrift">Drift: OFF</button><button id="bShock">Shockwave: OFF</button></div><div class="status" id="bpmReadout">BPM: waiting for music</div><label><span>Drift amount</span><input id="sDrift" type="range" min="0" max="100" value="35"></label></div>
+<div class="sec panel" id="advancedVisualLab"><h4>Vignette · Progress · Extra Text</h4><div class="row"><button id="bVignette" class="on">Vignette: ON</button><button id="bProgressLine" class="on">Line progress</button><button id="bProgressRing">Ring progress</button></div><label><span>Vignette</span><input id="sVignette" type="range" min="0" max="100" value="42"></label><label><span>Progress size</span><input id="sProgressSize" type="range" min="2" max="24" value="7"></label><div class="row"><button id="bAddTimeText">Add song time</button><button id="bAddArtistText">Add artist text</button><button id="bClearExtraText">Clear extra text</button></div><div class="status" id="extraTextInfo">Extra text layers: 0</div></div>
+<div class="sec panel" id="advancedMediaLab"><h4>Custom Font · Project Save/Load</h4><div class="row"><button id="bFontUpload">Upload TTF / OTF font</button><button id="bProjectSave">Save project file</button><button id="bProjectLoad">Load project file</button></div><div class="status" id="projectInfo">Project settings only; reselect media after loading.</div></div>
 </div>
 </div>
 <input id="fA" type="file" accept="audio/*"><input id="fI" type="file" accept="image/*">
 <input id="fV" type="file" accept="video/*"><input id="fO" type="file" accept="image/*" multiple>
 <input id="fBgI" type="file" accept="image/*"><input id="fBgV" type="file" accept="video/*">
+<input id="fFont" type="file" accept=".ttf,.otf,.woff,.woff2"><input id="fProject" type="file" accept=".json,application/json">
 <video id="vid" playsinline muted loop style="display:none"></video>
 <video id="bvid" playsinline muted loop style="display:none"></video>
 
@@ -1053,11 +1057,74 @@ function autoStep(){
     $('sSwy').value=swy;$('sSpd').value=spd;}
 }
 
+
+/* VISO advanced native feature suite */
+let vBpmSync=true,vDriftOn=false,vShockOn=false,vVignetteOn=true,vProgressMode='line';
+let vDrift=35,vVignette=42,vProgressSize=7,vBpm=0,vBeatTimes=[],vLastBeat=0,vLastCheck=0,vDriftPhase=0,vShockRadius=0,vShockAlpha=0;
+let vTimeData=null,vExtraTexts=[],vCustomFont='system-ui',vFontUrl=null;
+function detectVISOBeat(t){
+ if(!vBpmSync||!an||!playing||t-vLastCheck<45)return;vLastCheck=t;
+ if(!vTimeData||vTimeData.length!==an.fftSize)vTimeData=new Uint8Array(an.fftSize);
+ an.getByteTimeDomainData(vTimeData);let sum=0;for(let i=0;i<vTimeData.length;i++){const d=vTimeData[i]-128;sum+=d*d;}
+ const rms=Math.sqrt(sum/vTimeData.length),now=performance.now();
+ if(rms>Math.max(9,Math.min(24,rms*.95))&&now-vLastBeat>300&&now-vLastBeat<1800){
+  vLastBeat=now;vBeatTimes.push(now);if(vBeatTimes.length>9)vBeatTimes.shift();
+  if(vBeatTimes.length>=4){const a=[];for(let i=1;i<vBeatTimes.length;i++)a.push(vBeatTimes[i]-vBeatTimes[i-1]);a.sort((x,y)=>x-y);
+   let bpm=60000/a[Math.floor(a.length/2)];while(bpm<65)bpm*=2;while(bpm>180)bpm/=2;vBpm=Math.round(bpm);}
+  if(vShockOn){vShockRadius=0;vShockAlpha=1;}
+ }
+ $('bpmReadout').textContent=vBpm?'Detected BPM: '+vBpm+' · approximate':'BPM: listening…';
+}
+function drawVISOExtraTexts(ctx){
+ ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';vExtraTexts.forEach(o=>{
+  const label=o.type==='time'?(audio?clockText(audio.currentTime):'00:00'):o.text;
+  ctx.font='700 '+(H*o.size/1000)+'px '+(o.font||vCustomFont);ctx.fillStyle=o.color||'#fff';ctx.shadowColor='#000';ctx.shadowBlur=10;
+  ctx.fillText(label,W*o.x/100,H*o.y/100);
+ });ctx.restore();
+}
+function drawVISOProgress(ctx){
+ if(!audio||!Number.isFinite(audio.duration)||audio.duration<=0)return;
+ const p=Math.max(0,Math.min(1,audio.currentTime/audio.duration)),th=vProgressSize;ctx.save();ctx.lineCap='round';ctx.lineWidth=th;
+ if(vProgressMode==='ring'){const r=Math.min(W,H)*.075,yy=H*.86;ctx.strokeStyle='rgba(255,255,255,.25)';ctx.beginPath();ctx.arc(cx,yy,r,-Math.PI/2,Math.PI*1.5);ctx.stroke();
+  ctx.strokeStyle='#9bf36c';ctx.beginPath();ctx.arc(cx,yy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*p);ctx.stroke();
+ }else{const xx=W*.1,yy=H*.94,bw=W*.8;ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(xx,yy,bw,th);ctx.fillStyle='#9bf36c';ctx.fillRect(xx,yy,bw*p,th);}ctx.restore();
+}
+function drawVISOEffects(ctx,dt){
+ if(vShockOn&&vShockAlpha>.01){vShockRadius+=dt*.62;vShockAlpha*=.965;ctx.save();ctx.globalAlpha=vShockAlpha;ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.beginPath();ctx.arc(cx,cy,vShockRadius,0,Math.PI*2);ctx.stroke();ctx.restore();}
+ if(vVignetteOn&&vVignette>0){const g=ctx.createRadialGradient(cx,cy,H*.2,cx,cy,H*.78);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,'+(vVignette/100*.82)+')');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+}
+function saveVISOProject(){
+ const keys=['colors','mstate','shape','ix','iy','isc','irot','pow','cut','fea','pho','dep','trla','shk','pnc','cyc','dirG','swy','spd','bri','con','sat','hueSh','bloom','dim','split','bgb','bvo','bvp','bassGain','midGain','highGain','studioText','studioTextOn','studioTextSize','studioTextPos','studioTextAlpha','studioTextColor','studioTextX','studioTextRot','studioTextStroke','studioTextGlow','studioTextAnim','studioTextFont','studioTextAlign','studioTextPlate'];
+ const data={app:'VISO',version:1,settings:{}};keys.forEach(k=>{try{data.settings[k]=JSON.parse(JSON.stringify(eval(k)));}catch(e){}});
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});dl(blob,'VISO-Project.json');
+ $('projectInfo').textContent='Project settings saved. Media files are not embedded; reselect media after loading.';
+}
+function loadVISOProject(file){
+ const r=new FileReader();r.onload=()=>{try{const p=JSON.parse(r.result);if(p.app!=='VISO'||!p.settings)throw Error('invalid');
+  const allowed=['colors','mstate','shape','ix','iy','isc','irot','pow','cut','fea','pho','dep','trla','shk','pnc','cyc','dirG','swy','spd','bri','con','sat','hueSh','bloom','dim','split','bgb','bvo','bvp','bassGain','midGain','highGain','studioText','studioTextOn','studioTextSize','studioTextPos','studioTextAlpha','studioTextColor','studioTextX','studioTextRot','studioTextStroke','studioTextGlow','studioTextAnim','studioTextFont','studioTextAlign','studioTextPlate'];
+  allowed.forEach(k=>{if(k in p.settings)try{eval(k+'=p.settings[k]')}catch(e){}});
+  drawPals();drawMixers();maskDirty=true;$('projectInfo').textContent='Project settings loaded. Reselect audio and image/video files.';
+ }catch(e){$('projectInfo').textContent='Invalid VISO project file.';}};r.readAsText(file);
+}
+$('bBpmSync').onclick=()=>{vBpmSync=!vBpmSync;$('bBpmSync').textContent='BPM Sync: '+(vBpmSync?'ON':'OFF');$('bBpmSync').classList.toggle('on',vBpmSync);};
+$('bDrift').onclick=()=>{vDriftOn=!vDriftOn;$('bDrift').textContent='Drift: '+(vDriftOn?'ON':'OFF');$('bDrift').classList.toggle('on',vDriftOn);};
+$('bShock').onclick=()=>{vShockOn=!vShockOn;$('bShock').textContent='Shockwave: '+(vShockOn?'ON':'OFF');$('bShock').classList.toggle('on',vShockOn);};
+$('bVignette').onclick=()=>{vVignetteOn=!vVignetteOn;$('bVignette').textContent='Vignette: '+(vVignetteOn?'ON':'OFF');$('bVignette').classList.toggle('on',vVignetteOn);};
+$('bProgressLine').onclick=()=>{vProgressMode='line';$('bProgressLine').classList.add('on');$('bProgressRing').classList.remove('on');};
+$('bProgressRing').onclick=()=>{vProgressMode='ring';$('bProgressRing').classList.add('on');$('bProgressLine').classList.remove('on');};
+$('sDrift').oninput=e=>vDrift=+e.target.value;$('sVignette').oninput=e=>vVignette=+e.target.value;$('sProgressSize').oninput=e=>vProgressSize=+e.target.value;
+$('bAddTimeText').onclick=()=>{vExtraTexts.push({type:'time',x:50,y:90,size:42});$('extraTextInfo').textContent='Extra text layers: '+vExtraTexts.length;};
+$('bAddArtistText').onclick=()=>{vExtraTexts.push({type:'text',text:'ARTIST NAME',x:50,y:12,size:38});$('extraTextInfo').textContent='Extra text layers: '+vExtraTexts.length;};
+$('bClearExtraText').onclick=()=>{vExtraTexts=[];$('extraTextInfo').textContent='Extra text layers: 0';};
+$('bFontUpload').onclick=()=>$('fFont').click();
+$('fFont').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{if(vFontUrl)URL.revokeObjectURL(vFontUrl);vFontUrl=URL.createObjectURL(f);const face=new FontFace('VISOUserFont','url('+vFontUrl+')');await face.load();document.fonts.add(face);vCustomFont='VISOUserFont';studioTextFont=vCustomFont;$('sTextFont').add(new Option('Custom · '+f.name,vCustomFont));$('sTextFont').value=vCustomFont;$('projectInfo').textContent='Custom font loaded for this session.';}catch(e){$('projectInfo').textContent='Font load failed. Use a valid TTF/OTF.';}};
+$('bProjectSave').onclick=saveVISOProject;$('bProjectLoad').onclick=()=>$('fProject').click();$('fProject').onchange=e=>{if(e.target.files[0])loadVISOProject(e.target.files[0]);};
+
 function frame(t){
   requestAnimationFrame(frame);
   const dt=Math.min(50,t-last||16);last=t;frameN++;
   const b=bands();curB=b;curBbg=bands(bvp);
-  const bass=b[0];avg=avg*.92+bass*.08;
+  detectVISOBeat(t);\n  if(vDriftOn&&vBpm>0)vDriftPhase+=dt*(vBpm/60)*.002*(vDrift/35);\n  const bass=b[0];avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
   pulse=Math.max(pulse*.85,bass);hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
   if(autoOn){autoT+=dt;if(autoT>autoEvery*1000){autoT=0;autoStep();}}
@@ -1123,7 +1190,7 @@ function frame(t){
   bx.filter='blur(12px)';bx.drawImage(c,0,0,bl.width,bl.height);bx.filter='none';
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
-  drawStudioText(x,b);
+  drawStudioText(x,b);\n  drawVISOExtraTexts(x);\n  drawVISOProgress(x);\n  drawVISOEffects(x,dt);
   x.restore();
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
     x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
