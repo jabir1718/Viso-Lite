@@ -165,11 +165,36 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <label><span>Vignette</span><input id="sVig" type="range" min="0" max="100" value="45"></label>
     <label><span>Bar size</span><input id="sProgSz" type="range" min="4" max="40" value="12"></label>
     <label><span>Bar position</span><input id="sProgPos" type="range" min="0" max="100" value="96"></label>
-    <div class="row"><button id="bWm">Watermark: OFF</button><button id="bLogo">+ Logo PNG</button><button id="bLogoX">× Logo</button></div>
-    <input id="wmText" type="text" maxlength="28" value="@yourname">
-    <label><span>WM opacity</span><input id="sWm" type="range" min="10" max="100" value="70"></label>
+    <div class="row"><button id="bLogo">+ Custom logo PNG</button><button id="bLogoX">× Remove logo</button></div>
+    <label><span>Logo size</span><input id="sLogoSize" type="range" min="4" max="35" value="16"></label>
+    <label><span>Logo X position</span><input id="sLogoX" type="range" min="0" max="100" value="92"></label>
+    <label><span>Logo Y position</span><input id="sLogoY" type="range" min="0" max="100" value="92"></label>
+    <label><span>Logo opacity</span><input id="sLogoAlpha" type="range" min="10" max="100" value="90"></label>
     <div class="row"><button id="bFont">+ Custom font</button></div>
     <div id="fontInfo" class="status">Fonts: system</div>
+  </div>
+  <div class="sec panel"><h4>Background Drift · Motion FX</h4>
+    <div class="row"><button id="bBgDrift">Background drift: OFF</button><button id="bDriftBeat">Beat sync: ON</button></div>
+    <label><span>Drift speed</span><input id="sBgDriftSpeed" type="range" min="0" max="100" value="24"></label>
+    <label><span>Drift rotation</span><input id="sBgDriftRot" type="range" min="0" max="100" value="18"></label>
+    <label><span>Travel distance</span><input id="sBgDriftTravel" type="range" min="0" max="100" value="22"></label>
+    <div class="row"><button id="bVhs">VHS: OFF</button><button id="bShock">Shockwave: OFF</button><button id="bLens">Lens glow: OFF</button></div>
+    <label><span>Motion FX intensity</span><input id="sMotionFx" type="range" min="0" max="100" value="45"></label>
+  </div>
+  <div class="sec panel"><h4>Progress Bar Studio</h4>
+    <div class="row" id="progressStyles"><button data-prog="gradient">Gradient</button><button data-prog="thin">Thin</button><button data-prog="segments">Segments</button><button data-prog="circle">Circle</button></div>
+    <div class="status" id="progressInfo">Choose a progress style · enable Progress bar in Overlay</div>
+  </div>
+  <div class="sec panel"><h4>Templates · Editable Projects</h4>
+    <div class="status">Download a template, then open it in the editor as editable settings. Add or replace your own song, photo, video and logo.</div>
+    <div class="row" id="visoTemplates">
+      <button data-template="aura">Aura Pulse</button><button data-template="romance">Soft Romance</button>
+      <button data-template="vhs">Retro VHS</button><button data-template="club">Club Energy</button>
+      <button data-template="minimal">Minimal Wave</button>
+    </div>
+    <div class="row"><button id="bProjectSave">Save Project</button><button id="bProjectOpen">Open Project</button></div>
+    <input id="fProjectOpen" type="file" accept=".viso,.json,application/json" hidden>
+    <div class="status" id="templateInfo">Templates load editable controls, not a flattened preview.</div>
   </div>
   <div class="sec panel"><h4>Colour</h4>
     <div class="row" id="pals"></div>
@@ -1091,7 +1116,7 @@ function drawLights(ctx){
 let panner=null,conv=null,dryG=null,wetG=null,lfo=null,lfoG=null,td=null;
 let speed=100,pitchSemis=0,pitchLock=true,eightD=false,eightW=80,eightS=22,eightR=22;
 let bpm=0,beatFlash=0,flashAmt=0,driftAmt=0,driftX=0,driftY=0,lastOnset=0,onsetGaps=[];
-let sym='off',vigOn=false,vigAmt=45,progOn=false,progSz=12,progPos=96,wmOn=false,wmOpacity=70,logoImg=null;
+let sym='off',vigOn=false,vigAmt=45,progOn=false,progSz=12,progPos=96,logoImg=null,logoSize=16,logoX=92,logoY=92,logoAlpha=90,progStyle='gradient';
 function makeImpulse(sec,decay){const r=ctxA.sampleRate,len=Math.floor(r*sec),b=ctxA.createBuffer(2,len,r);
   for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);
     for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);}
@@ -1136,8 +1161,11 @@ SYMS.forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;
 const symC=document.createElement('canvas'),symX=symC.getContext('2d');
 $('bVig').onclick=e=>{vigOn=!vigOn;e.currentTarget.classList.toggle('on',vigOn);};
 $('bProg').onclick=e=>{progOn=!progOn;e.currentTarget.classList.toggle('on',progOn);};
-$('bWm').onclick=e=>{wmOn=!wmOn;e.currentTarget.textContent='Watermark: '+(wmOn?'ON':'OFF');e.currentTarget.classList.toggle('on',wmOn);};
 $('bLogo').onclick=()=>$('fLogo').click();
+$('sLogoSize').oninput=e=>logoSize=+e.target.value;
+$('sLogoX').oninput=e=>logoX=+e.target.value;
+$('sLogoY').oninput=e=>logoY=+e.target.value;
+$('sLogoAlpha').oninput=e=>logoAlpha=+e.target.value;
 $('fLogo').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{logoImg=im;};im.src=URL.createObjectURL(f);};
 $('bLogoX').onclick=()=>{logoImg=null;};
 $('bFont').onclick=()=>$('fFont').click();
@@ -1152,21 +1180,23 @@ function drawVignette(ctx){if(!vigOn)return;
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
 function drawProgress(ctx){if(!progOn||!audio)return;
   const p=audio.duration?Math.min(1,audio.currentTime/audio.duration):0;
-  const th=Math.max(2,H*progSz/1000),y=H*progPos/100;
-  ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(0,y,W,th);
+  const th=Math.max(3,H*progSz/1000),y=H*progPos/100;
   const g=ctx.createLinearGradient(0,0,W,0);g.addColorStop(0,grad(0));g.addColorStop(1,grad(1));
-  ctx.fillStyle=g;ctx.shadowColor=grad(.5);ctx.shadowBlur=th*2;ctx.fillRect(0,y,W*p,th);ctx.shadowBlur=0;}
+  ctx.save();
+  if(progStyle==='thin'){ctx.fillStyle='rgba(255,255,255,.2)';ctx.fillRect(0,y,W,Math.max(2,th*.25));ctx.fillStyle=g;ctx.fillRect(0,y,W*p,Math.max(2,th*.25));}
+  else if(progStyle==='segments'){const count=48,gap=Math.max(2,W*.003),sw=(W-gap*(count-1))/count;for(let i=0;i<count;i++){ctx.globalAlpha=i<count*p?1:.22;ctx.fillStyle=g;ctx.fillRect(i*(sw+gap),y,sw,th);}}
+  else if(progStyle==='circle'){const r=Math.min(W,H)*.43;ctx.lineWidth=Math.max(3,th);ctx.lineCap='round';ctx.strokeStyle='rgba(255,255,255,.2)';ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,Math.PI*1.5);ctx.stroke();ctx.strokeStyle=g;ctx.shadowColor=grad(.5);ctx.shadowBlur=th*2;ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*p);ctx.stroke();}
+  else {ctx.fillStyle='rgba(255,255,255,.2)';ctx.fillRect(0,y,W,th);ctx.fillStyle=g;ctx.shadowColor=grad(.5);ctx.shadowBlur=th*2;ctx.fillRect(0,y,W*p,th);}
+  ctx.restore();
+}
 function drawWatermark(ctx){
-  const label=wmOn?($('wmText').value||'').trim():'';
-  if(!label&&!logoImg)return;
-  const fs=Math.round(H*.026);
-  ctx.save();ctx.globalAlpha=wmOpacity/100;ctx.textAlign='right';ctx.textBaseline='bottom';
-  if(logoImg){const lw=W*.16,lh=logoImg.height/logoImg.width*lw;
-    ctx.drawImage(logoImg,W-lw-W*.05,H-lh-H*.05-(label?fs*1.7:0),lw,lh);}
-  if(label){ctx.font='800 '+fs+'px system-ui';ctx.fillStyle='#fff';
-    ctx.shadowColor='rgba(0,0,0,.65)';ctx.shadowBlur=fs*.5;
-    ctx.fillText(label,W-W*.05,H-H*.045);}
-  ctx.restore();}
+  if(!logoImg)return;
+  const lw=W*logoSize/100,lh=logoImg.height/logoImg.width*lw;
+  ctx.save();ctx.globalAlpha=logoAlpha/100;
+  ctx.shadowColor='rgba(0,0,0,.55)';ctx.shadowBlur=lw*.12;
+  ctx.drawImage(logoImg,W*logoX/100-lw/2,H*logoY/100-lh/2,lw,lh);
+  ctx.restore();
+}
 
 const SPEC_N=96;
 const specRaw=new Uint8Array(SPEC_N),specSmooth=new Float32Array(SPEC_N),specPeak=new Float32Array(SPEC_N),specPeakT=new Uint8Array(SPEC_N);
@@ -1369,12 +1399,74 @@ function frame(t){
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
   if(flashAmt>0&&beatFlash>0){x.fillStyle='rgba(255,255,255,'+(beatFlash*flashAmt/100*.22)+')';x.fillRect(0,0,W,H);}
-  drawVignette(x);drawProgress(x);drawWatermark(x);
+  drawVignette(x);drawProgress(x);drawWatermark(x);drawMotionFx(x,b);
   drawStudioText(x,b);
   x.restore();
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
     x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
     x.fillText('Photo / Video / PNG chuno',cx,cy);}
 }
+
+// VISO advanced studio modules: editable templates, motion, and project files.
+let bgDriftOn=false,bgBeatSync=true,bgDriftSpeed=24,bgDriftRot=18,bgDriftTravel=22;
+let vhsOn=false,shockOn=false,lensOn=false,motionFx=45,shockPhase=0;
+$('bBgDrift').onclick=e=>{bgDriftOn=!bgDriftOn;e.currentTarget.textContent='Background drift: '+(bgDriftOn?'ON':'OFF');e.currentTarget.classList.toggle('on',bgDriftOn);};
+$('bDriftBeat').onclick=e=>{bgBeatSync=!bgBeatSync;e.currentTarget.textContent='Beat sync: '+(bgBeatSync?'ON':'OFF');e.currentTarget.classList.toggle('on',bgBeatSync);};
+$('sBgDriftSpeed').oninput=e=>bgDriftSpeed=+e.target.value;
+$('sBgDriftRot').oninput=e=>bgDriftRot=+e.target.value;
+$('sBgDriftTravel').oninput=e=>bgDriftTravel=+e.target.value;
+$('bVhs').onclick=e=>{vhsOn=!vhsOn;e.currentTarget.textContent='VHS: '+(vhsOn?'ON':'OFF');e.currentTarget.classList.toggle('on',vhsOn);};
+$('bShock').onclick=e=>{shockOn=!shockOn;e.currentTarget.textContent='Shockwave: '+(shockOn?'ON':'OFF');e.currentTarget.classList.toggle('on',shockOn);};
+$('bLens').onclick=e=>{lensOn=!lensOn;e.currentTarget.textContent='Lens glow: '+(lensOn?'ON':'OFF');e.currentTarget.classList.toggle('on',lensOn);};
+$('sMotionFx').oninput=e=>motionFx=+e.target.value;
+document.querySelectorAll('#progressStyles button').forEach(q=>q.onclick=()=>{progStyle=q.dataset.prog;document.querySelectorAll('#progressStyles button').forEach(b=>b.classList.toggle('on',b===q));$('progressInfo').textContent='Progress style: '+progStyle;});
+const VISO_TEMPLATES={
+ aura:{name:'Aura Pulse',vig:true,prog:true,progStyle:'gradient',progSz:16,progPos:94,drift:true,speed:34,rot:26,travel:34,flash:55,studio:true,text:'AURA',anim:'pulse',glow:42,stroke:9,vhs:false,shock:true,lens:true},
+ romance:{name:'Soft Romance',vig:true,prog:true,progStyle:'thin',progSz:9,progPos:96,drift:true,speed:14,rot:10,travel:15,flash:8,studio:true,text:'LOVE',anim:'float',glow:30,stroke:2,vhs:false,shock:false,lens:true},
+ vhs:{name:'Retro VHS',vig:true,prog:true,progStyle:'segments',progSz:13,progPos:93,drift:true,speed:42,rot:8,travel:18,flash:24,studio:true,text:'RETRO',anim:'pulse',glow:12,stroke:5,vhs:true,shock:false,lens:false},
+ club:{name:'Club Energy',vig:false,prog:true,progStyle:'segments',progSz:18,progPos:90,drift:true,speed:70,rot:34,travel:46,flash:85,studio:true,text:'ENERGY',anim:'bounce',glow:55,stroke:12,vhs:false,shock:true,lens:true},
+ minimal:{name:'Minimal Wave',vig:false,prog:true,progStyle:'thin',progSz:7,progPos:97,drift:true,speed:10,rot:0,travel:8,flash:0,studio:false,text:'',anim:'none',glow:0,stroke:0,vhs:false,shock:false,lens:false}
+};
+function applyVisoProject(p){
+ if(!p||p.schema!=='viso-project-v1')throw new Error('Unsupported VISO project');
+ const t=p.settings||{};
+ if(t.template&&VISO_TEMPLATES[t.template]){const v=VISO_TEMPLATES[t.template];vigOn=!!v.vig;progOn=!!v.prog;progStyle=v.progStyle;progSz=v.progSz;progPos=v.progPos;bgDriftOn=v.drift;bgDriftSpeed=v.speed;bgDriftRot=v.rot;bgDriftTravel=v.travel;flashAmt=v.flash;studioTextOn=v.studio;studioText=v.text;studioTextAnim=v.anim;studioTextGlow=v.glow;studioTextStroke=v.stroke;vhsOn=v.vhs;shockOn=v.shock;lensOn=v.lens;}
+ if(t.progStyle)progStyle=t.progStyle;
+ if(t.studioText!==undefined){studioText=t.studioText;$('studioText').value=studioText;}
+ if(t.studioTextOn!==undefined)studioTextOn=!!t.studioTextOn;
+ if(t.bgDriftOn!==undefined)bgDriftOn=!!t.bgDriftOn;
+ if(t.vhsOn!==undefined)vhsOn=!!t.vhsOn;
+ if(t.shockOn!==undefined)shockOn=!!t.shockOn;
+ if(t.lensOn!==undefined)lensOn=!!t.lensOn;
+ const sync=(id,val)=>{const el=$(id);if(el&&val!==undefined){el.value=val;el.dispatchEvent(new Event('input'));}};
+ sync('sProgSz',progSz);sync('sProgPos',progPos);sync('sBgDriftSpeed',bgDriftSpeed);sync('sBgDriftRot',bgDriftRot);sync('sBgDriftTravel',bgDriftTravel);
+ $('bVig').classList.toggle('on',vigOn);$('bProg').classList.toggle('on',progOn);
+ $('bBgDrift').textContent='Background drift: '+(bgDriftOn?'ON':'OFF');$('bBgDrift').classList.toggle('on',bgDriftOn);
+ $('bVhs').textContent='VHS: '+(vhsOn?'ON':'OFF');$('bVhs').classList.toggle('on',vhsOn);
+ $('bShock').textContent='Shockwave: '+(shockOn?'ON':'OFF');$('bShock').classList.toggle('on',shockOn);
+ $('bLens').textContent='Lens glow: '+(lensOn?'ON':'OFF');$('bLens').classList.toggle('on',lensOn);
+ $('bTextOn').textContent='Text: '+(studioTextOn?'ON':'OFF');$('bTextOn').classList.toggle('on',studioTextOn);
+ document.querySelectorAll('#progressStyles button').forEach(q=>q.classList.toggle('on',q.dataset.prog===progStyle));
+ $('templateInfo').textContent='Project loaded: '+(p.name||'Custom project')+' · now replace media and edit layers';
+}
+document.querySelectorAll('#visoTemplates button').forEach(q=>q.onclick=()=>{
+ const key=q.dataset.template,preset=VISO_TEMPLATES[key];
+ const project={schema:'viso-project-v1',name:preset.name,settings:{template:key}};
+ applyVisoProject(project);
+ const blob=new Blob([JSON.stringify(project,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='VISO-'+key+'.viso';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+ $('templateInfo').textContent=preset.name+' downloaded · open the downloaded .viso file to load its editable project';
+});
+function collectVisoProject(){return {schema:'viso-project-v1',name:'VISO Custom Project',settings:{progStyle,studioText,studioTextOn,bgDriftOn,vhsOn,shockOn,lensOn,progSz,progPos,bgDriftSpeed,bgDriftRot,bgDriftTravel}};}
+$('bProjectSave').onclick=()=>{const blob=new Blob([JSON.stringify(collectVisoProject(),null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='VISO-project.viso';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);};
+$('bProjectOpen').onclick=()=>$('fProjectOpen').click();
+$('fProjectOpen').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{applyVisoProject(JSON.parse(await f.text()));}catch(err){$('templateInfo').textContent='Could not open project: '+err.message;}e.target.value='';};
+function drawMotionFx(ctx,b){
+ const amt=motionFx/100,now=performance.now()*.001;
+ if(lensOn){const rg=ctx.createRadialGradient(cx,cy,Math.min(W,H)*.08,cx,cy,Math.max(W,H)*.62);rg.addColorStop(0,'rgba(255,255,255,'+(amt*.09)+')');rg.addColorStop(.55,'rgba(130,170,255,'+(amt*.025)+')');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);}
+ if(vhsOn){ctx.save();ctx.globalAlpha=amt*.22;ctx.fillStyle='#9cecff';const y=(Math.sin(now*2.1)*.5+.5)*H;ctx.fillRect(0,y,W,Math.max(1,H*.002));ctx.globalAlpha=amt*.07;for(let i=0;i<7;i++)ctx.fillRect(0,(i/7)*H,W,1);ctx.restore();}
+ if(shockOn){const bass=b&&b[0]||0;shockPhase=(shockPhase+.012+bass*.045)%1;const radius=shockPhase*Math.max(W,H)*.7;ctx.save();ctx.globalAlpha=(1-shockPhase)*amt*.55;ctx.strokeStyle=grad(.5);ctx.lineWidth=Math.max(1,H*.003);ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.stroke();ctx.restore();}
+}
+
 requestAnimationFrame(frame);
 </script>
