@@ -210,7 +210,7 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <label><span>Treble</span><input id="sHighGain" type="range" min="0" max="250" value="100"></label>
     <div class="row"><button id="bFreqReset">Reset frequency</button></div>
   </div>
-<div class="sec panel" id="advancedAudioLab"><h4>Advanced Audio · BPM Sync</h4><div class="row"><button id="bBpmSync" class="on">BPM Sync: ON</button><button id="bDrift">Drift: OFF</button><button id="bShock">Shockwave: OFF</button></div><div class="status" id="bpmReadout">BPM: waiting for music</div><label><span>Drift amount</span><input id="sDrift" type="range" min="0" max="100" value="35"></label></div>
+<div class="sec panel" id="advancedAudioLab"><h4>Advanced Audio · BPM Sync</h4><div class="row"><button id="bBpmSync" class="on">BPM Sync: ON</button><button id="bDrift">Drift: OFF</button><button id="bShock">Shockwave: OFF</button></div><div class="status" id="bpmReadout">BPM: waiting for music</div><label><span>Drift amount</span><input id="sDrift" type="range" min="0" max="100" value="35"></label><label><span>8D speed</span><input id="s8Speed" type="range" min="0" max="100" value="35"></label><label><span>8D width</span><input id="s8Width" type="range" min="0" max="100" value="75"></label><label><span>8D reverb</span><input id="s8Reverb" type="range" min="0" max="100" value="18"></label><div class="row"><button id="bStickerBehind">Stickers behind: OFF</button></div><label><span>Sticker outline</span><input id="sStickerOutline" type="range" min="0" max="24" value="0"></label><label><span>Sticker saturation</span><input id="sStickerSat" type="range" min="0" max="250" value="100"></label></div>
 <div class="sec panel" id="advancedVisualLab"><h4>Vignette · Progress · Extra Text</h4><div class="row"><button id="bVignette" class="on">Vignette: ON</button><button id="bProgressLine" class="on">Line progress</button><button id="bProgressRing">Ring progress</button></div><label><span>Vignette</span><input id="sVignette" type="range" min="0" max="100" value="42"></label><label><span>Progress size</span><input id="sProgressSize" type="range" min="2" max="24" value="7"></label><div class="row"><button id="bAddTimeText">Add song time</button><button id="bAddArtistText">Add artist text</button><button id="bClearExtraText">Clear extra text</button></div><div class="status" id="extraTextInfo">Extra text layers: 0</div></div>
 <div class="sec panel" id="advancedMediaLab"><h4>Custom Font · Project Save/Load</h4><div class="row"><button id="bFontUpload">Upload TTF / OTF font</button><button id="bProjectSave">Save project file</button><button id="bProjectLoad">Load project file</button></div><div class="status" id="projectInfo">Project settings only; reselect media after loading.</div></div>
 </div>
@@ -444,7 +444,12 @@ $('fA').onchange=e=>{const f=e.target.files[0];if(!f)return;
   audio=new Audio(URL.createObjectURL(f));audio.loop=loopSong;audio.onloadedmetadata=updateSongInfo;audio.ontimeupdate=updateSongInfo;audio.onended=()=>{updateSongInfo();if(stopAtSongEnd&&rec&&rec.state==='recording')rec.stop();};
   const s=ctxA.createMediaElementSource(audio);
   an=ctxA.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.7;
-  s.connect(an);an.connect(ctxA.destination);
+  vPanner=ctxA.createStereoPanner();vConvolver=ctxA.createConvolver();vWet=ctxA.createGain();vDry=ctxA.createGain();
+  const irLen=Math.floor(ctxA.sampleRate*1.25),ir=ctxA.createBuffer(2,irLen,ctxA.sampleRate);
+  for(let ch=0;ch<2;ch++){const a=ir.getChannelData(ch);for(let i=0;i<irLen;i++)a[i]=(Math.random()*2-1)*Math.pow(1-i/irLen,3);}
+  vConvolver.buffer=ir;vWet.gain.value=v8Reverb/100;vDry.gain.value=1;
+  s.connect(vPanner);vPanner.connect(an);vPanner.connect(vDry);vDry.connect(ctxA.destination);
+  vPanner.connect(vConvolver);vConvolver.connect(vWet);vWet.connect(ctxA.destination);
   streamDest=ctxA.createMediaStreamDestination();an.connect(streamDest);
   buf=new Uint8Array(an.frequencyBinCount);playing=false;$('bP').textContent='Play';updateSongInfo();};
 $('bP').onclick=async()=>{if(!audio)return;
@@ -990,8 +995,9 @@ function stepObject(ob,b,dt){const bass=b[0],hi=b[5];ob.phase+=dt*(.002+hi*.02);
     if(ob.y<-h)ob.y=H;if(ob.y>H)ob.y=-h;}}
 function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
   ctx.save();ctx.translate(ob.x,ob.y);ctx.rotate(ob.rot);const s=ob.sc*(1+pulse*.12);ctx.scale(s,s);
-  ctx.shadowColor=gradAt(ob.x,ob.y);ctx.shadowBlur=16+pulse*55;
-  ctx.drawImage(ob.img,-ob.img.width/2,-ob.img.height/2);
+  ctx.filter=ob.isSticker?'saturate('+vStickerSat+'%)':'none';
+  ctx.shadowColor=gradAt(ob.x,ob.y);ctx.shadowBlur=ob.isSticker&&vStickerOutline>0?vStickerOutline*2:16+pulse*55;
+  ctx.drawImage(ob.img,-ob.img.width/2,-ob.img.height/2);ctx.filter='none';
   if(i===selObj){ctx.shadowBlur=0;ctx.strokeStyle='#b054f0';ctx.lineWidth=3/s;
     ctx.strokeRect(-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);}
   ctx.restore();});}
@@ -1062,6 +1068,7 @@ function autoStep(){
 let vBpmSync=true,vDriftOn=false,vShockOn=false,vVignetteOn=true,vProgressMode='line';
 let vDrift=35,vVignette=42,vProgressSize=7,vBpm=0,vBeatTimes=[],vLastBeat=0,vLastCheck=0,vDriftPhase=0,vShockRadius=0,vShockAlpha=0;
 let vTimeData=null,vExtraTexts=[],vCustomFont='system-ui',vFontUrl=null;
+let vPanner=null,vConvolver=null,vWet=null,vDry=null,v8Speed=35,v8Width=75,v8Reverb=18,vStickerBehind=false,vStickerOutline=0,vStickerSat=100;
 function detectVISOBeat(t){
  if(!vBpmSync||!an||!playing||t-vLastCheck<45)return;vLastCheck=t;
  if(!vTimeData||vTimeData.length!==an.fftSize)vTimeData=new Uint8Array(an.fftSize);
@@ -1112,7 +1119,11 @@ $('bShock').onclick=()=>{vShockOn=!vShockOn;$('bShock').textContent='Shockwave: 
 $('bVignette').onclick=()=>{vVignetteOn=!vVignetteOn;$('bVignette').textContent='Vignette: '+(vVignetteOn?'ON':'OFF');$('bVignette').classList.toggle('on',vVignetteOn);};
 $('bProgressLine').onclick=()=>{vProgressMode='line';$('bProgressLine').classList.add('on');$('bProgressRing').classList.remove('on');};
 $('bProgressRing').onclick=()=>{vProgressMode='ring';$('bProgressRing').classList.add('on');$('bProgressLine').classList.remove('on');};
-$('sDrift').oninput=e=>vDrift=+e.target.value;$('sVignette').oninput=e=>vVignette=+e.target.value;$('sProgressSize').oninput=e=>vProgressSize=+e.target.value;
+$('sDrift').oninput=e=>vDrift=+e.target.value;
+$('s8Speed').oninput=e=>v8Speed=+e.target.value;$('s8Width').oninput=e=>v8Width=+e.target.value;
+$('s8Reverb').oninput=e=>{v8Reverb=+e.target.value;if(vWet&&ctxA)vWet.gain.setTargetAtTime(v8Reverb/100,ctxA.currentTime,.04);};
+$('bStickerBehind').onclick=()=>{vStickerBehind=!vStickerBehind;$('bStickerBehind').textContent='Stickers behind: '+(vStickerBehind?'ON':'OFF');$('bStickerBehind').classList.toggle('on',vStickerBehind);};
+$('sStickerOutline').oninput=e=>vStickerOutline=+e.target.value;$('sStickerSat').oninput=e=>vStickerSat=+e.target.value;$('sVignette').oninput=e=>vVignette=+e.target.value;$('sProgressSize').oninput=e=>vProgressSize=+e.target.value;
 $('bAddTimeText').onclick=()=>{vExtraTexts.push({type:'time',x:50,y:90,size:42});$('extraTextInfo').textContent='Extra text layers: '+vExtraTexts.length;};
 $('bAddArtistText').onclick=()=>{vExtraTexts.push({type:'text',text:'ARTIST NAME',x:50,y:12,size:38});$('extraTextInfo').textContent='Extra text layers: '+vExtraTexts.length;};
 $('bClearExtraText').onclick=()=>{vExtraTexts=[];$('extraTextInfo').textContent='Extra text layers: 0';};
@@ -1124,7 +1135,8 @@ function frame(t){
   requestAnimationFrame(frame);
   const dt=Math.min(50,t-last||16);last=t;frameN++;
   const b=bands();curB=b;curBbg=bands(bvp);
-  detectVISOBeat(t);\n  if(vDriftOn&&vBpm>0)vDriftPhase+=dt*(vBpm/60)*.002*(vDrift/35);\n  const bass=b[0];avg=avg*.92+bass*.08;
+  detectVISOBeat(t);\n  if(vDriftOn&&vBpm>0)vDriftPhase+=dt*(vBpm/60)*.002*(vDrift/35);
+  if(vPanner&&playing)vPanner.pan.setTargetAtTime(Math.sin(performance.now()/1000*(v8Speed/100+.05))*v8Width/100,ctxA.currentTime,.04);\n  const bass=b[0];avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
   pulse=Math.max(pulse*.85,bass);hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
   if(autoOn){autoT+=dt;if(autoT>autoEvery*1000){autoT=0;autoStep();}}
@@ -1144,6 +1156,7 @@ function frame(t){
   const clipH=Math.max(0,split/100*H);
   if(clipH>0){
     x.save();x.beginPath();x.rect(0,0,W,clipH);x.clip();
+    if(vDriftOn&&vBpm>0)x.translate(Math.sin(vDriftPhase)*W*.025,Math.cos(vDriftPhase*.7)*H*.012);
     if(bgImg||(bgUseVid&&bvid.readyState>=2)){
       if(bgb>0)x.filter='blur('+bgb+'px)';
       if(bgUseVid&&bvid.readyState>=2)cover(x,bvid,bvid.videoWidth||W,bvid.videoHeight||H,H);
@@ -1170,6 +1183,7 @@ function frame(t){
     x.filter='none';x.restore();x.globalAlpha=1;
   };
 
+  if(vStickerBehind)drawObjects(x,b,dt);
   if(mediaFront){
     x.globalCompositeOperation='lighter';
     x.drawImage(paintLayer(1,maskOn),0,0);
@@ -1182,7 +1196,7 @@ function frame(t){
     x.globalCompositeOperation='source-over';
   }
 
-  drawObjects(x,b,dt);
+  if(!vStickerBehind)drawObjects(x,b,dt);
   drawLights(x);
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
     x.drawImage(paintLayer(.7,false),0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;}
