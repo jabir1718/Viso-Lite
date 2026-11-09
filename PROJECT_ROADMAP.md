@@ -273,3 +273,14 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Latest workflow run `42715648508` (run #107), exact commit `7f1a4b62a42aa7402b1dd51969fa2046ea2add44`, completed successfully. HTML/JS validation, project archive/manifest/registry/render-stage tests, Android SDK setup, APK build and artifact upload all passed.
 - Latest artifact ID `13718016338`; ZIP integrity passed. APK size 84,462,407 bytes; SHA-256 `785e57616f4deabe7d66215db9cd90b3911f96b0dbbedbb335a93034d39fc088`.
 - This confirms build/automated checks only, not visual correctness or actual playback on the user's Android phone. Next: verify Spectrum modes with real audio in preview and export, confirm frequency focus is perceptually distinct, then continue logo animation and project/template asset round-trip QA.
+
+
+## 21. Project migration defaults and audio-reactive logo — 2026-11-10
+
+- Fixed VISO tool-registry restore so a missing or older project tool-state object is normalized to an empty state, and each registered tool restores missing controls to their declared HTML defaults. This prevents newly introduced controls from retaining stale values when a saved project predates that tool's settings.
+- Added CI coverage for both missing individual tool values and a completely absent tool state, including range and checkbox default restoration.
+- Added `Audio-reactive size` to the Custom Logo panel. The uploaded logo now scales subtly with the live bass/pulse level, in addition to its existing glow, bounce, shake, rotation, reflection and orbiting particles. The new setting is included in advanced project state, undo/redo snapshots, restore UI synchronization and reset defaults.
+- CI asserts the new logo control, saved-state wiring, restore sync and actual render expression. Latest workflow run `42716373393` (run #114), exact commit `beeaa776b8428b769d7de0d521171894e2b2d16f`, completed successfully: HTML/JavaScript validation, project archive/manifest/registry tests, Android SDK setup, debug APK build and artifact upload all passed.
+- Latest source HTML blob: `5541c3cb532d9368c141b79a4e06a4f74b2021b0` (173,467 characters, 2,213 lines, 274 unique element IDs, no duplicate IDs). The original uploaded baseline's 129 IDs were previously confirmed preserved.
+- Latest APK artifact ID `13718116880`; ZIP digest `sha256:61ccf6ede647c9af309aa4ed29ba563342bf0a9d2e58789624367895ea94f257`. Extracted APK size 84,462,535 bytes; SHA-256 `de24f093b9377ff9a81c4a76cdd4557e888ddfc751e720bea3e4b69681b46c2f`.
+- Device QA is still pending. CI success is not a claim of installation or physical-device testing. Next: test the new logo response and spectrum/background effects with actual audio, verify export capture and `.viso` asset round-trip on Android, and continue the reference-app parity audit.
