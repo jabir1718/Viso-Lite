@@ -299,7 +299,7 @@ function actualFormatLabel(){
 updateBitrate();
 
 let img=null,bgImg=null,bgUseVid=false,bgViz=false,maskDirty=true;
-let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
+let audio=null,ctxA=null,an=null,buf=null,streamDest=null,bassFilter=null;
 let pulse=0,pow=140,cut=140,fea=12,pho=100,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
 let beatReaction=true,audioBassBoost=false,bassBoost=1.6,beatSense=1.2,lowGain=1.3,midGain=1,highGain=1.2,beatDamp=.55;
 let spectrumOn=true,spectrumBorder=true,spectrumStyle='bars',spectrumSize=.72,spectrumPos=.72,spectrumGlow=75,spectrumBorderWidth=3;
@@ -370,7 +370,7 @@ $('bRand').onclick=()=>{scatter(500);};
 
 function bind(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);el.onchange=()=>snap();}
 $('bassOn').onclick=e=>{beatReaction=!beatReaction;e.currentTarget.classList.toggle('on',beatReaction);};
-$('bassAudio').onclick=e=>{audioBassBoost=!audioBassBoost;e.currentTarget.classList.toggle('on',audioBassBoost);e.currentTarget.textContent='Audio bass boost '+(audioBassBoost?'ON':'OFF');};
+$('bassAudio').onclick=e=>{audioBassBoost=!audioBassBoost;if(bassFilter)bassFilter.gain.setTargetAtTime(audioBassBoost?9:0,ctxA.currentTime,.04);e.currentTarget.classList.toggle('on',audioBassBoost);e.currentTarget.textContent='Audio bass boost '+(audioBassBoost?'ON':'OFF');};
 $('bassBoost').oninput=e=>bassBoost=+e.target.value/100;
 $('beatSense').oninput=e=>beatSense=+e.target.value/100;
 $('lowBand').oninput=e=>lowGain=+e.target.value/100;
@@ -479,8 +479,9 @@ $('fA').onchange=e=>{const f=e.target.files[0];if(!f)return;
   if(audio)audio.pause();
   audio=new Audio(URL.createObjectURL(f));audio.loop=loopSong;audio.onloadedmetadata=updateSongInfo;audio.ontimeupdate=updateSongInfo;audio.onended=()=>{updateSongInfo();if(rec&&rec.state==='recording')rec.stop();};
   const s=ctxA.createMediaElementSource(audio);
+  bassFilter=ctxA.createBiquadFilter();bassFilter.type='lowshelf';bassFilter.frequency.value=120;bassFilter.gain.value=audioBassBoost?9:0;
   an=ctxA.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.7;
-  s.connect(an);an.connect(ctxA.destination);
+  s.connect(bassFilter);bassFilter.connect(an);an.connect(ctxA.destination);
   streamDest=ctxA.createMediaStreamDestination();an.connect(streamDest);
   buf=new Uint8Array(an.frequencyBinCount);playing=false;$('bP').textContent='Play';updateSongInfo();};
 $('bP').onclick=async()=>{if(!audio)return;
@@ -1056,7 +1057,7 @@ function autoStep(){
 function frame(t){
   requestAnimationFrame(frame);
   const dt=Math.min(50,t-last||16);last=t;frameN++;
-  const b=bands();curB=b;curBbg=bands(bvp);
+  let b=bands();curB=b;curBbg=bands(bvp);
   b=b.map((v,i)=>{const gain=i===0?lowGain*bassBoost:i<4?midGain:highGain;beatSmooth[i]=beatSmooth[i]*beatDamp+(v*beatSense*gain)*(1-beatDamp);return Math.min(1,beatSmooth[i]);});
   const bass=beatReaction?b[0]:0;avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
