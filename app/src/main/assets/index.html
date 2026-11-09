@@ -199,7 +199,8 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <label><span>Font</span><select id="sTextFont"><option value="system-ui">Modern</option><option value="Arial">Clean</option><option value="Georgia">Classic</option><option value="monospace">Tech</option><option value="Impact">Heavy</option></select></label>
     <label><span>Alignment</span><select id="sTextAlign"><option value="center">Center</option><option value="left">Left</option><option value="right">Right</option></select></label>
     <div class="row"><button id="bTextPlate">Text plate: OFF</button></div>
-    <div class="row"><button id="bPresetSave">Save Studio Preset</button><button id="bPresetLoad">Load Studio Preset</button><button id="bPresetClear">Clear Saved</button></div>
+    <label><span>Preset slot</span><select id="studioPresetSlot"><option value="1">Slot 1</option><option value="2">Slot 2</option><option value="3">Slot 3</option></select></label>
+    <div class="row"><button id="bPresetSave">Save slot</button><button id="bPresetLoad">Load slot</button><button id="bPresetClear">Clear slot</button></div>
     <div class="status" id="presetInfo">Save your current visual settings on this device</div>
   </div>
   <div class="sec panel"><h4>Audio Frequency Response</h4>
@@ -586,9 +587,10 @@ $('bTextPlate').onclick=e=>{snap();studioTextPlate=!studioTextPlate;e.currentTar
 $('studioTextColor').oninput=e=>studioTextColor=e.target.value;$('studioTextColor').onchange=()=>snap();
 
 const PRESET_KEY='viso_studio_preset_v2';
-$('bPresetSave').onclick=()=>{try{localStorage.setItem(PRESET_KEY,JSON.stringify({version:2,state:JSON.parse((()=>{snap();return undo[undo.length-1];})())}));$('presetInfo').textContent='Preset saved on this device';}catch(e){$('presetInfo').textContent='Could not save preset: storage unavailable';}};
-$('bPresetLoad').onclick=()=>{try{const p=JSON.parse(localStorage.getItem(PRESET_KEY)||'null');if(!p||!p.state)throw new Error('No saved preset');snap();apply(JSON.stringify(p.state));$('presetInfo').textContent='Saved preset loaded';}catch(e){$('presetInfo').textContent=e.message==='No saved preset'?'No saved preset found':'Could not load preset';}};
-$('bPresetClear').onclick=()=>{try{localStorage.removeItem(PRESET_KEY);$('presetInfo').textContent='Saved preset cleared';}catch(e){$('presetInfo').textContent='Storage unavailable';}};
+function selectedPresetKey(){return PRESET_KEY+'_slot_'+$('studioPresetSlot').value;}
+$('bPresetSave').onclick=()=>{try{snap();localStorage.setItem(selectedPresetKey(),JSON.stringify({version:3,state:JSON.parse(undo[undo.length-1])}));$('presetInfo').textContent='Preset saved in slot '+$('studioPresetSlot').value;}catch(e){$('presetInfo').textContent='Could not save preset: storage unavailable';}};
+$('bPresetLoad').onclick=()=>{try{let raw=localStorage.getItem(selectedPresetKey());if(!raw&&$('studioPresetSlot').value==='1')raw=localStorage.getItem(PRESET_KEY);const p=JSON.parse(raw||'null');if(!p||!p.state)throw new Error('No saved preset');snap();apply(JSON.stringify(p.state));$('presetInfo').textContent='Loaded slot '+$('studioPresetSlot').value;}catch(e){$('presetInfo').textContent=e.message==='No saved preset'?'This slot is empty':'Could not load preset';}};
+$('bPresetClear').onclick=()=>{try{localStorage.removeItem(selectedPresetKey());if($('studioPresetSlot').value==='1')localStorage.removeItem(PRESET_KEY);$('presetInfo').textContent='Slot '+$('studioPresetSlot').value+' cleared';}catch(e){$('presetInfo').textContent='Storage unavailable';}};
 bindStudioSlider('sBassGain',v=>bassGain=v);bindStudioSlider('sMidGain',v=>midGain=v);bindStudioSlider('sHighGain',v=>highGain=v);
 $('bFreqReset').onclick=()=>{snap();bassGain=midGain=highGain=100;$('sBassGain').value=$('sMidGain').value=$('sHighGain').value=100;};
 function pos(e){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
