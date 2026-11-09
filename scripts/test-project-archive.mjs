@@ -120,11 +120,15 @@ const registrySandbox = {
 };
 vm.runInNewContext(
   html.slice(registryStart, registryEnd) +
-    '\nglobalThis.__registry = { registerVISOEffectTool, collectVISORegistryState, restoreVISORegistryState, renderVISOStage };',
+    '\nglobalThis.__registry = { registerVISOEffectTool, collectVISORegistryState, restoreVISORegistryState, renderVISOStage, modules: VISO_RENDER_MODULES };',
   registrySandbox,
   { timeout: 2000 }
 );
 const registry = registrySandbox.__registry;
+assert.equal(registry.modules['Text · Logo Studio'].stage, 'overlay');
+assert.equal(registry.modules['Text · Logo Studio'].order, 80);
+assert.equal(typeof registry.modules['Text · Logo Studio'].render, 'function');
+assert.equal(registry.modules['Surface Reflection'].stage, 'post');
 const dispatched = [];
 const rangeControl = {
   id: 'rangeA', type: 'range', value: '22',
