@@ -72,6 +72,7 @@ label{color:#536b57!important}
 label span{color:#45634b!important}
 input[type=range]{accent-color:#58a94d!important}
 input[type=text]{background:#fff!important;color:#193e27!important;border:1px solid #cbdcc7!important}
+input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;border-radius:8px;background:#fff}
 .status{color:#344d3a!important}
 .subhead{color:#39764b!important}
 .pal{border-color:#c8d8c4!important}
@@ -181,6 +182,19 @@ input[type=text]{background:#fff!important;color:#193e27!important;border:1px so
     <label><span>Colour flow</span><input id="sCyc" type="range" min="0" max="100" value="18"></label>
     <label><span>Gradient</span><input id="sDir" type="range" min="0" max="100" value="0"></label>
   </div>
+  <div class="sec panel"><h4>Text · Logo Studio</h4>
+    <div class="row"><input id="studioText" type="text" maxlength="36" value="VISO" placeholder="Type title or logo"><button id="bTextOn">Text: OFF</button></div>
+    <label><span>Text size</span><input id="sTextSize" type="range" min="25" max="110" value="65"></label>
+    <label><span>Vertical</span><input id="sTextPos" type="range" min="10" max="90" value="78"></label>
+    <label><span>Opacity</span><input id="sTextAlpha" type="range" min="10" max="100" value="100"></label>
+    <label><span>Text colour</span><input id="studioTextColor" type="color" value="#ffffff"></label>
+  </div>
+  <div class="sec panel"><h4>Audio Frequency Response</h4>
+    <label><span>Bass</span><input id="sBassGain" type="range" min="0" max="250" value="100"></label>
+    <label><span>Vocals · Mids</span><input id="sMidGain" type="range" min="0" max="250" value="100"></label>
+    <label><span>Treble</span><input id="sHighGain" type="range" min="0" max="250" value="100"></label>
+    <div class="row"><button id="bFreqReset">Reset frequency</button></div>
+  </div>
   <div class="sec panel"><h4>Export</h4>
     <div class="row"><button id="bShot">Save frame PNG</button><button id="bRec" class="prim">Export video</button></div>
   </div>
@@ -252,6 +266,8 @@ updateBitrate();
 
 let img=null,bgImg=null,bgUseVid=false,bgViz=false,maskDirty=true;
 let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
+let bassGain=100,midGain=100,highGain=100;
+let studioText='VISO',studioTextOn=false,studioTextSize=65,studioTextPos=78,studioTextAlpha=100,studioTextColor='#ffffff';
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
 let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,bvp=140;
 let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
@@ -474,7 +490,7 @@ $('bRec').onclick=()=>{
   recClock=setInterval(()=>{$('recInfo').textContent='Exporting · '+clockText((Date.now()-recStarted)/1000);},250);
   if(audio&&!playing){$('bP').click();}
 };
-function snap(){undo.push(JSON.stringify({colors,mstate,shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp}));
+function snap(){undo.push(JSON.stringify({colors,mstate,shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor}));
   if(undo.length>40)undo.shift();redo.length=0;}
 function apply(s){const d=JSON.parse(s);
   colors=d.colors;mstate.forEach((m,i)=>{m.on=d.mstate[i].on;m.op=d.mstate[i].op;});
@@ -485,11 +501,17 @@ function apply(s){const d=JSON.parse(s);
   trla=d.trla;shk=d.shk;pnc=d.pnc;cyc=d.cyc;dirG=d.dirG;swy=d.swy;spd=d.spd;bri=d.bri;
   con=d.con;sat=d.sat;hueSh=d.hueSh;bloom=d.bloom;dim=d.dim;split=d.split;bgb=d.bgb;txt=d.txt;
   mX=d.mX;mY=d.mY;mSc=d.mSc;mRot=d.mRot;bvo=d.bvo;bvp=d.bvp;
+  bassGain=d.bassGain??100;midGain=d.midGain??100;highGain=d.highGain??100;
+  studioText=d.studioText??'VISO';studioTextOn=!!d.studioTextOn;studioTextSize=d.studioTextSize??65;
+  studioTextPos=d.studioTextPos??78;studioTextAlpha=d.studioTextAlpha??100;studioTextColor=d.studioTextColor??'#ffffff';
   $('sPow').value=pow;$('sCut').value=cut;$('sFea').value=fea;$('sPho').value=pho;$('sDep').value=dep;
   $('sTrl').value=trla;$('sShk').value=shk;$('sPnc').value=pnc;$('sCyc').value=cyc;$('sDir').value=dirG;
   $('sSwy').value=swy;$('sSpd').value=spd;$('sBri').value=bri;$('sCon').value=con;$('sSat').value=sat;
   $('sHue').value=hueSh;$('sDim').value=dim;$('sSplit').value=split;$('sBgb').value=bgb;
   $('txtMask').value=txt;$('sMsc').value=mSc*100;$('sBvo').value=bvo;$('sBvp').value=bvp;
+  $('sBassGain').value=bassGain;$('sMidGain').value=midGain;$('sHighGain').value=highGain;
+  $('studioText').value=studioText;$('bTextOn').textContent='Text: '+(studioTextOn?'ON':'OFF');$('bTextOn').classList.toggle('on',studioTextOn);
+  $('sTextSize').value=studioTextSize;$('sTextPos').value=studioTextPos;$('sTextAlpha').value=studioTextAlpha;$('studioTextColor').value=studioTextColor;
   drawPals();drawMixers();}
 $('bUndo').onclick=()=>{if(!undo.length)return;const s=undo.pop();redo.push(s);apply(s);};
 $('bRedo').onclick=()=>{if(!redo.length)return;const s=redo.pop();undo.push(s);apply(s);};
@@ -503,8 +525,21 @@ $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
   $('sTrl').value=28;$('sShk').value=45;$('sPnc').value=40;$('sCyc').value=18;$('sDir').value=0;
   $('sSwy').value=0;$('sSpd').value=14;$('sBri').value=100;$('sCon').value=100;$('sSat').value=100;
   $('sHue').value=0;$('sDim').value=25;$('sSplit').value=100;$('sBgb').value=0;$('txtMask').value=txt;
-  $('sMsc').value=100;autoOn=false;$('bAuto').classList.remove('on');drawMixers();};
+  $('sMsc').value=100;autoOn=false;$('bAuto').classList.remove('on');
+  bassGain=midGain=highGain=100;studioText='VISO';studioTextOn=false;studioTextSize=65;studioTextPos=78;studioTextAlpha=100;studioTextColor='#ffffff';
+  $('sBassGain').value=100;$('sMidGain').value=100;$('sHighGain').value=100;$('studioText').value='VISO';
+  $('bTextOn').textContent='Text: OFF';$('bTextOn').classList.remove('on');$('sTextSize').value=65;$('sTextPos').value=78;$('sTextAlpha').value=100;$('studioTextColor').value='#ffffff';
+  drawMixers();};
 
+$('studioText').oninput=e=>{studioText=e.target.value.slice(0,36);};
+$('studioText').onchange=()=>snap();
+$('bTextOn').onclick=e=>{snap();studioTextOn=!studioTextOn;e.currentTarget.textContent='Text: '+(studioTextOn?'ON':'OFF');e.currentTarget.classList.toggle('on',studioTextOn);};
+function bindStudioSlider(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);el.onchange=()=>snap();}
+bindStudioSlider('sTextSize',v=>studioTextSize=v);bindStudioSlider('sTextPos',v=>studioTextPos=v);
+bindStudioSlider('sTextAlpha',v=>studioTextAlpha=v);
+$('studioTextColor').oninput=e=>studioTextColor=e.target.value;$('studioTextColor').onchange=()=>snap();
+bindStudioSlider('sBassGain',v=>bassGain=v);bindStudioSlider('sMidGain',v=>midGain=v);bindStudioSlider('sHighGain',v=>highGain=v);
+$('bFreqReset').onclick=()=>{snap();bassGain=midGain=highGain=100;$('sBassGain').value=$('sMidGain').value=$('sHighGain').value=100;};
 function pos(e){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
 function hitObj(p){for(let i=objects.length-1;i>=0;i--){const b=objects[i],w=b.img.width*b.sc,h=b.img.height*b.sc;
   if(p.x>b.x-w/2&&p.x<b.x+w/2&&p.y>b.y-h/2&&p.y<b.y+h/2)return i;}return -1;}
@@ -582,7 +617,9 @@ function buildMask(){
 function bands(pw){if(!an||!playing)return[0,0,0,0,0,0];an.getByteFrequencyData(buf);
   const n=buf.length,out=[];
   for(let b=0;b<6;b++){let s=0,c0=Math.floor(n*Math.pow(b/6,1.7)),c1=Math.floor(n*Math.pow((b+1)/6,1.7));
-    for(let i=c0;i<c1;i++)s+=buf[i];out.push(Math.min(1,(s/Math.max(1,c1-c0))/120*((pw||pow)/100)));}
+    for(let i=c0;i<c1;i++)s+=buf[i];
+    const gain=b<2?bassGain:b<4?midGain:highGain;
+    out.push(Math.min(1,(s/Math.max(1,c1-c0))/120*((pw||pow)/100)*(gain/100)));}
   return out;}
 
 function grad(t){const a=Math.max(0,Math.min(1,t));
@@ -900,6 +937,16 @@ function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
     ctx.strokeRect(-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);}
   ctx.restore();});}
 
+function drawStudioText(ctx,b){
+  if(!studioTextOn||!studioText.trim())return;
+  const bass=b[0]||0,scale=1+bass*.08,size=H*(studioTextSize/1000),label=studioText.trim();
+  ctx.save();ctx.globalAlpha=studioTextAlpha/100;ctx.translate(cx,H*studioTextPos/100);ctx.scale(scale,scale);
+  let fitted=size;ctx.font='800 '+fitted+'px system-ui, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  while(ctx.measureText(label).width>W*.84&&fitted>12){fitted*=.94;ctx.font='800 '+fitted+'px system-ui, sans-serif';}
+  ctx.lineJoin='round';ctx.lineWidth=Math.max(3,fitted*.075);ctx.strokeStyle='rgba(0,0,0,.55)';
+  ctx.shadowColor=studioTextColor;ctx.shadowBlur=16+bass*24;ctx.strokeText(label,0,0);
+  ctx.fillStyle=studioTextColor;ctx.fillText(label,0,0);ctx.restore();
+}
 function drawLights(ctx){
   lights.forEach((l,i)=>{
     const px=l.pin>=0&&objects[l.pin]?objects[l.pin].x:l.x;
@@ -1008,6 +1055,7 @@ function frame(t){
   bx.filter='blur(12px)';bx.drawImage(c,0,0,bl.width,bl.height);bx.filter='none';
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
+  drawStudioText(x,b);
   x.restore();
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
     x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
