@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import { TextDecoder, TextEncoder } from 'node:util';
 
 const html = fs.readFileSync('app/src/main/assets/index.html', 'utf8');
-for (const id of ['bgColor', 'bgTintColor', 'sBgTint', 'sBgBright', 'sBgContrast', 'sBgSat', 'sBgHue', 'sBgX', 'sBgY', 'selBgPattern', 'sBgPattern', 'sBgPatternScale']) {
+for (const id of ['bgColor', 'bgTintColor', 'sBgTint', 'sBgBright', 'sBgContrast', 'sBgSat', 'sBgHue', 'sBgX', 'sBgY', 'selBgPattern', 'sBgPattern', 'sBgPatternScale', 'sBeatSens', 'sBeatScale', 'bBeatMarkers', 'bMetronome', 'bDownbeat', 'beatColor']) {
   assert(html.includes('id="' + id + '"'), 'background control must exist: ' + id);
 }
 const start = html.indexOf('const VISO_CRC_TABLE=');
@@ -134,6 +134,8 @@ assert.equal(registry.modules['Media'].order, 10);
 assert.equal(registry.modules['Background'].order, 10);
 assert.equal(registry.modules['Layers · Tools box'].stage, 'scene');
 assert.equal(registry.modules['Layers · Tools box'].order, 10);
+assert.equal(registry.modules['Beat · BPM Sync'].stage, 'overlay');
+assert.equal(registry.modules['Beat · BPM Sync'].order, 75);
 assert.equal(registry.modules['Text · Logo Studio'].stage, 'overlay');
 assert.equal(registry.modules['Text · Logo Studio'].order, 80);
 assert.equal(typeof registry.modules['Text · Logo Studio'].render, 'function');
