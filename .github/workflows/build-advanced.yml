@@ -62,7 +62,9 @@ jobs:
                   raise SystemExit(f"Missing required UI element: {required}")
           for required_source in (
               "VISO_TOOL_REGISTRY", "viso-project-v3", "function visoZip",
-              "function visoUnzip", "restoreVISOProjectAssets", "AndroidSave.appendChunk"
+              "function visoUnzip", "function visoCRC32", "Project asset checksum failed",
+              "restoreVISOProjectAssets", "AndroidSave.appendChunk", "drawFilmEffect",
+              "drawAtmosphere", "drawSurfaceReflection", "drawStudioTextLayer"
           ):
               if required_source not in html:
                   raise SystemExit(f"Missing required VISO module: {required_source}")
