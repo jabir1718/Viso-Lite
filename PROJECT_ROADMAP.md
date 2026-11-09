@@ -264,3 +264,12 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - CI now asserts the beat/metronome module controls and settings. Latest workflow run `42714993773` completed successfully on the exact branch head; HTML/JavaScript validation, project archive/registry tests, Android SDK setup, debug APK build and artifact upload all passed.
 - Latest verified APK artifact ID `13716499790`, archive ZIP integrity passed; extracted APK size 84,462,407 bytes; SHA-256 `9d4fae02889e00ca93382d4d15280b42c032c7262b09c7cf78a8e2f68f1cf503`.
 - Device QA remains pending. Next priorities: complete spectrum mode and vocal/bass separation audit, logo animation/effect parity, verify every newly added background/beat control changes both preview and export, then test `.viso` project and template media round-trip on a real Android device.
+
+
+## 20. Spectrum and beat CI parity checks — 2026-11-10
+
+- Expanded the project QA script to assert all Spectrum Studio controls (bars, radius, thickness, glow, level, attack/release, peak hold and spin), all eight visual modes (Radial, Ring, Sphere 3D, Tunnel, Mirror, Dual, Wave, LED), and all six frequency focus modes (Full, Low, Balanced, High, Vocals, Changes).
+- Added separate assertions for BPM detection/tap tempo and beat sensitivity, scale, markers, metronome and downbeat controls. The existing background colour-grade/pattern assertions remain.
+- Latest workflow run `42715648508` (run #107), exact commit `7f1a4b62a42aa7402b1dd51969fa2046ea2add44`, completed successfully. HTML/JS validation, project archive/manifest/registry/render-stage tests, Android SDK setup, APK build and artifact upload all passed.
+- Latest artifact ID `13718016338`; ZIP integrity passed. APK size 84,462,407 bytes; SHA-256 `785e57616f4deabe7d66215db9cd90b3911f96b0dbbedbb335a93034d39fc088`.
+- This confirms build/automated checks only, not visual correctness or actual playback on the user's Android phone. Next: verify Spectrum modes with real audio in preview and export, confirm frequency focus is perceptually distinct, then continue logo animation and project/template asset round-trip QA.
