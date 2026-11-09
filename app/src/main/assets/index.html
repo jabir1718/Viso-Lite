@@ -1494,7 +1494,10 @@ try{visoFavorites=new Set(JSON.parse(localStorage.getItem(VISO_FAV_KEY)||'[]'));
 function registerVISOEffectTool(def){
  if(!def||!def.id||!def.name||!def.category||!def.panel)throw new Error('Tool requires id, name, category and panel');
  if(VISO_TOOL_REGISTRY[def.id])throw new Error('Duplicate VISO tool id: '+def.id);
- VISO_TOOL_REGISTRY[def.id]=Object.freeze({...def,controls:(def.controls||[]).slice()});
+ const controls=(def.controls||[]).map(c=>Object.freeze({...c}));
+ const defaults=def.defaults||Object.fromEntries(controls.filter(c=>c.id).map(c=>[c.id,c.defaultValue]));
+ VISO_TOOL_REGISTRY[def.id]=Object.freeze({...def,version:def.version||1,defaults:Object.freeze({...defaults}),controls:Object.freeze(controls),
+  render:typeof def.render==='function'?def.render:null,serialize:typeof def.serialize==='function'?def.serialize:null,restore:typeof def.restore==='function'?def.restore:null});
  return VISO_TOOL_REGISTRY[def.id];
 }
 function visoToolCategory(title){
