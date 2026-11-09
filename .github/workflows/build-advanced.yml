@@ -17,7 +17,7 @@ jobs:
       - name: Checkout VISO Studio branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
+          ref: \${{ github.ref }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -32,16 +32,16 @@ jobs:
           from pathlib import Path
           p = Path("app/src/main/assets/index.html")
           html = p.read_text(encoding="utf-8")
-          scripts = re.findall(r"<script\\b[^>]*>([\\s\\S]*?)</script>", html, re.I)
+          scripts = re.findall(r"<script\b[^>]*>([\s\S]*?)</script>", html, re.I)
           if not scripts:
               raise SystemExit("No inline JavaScript found")
-          ids = re.findall(r'\\bid=["\\']([^"\\']+)["\\']', html)
+          ids = re.findall(r'\bid=["\']([^"\']+)["\']', html)
           if len(ids) != len(set(ids)):
               raise SystemExit("Duplicate HTML id detected")
           for required in ("songInfo", "recInfo", "bLoop", "bStopAtEnd"):
               if required not in ids:
                   raise SystemExit(f"Missing required UI element: {required}")
-          Path("/tmp/viso-inline.js").write_text("\\n".join(scripts), encoding="utf-8")
+          Path("/tmp/viso-inline.js").write_text("\n".join(scripts), encoding="utf-8")
           print(f"HTML checks passed: {len(ids)} unique IDs, {len(scripts)} script blocks")
           PY
           node --check /tmp/viso-inline.js
