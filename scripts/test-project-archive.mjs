@@ -185,6 +185,11 @@ checkControl.checked = true;
 registry.restoreVISORegistryState({ 'test-tool': {} });
 assert.equal(rangeControl.value, '12', 'missing tool values migrate to element defaults');
 assert.equal(checkControl.checked, false, 'missing checkbox values migrate to defaultChecked');
+rangeControl.value = '88';
+checkControl.checked = true;
+registry.restoreVISORegistryState({});
+assert.equal(rangeControl.value, '12', 'tools added after an older project restore to their defaults');
+assert.equal(checkControl.checked, false, 'new checkbox controls restore their defaultChecked state');
 const renderOrder = [];
 registry.registerVISOEffectTool({
   id: 'late-render', name: 'Late Render', category: 'overlay', panel: fakePanel, controls: [],
