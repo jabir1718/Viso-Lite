@@ -1922,7 +1922,7 @@ function clearVISOAssets(){
  VISO_ASSET_FILES.audio=null;VISO_ASSET_FILES.mediaImage=null;VISO_ASSET_FILES.mediaVideo=null;VISO_ASSET_FILES.backgroundImage=null;VISO_ASSET_FILES.backgroundVideo=null;VISO_ASSET_FILES.logo=null;VISO_ASSET_FILES.font=null;VISO_ASSET_FILES.overlays=[];
  ['fA','fI','fV','fBgI','fBgV','fLogo','fFont','fO'].forEach(id=>{const input=$(id);if(input)input.value='';});
 }
-async function validateVISOProjectManifest(project,entries){
+function validateVISOProjectManifest(project,entries){
  if(project.schema!=='viso-project-v3')return true;
  if(!Array.isArray(project.assets)||project.assets.length>512)throw new Error('Invalid project asset manifest');
  const seen=new Set(),seenKinds=new Set(),allowedKinds=new Set(['audio','media-image','media-video','background-image','background-video','logo','font']);let total=0;
@@ -1944,7 +1944,7 @@ async function validateVISOProjectManifest(project,entries){
  if(layers.objects.length!==overlayIndexes.length)throw new Error('Project overlay asset count mismatch');
  return true;
 }
-function restoreVISOProjectAssets(project,entries){
+async function restoreVISOProjectAssets(project,entries){
  const assets=project.assets||[],byKind={},layerState=project.settings?.layers||{};
  assets.forEach(meta=>{const data=entries[meta.name];if(data)byKind[meta.kind]={meta,data};});
  const makeFile=({meta,data})=>new File([data],meta.fileName||meta.name.split('/').pop(),{type:meta.mime||'application/octet-stream'});
