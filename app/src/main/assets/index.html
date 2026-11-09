@@ -1519,7 +1519,7 @@ function visoToolCategory(title){
  if(t.includes('audio')||t.includes('spectrum')||t.includes('bpm'))return 'audio';
  if(t.includes('text')||t.includes('logo'))return 'logo';
  if(t.includes('mask')||t.includes('layer')||t.includes('position')||t.includes('light'))return 'elements';
- if(t.includes('motion')||t.includes('progress')||t.includes('vignette')||t.includes('effect')||t.includes('reflection'))return 'overlay';
+ if(t.includes('motion')||t.includes('progress')||t.includes('vignette')||t.includes('effect')||t.includes('reflection')||t.includes('film'))return 'overlay';
  return 'visualizer';
 }
 function visoSlug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
