@@ -44,7 +44,7 @@ class VideoExporter(
         onProgress: (Int) -> Unit
     ): File? {
         cancelRequested = false
-        val out = File(context.getExternalFilesDir(null), "viso_\${System.currentTimeMillis()}.mp4")
+        val out = File(context.getExternalFilesDir(null), "viso_${System.currentTimeMillis()}.mp4")
         var encoder: MediaCodec? = null
         var muxer: MediaMuxer? = null
         var egl: EglHelper? = null
