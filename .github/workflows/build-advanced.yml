@@ -30,18 +30,28 @@ jobs:
           python3 - <<'PY'
           import re
           from pathlib import Path
-          p = Path("app/src/main/assets/index.html")
-          html = p.read_text(encoding="utf-8")
-          scripts = re.findall(r'<script\b[^>]*>([\s\S]*?)</script>', html, re.I)
+          html = Path("app/src/main/assets/index.html").read_text(encoding="utf-8")
+          scripts = []
+          pos = 0
+          while True:
+              start = html.find("<script", pos)
+              if start < 0:
+                  break
+              tag_end = html.find(">", start)
+              end = html.find("</script>", tag_end)
+              if tag_end < 0 or end < 0:
+                  raise SystemExit("Malformed script tag")
+              scripts.append(html[tag_end + 1:end])
+              pos = end + len("</script>")
           if not scripts:
               raise SystemExit("No inline JavaScript found")
-          ids = re.findall(r'\bid="([^"]+)"', html)
+          ids = re.findall('id="([^"]+)"', html)
           if len(ids) != len(set(ids)):
               raise SystemExit("Duplicate HTML id detected")
           for required in ("songInfo", "recInfo", "bLoop", "bStopAtEnd"):
               if required not in ids:
                   raise SystemExit(f"Missing required UI element: {required}")
-          Path("/tmp/viso-inline.js").write_text("\n".join(scripts), encoding="utf-8")
+          Path("/tmp/viso-inline.js").write_text(chr(10).join(scripts), encoding="utf-8")
           print(f"HTML checks passed: {len(ids)} unique IDs, {len(scripts)} script blocks")
           PY
           node --check /tmp/viso-inline.js
