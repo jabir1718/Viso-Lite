@@ -57,7 +57,7 @@
 :root{color-scheme:light;--lemon:#dfff43;--ink:#303322;--panel:#fff;--line:#e0e5d2;--accent:#a5ce00}
 body{color:var(--ink);background:linear-gradient(180deg,#fff 0%,#f7f9ef 48%,#edf5df 100%)}
 #wrap{background:transparent;padding:8px 12px}
-canvas{background:#000!important;box-shadow:0 8px 28px #26300020,0 0 0 1px #dfe5d4!important;border-radius:24px}
+canvas{background:#050812!important;box-shadow:0 8px 28px #10152235,0 0 0 1px #dfe5d4!important;border-radius:24px}
 #bar{max-height:46dvh;padding:8px 12px 24px;gap:9px;overscroll-behavior:contain}
 .sec{background:#fff;border:1px solid #e1e6d8;border-radius:22px;padding:12px 13px;gap:9px;box-shadow:0 2px 8px #2934000c}
 .sec h4{color:#737d3e;font-size:10px;letter-spacing:.1em;cursor:pointer;display:flex;align-items:center;justify-content:space-between;min-height:17px}
@@ -167,7 +167,7 @@ input[type=text]{background:#fff;border:1px solid #dfe4d2;color:#303322}
   <div class="sec"><h4>Shape</h4>
     <label><span>Cut</span><input id="sCut" type="range" min="40" max="230" value="140"></label>
     <label><span>Feather</span><input id="sFea" type="range" min="0" max="30" value="12"></label>
-    <label><span>Media</span><input id="sPho" type="range" min="0" max="100" value="14"></label>
+    <label><span>Media opacity</span><input id="sPho" type="range" min="0" max="100" value="100"></label>
   </div>
   <div class="sec"><h4>Video grade</h4>
     <label><span>Bright</span><input id="sBri" type="range" min="20" max="180" value="100"></label>
@@ -273,7 +273,7 @@ updateBitrate();
 
 let img=null,bgImg=null,bgUseVid=false,bgViz=false,maskDirty=true;
 let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
-let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
+let pulse=0,pow=140,cut=140,fea=12,pho=100,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
 let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,bvp=140;
 let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
@@ -983,8 +983,8 @@ function frame(t){
   const punch=1+(pnc/100)*pulse*.06;
   if(punch>1){x.translate(cx,cy);x.scale(punch,punch);x.translate(-cx,-cy);}
   const tr=trla/100;
-  if(tr>0.02){x.fillStyle='rgba(244,255,157,'+(1-tr*.85)+')';x.fillRect(-100,-100,W+200,H+200);}
-  else{x.fillStyle='#f4ff9d';x.fillRect(-100,-100,W+200,H+200);}
+  if(tr>0.02){x.fillStyle='rgba(5,8,18,'+(1-tr*.85)+')';x.fillRect(-100,-100,W+200,H+200);}
+  else{x.fillStyle='#050812';x.fillRect(-100,-100,W+200,H+200);}
 
   const clipH=Math.max(0,split/100*H);
   if(clipH>0){
@@ -1003,7 +1003,7 @@ function frame(t){
     }
     x.restore();
   }
-  if(clipH>0&&clipH<H){x.fillStyle='#f4ff9d';x.fillRect(0,clipH,W,H-clipH);}
+  if(clipH>0&&clipH<H){x.fillStyle='#050812';x.fillRect(0,clipH,W,H-clipH);}
   if(bgOn){x.globalAlpha=.4;x.drawImage(paintLayer(1.4,false),0,0);x.globalAlpha=1;}
 
   const s0=src();
