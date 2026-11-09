@@ -205,8 +205,8 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun cancel() {
+        // Keep the UI busy until the encoder has actually stopped and released its resources.
         exporter.cancel()
-        _state.value = _state.value.copy(exporting = false)
     }
 
     override fun onCleared() {
