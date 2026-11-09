@@ -284,3 +284,13 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Latest source HTML blob: `5541c3cb532d9368c141b79a4e06a4f74b2021b0` (173,467 characters, 2,213 lines, 274 unique element IDs, no duplicate IDs). The original uploaded baseline's 129 IDs were previously confirmed preserved.
 - Latest APK artifact ID `13718116880`; ZIP digest `sha256:61ccf6ede647c9af309aa4ed29ba563342bf0a9d2e58789624367895ea94f257`. Extracted APK size 84,462,535 bytes; SHA-256 `de24f093b9377ff9a81c4a76cdd4557e888ddfc751e720bea3e4b69681b46c2f`.
 - Device QA is still pending. CI success is not a claim of installation or physical-device testing. Next: test the new logo response and spectrum/background effects with actual audio, verify export capture and `.viso` asset round-trip on Android, and continue the reference-app parity audit.
+
+
+## 22. Render/export verification build — 2026-11-10
+
+- Latest branch head: `2613ff8e360b220ca552ea5e4829b3573435e916`; app HTML blob remains `5541c3cb532d9368c141b79a4e06a4f74b2021b0` (173,467 characters, 2,213 lines). The latest commit changes CI tests only; the app source is unchanged from the previous feature build.
+- CI workflow run `42716739744` (run #116) completed successfully on the exact branch head. The single build job passed; the workflow's HTML/JavaScript validation, archive/manifest/registry tests, Android debug APK build and artifact upload all completed.
+- Added CI assertions that the preview frame executes render stages in deterministic order `background → media → scene → overlay → post`, video export captures the composited canvas, and Text Studio draws through the shared export canvas.
+- Artifact ID `13718576660`; archive digest `sha256:4111daa4ce6853f401493827f8a7f1ed87325e94d1e89bdd13b0355fd08d8d7b`. Downloaded archive passed ZIP integrity check. Extracted APK size: 84,462,535 bytes; APK SHA-256: `2f67be5c0761b162faaa2dc5d3eec3be3b26f243a59d7c69aaa86a77ac1168ad`.
+- Static source review confirms the Android WebView file picker, project/media save bridge, and MediaStore output path are present. This is code review, not on-device runtime verification.
+- Physical-device QA remains unconfirmed. Outstanding: verify audio/media selection, project/template asset round-trip, audio-reactive logo and spectrum/background effects with real audio, preview/export parity, saved video/audio output, startup/performance and stability on the target Android phone. Continue the Aspectrum reference-app screen-by-screen parity audit and add CI coverage for any uncovered behaviour.
