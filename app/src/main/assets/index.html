@@ -228,6 +228,12 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <label><span>Logo X position</span><input id="sLogoX" type="range" min="0" max="100" value="92"></label>
     <label><span>Logo Y position</span><input id="sLogoY" type="range" min="0" max="100" value="92"></label>
     <label><span>Logo opacity</span><input id="sLogoAlpha" type="range" min="10" max="100" value="90"></label>
+    <label><span>Glow</span><input id="sLogoGlow" type="range" min="0" max="100" value="42"></label>
+    <label><span>Bounce</span><input id="sLogoBounce" type="range" min="0" max="100" value="18"></label>
+    <label><span>Shake</span><input id="sLogoShake" type="range" min="0" max="100" value="8"></label>
+    <label><span>Rotation</span><input id="sLogoRot" type="range" min="-180" max="180" value="0"></label>
+    <label><span>Reflection</span><input id="sLogoReflection" type="range" min="0" max="100" value="0"></label>
+    <label><span>Particles</span><input id="sLogoParticles" type="range" min="0" max="100" value="0"></label>
     <div class="row"><button id="bFont">+ Custom font</button></div>
     <div id="fontInfo" class="status">Fonts: system</div>
   </div>
@@ -1199,6 +1205,7 @@ let panner=null,conv=null,dryG=null,wetG=null,lfo=null,lfoG=null,td=null;
 let speed=100,pitchSemis=0,pitchLock=true,eightD=false,eightW=80,eightS=22,eightR=22;
 let bpm=0,beatFlash=0,flashAmt=0,driftAmt=0,driftX=0,driftY=0,lastOnset=0,onsetGaps=[];
 let sym='off',vigOn=false,vigAmt=45,progOn=false,progSz=12,progPos=96,logoImg=null,logoSize=16,logoX=92,logoY=92,logoAlpha=90,progStyle='gradient';
+let logoGlow=42,logoBounce=18,logoShake=8,logoRotation=0,logoReflection=0,logoParticles=0;
 let progThickness=100,progRound=70,progGlow=48,progRotation=0,progX=0,progColor='#8b5cf6',progRemaining='#dfe8dc';
 function makeImpulse(sec,decay){const r=ctxA.sampleRate,len=Math.floor(r*sec),b=ctxA.createBuffer(2,len,r);
   for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);
@@ -1249,6 +1256,7 @@ $('sLogoSize').oninput=e=>logoSize=+e.target.value;
 $('sLogoX').oninput=e=>logoX=+e.target.value;
 $('sLogoY').oninput=e=>logoY=+e.target.value;
 $('sLogoAlpha').oninput=e=>logoAlpha=+e.target.value;
+$('sLogoGlow').oninput=e=>logoGlow=+e.target.value;$('sLogoBounce').oninput=e=>logoBounce=+e.target.value;$('sLogoShake').oninput=e=>logoShake=+e.target.value;$('sLogoRot').oninput=e=>logoRotation=+e.target.value;$('sLogoReflection').oninput=e=>logoReflection=+e.target.value;$('sLogoParticles').oninput=e=>logoParticles=+e.target.value;
 $('fLogo').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{logoImg=im;};im.src=URL.createObjectURL(f);};
 $('bLogoX').onclick=()=>{logoImg=null;};
 $('bFont').onclick=()=>$('fFont').click();
@@ -1283,11 +1291,23 @@ function drawProgress(ctx){if(!progOn||!audio)return;
 }
 function drawCustomLogo(ctx){
   if(!logoImg)return;
-  const lw=W*logoSize/100,lh=logoImg.height/logoImg.width*lw;
-  ctx.save();ctx.globalAlpha=logoAlpha/100;
-  ctx.shadowColor='rgba(0,0,0,.55)';ctx.shadowBlur=lw*.12;
-  ctx.drawImage(logoImg,W*logoX/100-lw/2,H*logoY/100-lh/2,lw,lh);
-  ctx.restore();
+  const lw=W*logoSize/100,lh=logoImg.height/logoImg.width*lw,t=performance.now()*.001,b=pulse||0;
+  const bounce=Math.sin(t*3.2)*H*.012*(logoBounce/100)-b*H*.018*(logoBounce/100);
+  const shakeX=Math.sin(t*41.7)*W*.009*(logoShake/100)*(0.25+b),shakeY=Math.cos(t*35.1)*H*.006*(logoShake/100)*(0.25+b);
+  const lx=W*logoX/100+shakeX,ly=H*logoY/100+bounce+shakeY;
+  ctx.save();ctx.translate(lx,ly);ctx.rotate(logoRotation*Math.PI/180);ctx.globalAlpha=logoAlpha/100;
+  ctx.shadowColor=grad(.5);ctx.shadowBlur=lw*.32*(logoGlow/100);
+  ctx.drawImage(logoImg,-lw/2,-lh/2,lw,lh);ctx.restore();
+  if(logoReflection>0){
+   ctx.save();ctx.globalAlpha=logoAlpha/100*logoReflection/100*.28;ctx.translate(lx,ly+lh*.58);ctx.scale(1,-1);
+   ctx.drawImage(logoImg,-lw/2,-lh/2,lw,lh);ctx.restore();
+  }
+  if(logoParticles>0){
+   ctx.save();const count=Math.round(logoParticles/100*18),orbit=Math.max(lw,lh)*.72;
+   for(let i=0;i<count;i++){const a=t*(.45+i%4*.12)+i*6.2832/Math.max(1,count),r=orbit*(.62+(i%3)*.17),px=lx+Math.cos(a)*r,py=ly+Math.sin(a*1.13)*r*.72;
+    ctx.globalAlpha=logoParticles/100*(.18+.42*(.5+.5*Math.sin(a*2)));ctx.fillStyle=grad(i/Math.max(1,count));ctx.beginPath();ctx.arc(px,py,Math.max(1,W*.0015*(1+b)),0,Math.PI*2);ctx.fill();}
+   ctx.restore();
+  }
 }
 
 const SPEC_N=96;
@@ -1655,7 +1675,7 @@ document.querySelectorAll('#visoTemplates button').forEach(q=>q.onclick=async()=
  try{await downloadVISOProject(project,'VISO-'+key+'.viso');$('templateInfo').textContent=preset.name+' editable project package downloaded with imported assets';}
  catch(err){$('templateInfo').textContent='Template package failed: '+err.message;}
 });
-function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining};}
+function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining,logoGlow,logoBounce,logoShake,logoRotation,logoReflection,logoParticles};}
 function restoreAdvancedState(s){
  if(!s)return;
  if(s.speed!==undefined)speed=s.speed;if(s.pitchSemis!==undefined)pitchSemis=s.pitchSemis;if(s.pitchLock!==undefined)pitchLock=s.pitchLock;
@@ -1670,9 +1690,11 @@ function restoreAdvancedState(s){
  if(s.shockStrength!==undefined)shockStrength=s.shockStrength;if(s.shockSpeed!==undefined)shockSpeed=s.shockSpeed;if(s.shockThickness!==undefined)shockThickness=s.shockThickness;if(s.shockRgb!==undefined)shockRgb=s.shockRgb;
  if(s.lensAmount!==undefined)lensAmount=s.lensAmount;if(s.lensFocus!==undefined)lensFocus=s.lensFocus;if(s.lensBokeh!==undefined)lensBokeh=s.lensBokeh;if(s.lensBlur!==undefined)lensBlur=s.lensBlur;
  if(s.progThickness!==undefined)progThickness=s.progThickness;if(s.progRound!==undefined)progRound=s.progRound;if(s.progGlow!==undefined)progGlow=s.progGlow;if(s.progRotation!==undefined)progRotation=s.progRotation;if(s.progX!==undefined)progX=s.progX;if(s.progColor!==undefined)progColor=s.progColor;if(s.progRemaining!==undefined)progRemaining=s.progRemaining;
+ if(s.logoGlow!==undefined)logoGlow=s.logoGlow;if(s.logoBounce!==undefined)logoBounce=s.logoBounce;if(s.logoShake!==undefined)logoShake=s.logoShake;if(s.logoRotation!==undefined)logoRotation=s.logoRotation;if(s.logoReflection!==undefined)logoReflection=s.logoReflection;if(s.logoParticles!==undefined)logoParticles=s.logoParticles;
  const sync=(id,val)=>{const el=$(id);if(el&&val!==undefined){el.value=val;el.dispatchEvent(new Event('input'));}};
  [['sSpeed',speed],['sPitch',pitchSemis],['s8w',eightW],['s8s',eightS],['s8r',eightR],['sDrift',driftAmt],['sFlash',flashAmt],['sVig',vigAmt],['sProgSz',progSz],['sProgPos',progPos],['sLogoSize',logoSize],['sLogoX',logoX],['sLogoY',logoY],['sLogoAlpha',logoAlpha],['sSpecBars',specBars],['sSpecRad',specRad],['sSpecThick',specThick],['sSpecGlow',specGlow],['sSpecLevel',specLevel],['sSpecAtk',specAtk*100],['sSpecRel',specRel*100],['sSpecPeak',specPeakHold],['sSpecSpin',specSpin*100],['sBgDriftSpeed',bgDriftSpeed],['sBgDriftRot',bgDriftRot],['sBgDriftTravel',bgDriftTravel],['sMotionFx',motionFx],['sVhsScan',vhsScan],['sVhsNoise',vhsNoise],['sVhsJitter',vhsJitter],['sVhsBleed',vhsBleed],['sShockStrength',shockStrength],['sShockSpeed',shockSpeed],['sShockThickness',shockThickness],['sShockRgb',shockRgb],['sLensAmount',lensAmount],['sLensFocus',lensFocus],['sLensBokeh',lensBokeh],['sLensBlur',lensBlur],['sProgThickness',progThickness],['sProgRound',progRound],['sProgGlow',progGlow],['sProgRot',progRotation],['sProgX',progX]].forEach(([id,val])=>sync(id,val));
  sync('progColor',progColor);sync('progRemaining',progRemaining);
+ sync('sLogoGlow',logoGlow);sync('sLogoBounce',logoBounce);sync('sLogoShake',logoShake);sync('sLogoRot',logoRotation);sync('sLogoReflection',logoReflection);sync('sLogoParticles',logoParticles);
  const btn=(id,on,label)=>{const el=$(id);if(!el)return;el.classList.toggle('on',!!on);if(label)el.textContent=label;};
  btn('b8d',eightD,'8D audio: '+(eightD?'ON':'OFF'));btn('bPreserve',pitchLock,'Pitch lock: '+(pitchLock?'ON':'OFF'));
  btn('bVig',vigOn);btn('bProg',progOn);btn('bSpec',specOn,'Spectrum: '+(specOn?'ON':'OFF'));
