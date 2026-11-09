@@ -1667,6 +1667,13 @@ const VISO_ASSET_FILES={audio:null,mediaImage:null,mediaVideo:null,backgroundIma
 [['fA','audio'],['fI','mediaImage'],['fV','mediaVideo'],['fBgI','backgroundImage'],['fBgV','backgroundVideo'],['fLogo','logo'],['fFont','font']]
  .forEach(([id,key])=>$(id).addEventListener('change',e=>{VISO_ASSET_FILES[key]=e.target.files?.[0]||null;}));
 $('fO').addEventListener('change',e=>{VISO_ASSET_FILES.overlays=[...(VISO_ASSET_FILES.overlays||[]),...Array.from(e.target.files||[])];});
+$('fI').addEventListener('change',()=>{VISO_ASSET_FILES.mediaVideo=null;});
+$('fV').addEventListener('change',()=>{VISO_ASSET_FILES.mediaImage=null;});
+$('fBgI').addEventListener('change',()=>{VISO_ASSET_FILES.backgroundVideo=null;});
+$('fBgV').addEventListener('change',()=>{VISO_ASSET_FILES.backgroundImage=null;});
+$('bMediaClear').addEventListener('click',()=>{VISO_ASSET_FILES.mediaImage=null;VISO_ASSET_FILES.mediaVideo=null;$('fI').value='';$('fV').value='';});
+$('bBgX').addEventListener('click',()=>{VISO_ASSET_FILES.backgroundImage=null;VISO_ASSET_FILES.backgroundVideo=null;$('fBgI').value='';$('fBgV').value='';});
+$('bLogoX').addEventListener('click',()=>{VISO_ASSET_FILES.logo=null;$('fLogo').value='';});
 const VISO_CRC_TABLE=(()=>{const table=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);table[n]=c>>>0;}return table;})();
 function visoCRC32(bytes){let crc=0xffffffff;for(let i=0;i<bytes.length;i++)crc=VISO_CRC_TABLE[(crc^bytes[i])&255]^(crc>>>8);return (crc^0xffffffff)>>>0;}
 function visoZip(files){
