@@ -730,7 +730,7 @@ $('bRec').onclick=()=>{
   if(audio&&!playing){$('bP').click();}
 };
 function captureProjectState(){return {colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState()};}
-function snap(){const state=JSON.stringify(captureProjectState());undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
+function snap(){const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
   if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
   redo.forEach(old=>objectSnapshotCache.delete(old));redo.length=0;}
 function apply(s){const d=JSON.parse(s);
@@ -789,12 +789,12 @@ $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
   drawMixers();resetVISOAdvancedControls();};
 
 $('studioText').oninput=e=>{studioText=e.target.value.slice(0,36);};
-$('studioText').onchange=()=>snap();
+$('studioText').onchange=()=>{};
 $('studioText2').oninput=e=>{studioText2=e.target.value.slice(0,36);};
-$('studioText2').onchange=()=>snap();
+$('studioText2').onchange=()=>{};
 $('bText2On').onclick=e=>{snap();studioText2On=!studioText2On;e.currentTarget.textContent='Text 2: '+(studioText2On?'ON':'OFF');e.currentTarget.classList.toggle('on',studioText2On);};
 $('bTextOn').onclick=e=>{snap();studioTextOn=!studioTextOn;e.currentTarget.textContent='Text: '+(studioTextOn?'ON':'OFF');e.currentTarget.classList.toggle('on',studioTextOn);};
-function bindStudioSlider(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);el.onchange=()=>snap();}
+function bindStudioSlider(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);}
 bindStudioSlider('sTextSize',v=>studioTextSize=v);bindStudioSlider('sTextPos',v=>studioTextPos=v);
 bindStudioSlider('sTextAlpha',v=>studioTextAlpha=v);
 bindStudioSlider('sTextX',v=>studioTextX=v);bindStudioSlider('sTextRot',v=>studioTextRot=v);
@@ -803,8 +803,8 @@ $('sTextAnim').onchange=e=>{snap();studioTextAnim=e.target.value;};
 $('sTextFont').onchange=e=>{snap();studioTextFont=e.target.value;};
 $('sTextAlign').onchange=e=>{snap();studioTextAlign=e.target.value;};
 $('bTextPlate').onclick=e=>{snap();studioTextPlate=!studioTextPlate;e.currentTarget.textContent='Text plate: '+(studioTextPlate?'ON':'OFF');e.currentTarget.classList.toggle('on',studioTextPlate);};
-$('studioTextColor').oninput=e=>studioTextColor=e.target.value;$('studioTextColor').onchange=()=>snap();
-function bindStudio2(id,fn){const el=$(id);el.oninput=e=>fn(e.target.type==='range'?+e.target.value:e.target.value);el.onchange=()=>snap();}
+$('studioTextColor').oninput=e=>studioTextColor=e.target.value;
+function bindStudio2(id,fn){const el=$(id);el.oninput=e=>fn(e.target.type==='range'?+e.target.value:e.target.value);}
 bindStudio2('sText2Size',v=>studioText2Size=v);bindStudio2('sText2Pos',v=>studioText2Pos=v);bindStudio2('sText2Alpha',v=>studioText2Alpha=v);bindStudio2('studioText2Color',v=>studioText2Color=v);bindStudio2('sText2X',v=>studioText2X=v);bindStudio2('sText2Rot',v=>studioText2Rot=v);bindStudio2('sText2Stroke',v=>studioText2Stroke=v);bindStudio2('sText2Glow',v=>studioText2Glow=v);
 $('sText2Anim').onchange=e=>{snap();studioText2Anim=e.target.value;};$('sText2Align').onchange=e=>{snap();studioText2Align=e.target.value;};
 $('bText2Plate').onclick=e=>{snap();studioText2Plate=!studioText2Plate;e.currentTarget.textContent='Text 2 plate: '+(studioText2Plate?'ON':'OFF');e.currentTarget.classList.toggle('on',studioText2Plate);};
@@ -1600,6 +1600,16 @@ $('bar').appendChild(empty);
 window.VISO_TOOL_REGISTRY=VISO_TOOL_REGISTRY;
 window.registerVISOEffectTool=registerVISOEffectTool;
 applyVISOFilters();
+// Capture history before any editor button/input changes; Undo and Redo remain direct history actions.
+document.querySelectorAll('#bar button').forEach(button=>{
+ if(['bUndo','bRedo','bProjectSave','bProjectOpen'].includes(button.id)||button.classList.contains('toolFav'))return;
+ button.addEventListener('click',()=>snap(),true);
+});
+document.querySelectorAll('#bar input[type="range"],#bar input[type="color"],#bar select').forEach(control=>{
+ control.addEventListener('pointerdown',()=>snap());
+ control.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End',' '].includes(e.key))snap();});
+});
+document.querySelectorAll('#bar input[type="text"]').forEach(control=>control.addEventListener('focus',()=>snap()));
 
 requestAnimationFrame(frame);
   const dt=Math.min(50,t-last||16);last=t;frameN++;
