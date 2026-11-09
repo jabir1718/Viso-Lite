@@ -92,8 +92,9 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
       <button id="bO">+ PNG</button><button id="bDel">× PNG</button>
       <button id="bP" class="prim">Play</button><button id="bR">Center</button>
     </div>
-<div class="subhead">Social export format</div>
-
+<div class="subhead">Quick social presets</div>
+    <div class="row" id="socialPresets"><button data-social="tiktok">TikTok</button><button data-social="reels">Reels</button><button data-social="youtube">YouTube</button><button data-social="square">Square</button><button data-social="story4k">Story 4K</button></div>
+    <div class="subhead">Social export format</div>
     <div class="row" id="aspect"></div>
     <div class="row" id="res"></div>
     <div class="row" id="fps"></div>
@@ -270,6 +271,24 @@ const fmtButton=document.createElement('button');fmtButton.textContent='Auto for
 fmtButton.onclick=()=>{formatChoice=formatChoice==='auto'?'webm':'auto';fmtButton.textContent=formatChoice==='auto'?'Auto format':'WebM';fmtButton.classList.toggle('on',formatChoice==='auto');updateBitrate();};
 $('format').appendChild(fmtButton);
 updateBitrate();
+
+const socialProfiles={
+  tiktok:{aspect:'9:16',res:1080,fps:30,label:'TikTok · 1080p · 30 FPS'},
+  reels:{aspect:'9:16',res:1080,fps:30,label:'Instagram Reels · 1080p · 30 FPS'},
+  youtube:{aspect:'16:9',res:1080,fps:30,label:'YouTube · 1080p · 30 FPS'},
+  square:{aspect:'1:1',res:1080,fps:30,label:'Square · 1080p · 30 FPS'},
+  story4k:{aspect:'9:16',res:2160,fps:30,label:'Story · 4K · 30 FPS'}
+};
+function applySocialProfile(key){
+  const p=socialProfiles[key];if(!p)return;
+  aspect=p.aspect;baseRes=p.res;FPS=p.fps;
+  document.querySelectorAll('#aspect button').forEach(q=>q.classList.toggle('on',q.textContent.startsWith(aspect)));
+  document.querySelectorAll('#res button').forEach(q=>q.classList.toggle('on',q.textContent===String(baseRes===2160?'4K':baseRes)));
+  document.querySelectorAll('#fps button').forEach(q=>q.classList.toggle('on',q.textContent===FPS+' fps'));
+  document.querySelectorAll('#socialPresets button').forEach(q=>q.classList.toggle('on',q.dataset.social===key));
+  setRes();$('exportInfo').textContent=p.label+' · '+W+'×'+H+' · '+actualFormatLabel();
+}
+document.querySelectorAll('#socialPresets button').forEach(q=>q.addEventListener('click',()=>applySocialProfile(q.dataset.social)));
 
 let img=null,bgImg=null,bgUseVid=false,bgViz=false,maskDirty=true;
 let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
