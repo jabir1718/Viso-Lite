@@ -62,7 +62,7 @@ assert.throws(() => visoUnzip(headerMismatch), /header mismatch/i, 'local/centra
 
 
 const validationStart = html.indexOf('function validateVISOProjectManifest(');
-const validationEnd = html.indexOf('function restoreVISOProjectAssets', validationStart);
+const validationEnd = html.indexOf('async function restoreVISOProjectAssets', validationStart);
 assert(validationStart >= 0 && validationEnd > validationStart, 'project manifest validator must exist');
 const validationSandbox = {};
 vm.runInNewContext(
