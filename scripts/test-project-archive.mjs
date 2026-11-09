@@ -66,7 +66,7 @@ const validationEnd = html.indexOf('async function restoreVISOProjectAssets', va
 assert(validationStart >= 0 && validationEnd > validationStart, 'project manifest validator must exist');
 const validationSandbox = {};
 vm.runInNewContext(
-  html.slice(validationStart, validationEnd) + '\\nglobalThis.__validate = validateVISOProjectManifest;',
+  html.slice(validationStart, validationEnd) + '\nglobalThis.__validate = validateVISOProjectManifest;',
   validationSandbox,
   { timeout: 2000 }
 );
