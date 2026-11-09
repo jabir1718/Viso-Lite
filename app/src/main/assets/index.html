@@ -1517,6 +1517,7 @@ const VISO_RENDER_MODULES={
  'Overlay Effects · Motion FX':{stage:'overlay',order:20,render:(ctx,b)=>drawMotionFx(ctx,b)},
  'Film & Vintage':{stage:'overlay',order:30,render:(ctx,b)=>drawFilmEffect(ctx,b)},
  'Atmosphere FX':{stage:'overlay',order:40,render:(ctx,b)=>drawAtmosphere(ctx,b)},
+ 'Text · Logo Studio':{stage:'overlay',order:80,render:(ctx,b)=>drawStudioText(ctx,b)},
  'Surface Reflection':{stage:'post',order:90,render:ctx=>drawSurfaceReflection(ctx)}
 };
 const VISO_TOOL_REGISTRY=Object.create(null);
@@ -1724,8 +1725,7 @@ function frame(t){
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
   if(flashAmt>0&&beatFlash>0){x.fillStyle='rgba(255,255,255,'+(beatFlash*flashAmt/100*.22)+')';x.fillRect(0,0,W,H);}
   renderVISOStage('overlay',x,b,dt);
-  drawStudioText(x,b);
-  x.restore();
+    x.restore();
   renderVISOStage('post',x,b,dt);
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
     x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
