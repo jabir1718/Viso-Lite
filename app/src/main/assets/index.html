@@ -8,23 +8,19 @@
        background:radial-gradient(120% 60% at 50% 0%,#1a1030 0%,#0a0812 45%,#050409 100%);
        display:flex;flex-direction:column;height:100dvh;overflow:hidden}
   body{color:#203027;background:linear-gradient(145deg,#f8ffe8 0%,#e9ffd1 48%,#d9fff0 100%)}
-  #bar{background:transparent}
   .sec{background:linear-gradient(145deg,#ffffffed,#efffe5ed);border:1px solid #b7d99c;box-shadow:0 3px 12px #466b2814}
-  .sec h4{color:#287a42;font-size:11px;letter-spacing:.04em;display:flex;justify-content:space-between;align-items:center;min-height:30px;cursor:pointer}
-  .sec h4 .chev{font-size:13px;color:#368d52}
+  .sec h4{font-size:11px;letter-spacing:.04em;color:#287a42;display:flex;justify-content:space-between;align-items:center;min-height:30px;cursor:pointer}
   .panel.collapsed>:not(h4){display:none!important}
   button{background:#f5ffe9;color:#203d2a;border:1px solid #a8ce8e}
   button.on{background:#d5ffad;border-color:#54a86a;color:#164b2b}
   button.lock{background:#d8f8cf;border-color:#4ade80;color:#17552d}
   button.prim{background:linear-gradient(180deg,#a9ef69,#65c84e);border-color:#60b947;color:#123c1d}
-  label{color:#46634b}
-  input[type=range]{accent-color:#59b94d}
+  label{color:#46634b} input[type=range]{accent-color:#59b94d}
   input[type=text]{background:#fff;color:#183d24;border-color:#a8ce8e}
   .status{background:#efffe7;color:#244a2e;border:1px solid #c3e5ad;border-radius:9px;padding:7px}
   .subhead{font-size:10px;font-weight:700;color:#39824b;padding-top:4px}
-  #monitorDock{position:absolute;left:8px;right:8px;bottom:8px;max-width:420px;margin:auto;background:#f7ffedf0;border:1px solid #9fcf81;border-radius:12px;padding:7px;display:flex;flex-direction:column;gap:5px;box-shadow:0 4px 18px #294e251c}
   #wrap{position:relative}
-  #monitorDock .row{flex-wrap:nowrap}
+  #monitorDock{position:absolute;left:6px;right:6px;bottom:6px;max-width:420px;margin:auto;background:#f7ffedf0;border:1px solid #9fcf81;border-radius:12px;padding:7px;display:flex;flex-direction:column;gap:5px;box-shadow:0 4px 18px #294e251c}
   #wrap{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:6px}
   canvas{max-height:100%;max-width:100%;aspect-ratio:9/16;border-radius:16px;background:#000;
          touch-action:none;display:block;box-shadow:0 0 40px #7c3aed44,0 0 0 1px #ffffff14}
@@ -54,29 +50,29 @@
   .status{font-size:10px;color:#d5d1e2;background:#ffffff0b;border:1px solid #ffffff12;
     border-radius:9px;padding:8px 10px;font-variant-numeric:tabular-nums;line-height:1.4}
 </style>
-<div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
+<div id="wrap"><canvas id="c" width="1080" height="1920"></canvas><div id="monitorDock"><div class="subhead">Song + Export Monitor</div>
+    <div id="songInfo" class="status">Song: not loaded · 00:00 / 00:00</div>
+    <div id="recInfo" class="status">Export: ready · 00:00</div>
+    <div class="row"><button id="bLoop" class="on">Loop song: ON</button><button id="bStopAtEnd">Stop export at song end: OFF</button></div></div></div>
 <div id="bar">
-  <div class="sec panel open" id="mediaPanel"><h4>Media + Export <span class="chev">＋</span></h4>
-    <div class="row"><button id="bA">MP3</button><button id="bI">Photo</button><button id="bV">Video</button><button id="bO">+ PNG</button><button id="bDel">× PNG</button><button id="bP" class="prim">Play</button><button id="bR">Center</button></div>
-    <div class="subhead">Social export format</div>
-    <div class="row" id="aspect"></div><div class="row" id="res"></div><div class="row" id="fps"></div><div class="row" id="format"></div>
-    <label><span>Quality</span><input id="sQuality" type="range" min="40" max="160" value="100"></label>
-    <div id="exportInfo" class="status">1080 · 30 FPS · best available format</div>
-  </div>
+<div class="sec panel open" id="mediaPanel"><h4>Media + Export</h4>
+    <div class="row">
+      <button id="bA">MP3</button><button id="bI">Photo</button><button id="bV">Video</button>
+      <button id="bO">+ PNG</button><button id="bDel">× PNG</button>
+      <button id="bP" class="prim">Play</button><button id="bR">Center</button>
+    </div>
+<div class="subhead">Social export format</div>
+
+    <div class="row" id="aspect"></div>
     <div class="row" id="res"></div>
     <div class="row" id="fps"></div>
     <div class="row" id="format"></div>
     <label><span>Quality</span><input id="sQuality" type="range" min="40" max="160" value="100"></label>
     <div id="exportInfo" class="status">1080 · 30 FPS · best available format</div>
-  </div>
-  
-    <div id="recInfo" class="status">Export: ready · 00:00</div>
-    <div class="row"><button id="bLoop" class="on">Loop song: ON</button><button id="bStopAtEnd">Stop export at song end: OFF</button></div>
-  </div>
-  <div class="sec panel"><h4>History</h4>
+</div><div class="sec panel"><h4>History</h4>
     <div class="row"><button id="bUndo">⟲ Undo</button><button id="bRedo">Redo ⟳</button><button id="bReset">Reset all</button></div>
   </div>
-  <div class="sec"><h4>Background</h4>
+  <div class="sec panel"><h4>Background</h4>
     <div class="row"><button id="bBgI">BG image</button><button id="bBgV">BG video</button>
       <button id="bBgX">BG off</button><button id="bBgViz">BG visualizer</button></div>
     <label><span>BG split</span><input id="sSplit" type="range" min="0" max="100" value="100"></label>
@@ -86,7 +82,7 @@
     <label><span>BG viz power</span><input id="sBvp" type="range" min="20" max="300" value="140"></label>
     <div class="row"><button id="tBvm" class="on">BG viz on BG shape</button></div>
   </div>
-  <div class="sec"><h4>Auto + Lock</h4>
+  <div class="sec panel"><h4>Auto + Lock</h4>
     <div class="row">
       <button id="bAuto" class="prim">AUTO</button>
       <button class="chip lock" id="kCol">Lock colour</button><button class="chip lock" id="kVis">Lock visuals</button>
@@ -94,16 +90,16 @@
     </div>
     <label><span>Every</span><input id="sAuto" type="range" min="1" max="12" value="3"></label>
   </div>
-  <div class="sec"><h4>Look</h4>
+  <div class="sec panel"><h4>Look</h4>
     <div class="row" id="presets"></div>
     <div class="row"><button id="bMix">Auto mix</button><button id="bRand">Random</button></div>
   </div>
-  <div class="sec"><h4>Visuals</h4><div class="row" id="modes"></div><div id="mixers"></div></div>
-  <div class="sec"><h4>Colour</h4>
+  <div class="sec panel"><h4>Visuals</h4><div class="row" id="modes"></div><div id="mixers"></div></div>
+  <div class="sec panel"><h4>Colour</h4>
     <div class="row" id="pals"></div>
     <div class="row"><button id="addC">+ colour</button><button id="delC">× colour</button></div>
   </div>
-  <div class="sec"><h4>Mask shape</h4>
+  <div class="sec panel"><h4>Mask shape</h4>
     <div class="row" id="shapes"></div>
     <input id="txtMask" type="text" value="VISO" maxlength="14">
     <div class="row">
@@ -113,20 +109,20 @@
     </div>
     <label><span>Mask size</span><input id="sMsc" type="range" min="20" max="300" value="100"></label>
   </div>
-  <div class="sec"><h4>Lights</h4>
+  <div class="sec panel"><h4>Lights · Tools box</h4>
     <div class="row"><button id="bLight" class="prim">+ Light</button><button id="bLightDel">× Light</button>
       <button id="bLightPin">Pin to PNG</button></div>
     <label><span>Intensity</span><input id="sLint" type="range" min="0" max="100" value="60"></label>
     <label><span>Size</span><input id="sLsz" type="range" min="20" max="300" value="100"></label>
   </div>
-  <div class="sec"><h4>Layers</h4>
+  <div class="sec panel"><h4>Layers · Tools box</h4>
     <div class="row">
       <button id="tBg">BG viz</button><button id="tFr">Front viz</button>
       <button id="tPh" class="on">Media</button><button id="tMask" class="on">Mask</button>
     </div>
     <div class="row"><button id="bZup">Media ⬆ front</button><button id="bZdn">Media ⬇ back</button></div>
   </div>
-  <div class="sec"><h4>Position</h4>
+  <div class="sec panel"><h4>Position</h4>
     <div class="row">
       <button class="nudge" id="bL">◀</button><button class="nudge" id="bRt">▶</button>
       <button class="nudge" id="bU">▲</button><button class="nudge" id="bD">▼</button>
@@ -135,18 +131,18 @@
     <label><span>Sway L/R</span><input id="sSwy" type="range" min="0" max="100" value="0"></label>
     <label><span>Sway speed</span><input id="sSpd" type="range" min="2" max="60" value="14"></label>
   </div>
-  <div class="sec"><h4>Shape</h4>
+  <div class="sec panel"><h4>Shape</h4>
     <label><span>Cut</span><input id="sCut" type="range" min="40" max="230" value="140"></label>
     <label><span>Feather</span><input id="sFea" type="range" min="0" max="30" value="12"></label>
     <label><span>Media</span><input id="sPho" type="range" min="0" max="100" value="14"></label>
   </div>
-  <div class="sec"><h4>Video grade</h4>
+  <div class="sec panel"><h4>Video grade</h4>
     <label><span>Bright</span><input id="sBri" type="range" min="20" max="180" value="100"></label>
     <label><span>Contrast</span><input id="sCon" type="range" min="20" max="200" value="100"></label>
     <label><span>Saturate</span><input id="sSat" type="range" min="0" max="260" value="100"></label>
     <label><span>Hue shift</span><input id="sHue" type="range" min="0" max="360" value="0"></label>
   </div>
-  <div class="sec"><h4>Motion</h4>
+  <div class="sec panel"><h4>Shape · Gradient · Motion</h4>
     <label><span>Power</span><input id="sPow" type="range" min="10" max="300" value="140"></label>
     <label><span>Depth</span><input id="sDep" type="range" min="0" max="100" value="70"></label>
     <label><span>Trail</span><input id="sTrl" type="range" min="0" max="90" value="28"></label>
@@ -155,9 +151,10 @@
     <label><span>Colour flow</span><input id="sCyc" type="range" min="0" max="100" value="18"></label>
     <label><span>Gradient</span><input id="sDir" type="range" min="0" max="100" value="0"></label>
   </div>
-  <div class="sec"><h4>Export</h4>
+  <div class="sec panel"><h4>Export</h4>
     <div class="row"><button id="bShot">Save frame PNG</button><button id="bRec" class="prim">Export video</button></div>
   </div>
+</div>
 </div>
 <input id="fA" type="file" accept="audio/*"><input id="fI" type="file" accept="image/*">
 <input id="fV" type="file" accept="video/*"><input id="fO" type="file" accept="image/*" multiple>
