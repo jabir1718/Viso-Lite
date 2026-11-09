@@ -1656,8 +1656,8 @@ function drawVISOBackground(ctx,b,dt){
         ctx.translate(cx+dx,cy+dy);ctx.rotate(rot);ctx.scale(zoom,zoom);ctx.translate(-cx,-cy);
       }
       if(bgb>0)ctx.filter='blur('+bgb+'px)';
-      if(bgUseVid&&bvid.readyState>=2)cover(x,bvid,bvid.videoWidth||W,bvid.videoHeight||H,H);
-      else if(bgImg)cover(x,bgImg,bgImg.width,bgImg.height,H);
+      if(bgUseVid&&bvid.readyState>=2)cover(ctx,bvid,bvid.videoWidth||W,bvid.videoHeight||H,H);
+      else if(bgImg)cover(ctx,bgImg,bgImg.width,bgImg.height,H);
       ctx.filter='none';ctx.restore();
       ctx.fillStyle='rgba(0,0,0,'+(dim/100*.75)+')';ctx.fillRect(0,0,W,clipH);
       if(bgViz){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=bvo/100;
