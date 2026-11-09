@@ -80,6 +80,8 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
 @media(max-height:740px){#bar{max-height:35dvh}#monitorDock{padding:6px 8px;gap:4px}#monitorDock button{min-height:29px}}
 
 /* VISO professional workspace shell + searchable tool registry */
+.fxSubhead{padding-top:5px;border-top:1px solid #e3ecdf;color:#5d9161;font-size:8px;font-weight:900;letter-spacing:.12em}
+
 #studioHeader{flex:0 0 auto;padding:9px 12px 7px;background:linear-gradient(135deg,#fbfff9 0%,#f0f8ed 58%,#eaf5ed 100%);border-bottom:1px solid #d6e5d3;box-shadow:0 2px 12px #1b42200b;z-index:5}
 .studioBrand{display:flex;align-items:center;gap:9px;min-height:30px}
 .brandGlyph{width:29px;height:29px;display:grid;place-items:center;border-radius:9px;background:linear-gradient(145deg,#a7e978,#4eaa52);color:#123c22;font-size:17px;font-weight:950;box-shadow:inset 0 1px #ffffffa6,0 2px 6px #4eaa5230}
@@ -236,6 +238,21 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <label><span>Travel distance</span><input id="sBgDriftTravel" type="range" min="0" max="100" value="22"></label>
     <div class="row"><button id="bVhs">VHS: OFF</button><button id="bShock">Shockwave: OFF</button><button id="bLens">Lens glow: OFF</button></div>
     <label><span>Motion FX intensity</span><input id="sMotionFx" type="range" min="0" max="100" value="45"></label>
+    <div class="fxSubhead">VHS / ANALOG TAPE</div>
+    <label><span>Scanlines</span><input id="sVhsScan" type="range" min="0" max="100" value="32"></label>
+    <label><span>Static noise</span><input id="sVhsNoise" type="range" min="0" max="100" value="24"></label>
+    <label><span>Jitter</span><input id="sVhsJitter" type="range" min="0" max="100" value="18"></label>
+    <label><span>Colour bleed</span><input id="sVhsBleed" type="range" min="0" max="100" value="22"></label>
+    <div class="fxSubhead">SHOCKWAVE</div>
+    <label><span>Strength</span><input id="sShockStrength" type="range" min="0" max="100" value="58"></label>
+    <label><span>Speed</span><input id="sShockSpeed" type="range" min="5" max="100" value="52"></label>
+    <label><span>Thickness</span><input id="sShockThickness" type="range" min="1" max="24" value="5"></label>
+    <label><span>RGB split</span><input id="sShockRgb" type="range" min="0" max="100" value="16"></label>
+    <div class="fxSubhead">LENS / BOKEH</div>
+    <label><span>Glow amount</span><input id="sLensAmount" type="range" min="0" max="100" value="42"></label>
+    <label><span>Focus size</span><input id="sLensFocus" type="range" min="10" max="100" value="58"></label>
+    <label><span>Bokeh</span><input id="sLensBokeh" type="range" min="0" max="100" value="22"></label>
+    <label><span>Soft blur</span><input id="sLensBlur" type="range" min="0" max="100" value="28"></label>
   </div>
   <div class="sec panel"><h4>Progress Bar Studio</h4>
     <div class="row" id="progressStyles"><button data-prog="gradient">Gradient</button><button data-prog="thin">Thin</button><button data-prog="segments">Segments</button><button data-prog="circle">Circle</button></div>
@@ -1563,6 +1580,9 @@ requestAnimationFrame(frame);
 // VISO advanced studio modules: editable templates, motion, and project files.
 let bgDriftOn=false,bgBeatSync=true,bgDriftSpeed=24,bgDriftRot=18,bgDriftTravel=22;
 let vhsOn=false,shockOn=false,lensOn=false,motionFx=45,shockPhase=0;
+let vhsScan=32,vhsNoise=24,vhsJitter=18,vhsBleed=22;
+let shockStrength=58,shockSpeed=52,shockThickness=5,shockRgb=16;
+let lensAmount=42,lensFocus=58,lensBokeh=22,lensBlur=28;
 $('bBgDrift').onclick=e=>{bgDriftOn=!bgDriftOn;e.currentTarget.textContent='Background drift: '+(bgDriftOn?'ON':'OFF');e.currentTarget.classList.toggle('on',bgDriftOn);};
 $('bDriftBeat').onclick=e=>{bgBeatSync=!bgBeatSync;e.currentTarget.textContent='Beat sync: '+(bgBeatSync?'ON':'OFF');e.currentTarget.classList.toggle('on',bgBeatSync);};
 $('sBgDriftSpeed').oninput=e=>bgDriftSpeed=+e.target.value;
@@ -1572,6 +1592,10 @@ $('bVhs').onclick=e=>{vhsOn=!vhsOn;e.currentTarget.textContent='VHS: '+(vhsOn?'O
 $('bShock').onclick=e=>{shockOn=!shockOn;e.currentTarget.textContent='Shockwave: '+(shockOn?'ON':'OFF');e.currentTarget.classList.toggle('on',shockOn);};
 $('bLens').onclick=e=>{lensOn=!lensOn;e.currentTarget.textContent='Lens glow: '+(lensOn?'ON':'OFF');e.currentTarget.classList.toggle('on',lensOn);};
 $('sMotionFx').oninput=e=>motionFx=+e.target.value;
+[['sVhsScan','vhsScan'],['sVhsNoise','vhsNoise'],['sVhsJitter','vhsJitter'],['sVhsBleed','vhsBleed'],
+ ['sShockStrength','shockStrength'],['sShockSpeed','shockSpeed'],['sShockThickness','shockThickness'],['sShockRgb','shockRgb'],
+ ['sLensAmount','lensAmount'],['sLensFocus','lensFocus'],['sLensBokeh','lensBokeh'],['sLensBlur','lensBlur']]
+ .forEach(([id,key])=>$(id).oninput=e=>{({vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur}[key]=+e.target.value);});
 document.querySelectorAll('#progressStyles button').forEach(q=>q.onclick=()=>{progStyle=q.dataset.prog;document.querySelectorAll('#progressStyles button').forEach(b=>b.classList.toggle('on',b===q));$('progressInfo').textContent='Progress style: '+progStyle;});
 const VISO_TEMPLATES={
  aura:{name:'Aura Pulse',vig:true,prog:true,progStyle:'gradient',progSz:16,progPos:94,drift:true,speed:34,rot:26,travel:34,flash:55,studio:true,text:'AURA',anim:'pulse',glow:42,stroke:9,vhs:false,shock:true,lens:true},
@@ -1611,7 +1635,7 @@ document.querySelectorAll('#visoTemplates button').forEach(q=>q.onclick=()=>{
  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='VISO-'+key+'.viso';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
  $('templateInfo').textContent=preset.name+' downloaded · open the downloaded .viso file to load its editable project';
 });
-function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase};}
+function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur};}
 function restoreAdvancedState(s){
  if(!s)return;
  if(s.speed!==undefined)speed=s.speed;if(s.pitchSemis!==undefined)pitchSemis=s.pitchSemis;if(s.pitchLock!==undefined)pitchLock=s.pitchLock;
@@ -1622,8 +1646,11 @@ function restoreAdvancedState(s){
  if(s.specOn!==undefined)specOn=s.specOn;if(s.specMode!==undefined)specMode=s.specMode;if(s.specBars!==undefined)specBars=s.specBars;if(s.specRad!==undefined)specRad=s.specRad;if(s.specThick!==undefined)specThick=s.specThick;if(s.specGlow!==undefined)specGlow=s.specGlow;if(s.specLevel!==undefined)specLevel=s.specLevel;if(s.specAtk!==undefined)specAtk=s.specAtk;if(s.specRel!==undefined)specRel=s.specRel;if(s.specPeakHold!==undefined)specPeakHold=s.specPeakHold;if(s.specSpin!==undefined)specSpin=s.specSpin;
  if(s.bgDriftOn!==undefined)bgDriftOn=s.bgDriftOn;if(s.bgBeatSync!==undefined)bgBeatSync=s.bgBeatSync;if(s.bgDriftSpeed!==undefined)bgDriftSpeed=s.bgDriftSpeed;if(s.bgDriftRot!==undefined)bgDriftRot=s.bgDriftRot;if(s.bgDriftTravel!==undefined)bgDriftTravel=s.bgDriftTravel;
  if(s.vhsOn!==undefined)vhsOn=s.vhsOn;if(s.shockOn!==undefined)shockOn=s.shockOn;if(s.lensOn!==undefined)lensOn=s.lensOn;if(s.motionFx!==undefined)motionFx=s.motionFx;if(s.shockPhase!==undefined)shockPhase=s.shockPhase;
+ if(s.vhsScan!==undefined)vhsScan=s.vhsScan;if(s.vhsNoise!==undefined)vhsNoise=s.vhsNoise;if(s.vhsJitter!==undefined)vhsJitter=s.vhsJitter;if(s.vhsBleed!==undefined)vhsBleed=s.vhsBleed;
+ if(s.shockStrength!==undefined)shockStrength=s.shockStrength;if(s.shockSpeed!==undefined)shockSpeed=s.shockSpeed;if(s.shockThickness!==undefined)shockThickness=s.shockThickness;if(s.shockRgb!==undefined)shockRgb=s.shockRgb;
+ if(s.lensAmount!==undefined)lensAmount=s.lensAmount;if(s.lensFocus!==undefined)lensFocus=s.lensFocus;if(s.lensBokeh!==undefined)lensBokeh=s.lensBokeh;if(s.lensBlur!==undefined)lensBlur=s.lensBlur;
  const sync=(id,val)=>{const el=$(id);if(el&&val!==undefined){el.value=val;el.dispatchEvent(new Event('input'));}};
- [['sSpeed',speed],['sPitch',pitchSemis],['s8w',eightW],['s8s',eightS],['s8r',eightR],['sDrift',driftAmt],['sFlash',flashAmt],['sVig',vigAmt],['sProgSz',progSz],['sProgPos',progPos],['sLogoSize',logoSize],['sLogoX',logoX],['sLogoY',logoY],['sLogoAlpha',logoAlpha],['sSpecBars',specBars],['sSpecRad',specRad],['sSpecThick',specThick],['sSpecGlow',specGlow],['sSpecLevel',specLevel],['sSpecAtk',specAtk*100],['sSpecRel',specRel*100],['sSpecPeak',specPeakHold],['sSpecSpin',specSpin*100],['sBgDriftSpeed',bgDriftSpeed],['sBgDriftRot',bgDriftRot],['sBgDriftTravel',bgDriftTravel],['sMotionFx',motionFx]].forEach(([id,val])=>sync(id,val));
+ [['sSpeed',speed],['sPitch',pitchSemis],['s8w',eightW],['s8s',eightS],['s8r',eightR],['sDrift',driftAmt],['sFlash',flashAmt],['sVig',vigAmt],['sProgSz',progSz],['sProgPos',progPos],['sLogoSize',logoSize],['sLogoX',logoX],['sLogoY',logoY],['sLogoAlpha',logoAlpha],['sSpecBars',specBars],['sSpecRad',specRad],['sSpecThick',specThick],['sSpecGlow',specGlow],['sSpecLevel',specLevel],['sSpecAtk',specAtk*100],['sSpecRel',specRel*100],['sSpecPeak',specPeakHold],['sSpecSpin',specSpin*100],['sBgDriftSpeed',bgDriftSpeed],['sBgDriftRot',bgDriftRot],['sBgDriftTravel',bgDriftTravel],['sMotionFx',motionFx],['sVhsScan',vhsScan],['sVhsNoise',vhsNoise],['sVhsJitter',vhsJitter],['sVhsBleed',vhsBleed],['sShockStrength',shockStrength],['sShockSpeed',shockSpeed],['sShockThickness',shockThickness],['sShockRgb',shockRgb],['sLensAmount',lensAmount],['sLensFocus',lensFocus],['sLensBokeh',lensBokeh],['sLensBlur',lensBlur]].forEach(([id,val])=>sync(id,val));
  const btn=(id,on,label)=>{const el=$(id);if(!el)return;el.classList.toggle('on',!!on);if(label)el.textContent=label;};
  btn('b8d',eightD,'8D audio: '+(eightD?'ON':'OFF'));btn('bPreserve',pitchLock,'Pitch lock: '+(pitchLock?'ON':'OFF'));
  btn('bVig',vigOn);btn('bProg',progOn);btn('bSpec',specOn,'Spectrum: '+(specOn?'ON':'OFF'));
@@ -1639,9 +1666,42 @@ $('bProjectOpen').onclick=()=>$('fProjectOpen').click();
 $('fProjectOpen').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{applyVisoProject(JSON.parse(await f.text()));}catch(err){$('templateInfo').textContent='Could not open project: '+err.message;}e.target.value='';};
 function drawMotionFx(ctx,b){
  const amt=motionFx/100,now=performance.now()*.001;
- if(lensOn){const rg=ctx.createRadialGradient(cx,cy,Math.min(W,H)*.08,cx,cy,Math.max(W,H)*.62);rg.addColorStop(0,'rgba(255,255,255,'+(amt*.09)+')');rg.addColorStop(.55,'rgba(130,170,255,'+(amt*.025)+')');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);}
- if(vhsOn){ctx.save();ctx.globalAlpha=amt*.22;ctx.fillStyle='#9cecff';const y=(Math.sin(now*2.1)*.5+.5)*H;ctx.fillRect(0,y,W,Math.max(1,H*.002));ctx.globalAlpha=amt*.07;for(let i=0;i<7;i++)ctx.fillRect(0,(i/7)*H,W,1);ctx.restore();}
- if(shockOn){const bass=b&&b[0]||0;shockPhase=(shockPhase+.012+bass*.045)%1;const radius=shockPhase*Math.max(W,H)*.7;ctx.save();ctx.globalAlpha=(1-shockPhase)*amt*.55;ctx.strokeStyle=grad(.5);ctx.lineWidth=Math.max(1,H*.003);ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.stroke();ctx.restore();}
+ if(lensOn&&lensAmount>0){
+  const focus=Math.min(W,H)*(.08+(.92-lensFocus/100)*.25),radius=Math.max(W,H)*(.28+lensFocus/100*.42);
+  const rg=ctx.createRadialGradient(cx,cy,focus,cx,cy,radius);
+  rg.addColorStop(0,'rgba(255,255,255,'+(amt*lensAmount/100*.20)+')');
+  rg.addColorStop(.42,'rgba(160,190,255,'+(amt*lensAmount/100*.075)+')');
+  rg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.save();ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+  const count=Math.round(lensBokeh/100*22);
+  for(let i=0;i<count;i++){const phase=now*.12+i*2.399;const rr=(.08+(i%5)*.045)*Math.min(W,H);const bx=cx+Math.cos(phase+i)*rr,by=cy+Math.sin(phase*.83+i)*rr;const br=3+lensBlur/100*18;
+   ctx.globalAlpha=amt*lensBokeh/100*.16;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=Math.max(1,br*.12);ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.stroke();}
+  ctx.restore();
+ }
+ if(vhsOn){
+  ctx.save();const intensity=amt;
+  const bandY=(Math.sin(now*2.1)*.5+.5)*H;
+  const jitter=(Math.sin(now*17.3)*.5+.5)*vhsJitter/100*W*.035;
+  ctx.globalAlpha=intensity*(.10+vhsBleed/100*.22);
+  ctx.fillStyle='#ff4b8b';ctx.fillRect(jitter,bandY,W,Math.max(2,H*.004));
+  ctx.fillStyle='#37e8ee';ctx.fillRect(-jitter,bandY+Math.max(2,H*.004),W,Math.max(1,H*.002));
+  ctx.globalAlpha=intensity*vhsScan/100*.22;ctx.fillStyle='#07101a';
+  const gap=Math.max(4,Math.round(H/260));for(let y=0;y<H;y+=gap)ctx.fillRect(0,y,W,Math.max(1,H*.0007));
+  const bands=Math.round(vhsJitter/100*7);
+  for(let i=0;i<bands;i++){const y=((i*173+Math.floor(now*9)*31)%H);ctx.globalAlpha=intensity*.2;ctx.fillStyle=i%2?'#fa4b9b':'#49e7ee';ctx.fillRect(Math.sin(now*8+i)*jitter,y,W,Math.max(2,H*.003));}
+  const noise=Math.round(vhsNoise/100*95);
+  ctx.globalAlpha=intensity*vhsNoise/100*.22;
+  for(let i=0;i<noise;i++){const nx=(Math.sin(i*127.1+now*31)*.5+.5)*W,ny=(Math.sin(i*311.7+now*17)*.5+.5)*H;ctx.fillStyle=i%2?'#fff':'#111';ctx.fillRect(nx,ny,Math.max(1,W*.003),Math.max(1,H*.0015));}
+  ctx.restore();
+ }
+ if(shockOn){
+  const bass=b&&b[0]||0;shockPhase=(shockPhase+(.002+shockSpeed/100*.035+bass*.035))%1;
+  const radius=shockPhase*Math.max(W,H)*.72,fade=(1-shockPhase)*amt*shockStrength/100;
+  ctx.save();ctx.globalAlpha=fade;ctx.strokeStyle=grad(.5);ctx.lineWidth=Math.max(1,H*.0008*shockThickness);
+  ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.stroke();
+  if(shockRgb>0){ctx.globalAlpha=fade*shockRgb/100*.65;ctx.lineWidth=Math.max(1,H*.0005*shockThickness);ctx.strokeStyle='#ff3c91';ctx.beginPath();ctx.arc(cx-shockRgb*.18,cy,radius,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#39eaff';ctx.beginPath();ctx.arc(cx+shockRgb*.18,cy,radius,0,Math.PI*2);ctx.stroke();}
+  ctx.restore();
+ }
 }
 
 requestAnimationFrame(frame);
