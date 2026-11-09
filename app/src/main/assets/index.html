@@ -1555,7 +1555,7 @@ function drawSpectrum(ctx,scale){
     for(let i=0;i<n;i++){
       const v=specSmooth[i]/255,len=Math.max(thick,v*W*.42),yl=cy-bh*(i+1),yr=cy+bh*i;
       ctx.fillStyle=col(i);ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=thick*3*gl;
-      ctx.fillRect(cx-len,yl,bh*.86,len);ctx.fillRect(cx,yr,bh*.86,len);
+      ctx.fillRect(cx-len,yl,len,bh*.86);ctx.fillRect(cx,yr,len,bh*.86);
       if(specPeakHold>0&&specPeak[i]>3){const pl=specPeak[i]/255*W*.42+4;
         ctx.fillRect(cx-pl-2,yl,thick*.5,bh*.86);ctx.fillRect(cx+pl+2,yr,thick*.5,bh*.86);}
     }
