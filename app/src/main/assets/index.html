@@ -1962,11 +1962,12 @@ $('fProjectOpen').onchange=async e=>{
     if(!Number.isSafeInteger(expected)||expected<0||data.length!==expected)throw new Error('Project asset size mismatch: '+(meta.fileName||meta.name));
     total+=data.length;if(total>180*1024*1024)throw new Error('Project assets exceed the supported 180 MB limit');
    }
+   if(!project.settings||typeof project.settings!=='object'||!project.settings.state||typeof project.settings.state!=='object')throw new Error('Project settings are missing or invalid');
+   const layers=project.settings.layers;
+   if(!layers||!Array.isArray(layers.objects)||!Array.isArray(layers.lights))throw new Error('Project layer manifest is invalid');
    const overlayIndexes=project.assets.filter(meta=>meta.kind.startsWith('overlay-')).map(meta=>Number(meta.kind.slice(8))).sort((a,b)=>a-b);
    if(new Set(overlayIndexes).size!==overlayIndexes.length||overlayIndexes.some((n,i)=>n!==i))throw new Error('Project overlay asset sequence is invalid');
-   const layerObjects=project.settings?.layers?.objects;
-   const overlayCount=overlayIndexes.length;
-   if(Array.isArray(layerObjects)&&layerObjects.length!==overlayCount)throw new Error('Project overlay asset count mismatch');
+   if(layers.objects.length!==overlayIndexes.length)throw new Error('Project overlay asset count mismatch');
   }
   if(project.schema==='viso-project-v3')await restoreVISOProjectAssets(project,entries);
   applyVisoProject(project);
