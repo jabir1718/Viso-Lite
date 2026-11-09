@@ -130,6 +130,19 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <div class="row"><button id="bMix">Auto mix</button><button id="bRand">Random</button></div>
   </div>
   <div class="sec panel"><h4>Visuals</h4><div class="row" id="modes"></div><div id="mixers"></div></div>
+  <div class="sec panel"><h4>Spectrum Studio</h4>
+    <div class="row"><button id="bSpec">Spectrum: OFF</button><button id="bSpecClr">Clear peaks</button></div>
+    <div class="row" id="specModes"></div>
+    <label><span>Bars</span><input id="sSpecBars" type="range" min="8" max="96" value="48"></label>
+    <label><span>Radius</span><input id="sSpecRad" type="range" min="5" max="120" value="42"></label>
+    <label><span>Thickness</span><input id="sSpecThick" type="range" min="20" max="400" value="100"></label>
+    <label><span>Glow</span><input id="sSpecGlow" type="range" min="0" max="100" value="60"></label>
+    <label><span>Level</span><input id="sSpecLevel" type="range" min="20" max="300" value="100"></label>
+    <label><span>Attack</span><input id="sSpecAtk" type="range" min="5" max="100" value="55"></label>
+    <label><span>Release</span><input id="sSpecRel" type="range" min="2" max="60" value="14"></label>
+    <label><span>Peak hold</span><input id="sSpecPeak" type="range" min="0" max="40" value="10"></label>
+    <label><span>Spin</span><input id="sSpecSpin" type="range" min="0" max="200" value="25"></label>
+  </div>
   <div class="sec panel"><h4>Colour</h4>
     <div class="row" id="pals"></div>
     <div class="row"><button id="addC">+ colour</button><button id="delC">× colour</button></div>
@@ -558,6 +571,7 @@ $('bUndo').onclick=()=>{if(!undo.length)return;const s=undo.pop();redo.push(s);a
 $('bRedo').onclick=()=>{if(!redo.length)return;const s=redo.pop();undo.push(s);apply(s);};
 $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
   mstate.forEach((m,i)=>{m.on=i===0;m.op=i===0?.95:.7;});
+  specOn=false;$('bSpec').textContent='Spectrum: OFF';$('bSpec').classList.remove('on');
   document.querySelectorAll('#modes button').forEach((q,j)=>q.classList.toggle('on',mstate[j].on));
   shape='media';maskDirty=true;ix=0;iy=0;isc=1;irot=0;mX=0;mY=0;mSc=1;mRot=0;
   pow=140;cut=140;fea=12;pho=14;dep=70;trla=28;shk=45;pnc=40;cyc=18;dirG=0;swy=0;spd=14;
@@ -1033,10 +1047,112 @@ function drawLights(ctx){
   });
 }
 
+const SPEC_N=96;
+const specRaw=new Uint8Array(SPEC_N),specSmooth=new Float32Array(SPEC_N),specPeak=new Float32Array(SPEC_N),specPeakT=new Uint8Array(SPEC_N);
+let specOn=false,specMode='radial',specBars=48,specRad=42,specThick=100,specGlow=60,specLevel=100,specAtk=.55,specRel=.14,specPeakHold=10,specSpin=.25;
+function specBands(){
+  if(!an||!playing){for(let i=0;i<SPEC_N;i++)specRaw[i]=0;}
+  else{an.getByteFrequencyData(buf);const n=buf.length;
+    for(let i=0;i<SPEC_N;i++){
+      const f0=Math.pow(i/SPEC_N,2.1),f1=Math.pow((i+1)/SPEC_N,2.1);
+      let s=0,c0=Math.floor(f0*n),c1=Math.max(c0+1,Math.floor(f1*n)),cnt=0;
+      for(let j=c0;j<c1&&j<n;j++){s+=buf[j];cnt++;}
+      let v=(s/Math.max(1,cnt))/255;
+      v*=(i<SPEC_N*.33?bassGain:i<SPEC_N*.66?midGain:highGain)/100;
+      specRaw[i]=Math.min(255,v*255*(specLevel/100));
+    }}
+  for(let i=0;i<SPEC_N;i++){
+    const t=specRaw[i];
+    specSmooth[i]+=(t>specSmooth[i]?(t-specSmooth[i])*specAtk:(t-specSmooth[i])*specRel);
+    if(specSmooth[i]>specPeak[i]){specPeak[i]=specSmooth[i];specPeakT[i]=0;}
+    else if(specPeakT[i]++>specPeakHold)specPeak[i]*=.93;
+  }
+}
+const SPEC_MODES=[['radial','Radial'],['ring','Ring'],['sphere','Sphere 3D'],['tunnel','Tunnel'],['mirror','Mirror'],['dual','Dual'],['wave','Wave'],['led','LED']];
+SPEC_MODES.forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;
+  if(k==='radial')b.classList.add('on');
+  b.onclick=()=>{specMode=k;document.querySelectorAll('#specModes button').forEach(q=>q.classList.remove('on'));b.classList.add('on');};
+  $('specModes').appendChild(b);});
+$('bSpec').onclick=e=>{specOn=!specOn;e.currentTarget.textContent='Spectrum: '+(specOn?'ON':'OFF');e.currentTarget.classList.toggle('on',specOn);};
+$('bSpecClr').onclick=()=>{for(let i=0;i<SPEC_N;i++){specPeak[i]=0;specPeakT[i]=99;}};
+function bindSpec(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);}
+bindSpec('sSpecBars',v=>specBars=v);bindSpec('sSpecRad',v=>specRad=v);bindSpec('sSpecThick',v=>specThick=v);
+bindSpec('sSpecGlow',v=>specGlow=v);bindSpec('sSpecLevel',v=>specLevel=v);bindSpec('sSpecAtk',v=>specAtk=v/100);
+bindSpec('sSpecRel',v=>specRel=v/100);bindSpec('sSpecPeak',v=>specPeakHold=v);bindSpec('sSpecSpin',v=>specSpin=v/100);
+function drawSpectrum(ctx,scale){
+  const t=performance.now()/1000,n=Math.min(SPEC_N,Math.max(8,specBars|0));
+  const thick=Math.max(1,Math.min(W,H)*.011*(specThick/100)),gl=specGlow/100,rot=t*specSpin,M=specMode;
+  ctx.save();ctx.scale(scale,scale);ctx.translate((1/scale-1)*cx,(1/scale-1)*cy);
+  ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
+  const col=i=>grad(i/Math.max(1,n-1));
+  if(M==='radial'||M==='ring'||M==='sphere'||M==='tunnel'){
+    const R0=Math.min(W,H)*(specRad/100)*.5,tilt=M==='sphere'?.72:1;
+    for(let i=0;i<n;i++){
+      const a=rot+(i/n)*6.2832,v=specSmooth[i]/255;
+      const len=(M==='ring'?Math.min(W,H)*.18:v*Math.min(W,H)*.34)+thick;
+      const lw=M==='sphere'?thick*(.55+.45*Math.sin(a)):thick;
+      ctx.strokeStyle=col(i);ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=lw*4*gl;ctx.lineWidth=lw;
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(a)*R0,cy+Math.sin(a)*R0*tilt);
+      const rr=R0+len;
+      ctx.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*tilt);
+      ctx.stroke();
+      if(specPeakHold>0&&specPeak[i]>3){const pr=R0+thick*2+specPeak[i]/255*Math.min(W,H)*.34;
+        ctx.fillStyle=col(i);ctx.beginPath();ctx.arc(cx+Math.cos(a)*pr,cy+Math.sin(a)*pr*tilt,lw*.55,0,6.283);ctx.fill();}
+    }
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R0*1.7);
+    g.addColorStop(0,grad(.5));g.addColorStop(1,'transparent');
+    ctx.globalAlpha=.22*gl;ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,R0*1.7,0,6.283);ctx.fill();ctx.globalAlpha=1;
+  } else if(M==='mirror'){
+    const bw=W/(n*2),base=H*.93;
+    for(let i=0;i<n;i++){
+      const v=specSmooth[i]/255,h=Math.max(thick,v*H*.62),xl=cx-bw*(i+1),xr=cx+bw*i;
+      ctx.fillStyle=col(i);ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=thick*3*gl;
+      ctx.fillRect(xl,base-h,bw*.86,h);ctx.fillRect(xr,base-h,bw*.86,h);
+      if(specPeakHold>0&&specPeak[i]>3){const ph=specPeak[i]/255*H*.62+4;
+        ctx.fillRect(xl,base-ph-2,bw*.86,thick*.5);ctx.fillRect(xr,base-ph-2,bw*.86,thick*.5);}
+    }
+  } else if(M==='dual'){
+    const bh=H/(n*2);
+    for(let i=0;i<n;i++){
+      const v=specSmooth[i]/255,len=Math.max(thick,v*W*.42),yl=cy-bh*(i+1),yr=cy+bh*i;
+      ctx.fillStyle=col(i);ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=thick*3*gl;
+      ctx.fillRect(cx-len,yl,bh*.86,len);ctx.fillRect(cx,yr,bh*.86,len);
+      if(specPeakHold>0&&specPeak[i]>3){const pl=specPeak[i]/255*W*.42+4;
+        ctx.fillRect(cx-pl-2,yl,thick*.5,bh*.86);ctx.fillRect(cx+pl+2,yr,thick*.5,bh*.86);}
+    }
+  } else if(M==='wave'){
+    for(let pass=0;pass<3;pass++){
+      ctx.beginPath();
+      for(let i=0;i<n;i++){
+        const x2=(i/(n-1))*W,v=specSmooth[i]/255;
+        const y2=cy+Math.sin(i*.5+t*2+pass)*(v*H*.35)+(pass-1)*H*.06;
+        i?ctx.lineTo(x2,y2):ctx.moveTo(x2,y2);
+      }
+      ctx.strokeStyle=grad(pass/2);ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=thick*4*gl;
+      ctx.lineWidth=thick*(1-pass*.22);ctx.globalAlpha=.9-pass*.22;ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+  } else {
+    const rows=14,gw=W/n,gh=H*.55/rows,base=H*.96;
+    for(let i=0;i<n;i++){
+      const v=specSmooth[i]/255,lit=Math.round(v*rows),pk=Math.round(specPeak[i]/255*rows);
+      for(let r=0;r<rows;r++){
+        const on=r<lit,peak=specPeakHold>0&&r===pk&&pk>lit;
+        if(!on&&!peak)continue;
+        ctx.fillStyle=on?col(i):'rgba(255,255,255,.45)';
+        ctx.shadowColor=on?ctx.fillStyle:'transparent';ctx.shadowBlur=on?gh*2*gl:0;
+        ctx.beginPath();ctx.arc(i*gw+gw/2,base-r*gh,Math.min(gw,gh)*.3,0,6.283);ctx.fill();
+      }
+    }
+  }
+  ctx.restore();ctx.globalAlpha=1;
+}
 let curB=[0,0,0,0,0,0],curBbg=[0,0,0,0,0,0],last=0,avg=.1,frameN=0;
 function paintLayer(scale,masked,bb){const cc=bb||curB;
   ox.clearRect(0,0,W,H);
   for(const m of mstate)if(m.on)drawMode(ox,m,cc,scale);
+  if(specOn)drawSpectrum(ox,scale);
   if(masked){ox.globalCompositeOperation='destination-in';ox.save();applyMT(ox);
     ox.drawImage(mk,-W/2,-H/2,W,H);ox.restore();ox.globalCompositeOperation='source-over';}
   return o;}
@@ -1057,6 +1173,7 @@ function frame(t){
   requestAnimationFrame(frame);
   const dt=Math.min(50,t-last||16);last=t;frameN++;
   const b=bands();curB=b;curBbg=bands(bvp);
+  if(specOn)specBands();
   const bass=b[0];avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
   pulse=Math.max(pulse*.85,bass);hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
