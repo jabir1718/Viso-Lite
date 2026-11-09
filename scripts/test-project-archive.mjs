@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import { TextDecoder, TextEncoder } from 'node:util';
 
 const html = fs.readFileSync('app/src/main/assets/index.html', 'utf8');
-for (const id of ['bgColor', 'bgTintColor', 'sBgTint', 'sBgBright', 'sBgContrast', 'sBgSat', 'sBgHue', 'sBgX', 'sBgY']) {
+for (const id of ['bgColor', 'bgTintColor', 'sBgTint', 'sBgBright', 'sBgContrast', 'sBgSat', 'sBgHue', 'sBgX', 'sBgY', 'selBgPattern', 'sBgPattern', 'sBgPatternScale']) {
   assert(html.includes('id="' + id + '"'), 'background control must exist: ' + id);
 }
 const start = html.indexOf('const VISO_CRC_TABLE=');
