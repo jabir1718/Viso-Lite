@@ -1511,8 +1511,6 @@ function autoStep(){
     $('sSwy').value=swy;$('sSpd').value=spd;}
 }
 
-function frame(t){
-  
 // VISO Tool Registry v1 — stable IDs and parameter metadata for future effect modules.
 const VISO_TOOL_REGISTRY=Object.create(null);
 const VISO_TOOL_CATEGORIES=['all','media','visualizer','audio','elements','background','logo','overlay','export','templates'];
@@ -1611,7 +1609,8 @@ document.querySelectorAll('#bar input[type="range"],#bar input[type="color"],#ba
 });
 document.querySelectorAll('#bar input[type="text"]').forEach(control=>control.addEventListener('focus',()=>snap()));
 
-requestAnimationFrame(frame);
+function frame(t){
+  
   const dt=Math.min(50,t-last||16);last=t;frameN++;
   const b=bands();curB=b;curBbg=bands(bvp);
   if(specOn)specBands();
