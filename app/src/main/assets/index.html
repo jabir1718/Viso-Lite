@@ -1865,9 +1865,14 @@ function visoUnzip(bytes){
   if(view.getUint32(p,true)!==0x02014b50)throw new Error('Invalid project archive entry');
   const crc=view.getUint32(p+16,true),method=view.getUint16(p+10,true),size=view.getUint32(p+24,true),nameLen=view.getUint16(p+28,true),extraLen=view.getUint16(p+30,true),commentLen=view.getUint16(p+32,true),localOffset=view.getUint32(p+42,true);
   const name=new TextDecoder().decode(bytes.slice(p+46,p+46+nameLen));p+=46+nameLen+extraLen+commentLen;
+  if(p>bytes.length||localOffset+30>bytes.length)throw new Error('Project archive entry is out of bounds');
+  if(!name||name.startsWith('/')||name.includes('\\')||name.split('/').includes('..'))throw new Error('Unsafe project archive path');
+  if(Object.prototype.hasOwnProperty.call(out,name))throw new Error('Duplicate project archive entry: '+name);
   if(name.endsWith('/'))continue;if(method!==0)throw new Error('Unsupported project compression method');
   if(view.getUint32(localOffset,true)!==0x04034b50)throw new Error('Invalid local project asset');
-  const localName=view.getUint16(localOffset+26,true),localExtra=view.getUint16(localOffset+28,true),start=localOffset+30+localName+localExtra;
+  const localFlags=view.getUint16(localOffset+6,true),localMethod=view.getUint16(localOffset+8,true),localCrc=view.getUint32(localOffset+14,true),localSize=view.getUint32(localOffset+18,true),localName=view.getUint16(localOffset+26,true),localExtra=view.getUint16(localOffset+28,true),start=localOffset+30+localName+localExtra;
+  const localFileName=new TextDecoder().decode(bytes.slice(localOffset+30,localOffset+30+localName));
+  if(localFlags!==0x0800||localMethod!==method||localCrc!==crc||localSize!==size||localFileName!==name||start+size>bytes.length)throw new Error('Project archive header mismatch: '+name);
   const data=bytes.slice(start,start+size);if(visoCRC32(data)!==crc)throw new Error('Project asset checksum failed: '+name);out[name]=data;
  }
  return out;
@@ -1943,6 +1948,18 @@ $('fProjectOpen').onchange=async e=>{
   const bytes=new Uint8Array(await file.arrayBuffer());let project,entries={};
   if(bytes[0]===0x50&&bytes[1]===0x4b){entries=visoUnzip(bytes);if(!entries['project.json'])throw new Error('project.json missing');project=JSON.parse(new TextDecoder().decode(entries['project.json']));}
   else project=JSON.parse(new TextDecoder().decode(bytes));
+  if(project.schema==='viso-project-v3'){
+   if(!Array.isArray(project.assets)||project.assets.length>512)throw new Error('Invalid project asset manifest');
+   const seen=new Set();let total=0;
+   for(const meta of project.assets){
+    if(!meta||typeof meta.name!=='string'||typeof meta.kind!=='string'||!meta.name.startsWith('assets/')||meta.name.includes('\\')||meta.name.split('/').includes('..'))throw new Error('Invalid project asset record');
+    if(seen.has(meta.name))throw new Error('Duplicate asset manifest entry: '+meta.name);seen.add(meta.name);
+    const data=entries[meta.name],expected=Number(meta.size);
+    if(!data)throw new Error('Project asset is missing: '+(meta.fileName||meta.name));
+    if(!Number.isSafeInteger(expected)||expected<0||data.length!==expected)throw new Error('Project asset size mismatch: '+(meta.fileName||meta.name));
+    total+=data.length;if(total>180*1024*1024)throw new Error('Project assets exceed the supported 180 MB limit');
+   }
+  }
   applyVisoProject(project);
   if(project.schema==='viso-project-v3')await restoreVISOProjectAssets(project,entries);
   undo.length=0;redo.length=0;objectSnapshotCache.clear();
