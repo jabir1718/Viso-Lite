@@ -447,6 +447,38 @@ const mk=document.createElement('canvas'),mx=mk.getContext('2d');
 const o=document.createElement('canvas'),ox=o.getContext('2d');
 const bl=document.createElement('canvas'),bx=bl.getContext('2d');
 const reflectionCanvas=document.createElement('canvas'),reflectionCtx=reflectionCanvas.getContext('2d');
+const specCanvas=document.createElement('canvas'),specCtx=specCanvas.getContext('2d');
+specCanvas.width=Math.min(360,W);specCanvas.height=Math.min(640,H);
+let recordCanvas=document.createElement('canvas'),recordGl=recordCanvas.getContext('webgl',{preserveDrawingBuffer:true,alpha:false,antialias:false}),record2d=null,recordProgram=null,recordTexture=null,recordBuffer=null;
+function initRecordGL(){
+ if(!recordGl)return false;
+ const compile=(type,source)=>{const shader=recordGl.createShader(type);recordGl.shaderSource(shader,source);recordGl.compileShader(shader);if(!recordGl.getShaderParameter(shader,recordGl.COMPILE_STATUS))throw new Error(recordGl.getShaderInfoLog(shader)||'Record shader compile failed');return shader;};
+ const vs=compile(recordGl.VERTEX_SHADER,'attribute vec2 a_position;attribute vec2 a_texCoord;varying vec2 v_texCoord;void main(){gl_Position=vec4(a_position,0.0,1.0);v_texCoord=a_texCoord;}');
+ const fs=compile(recordGl.FRAGMENT_SHADER,'precision mediump float;varying vec2 v_texCoord;uniform sampler2D u_image;void main(){gl_FragColor=texture2D(u_image,v_texCoord);}');
+ recordProgram=recordGl.createProgram();recordGl.attachShader(recordProgram,vs);recordGl.attachShader(recordProgram,fs);recordGl.linkProgram(recordProgram);
+ if(!recordGl.getProgramParameter(recordProgram,recordGl.LINK_STATUS))throw new Error(recordGl.getProgramInfoLog(recordProgram)||'Record shader link failed');
+ recordGl.useProgram(recordProgram);
+ const vertices=new Float32Array([-1,-1,0,0,1,-1,1,0,-1,1,0,1,1,1,1,1]);
+ recordBuffer=recordGl.createBuffer();recordGl.bindBuffer(recordGl.ARRAY_BUFFER,recordBuffer);recordGl.bufferData(recordGl.ARRAY_BUFFER,vertices,recordGl.STATIC_DRAW);
+ const pos=recordGl.getAttribLocation(recordProgram,'a_position'),uv=recordGl.getAttribLocation(recordProgram,'a_texCoord');
+ recordGl.enableVertexAttribArray(pos);recordGl.vertexAttribPointer(pos,2,recordGl.FLOAT,false,16,0);
+ recordGl.enableVertexAttribArray(uv);recordGl.vertexAttribPointer(uv,2,recordGl.FLOAT,false,16,8);
+ recordTexture=recordGl.createTexture();recordGl.activeTexture(recordGl.TEXTURE0);recordGl.bindTexture(recordGl.TEXTURE_2D,recordTexture);
+ recordGl.texParameteri(recordGl.TEXTURE_2D,recordGl.TEXTURE_MIN_FILTER,recordGl.LINEAR);recordGl.texParameteri(recordGl.TEXTURE_2D,recordGl.TEXTURE_MAG_FILTER,recordGl.LINEAR);
+ recordGl.texParameteri(recordGl.TEXTURE_2D,recordGl.TEXTURE_WRAP_S,recordGl.CLAMP_TO_EDGE);recordGl.texParameteri(recordGl.TEXTURE_2D,recordGl.TEXTURE_WRAP_T,recordGl.CLAMP_TO_EDGE);
+ recordGl.uniform1i(recordGl.getUniformLocation(recordProgram,'u_image'),0);return true;
+}
+try{initRecordGL();}catch(_){recordCanvas=document.createElement('canvas');recordGl=null;recordProgram=null;recordTexture=null;recordBuffer=null;}
+if(!recordGl)record2d=recordCanvas.getContext('2d');
+function drawRecordFrame(){
+ if(recordGl&&recordProgram){
+  recordGl.viewport(0,0,recordCanvas.width,recordCanvas.height);recordGl.useProgram(recordProgram);
+  recordGl.bindBuffer(recordGl.ARRAY_BUFFER,recordBuffer);recordGl.activeTexture(recordGl.TEXTURE0);recordGl.bindTexture(recordGl.TEXTURE_2D,recordTexture);
+  recordGl.pixelStorei(recordGl.UNPACK_FLIP_Y_WEBGL,true);
+  recordGl.texImage2D(recordGl.TEXTURE_2D,0,recordGl.RGBA,recordGl.RGBA,recordGl.UNSIGNED_BYTE,c);
+  recordGl.drawArrays(recordGl.TRIANGLE_STRIP,0,4);
+ }else if(record2d){record2d.clearRect(0,0,recordCanvas.width,recordCanvas.height);record2d.drawImage(c,0,0,targetW,targetH);}
+}
 mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=W>>1;bl.height=H>>1;reflectionCanvas.width=W;reflectionCanvas.height=H;
 const $=id=>document.getElementById(id);
 const vid=$('vid'),bvid=$('bvid');
@@ -462,18 +494,25 @@ function updateBitrate(){
   BIT=Math.round(targetW*targetH*FPS*0.13*(quality/100));
   $('exportInfo').textContent=`${targetW}×${targetH} · ${FPS} FPS · ${Math.round(BIT/1000000)} Mbps · ${actualFormatLabel()}`;
 }
-function setCanvasSize(w,h){
+function setCanvasSize(w,h,specMaxW=360,specMaxH=640){
   W=w;H=h;cx=W/2;cy=H/2;
   c.width=w;c.height=h;mk.width=w;mk.height=h;o.width=w;o.height=h;
   bl.width=Math.max(1,w>>1);bl.height=Math.max(1,h>>1);
   reflectionCanvas.width=w;reflectionCanvas.height=h;
+  const specScale=Math.min(1,specMaxW/w,specMaxH/h);
+  specCanvas.width=Math.max(1,Math.round(w*specScale));specCanvas.height=Math.max(1,Math.round(h*specScale));
   maskDirty=true;
 }
 function setPreviewCanvasSize(){
   const scale=Math.min(1,PREVIEW_MAX_W/targetW,PREVIEW_MAX_H/targetH);
   setCanvasSize(Math.max(1,Math.round(targetW*scale)),Math.max(1,Math.round(targetH*scale)));
 }
-function setExportCanvasSize(){setCanvasSize(targetW,targetH);}
+function setExportCanvasSize(){setCanvasSize(targetW,targetH,Math.min(1080,targetW),Math.min(1920,targetH));}
+function setVideoRenderCanvasSize(){
+  const heavy=specOn&&['tunnel','mirror','dual'].includes(specMode),maxW=heavy?360:540,maxH=heavy?640:960;
+  const scale=Math.min(1,maxW/targetW,maxH/targetH);
+  setCanvasSize(Math.max(1,Math.round(targetW*scale)),Math.max(1,Math.round(targetH*scale)));
+}
 function setRes(){
   const [w,h]=outputSize();targetW=w;targetH=h;
   setPreviewCanvasSize();updateBitrate();
@@ -739,10 +778,10 @@ setInterval(()=>{
   if(rec&&rec.state==='recording')$('recInfo').textContent='Exporting · '+clockText((Date.now()-recStarted)/1000);
 },250);
 $('bRec').onclick=()=>{
-  if(!window.MediaRecorder||!c.captureStream){$('recInfo').textContent='Video export unavailable in this WebView';return;}
+  if(!window.MediaRecorder||!recordCanvas.captureStream){$('recInfo').textContent='Video export unavailable in this WebView';return;}
   if(rec&&rec.state==='recording'){rec.stop();return;}
-  setExportCanvasSize();
-  const st=c.captureStream(FPS);
+  setVideoRenderCanvasSize();recordCanvas.width=targetW;recordCanvas.height=targetH;drawRecordFrame();
+  const st=recordCanvas.captureStream(FPS);
   if(streamDest)streamDest.stream.getAudioTracks().forEach(t=>st.addTrack(t));
   const candidates=formatChoice==='webm'
     ?['video/webm;codecs=vp9,opus','video/webm']
@@ -1609,7 +1648,12 @@ let curB=[0,0,0,0,0,0],curBbg=[0,0,0,0,0,0],last=0,avg=.1,frameN=0;
 function paintLayer(scale,masked,bb){const cc=bb||curB;
   ox.clearRect(0,0,W,H);
   for(const m of mstate)if(m.on)drawMode(ox,m,cc,scale);
-  if(specOn)drawSpectrum(ox,scale);
+  if(specOn){
+    const sw=specCanvas.width,sh=specCanvas.height;
+    specCtx.setTransform(1,0,0,1,0,0);specCtx.clearRect(0,0,sw,sh);
+    specCtx.save();specCtx.scale(sw/W,sh/H);drawSpectrum(specCtx,scale);specCtx.restore();
+    ox.drawImage(specCanvas,0,0,W,H);
+  }
   if(sym!=='off'){symC.width=W;symC.height=H;symX.clearRect(0,0,W,H);symX.drawImage(o,0,0);
     if(sym==='x'||sym==='quad'){ox.save();ox.translate(W,0);ox.scale(-1,1);ox.drawImage(symC,0,0);ox.restore();}
     if(sym==='y'||sym==='quad'){ox.save();ox.translate(0,H);ox.scale(1,-1);ox.drawImage(symC,0,0);ox.restore();}}
@@ -1892,6 +1936,7 @@ function frame(t){
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
     x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
     x.fillText('Photo / Video / PNG chuno',cx,cy);}
+  if(rec&&rec.state==='recording')drawRecordFrame();
   requestAnimationFrame(frame);
 }
 
