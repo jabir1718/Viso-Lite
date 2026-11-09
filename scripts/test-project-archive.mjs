@@ -4,9 +4,18 @@ import vm from 'node:vm';
 import { TextDecoder, TextEncoder } from 'node:util';
 
 const html = fs.readFileSync('app/src/main/assets/index.html', 'utf8');
-for (const id of ['bgColor', 'bgTintColor', 'sBgTint', 'sBgBright', 'sBgContrast', 'sBgSat', 'sBgHue', 'sBgX', 'sBgY', 'selBgPattern', 'sBgPattern', 'sBgPatternScale', 'sBeatSens', 'sBeatScale', 'bBeatMarkers', 'bMetronome', 'bDownbeat', 'beatColor']) {
+for (const id of ['bgColor', 'bgTintColor', 'sBgTint', 'sBgBright', 'sBgContrast', 'sBgSat', 'sBgHue', 'sBgX', 'sBgY', 'selBgPattern', 'sBgPattern', 'sBgPatternScale']) {
   assert(html.includes('id="' + id + '"'), 'background control must exist: ' + id);
 }
+for (const id of ['bSpec', 'sSpecBars', 'sSpecRad', 'sSpecThick', 'sSpecGlow', 'sSpecLevel', 'sSpecAtk', 'sSpecRel', 'sSpecPeak', 'sSpecSpin']) {
+  assert(html.includes('id="' + id + '"'), 'spectrum control must exist: ' + id);
+}
+for (const id of ['bBpm', 'bTap', 'sBeatSens', 'sBeatScale', 'bBeatMarkers', 'bMetronome', 'bDownbeat', 'beatColor']) {
+  assert(html.includes('id="' + id + '"'), 'beat control must exist: ' + id);
+}
+assert(html.includes("const SPEC_MODES=[['radial','Radial'],['ring','Ring'],['sphere','Sphere 3D'],['tunnel','Tunnel'],['mirror','Mirror'],['dual','Dual'],['wave','Wave'],['led','LED']]"), 'all spectrum visual modes must be registered');
+assert(html.includes("const SPEC_RANGES=[['full','Full'],['low','Low'],['balanced','Balanced'],['high','High'],['vocals','Vocals'],['changes','Changes']]"), 'all spectrum frequency focus modes must be registered');
+assert(html.includes("renderVISOStage('overlay'"), 'overlay render stage must remain in the preview frame');
 const start = html.indexOf('const VISO_CRC_TABLE=');
 const end = html.indexOf('function visoSafeFileName', start);
 assert(start >= 0 && end > start, 'VISO ZIP/CRC functions must exist in the studio source');
