@@ -1524,6 +1524,7 @@ const VISO_RENDER_MODULES={
  'Surface Reflection':{stage:'post',order:90,render:ctx=>drawSurfaceReflection(ctx)}
 };
 const VISO_TOOL_REGISTRY=Object.create(null);
+const VISO_RENDER_CACHE=Object.create(null);
 const VISO_TOOL_CATEGORIES=['all','media','visualizer','audio','elements','background','logo','overlay','export','templates'];
 const VISO_FAV_KEY='viso.toolFavorites.v1';
 let visoToolFilter='all',visoFavoritesOnly=false;
@@ -1544,10 +1545,12 @@ function registerVISOEffectTool(def){
    el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));
   });
  };
- VISO_TOOL_REGISTRY[def.id]=Object.freeze({...def,version:def.version||1,defaults:Object.freeze({...defaults}),controls:Object.freeze(controls),
+ const tool=Object.freeze({...def,version:def.version||1,defaults:Object.freeze({...defaults}),controls:Object.freeze(controls),
   render:typeof def.render==='function'?def.render:(module.render||null),renderStage:def.renderStage||module.stage||'overlay',
   renderOrder:Number.isFinite(def.renderOrder)?def.renderOrder:(module.order??100),serialize,restore});
- return VISO_TOOL_REGISTRY[def.id];
+ VISO_TOOL_REGISTRY[def.id]=tool;
+ if(tool.render){const list=VISO_RENDER_CACHE[tool.renderStage]||(VISO_RENDER_CACHE[tool.renderStage]=[]);list.push(tool);list.sort((a,b)=>a.renderOrder-b.renderOrder);}
+ return tool;
 }
 function collectVISORegistryState(){
  const state={};Object.values(VISO_TOOL_REGISTRY).forEach(tool=>{if(typeof tool.serialize==='function')state[tool.id]=tool.serialize();});return state;
@@ -1557,7 +1560,8 @@ function restoreVISORegistryState(state){
  Object.values(VISO_TOOL_REGISTRY).forEach(tool=>{const saved=state[tool.id];if(saved&&typeof saved==='object'&&typeof tool.restore==='function')tool.restore(saved);});
 }
 function renderVISOStage(stage,ctx,b,dt){
- Object.values(VISO_TOOL_REGISTRY).filter(tool=>tool.render&&tool.renderStage===stage).sort((a,b)=>a.renderOrder-b.renderOrder).forEach(tool=>tool.render(ctx,b,dt));
+ const list=VISO_RENDER_CACHE[stage];if(!list)return;
+ for(let i=0;i<list.length;i++)list[i].render(ctx,b,dt);
 }
 function visoToolCategory(title){
  const t=title.toLowerCase();
