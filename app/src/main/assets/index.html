@@ -19,6 +19,7 @@
   label{color:#525c22}
   input[type=range]{accent-color:#91ad00}
   input[type=text]{background:#fffde8;border:1px solid #c7d47a;color:#273000}
+  input[type=color]{width:52px;height:38px;border:1px solid #c7d47a;border-radius:10px;padding:2px;background:#fff}
   .mline b{color:#4c5918}
   .status{color:#38420f;background:#f5facd;border:1px solid #d8e39a}
   canvas{background:#f4ff9d;box-shadow:0 0 32px #c4e50055,0 0 0 1px #91a80030}
@@ -184,6 +185,32 @@ input[type=text]{background:#fff;border:1px solid #dfe4d2;color:#303322}
     <label><span>Colour flow</span><input id="sCyc" type="range" min="0" max="100" value="18"></label>
     <label><span>Gradient</span><input id="sDir" type="range" min="0" max="100" value="0"></label>
   </div>
+  <div class="sec"><h4>Beat + Bass Studio</h4>
+    <div class="row"><button id="bassOn" class="on">Beat reaction ON</button><button id="bassAudio">Audio bass boost OFF</button></div>
+    <label><span>Bass visual boost</span><input id="bassBoost" type="range" min="50" max="300" value="160"></label>
+    <label><span>Beat sensitivity</span><input id="beatSense" type="range" min="50" max="250" value="120"></label>
+    <label><span>Low / kick</span><input id="lowBand" type="range" min="0" max="200" value="130"></label>
+    <label><span>Mid band</span><input id="midBand" type="range" min="0" max="200" value="100"></label>
+    <label><span>High band</span><input id="highBand" type="range" min="0" max="200" value="120"></label>
+    <label><span>Beat damping / smooth</span><input id="beatDamp" type="range" min="0" max="95" value="55"></label>
+  </div>
+  <div class="sec"><h4>Integrated Spectrum</h4>
+    <div class="row"><button id="spectrumOn" class="on">Spectrum ON</button><button id="spectrumBorder" class="on">Border ON</button></div>
+    <div class="row"><button id="specBars" class="on">Bars</button><button id="specMirror">Mirror</button><button id="specCircle">Circle</button><button id="specWave">Wave</button></div>
+    <label><span>Spectrum size</span><input id="specSize" type="range" min="30" max="100" value="72"></label>
+    <label><span>Spectrum position</span><input id="specPos" type="range" min="10" max="90" value="72"></label>
+    <label><span>Border glow</span><input id="specGlow" type="range" min="0" max="100" value="75"></label>
+    <label><span>Border thickness</span><input id="specBorderWidth" type="range" min="1" max="12" value="3"></label>
+  </div>
+  <div class="sec"><h4>Neon Colour Studio</h4>
+    <div class="row"><input id="customColor" type="color" value="#00ff9d"><input id="customHex" type="text" value="#00FF9D" maxlength="7" placeholder="#RRGGBB"><button id="applyColor">Apply colour</button><button id="addCustomColor">Add colour</button></div>
+    <label><span>Selected colour hue</span><input id="colorHue" type="range" min="0" max="359" value="150"></label>
+  </div>
+  <div class="sec"><h4>Neon FX + Burn</h4>
+    <div class="row"><button id="fxOff">FX Off</button><button id="fxFire" class="on">🔥 Burn</button><button id="fxElectric">Electric</button><button id="fxPlasma">Plasma</button><button id="fxWave">Energy wave</button></div>
+    <label><span>FX intensity</span><input id="fxPower" type="range" min="0" max="100" value="65"></label>
+    <label><span>FX speed</span><input id="fxSpeed" type="range" min="10" max="200" value="100"></label>
+  </div>
   <div class="sec"><h4>Export</h4>
     <div class="row"><button id="bShot">Save frame PNG</button><button id="bRec" class="prim">Export video</button></div>
   </div>
@@ -274,6 +301,9 @@ updateBitrate();
 let img=null,bgImg=null,bgUseVid=false,bgViz=false,maskDirty=true;
 let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
 let pulse=0,pow=140,cut=140,fea=12,pho=100,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
+let beatReaction=true,audioBassBoost=false,bassBoost=1.6,beatSense=1.2,lowGain=1.3,midGain=1,highGain=1.2,beatDamp=.55;
+let spectrumOn=true,spectrumBorder=true,spectrumStyle='bars',spectrumSize=.72,spectrumPos=.72,spectrumGlow=75,spectrumBorderWidth=3;
+let fxStyle='fire',fxPower=65,fxSpeed=1,beatSmooth=[0,0,0,0,0,0];
 let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,bvp=140;
 let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
@@ -339,6 +369,42 @@ $('bMix').onclick=()=>{snap();colors=[];const n=2+((Math.random()*2)|0);
 $('bRand').onclick=()=>{scatter(500);};
 
 function bind(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);el.onchange=()=>snap();}
+$('bassOn').onclick=e=>{beatReaction=!beatReaction;e.currentTarget.classList.toggle('on',beatReaction);};
+$('bassAudio').onclick=e=>{audioBassBoost=!audioBassBoost;e.currentTarget.classList.toggle('on',audioBassBoost);e.currentTarget.textContent='Audio bass boost '+(audioBassBoost?'ON':'OFF');};
+$('bassBoost').oninput=e=>bassBoost=+e.target.value/100;
+$('beatSense').oninput=e=>beatSense=+e.target.value/100;
+$('lowBand').oninput=e=>lowGain=+e.target.value/100;
+$('midBand').oninput=e=>midGain=+e.target.value/100;
+$('highBand').oninput=e=>highGain=+e.target.value/100;
+$('beatDamp').oninput=e=>beatDamp=+e.target.value/100;
+$('spectrumOn').onclick=e=>{spectrumOn=!spectrumOn;e.currentTarget.classList.toggle('on',spectrumOn);e.currentTarget.textContent='Spectrum '+(spectrumOn?'ON':'OFF');};
+$('spectrumBorder').onclick=e=>{spectrumBorder=!spectrumBorder;e.currentTarget.classList.toggle('on',spectrumBorder);e.currentTarget.textContent='Border '+(spectrumBorder?'ON':'OFF');};
+[['specBars','bars'],['specMirror','mirror'],['specCircle','circle'],['specWave','wave']].forEach(([id,v])=>$(id).onclick=e=>{spectrumStyle=v;document.querySelectorAll('#specBars,#specMirror,#specCircle,#specWave').forEach(b=>b.classList.toggle('on',b===e.currentTarget));});
+$('specSize').oninput=e=>spectrumSize=+e.target.value/100;
+$('specPos').oninput=e=>spectrumPos=+e.target.value/100;
+$('specGlow').oninput=e=>spectrumGlow=+e.target.value;
+$('specBorderWidth').oninput=e=>spectrumBorderWidth=+e.target.value;
+[['fxOff','off'],['fxFire','fire'],['fxElectric','electric'],['fxPlasma','plasma'],['fxWave','wave']].forEach(([id,v])=>$(id).onclick=e=>{fxStyle=v;document.querySelectorAll('#fxOff,#fxFire,#fxElectric,#fxPlasma,#fxWave').forEach(b=>b.classList.toggle('on',b===e.currentTarget));});
+$('fxPower').oninput=e=>fxPower=+e.target.value;
+$('fxSpeed').oninput=e=>fxSpeed=+e.target.value/100;
+function drawIntegratedSpectrum(ctx,b){
+  if(!spectrumOn||!playing)return;
+  const w=W*spectrumSize,h=H*.14,left=(W-w)/2,cy0=H*spectrumPos;
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  if(spectrumBorder){ctx.shadowColor=grad(.35);ctx.shadowBlur=spectrumGlow*.55;ctx.strokeStyle=grad(.4);ctx.lineWidth=spectrumBorderWidth;const rr=H*.012;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(left,cy0-h/2,w,h,rr);else ctx.rect(left,cy0-h/2,w,h);ctx.stroke();ctx.shadowBlur=0;}
+  const count=64;
+  if(spectrumStyle==='circle'){const r=Math.min(w,h)*.28;for(let i=0;i<count;i++){const v=b[i%6],a=i/count*Math.PI*2-Math.PI/2,len=5+v*h*.8;ctx.strokeStyle=grad(i/count);ctx.lineWidth=Math.max(2,w/count*.42);ctx.shadowColor=grad(i/count);ctx.shadowBlur=spectrumGlow*.22;ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*r,cy0+Math.sin(a)*r);ctx.lineTo(cx+Math.cos(a)*(r+len),cy0+Math.sin(a)*(r+len));ctx.stroke();}}
+  else if(spectrumStyle==='wave'){ctx.beginPath();for(let i=0;i<count;i++){const xx=left+i/(count-1)*w,v=b[i%6],yy=cy0+Math.sin(i*.23+performance.now()*.003)*v*h*.8;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.strokeStyle=grad(.45);ctx.lineWidth=5;ctx.shadowColor=grad(.2);ctx.shadowBlur=spectrumGlow*.4;ctx.stroke();}
+  else{const bw=w/count;for(let i=0;i<count;i++){const band=i<count*.34?0:i<count*.68?2:5,gain=band===0?lowGain:band===2?midGain:highGain,v=Math.min(1,b[band]*gain),bh=4+v*h*.85,xx=left+i*bw+bw*.16;ctx.fillStyle=grad(i/count);ctx.shadowColor=grad(i/count);ctx.shadowBlur=spectrumGlow*.28;if(spectrumStyle==='mirror')ctx.fillRect(xx,cy0-bh/2,bw*.68,bh);else ctx.fillRect(xx,cy0-bh/2,bw*.68,bh);}}
+  ctx.restore();
+}
+function drawNeonFX(ctx,b){
+  if(fxStyle==='off'||fxPower<=0)return;const t=performance.now()*.001*fxSpeed,p=Math.min(1,fxPower/100),bass=b[0]||0;ctx.save();ctx.globalCompositeOperation='lighter';ctx.shadowBlur=18*p;
+  if(fxStyle==='fire'){const base=H*.88,span=W*.9;for(let i=0;i<22;i++){const xx=W*.05+i/21*span,ht=(H*.035+Math.abs(Math.sin(t*2.4+i*.83))*H*.075+bass*H*.12)*p,g=ctx.createLinearGradient(0,base-ht,0,base);g.addColorStop(0,'rgba(255,245,80,0)');g.addColorStop(.35,'rgba(255,95,20,.8)');g.addColorStop(1,'rgba(255,25,5,.18)');ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(xx-W*.018,base);ctx.quadraticCurveTo(xx-W*.01,base-ht*.55,xx+Math.sin(t*3+i)*W*.012,base-ht);ctx.quadraticCurveTo(xx+W*.025,base-ht*.42,xx+W*.018,base);ctx.fill();}}
+  else if(fxStyle==='electric'){for(let j=0;j<5;j++){ctx.strokeStyle=grad(j/5);ctx.lineWidth=2+p*5;ctx.shadowColor=grad(j/5);ctx.beginPath();let xx=W*(.12+j*.18),yy=H*.12;ctx.moveTo(xx,yy);for(let k=0;k<9;k++){xx+=(Math.random()-.5)*W*.1;yy+=H*.075;ctx.lineTo(xx,yy);}ctx.stroke();}}
+  else{for(let j=0;j<7;j++){ctx.strokeStyle=grad(j/7);ctx.lineWidth=3+p*8;ctx.globalAlpha=.22+p*.35;ctx.beginPath();for(let xx=0;xx<=W;xx+=W/45){const yy=H*(.45+j*.018)+Math.sin(xx*.008+t*2+j)*H*(.025+bass*.07)*p;xx?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.stroke();}}
+  ctx.restore();
+}
 bind('sCut',v=>{cut=v;maskDirty=true;});bind('sFea',v=>{fea=v;maskDirty=true;});
 bind('sPow',v=>pow=v);bind('sPho',v=>pho=v);bind('sDep',v=>dep=v);
 bind('sTrl',v=>trla=v);bind('sShk',v=>shk=v);bind('sPnc',v=>pnc=v);
@@ -352,7 +418,14 @@ function drawPals(){$('pals').innerHTML='';colors.forEach((h,i)=>{
   const b=document.createElement('div');b.className='pal'+(i===selColor?' on':'');
   b.style.background='hsl('+h+' 100% 58%)';b.onclick=()=>{selColor=i;drawPals();};$('pals').appendChild(b);});}
 drawPals();
-$('addC').onclick=()=>{snap();if(colors.length<6){colors.push(Math.floor(Math.random()*360));selColor=colors.length-1;drawPals();}};
+function hueFromHex(hex){const m=/^#?([0-9a-f]{6})$/i.exec(hex);if(!m)return null;const n=parseInt(m[1],16),r=((n>>16)&255)/255,g=((n>>8)&255)/255,b=(n&255)/255,max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;let h=0;if(d){if(max===r)h=((g-b)/d)%6;else if(max===g)h=(b-r)/d+2;else h=(r-g)/d+4;}return Math.round((h*60+360)%360);}
+function syncColor(hex){const h=hueFromHex(hex);if(h===null)return false;colors[selColor]=h;drawPals();$('colorHue').value=h;return true;}
+$('customColor').oninput=e=>{$('customHex').value=e.target.value.toUpperCase();syncColor(e.target.value);};
+$('customHex').onchange=e=>{if(/^#[0-9a-f]{6}$/i.test(e.target.value)){$('customColor').value=e.target.value;syncColor(e.target.value);}};
+$('applyColor').onclick=()=>{if(syncColor($('customColor').value))snap();};
+$('addCustomColor').onclick=()=>{const h=hueFromHex($('customColor').value);if(h===null)return;snap();if(colors.length<6)colors.push(h);else colors[selColor]=h;selColor=colors.length-1;drawPals();};
+$('colorHue').oninput=e=>{colors[selColor]=+e.target.value;drawPals();};
+=()=>{snap();if(colors.length<6){colors.push(Math.floor(Math.random()*360));selColor=colors.length-1;drawPals();}};
 $('delC').onclick=()=>{snap();if(colors.length>1){colors.splice(selColor,1);selColor=0;drawPals();}};
 $('tBg').onclick=e=>{bgOn=!bgOn;e.currentTarget.classList.toggle('on',bgOn);};
 $('tFr').onclick=e=>{frOn=!frOn;e.currentTarget.classList.toggle('on',frOn);};
@@ -984,7 +1057,8 @@ function frame(t){
   requestAnimationFrame(frame);
   const dt=Math.min(50,t-last||16);last=t;frameN++;
   const b=bands();curB=b;curBbg=bands(bvp);
-  const bass=b[0];avg=avg*.92+bass*.08;
+  b=b.map((v,i)=>{const gain=i===0?lowGain*bassBoost:i<4?midGain:highGain;beatSmooth[i]=beatSmooth[i]*beatDamp+(v*beatSense*gain)*(1-beatDamp);return Math.min(1,beatSmooth[i]);});
+  const bass=beatReaction?b[0]:0;avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
   pulse=Math.max(pulse*.85,bass);hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
   if(autoOn){autoT+=dt;if(autoT>autoEvery*1000){autoT=0;autoStep();}}
@@ -1046,6 +1120,7 @@ function frame(t){
   drawLights(x);
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
     x.drawImage(paintLayer(.7,false),0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;}
+  drawNeonFX(x,b);drawIntegratedSpectrum(x,b);
   bx.clearRect(0,0,bl.width,bl.height);
   bx.filter='blur(12px)';bx.drawImage(c,0,0,bl.width,bl.height);bx.filter='none';
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
