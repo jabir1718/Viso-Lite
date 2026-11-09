@@ -126,14 +126,14 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
   <div id="toolFilters" aria-label="Tool categories">
     <button type="button" class="toolFilter active" data-filter="all">All tools</button>
     <button type="button" class="toolFilter" data-filter="media">Media</button>
-    <button type="button" class="toolFilter" data-filter="visuals">Visuals</button>
+    <button type="button" class="toolFilter" data-filter="visualizer">Visualizer</button>
     <button type="button" class="toolFilter" data-filter="audio">Audio</button>
-    <button type="button" class="toolFilter" data-filter="effects">Effects</button>
-    <button type="button" class="toolFilter" data-filter="layers">Layers</button>
+    <button type="button" class="toolFilter" data-filter="overlay">Overlay FX</button>
+    <button type="button" class="toolFilter" data-filter="elements">Elements</button>
     <button type="button" class="toolFilter" data-filter="background">Background</button>
-    <button type="button" class="toolFilter" data-filter="text">Text</button>
+    <button type="button" class="toolFilter" data-filter="logo">Logo & Text</button>
     <button type="button" class="toolFilter" data-filter="export">Export</button>
-    <button type="button" class="toolFilter" data-filter="project">Projects</button>
+    <button type="button" class="toolFilter" data-filter="templates">Templates
   </div>
 </div>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
@@ -1384,7 +1384,7 @@ function frame(t){
   
 // VISO Tool Registry v1 — stable IDs and parameter metadata for future effect modules.
 const VISO_TOOL_REGISTRY=Object.create(null);
-const VISO_TOOL_CATEGORIES=['all','media','visuals','audio','effects','layers','background','text','export','project'];
+const VISO_TOOL_CATEGORIES=['all','media','visualizer','audio','elements','background','logo','overlay','export','templates'];
 const VISO_FAV_KEY='viso.toolFavorites.v1';
 let visoToolFilter='all',visoFavoritesOnly=false;
 let visoFavorites=new Set();
@@ -1399,13 +1399,13 @@ function visoToolCategory(title){
  const t=title.toLowerCase();
  if(t.includes('media'))return 'media';
  if(t.includes('export'))return 'export';
- if(t.includes('template')||t.includes('project'))return 'project';
+ if(t.includes('template')||t.includes('project'))return 'templates';
  if(t.includes('background'))return 'background';
  if(t.includes('audio')||t.includes('spectrum')||t.includes('bpm'))return 'audio';
- if(t.includes('text')||t.includes('logo'))return 'text';
- if(t.includes('mask')||t.includes('layer')||t.includes('position')||t.includes('light'))return 'layers';
- if(t.includes('motion')||t.includes('progress')||t.includes('vignette')||t.includes('effect'))return 'effects';
- return 'visuals';
+ if(t.includes('text')||t.includes('logo'))return 'logo';
+ if(t.includes('mask')||t.includes('layer')||t.includes('position')||t.includes('light'))return 'elements';
+ if(t.includes('motion')||t.includes('progress')||t.includes('vignette')||t.includes('effect'))return 'overlay';
+ return 'visualizer';
 }
 function visoSlug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
 function saveVISOFavorites(){try{localStorage.setItem(VISO_FAV_KEY,JSON.stringify([...visoFavorites]));}catch(_){}}
