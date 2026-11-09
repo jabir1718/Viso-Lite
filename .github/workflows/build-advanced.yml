@@ -48,9 +48,23 @@ jobs:
           ids = re.findall('id="([^"]+)"', html)
           if len(ids) != len(set(ids)):
               raise SystemExit("Duplicate HTML id detected")
-          for required in ("songInfo", "recInfo", "bLoop", "bStopAtEnd"):
+          required_ids = (
+              "songInfo", "recInfo", "bLoop", "bStopAtEnd",
+              "studioHeader", "toolSearch", "toolFavorites", "toolFilters",
+              "bProjectSave", "bProjectOpen", "sVhsScan", "sShockStrength",
+              "sLensAmount", "sProgThickness", "sLogoGlow", "bSurfaceReflection"
+          )
+          for required in required_ids:
               if required not in ids:
                   raise SystemExit(f"Missing required UI element: {required}")
+          for required_source in (
+              "VISO_TOOL_REGISTRY", "viso-project-v3", "function visoZip",
+              "function visoUnzip", "restoreVISOProjectAssets", "AndroidSave.appendChunk"
+          ):
+              if required_source not in html:
+                  raise SystemExit(f"Missing required VISO module: {required_source}")
+          if "watermark" in html.lower():
+              raise SystemExit("Watermark code/UI is forbidden in VISO")
           Path("/tmp/viso-inline.js").write_text(chr(10).join(scripts), encoding="utf-8")
           print(f"HTML checks passed: {len(ids)} unique IDs, {len(scripts)} script blocks")
           PY
