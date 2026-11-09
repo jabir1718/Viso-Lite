@@ -794,17 +794,30 @@ $('bRec').onclick=()=>{
   }
   if(!rec||!mime){st.getTracks().forEach(t=>t.stop());setPreviewCanvasSize();$('recInfo').textContent='No compatible MP4/WebM encoder found';return;}
   const ext=mime.includes('mp4')?'mp4':'webm';
-  const chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
-  rec.onstop=()=>{
+  const chunks=[];let exportFailed=false,exportFinalized=false;
+  const finishRecorder=message=>{
+    if(exportFinalized)return;exportFinalized=true;
     clearInterval(recClock);recClock=null;
-    const blob=new Blob(chunks,{type:mime.split(';')[0]});
-    dl(blob,exportFileName(ext));
-    $('bRec').textContent='Export video';$('bRec').classList.add('prim');
-    $('recInfo').textContent='Export saved · '+clockText((Date.now()-recStarted)/1000)+' · '+ext.toUpperCase();
     st.getTracks().forEach(t=>t.stop());
     setPreviewCanvasSize();
+    $('bRec').textContent='Export video';$('bRec').classList.add('prim');
+    $('recInfo').textContent=message;
+    rec=null;
   };
-  rec.onerror=e=>{$('recInfo').textContent='Export error: '+(e.error?.message||'unknown');};
+  rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+  rec.onstop=()=>{
+    if(!exportFailed&&chunks.length){
+      const blob=new Blob(chunks,{type:mime.split(';')[0]});
+      dl(blob,exportFileName(ext));
+      finishRecorder('Export saved · '+clockText((Date.now()-recStarted)/1000)+' · '+ext.toUpperCase());
+    }else finishRecorder('Export failed: recorder returned no video data');
+  };
+  rec.onerror=e=>{
+    exportFailed=true;
+    const message='Export error: '+(e.error?.message||'unknown');
+    try{if(rec&&rec.state!=='inactive')rec.stop();}catch(_){}
+    finishRecorder(message);
+  };
   rec.start(500);recStarted=Date.now();
   $('bRec').textContent='Finish export';$('bRec').classList.remove('prim');
   $('recInfo').textContent='Exporting · 00:00';
