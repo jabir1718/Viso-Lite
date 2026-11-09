@@ -52,7 +52,8 @@ jobs:
               "songInfo", "recInfo", "bLoop", "bStopAtEnd",
               "studioHeader", "toolSearch", "toolFavorites", "toolFilters",
               "bProjectSave", "bProjectOpen", "sVhsScan", "sShockStrength",
-              "sLensAmount", "sProgThickness", "sLogoGlow", "bSurfaceReflection"
+              "sLensAmount", "sProgThickness", "sLogoGlow", "bSurfaceReflection",
+              "studioText2", "bText2On", "sText2Size", "sText2Glow"
           )
           for required in required_ids:
               if required not in ids:
