@@ -46,7 +46,7 @@ assert(html.includes('const PREVIEW_MAX_W=540,PREVIEW_MAX_H=960'), 'live preview
 assert(html.includes('function setPreviewCanvasSize()'), 'preview resolution must be independently managed');
 assert(html.includes('function setExportCanvasSize(){setCanvasSize(targetW,targetH);}'), 'exports must restore the selected full output resolution');
 assert(html.includes('BIT=Math.round(targetW*targetH*FPS*0.13*(quality/100))'), 'export bitrate must use the selected output resolution');
-assert(html.includes("setExportCanvasSize();\\n  const st=c.captureStream(FPS)"), 'video capture must start at full selected resolution');
+assert(html.includes("setExportCanvasSize();\n  const st=c.captureStream(FPS)"), 'video capture must start at full selected resolution');
 assert(html.includes("setPreviewCanvasSize();if(b)dl(b,exportFileName('png'))"), 'PNG export must restore the mobile preview resolution after capture');
 assert(html.includes('const st=c.captureStream(FPS)'), 'video export must capture the composited preview canvas');
 assert(html.includes("render:(ctx,b)=>drawStudioText(ctx,b)"), 'text studio layers must render through the shared export canvas pipeline');
