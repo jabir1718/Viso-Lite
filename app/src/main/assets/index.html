@@ -89,7 +89,7 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
 <div class="sec panel open" id="mediaPanel"><h4>Media</h4>
     <div class="row">
       <button id="bA">MP3 / Audio</button><button id="bI">Photo</button><button id="bV">Video</button>
-      <button id="bO">+ PNG / Overlay</button><button id="bDel">× Remove selected PNG</button><button id="bMediaClear">Remove photo/video</button>
+      <button id="bO">+ PNG / GIF Sticker</button><button id="bDel">× Remove selected PNG</button><button id="bMediaClear">Remove photo/video</button>
     </div>
     <div class="row"><button id="bP" class="prim">Play</button><button id="bR">Center media</button><button id="bUndo">Undo</button><button id="bRedo">Redo</button><button id="bReset">Reset</button></div>
     <div class="status">Choose your song, photo, video or transparent PNG. Your canvas stays visible above.</div>
@@ -430,7 +430,7 @@ $('fV').onchange=e=>{const f=e.target.files[0];if(!f)return;
 $('bO').onclick=()=>$('fO').click();
 $('fO').onchange=e=>{[...e.target.files].forEach(f=>{const im=new Image();
   im.onload=()=>{objects.push({img:im,x:Math.random()*W,y:Math.random()*H,sc:.32,rot:0,
-    motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28});selObj=objects.length-1;};
+    motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28,isSticker:true});selObj=objects.length-1;};
   im.src=URL.createObjectURL(f);});};
 function guessMotion(n){n=(n||'').toLowerCase();
   if(/car|truck|bike|bus|taxi|train|plane|rocket/.test(n))return'Drive';
