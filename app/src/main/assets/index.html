@@ -4,9 +4,24 @@
 <title>VISO Advanced</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
-  body{color:#e6e3ef;font:12px system-ui;
-       background:radial-gradient(120% 60% at 50% 0%,#1a1030 0%,#0a0812 45%,#050409 100%);
+  :root{color-scheme:light;--lemon:#efff75;--lemon2:#dfff32;--ink:#20240b;--panel:#fbffd9;--line:#c9d77a;--accent:#8ca900}
+  body{color:var(--ink);font:12px system-ui;background:linear-gradient(145deg,#fbffd9 0%,#f1ff8a 48%,#e5ff38 100%);
        display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+  #wrap{background:linear-gradient(135deg,#fbffd9,#efff75)}
+  #bar{background:transparent}
+  .sec{background:linear-gradient(180deg,#ffffffeb,#f8ffca);border:1px solid var(--line);box-shadow:0 2px 10px #64750018}
+  .sec h4{color:#647b00}
+  button{background:#f4f9c9;color:#29300b;border:1px solid #c3d16d}
+  button:active{background:#e4f58a}
+  button.on{background:#e6ff54;border-color:#829b00;color:#273000}
+  button.lock{background:#efffc0;border-color:#9dbb28;color:#435500}
+  button.prim{background:linear-gradient(180deg,#eaff55,#c9ed00);border-color:#8da800;color:#263000}
+  label{color:#525c22}
+  input[type=range]{accent-color:#91ad00}
+  input[type=text]{background:#fffde8;border:1px solid #c7d47a;color:#273000}
+  .mline b{color:#4c5918}
+  .status{color:#38420f;background:#f5facd;border:1px solid #d8e39a}
+  canvas{background:#f4ff9d;box-shadow:0 0 32px #c4e50055,0 0 0 1px #91a80030}
   #wrap{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:6px}
   canvas{max-height:100%;max-width:100%;aspect-ratio:9/16;border-radius:16px;background:#000;
          touch-action:none;display:block;box-shadow:0 0 40px #7c3aed44,0 0 0 1px #ffffff14}
@@ -33,8 +48,10 @@
   .mline{display:flex;align-items:center;gap:8px}
   .mline b{font-size:10px;color:#b9b3c9;width:64px;flex:0 0 auto;font-weight:500}
   .chip{min-height:32px;font-size:10.5px;padding:0 10px;border-radius:9px}
-  .status{font-size:10px;color:#d5d1e2;background:#ffffff0b;border:1px solid #ffffff12;
+  .status{font-size:10px;color:#38420f;background:#f5facd;border:1px solid #d8e39a;
     border-radius:9px;padding:8px 10px;font-variant-numeric:tabular-nums;line-height:1.4}
+  .progress{height:7px;border-radius:99px;background:#dce7a1;overflow:hidden}
+  #recProgress{height:100%;width:0;background:linear-gradient(90deg,#a8ca00,#e2ff32);transition:width .2s}
 </style>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
 <div id="bar">
@@ -56,6 +73,7 @@
   <div class="sec"><h4>Song + export monitor</h4>
     <div id="songInfo" class="status">Song: not loaded · 00:00 / 00:00</div>
     <div id="recInfo" class="status">Export: ready · 00:00</div>
+    <div class="progress"><div id="recProgress"></div></div>
     <div class="row"><button id="bLoop" class="on">Loop song: ON</button><button id="bStopAtEnd">Stop export at song end: OFF</button></div>
   </div>
   <div class="sec"><h4>History</h4>
@@ -199,10 +217,23 @@ function supportedVideoType(){
   const types=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'];
   return types.find(t=>MediaRecorder.isTypeSupported(t))||'';
 }
-function actualFormatLabel(){const t=supportedVideoType();return t.includes('mp4')?'MP4':'WebM (compatible)';}
-const fmtButton=document.createElement('button');fmtButton.textContent='Auto format';fmtButton.className='on';
-fmtButton.onclick=()=>{formatChoice=formatChoice==='auto'?'webm':'auto';fmtButton.textContent=formatChoice==='auto'?'Auto format':'WebM';fmtButton.classList.toggle('on',formatChoice==='auto');updateBitrate();};
-$('format').appendChild(fmtButton);
+function chooseMime(choice){
+  if(!window.MediaRecorder||!MediaRecorder.isTypeSupported)return '';
+  const types=choice==='mp4'?['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4']:
+    choice==='webm'?['video/webm;codecs=vp9,opus','video/webm']:
+    ['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'];
+  return types.find(t=>MediaRecorder.isTypeSupported(t))||'';
+}
+function actualFormatLabel(){
+  if(formatChoice!=='auto')return formatChoice.toUpperCase()+(chooseMime(formatChoice)?' · supported':' · unavailable');
+  const t=supportedVideoType();return t.includes('mp4')?'Auto · MP4':t.includes('webm')?'Auto · WebM':'No encoder';
+}
+['auto','mp4','webm'].forEach((v,i)=>{
+  const b=document.createElement('button');b.textContent=v==='auto'?'Auto':v.toUpperCase();
+  if(i===0)b.classList.add('on');
+  b.onclick=()=>{formatChoice=v;document.querySelectorAll('#format button').forEach(q=>q.classList.toggle('on',q===b));updateBitrate();};
+  $('format').appendChild(b);
+});
 updateBitrate();
 
 let img=null,bgImg=null,bgUseVid=false,bgViz=false,maskDirty=true;
@@ -401,16 +432,10 @@ $('bRec').onclick=()=>{
   if(rec&&rec.state==='recording'){rec.stop();return;}
   const st=c.captureStream(FPS);
   if(streamDest)streamDest.stream.getAudioTracks().forEach(t=>st.addTrack(t));
-  const candidates=formatChoice==='webm'
-    ?['video/webm;codecs=vp9,opus','video/webm']
-    :['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'];
-  let mime='';
-  for(const candidate of candidates){
-    if(!MediaRecorder.isTypeSupported(candidate))continue;
-    try{rec=new MediaRecorder(st,{mimeType:candidate,videoBitsPerSecond:BIT});mime=candidate;break;}
-    catch(_){rec=null;}
-  }
-  if(!rec||!mime){$('recInfo').textContent='No compatible MP4/WebM encoder found';return;}
+  const mime=chooseMime(formatChoice);
+  if(!mime){$('recInfo').textContent=formatChoice.toUpperCase()+' is not supported by this phone/WebView. Choose Auto or another format.';return;}
+  try{rec=new MediaRecorder(st,{mimeType:mime,videoBitsPerSecond:BIT});}
+  catch(err){$('recInfo').textContent='Encoder could not start: '+(err.message||'unsupported settings');st.getTracks().forEach(t=>t.stop());rec=null;return;}
   const ext=mime.includes('mp4')?'mp4':'webm';
   const chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
   rec.onstop=()=>{
@@ -418,7 +443,8 @@ $('bRec').onclick=()=>{
     const blob=new Blob(chunks,{type:mime.split(';')[0]});
     dl(blob,'viso_'+Date.now()+'.'+ext);
     $('bRec').textContent='Export video';$('bRec').classList.add('prim');
-    $('recInfo').textContent='Export saved · '+clockText((Date.now()-recStarted)/1000)+' · '+ext.toUpperCase();
+    $('recInfo').textContent='Export complete · '+clockText((Date.now()-recStarted)/1000)+' · '+ext.toUpperCase()+' · '+W+'×'+H+' · '+FPS+' FPS';
+    $('recProgress').style.width='100%';
     st.getTracks().forEach(t=>t.stop());
   };
   rec.onerror=e=>{$('recInfo').textContent='Export error: '+(e.error?.message||'unknown');};
@@ -426,7 +452,18 @@ $('bRec').onclick=()=>{
   $('bRec').textContent='Finish export';$('bRec').classList.remove('prim');
   $('recInfo').textContent='Exporting · 00:00';
   if(recClock)clearInterval(recClock);
-  recClock=setInterval(()=>{$('recInfo').textContent='Exporting · '+clockText((Date.now()-recStarted)/1000);},250);
+  $('recProgress').style.width='0%';
+  recClock=setInterval(()=>{
+    const elapsed=(Date.now()-recStarted)/1000;
+    if(stopAtSongEnd&&audio&&Number.isFinite(audio.duration)&&audio.duration>0){
+      const pct=Math.min(99,elapsed/audio.duration*100);
+      $('recProgress').style.width=pct+'%';
+      $('recInfo').textContent='Exporting · '+Math.round(pct)+'% · '+clockText(elapsed)+' / '+clockText(audio.duration);
+    }else{
+      $('recProgress').style.width='3%';
+      $('recInfo').textContent='Recording · '+clockText(elapsed)+' · press Finish export when ready';
+    }
+  },250);
   if(audio&&!playing){$('bP').click();}
 };
 function snap(){undo.push(JSON.stringify({colors,mstate,shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp}));
@@ -911,8 +948,8 @@ function frame(t){
   const punch=1+(pnc/100)*pulse*.06;
   if(punch>1){x.translate(cx,cy);x.scale(punch,punch);x.translate(-cx,-cy);}
   const tr=trla/100;
-  if(tr>0.02){x.fillStyle='rgba(0,0,0,'+(1-tr*.85)+')';x.fillRect(-100,-100,W+200,H+200);}
-  else{x.fillStyle='#000';x.fillRect(-100,-100,W+200,H+200);}
+  if(tr>0.02){x.fillStyle='rgba(244,255,157,'+(1-tr*.85)+')';x.fillRect(-100,-100,W+200,H+200);}
+  else{x.fillStyle='#f4ff9d';x.fillRect(-100,-100,W+200,H+200);}
 
   const clipH=Math.max(0,split/100*H);
   if(clipH>0){
@@ -931,7 +968,7 @@ function frame(t){
     }
     x.restore();
   }
-  if(clipH>0&&clipH<H){x.fillStyle='#000';x.fillRect(0,clipH,W,H-clipH);}
+  if(clipH>0&&clipH<H){x.fillStyle='#f4ff9d';x.fillRect(0,clipH,W,H-clipH);}
   if(bgOn){x.globalAlpha=.4;x.drawImage(paintLayer(1.4,false),0,0);x.globalAlpha=1;}
 
   const s0=src();
