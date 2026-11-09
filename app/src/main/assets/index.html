@@ -1629,8 +1629,8 @@ function collectVISORegistryState(){
  const state={};Object.values(VISO_TOOL_REGISTRY).forEach(tool=>{if(typeof tool.serialize==='function')state[tool.id]=tool.serialize();});return state;
 }
 function restoreVISORegistryState(state){
- if(!state||typeof state!=='object')return;
- Object.values(VISO_TOOL_REGISTRY).forEach(tool=>{const saved=state[tool.id];if(saved&&typeof saved==='object'&&typeof tool.restore==='function')tool.restore(saved);});
+ if(!state||typeof state!=='object')state={};
+ Object.values(VISO_TOOL_REGISTRY).forEach(tool=>{const saved=state[tool.id];if(typeof tool.restore==='function')tool.restore(saved&&typeof saved==='object'?saved:{});});
 }
 function renderVISOStage(stage,ctx,b,dt){
  const list=VISO_RENDER_CACHE[stage];if(!list)return;
