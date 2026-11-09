@@ -1769,9 +1769,9 @@ async function downloadVISOProject(project,fileName){
  const blob=visoZip(files);
  if(window.AndroidSave&&typeof window.AndroidSave.beginSave==='function'){
   if(!AndroidSave.beginSave(fileName,'application/vnd.viso.project+zip'))throw new Error('Android download could not start');
-  const bytes=new Uint8Array(await blob.arrayBuffer()),chunkSize=256*1024;
-  for(let offset=0;offset<bytes.length;offset+=chunkSize){
-   const chunk=bytes.subarray(offset,Math.min(bytes.length,offset+chunkSize));let binary='';
+  const chunkSize=256*1024;
+  for(let offset=0;offset<blob.size;offset+=chunkSize){
+   const chunk=new Uint8Array(await blob.slice(offset,Math.min(blob.size,offset+chunkSize)).arrayBuffer());let binary='';
    for(let i=0;i<chunk.length;i+=0x8000)binary+=String.fromCharCode(...chunk.subarray(i,Math.min(chunk.length,i+0x8000)));
    if(!AndroidSave.appendChunk(btoa(binary))){AndroidSave.cancelSave();throw new Error('Project download stopped while writing');}
   }
