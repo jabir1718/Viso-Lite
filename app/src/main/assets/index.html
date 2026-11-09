@@ -1968,8 +1968,8 @@ $('fProjectOpen').onchange=async e=>{
    const overlayCount=overlayIndexes.length;
    if(Array.isArray(layerObjects)&&layerObjects.length!==overlayCount)throw new Error('Project overlay asset count mismatch');
   }
-  applyVisoProject(project);
   if(project.schema==='viso-project-v3')await restoreVISOProjectAssets(project,entries);
+  applyVisoProject(project);
   undo.length=0;redo.length=0;objectSnapshotCache.clear();
  }catch(err){$('templateInfo').textContent='Could not open project: '+err.message;}
  e.target.value='';
