@@ -1169,8 +1169,11 @@ function frame(t){
   requestAnimationFrame(frame);
   const dt=Math.min(50,t-last||16);last=t;frameN++;
   const b=bands();curB=b;curBbg=bands(bvp);
-  detectVISOBeat(t);\n  applyTurningPoints();\n  if(vDriftOn&&vBpm>0)vDriftPhase+=dt*(vBpm/60)*.002*(vDrift/35);
-  if(vPanner&&playing)vPanner.pan.setTargetAtTime(Math.sin(performance.now()/1000*(v8Speed/100+.05))*v8Width/100,ctxA.currentTime,.04);\n  const bass=b[0];avg=avg*.92+bass*.08;
+  detectVISOBeat(t);
+  applyTurningPoints();
+  if(vDriftOn&&vBpm>0)vDriftPhase+=dt*(vBpm/60)*.002*(vDrift/35);
+  if(vPanner&&playing)vPanner.pan.setTargetAtTime(Math.sin(performance.now()/1000*(v8Speed/100+.05))*v8Width/100,ctxA.currentTime,.04);
+  const bass=b[0];avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
   pulse=Math.max(pulse*.85,bass);hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
   if(autoOn){autoT+=dt;if(autoT>autoEvery*1000){autoT=0;autoStep();}}
@@ -1238,7 +1241,11 @@ function frame(t){
   bx.filter='blur(12px)';bx.drawImage(c,0,0,bl.width,bl.height);bx.filter='none';
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
-  drawStudioText(x,b);\n  drawVISOExtraTexts(x);\n  drawVISOProgress(x);\n  drawVISOEffects(x,dt);\n  drawVISOMaterial(x);
+  drawStudioText(x,b);
+  drawVISOExtraTexts(x);
+  drawVISOProgress(x);
+  drawVISOEffects(x,dt);
+  drawVISOMaterial(x);
   x.restore();
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
     x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
