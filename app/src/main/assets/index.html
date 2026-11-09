@@ -41,6 +41,7 @@
   body[data-theme="yellow"]{color:#fff7cc;background:linear-gradient(180deg,#302600,#100e05)}body[data-theme="yellow"] .sec{background:#241d08;border-color:#6e570e}body[data-theme="yellow"] .sec h4{color:#ffd84d}body[data-theme="yellow"] button{background:#3b300d;color:#fff0a6;border-color:#796019}body[data-theme="yellow"] button.on{background:#69520c;border-color:#ffe066;color:#fff9d5}body[data-theme="yellow"] button.prim{background:linear-gradient(180deg,#f3c928,#a97900);color:#241900;border-color:#ffe066}body[data-theme="yellow"] label,body[data-theme="yellow"] .mline b{color:#d8c77e}body[data-theme="yellow"] input[type=text]{background:#332a0d;color:#fff5c4;border-color:#796019}body[data-theme="yellow"] .status{background:#2e260d;color:#fff0b0;border-color:#5e4b13}body[data-theme="yellow"] input[type=range]{accent-color:#ffd52e}
   body[data-theme="green"]{color:#d9ffe9;background:linear-gradient(180deg,#062b20,#04110e)}body[data-theme="green"] .sec{background:#09251d;border-color:#145b43}body[data-theme="green"] .sec h4{color:#48e69a}body[data-theme="green"] button{background:#10372a;color:#d9ffeb;border-color:#1b7654}body[data-theme="green"] button.on{background:#145b40;border-color:#4bf0a5;color:#effff6}body[data-theme="green"] button.prim{background:linear-gradient(180deg,#19b978,#08764d);color:#fff;border-color:#4bf0a5}body[data-theme="green"] label,body[data-theme="green"] .mline b{color:#9ed8bd}body[data-theme="green"] input[type=text]{background:#10372a;color:#e5fff1;border-color:#1b7654}body[data-theme="green"] .status{background:#0b3024;color:#d9ffeb;border-color:#145b43}body[data-theme="green"] input[type=range]{accent-color:#35d995}
   body[data-theme="banana"]{color:#332b08;background:linear-gradient(180deg,#fff4a8,#f4d94b)}body[data-theme="banana"] .sec{background:#fff9d7;border-color:#e3c638;box-shadow:0 2px 8px #66500018}body[data-theme="banana"] .sec h4{color:#806400}body[data-theme="banana"] button{background:#fff0a5;color:#453700;border-color:#dfc13a}body[data-theme="banana"] button.on{background:#ffe05b;border-color:#997900;color:#332700}body[data-theme="banana"] button.prim{background:linear-gradient(180deg,#f5d52c,#d4a900);color:#332700;border-color:#b38c00}body[data-theme="banana"] label,body[data-theme="banana"] .mline b{color:#756018}body[data-theme="banana"] input[type=text]{background:#fffdf0;color:#332b08;border-color:#dfc13a}body[data-theme="banana"] .status{background:#fff9d7;color:#4c3d08;border-color:#e3c638}body[data-theme="banana"] input[type=range]{accent-color:#bd9700}
+  body[data-theme="white"] canvas{background:#fff;box-shadow:0 0 20px #15223818,0 0 0 1px #cbd5e1}
   #themePick{max-width:100%;min-height:36px;border-radius:10px;padding:0 10px;background:#ffffff12;color:inherit;border:1px solid #ffffff2b;font-size:11px}body[data-theme="white"] #themePick,body[data-theme="banana"] #themePick{background:#fff;color:#263345;border-color:#cbd5e1}
 </style>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
@@ -81,10 +82,10 @@
   </div>
   <div class="sec"><h4>Auto + Lock</h4>
     <div class="row">
-      <button id="bAuto" class="prim">AUTO</button>
+      <button id="bAuto" class="prim">AUTO: OFF</button>
       <button class="chip lock" id="kCol">Lock colour</button><button class="chip lock" id="kVis">Lock visuals</button>
       <button class="chip lock" id="kShp">Lock shape</button><button class="chip lock" id="kSwy">Lock sway</button>
-    </div>
+    </div><div id="autoStatus" class="status">Auto changes are OFF</div>
     <label><span>Every</span><input id="sAuto" type="range" min="1" max="12" value="3"></label>
   </div>
   <div class="sec"><h4>Look</h4>
@@ -225,6 +226,8 @@ let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=fa
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
 let autoOn=false,autoT=0,autoEvery=3;
+const autoStatus=$('autoStatus');
+function updateAutoStatus(){const locks=Object.entries(lockChip).filter(([,v])=>v).map(([k])=>k).join(', ');autoStatus.textContent=autoOn?'AUTO ACTIVE · changes every '+autoEvery+'s'+(locks?' · locked: '+locks:''):'Auto changes are OFF';$('bAuto').textContent=autoOn?'AUTO: ON':'AUTO: OFF';}
 const lockChip={color:false,vis:false,shape:false,sway:false};
 const objects=[];let selObj=-1;
 const lights=[];let selLight=-1;let lint=60,lsz=100;
@@ -270,11 +273,11 @@ PRESETS.forEach(p=>{const b=document.createElement('button');b.textContent=p.n;
     bloom=p.bl;drawMixers();};
   $('presets').appendChild(b);});
 
-$('bAuto').onclick=e=>{autoOn=!autoOn;e.currentTarget.classList.toggle('on',autoOn);};
+$('bAuto').onclick=()=>{autoOn=!autoOn;autoT=0;$('bAuto').classList.toggle('on',autoOn);updateAutoStatus();};
 [['kCol','color'],['kVis','vis'],['kShp','shape'],['kSwy','sway']].forEach(([id,k])=>{
   $(id).onclick=e=>{lockChip[k]=!lockChip[k];e.currentTarget.classList.toggle('lock',!lockChip[k]);
-    e.currentTarget.classList.toggle('on',lockChip[k]);};});
-$('sAuto').oninput=e=>{autoEvery=+e.target.value;};
+    e.currentTarget.classList.toggle('on',lockChip[k]);updateAutoStatus();};});
+$('sAuto').oninput=e=>{autoEvery=+e.target.value;updateAutoStatus();};
 $('bMix').onclick=()=>{snap();colors=[];const n=2+((Math.random()*2)|0);
   for(let i=0;i<n;i++)colors.push(Math.floor(Math.random()*360));selColor=0;drawPals();
   mstate.forEach(m=>{m.on=Math.random()<.3;m.op=.4+Math.random()*.6;});
@@ -512,13 +515,13 @@ function buildMask(){
     const sw=useVid?vid.videoWidth:s0.width,sh=useVid?vid.videoHeight:s0.height;
     if(!sw||!sh)return;
     const s=Math.max(W/sw,H/sh),w=sw*s,h=sh*s;
-    const t=document.createElement('canvas');t.width=w;t.height=h;const tx=t.getContext('2d');
-    tx.drawImage(s0,0,0,w,h);
-    const d=tx.getImageData(0,0,w,h).data,out=tx.createImageData(w,h);
+    if(maskSource.width!==Math.ceil(w)||maskSource.height!==Math.ceil(h)){maskSource.width=Math.ceil(w);maskSource.height=Math.ceil(h);}
+    const tx=maskSourceCtx;tx.clearRect(0,0,maskSource.width,maskSource.height);tx.drawImage(s0,0,0,w,h);
+    const d=tx.getImageData(0,0,maskSource.width,maskSource.height).data,out=tx.createImageData(maskSource.width,maskSource.height);
     for(let i=0;i<d.length;i+=4){const l=.299*d[i]+.587*d[i+1]+.114*d[i+2];
       out.data[i]=255;out.data[i+1]=255;out.data[i+2]=255;out.data[i+3]=l>cut?255:0;}
     tx.putImageData(out,0,0);mx.filter='blur('+fea+'px)';
-    mx.drawImage(t,(W-w)/2,(H-h)/2);mx.filter='none';
+    mx.drawImage(maskSource,(W-w)/2,(H-h)/2);mx.filter='none';
   } else {
     mx.save();mx.fillStyle='#fff';mx.filter='blur('+(fea*.6)+'px)';
     if(shape==='circle'){mx.beginPath();mx.arc(cx,cy,H*.34,0,6.283);mx.fill();}
@@ -560,7 +563,7 @@ function gradAt(px,py){const a=dirG/100;return grad((1-a)*py/H+a*px/W);}
 function applyT(ctx){ctx.translate(cx+ix+Math.sin(swayT*spd/100)*swy*2.2,cy+iy);ctx.rotate(irot);ctx.scale(isc,isc);}
 function applyMT(ctx){ctx.translate(cx+mX,cy+mY);ctx.rotate(mRot);ctx.scale(mSc,mSc);}
 
-const P=[];for(let i=0;i<1500;i++)P.push({x:Math.random()*W,y:Math.random()*H,z:Math.random(),vx:0,vy:0,ph:Math.random()*6.28});
+const P=[];for(let i=0;i<900;i++)P.push({x:Math.random()*W,y:Math.random()*H,z:Math.random(),vx:0,vy:0,ph:Math.random()*6.28});
 function scatter(n){for(let i=0;i<n;i++){const p=P[(Math.random()*P.length)|0];
   p.x=Math.random()*W;p.y=Math.random()*H;p.z=Math.random();
   const a=Math.random()*6.28,v=2+Math.random()*12;p.vx=Math.cos(a)*v;p.vy=Math.sin(a)*v;}}
@@ -884,7 +887,8 @@ function drawLights(ctx){
   });
 }
 
-let curB=[0,0,0,0,0,0],curBbg=[0,0,0,0,0,0],last=0,avg=.1,frameN=0;
+let curB=[0,0,0,0,0,0],curBbg=[0,0,0,0,0,0],last=0,lastDraw=0,avg=.1,frameN=0;
+const maskSource=document.createElement('canvas'),maskSourceCtx=maskSource.getContext('2d');
 function paintLayer(scale,masked,bb){const cc=bb||curB;
   ox.clearRect(0,0,W,H);
   for(const m of mstate)if(m.on)drawMode(ox,m,cc,scale);
@@ -895,24 +899,28 @@ function paintLayer(scale,masked,bb){const cc=bb||curB;
 function autoStep(){
   if(!lockChip.color){colors=[];const n=2+((Math.random()*3)|0);
     for(let i=0;i<n;i++)colors.push(Math.floor(Math.random()*360));selColor=0;drawPals();}
-  if(!lockChip.vis){mstate.forEach(m=>{m.on=Math.random()<.22;m.op=.4+Math.random()*.6;});
-    mstate[(Math.random()*MODES.length)|0].on=true;
+  if(!lockChip.vis){mstate.forEach(m=>{m.on=false;m.op=.4+Math.random()*.6;});
+    const count=1+((Math.random()*2)|0);for(let i=0;i<count;i++){let pick;do{pick=(Math.random()*MODES.length)|0;}while(mstate[pick].on);mstate[pick].on=true;}
     document.querySelectorAll('#modes button').forEach((q,j)=>q.classList.toggle('on',mstate[j].on));drawMixers();}
   if(!lockChip.shape){const s=SHAPES[(Math.random()*SHAPES.length)|0][0];shape=s;maskDirty=true;
     document.querySelectorAll('#shapes button').forEach((q,j)=>q.classList.toggle('on',SHAPES[j][0]===s));}
+  updateAutoStatus();}
   if(!lockChip.sway){swy=Math.random()*100;spd=6+Math.random()*40;
     $('sSwy').value=swy;$('sSpd').value=spd;}
 }
 
 function frame(t){
   requestAnimationFrame(frame);
-  const dt=Math.min(50,t-last||16);last=t;frameN++;
+  const activeCount=mstate.reduce((n,m)=>n+(m.on?1:0),0);
+  const targetFps=activeCount>9?20:activeCount>5?24:30;
+  if(lastDraw&&t-lastDraw<1000/targetFps)return;
+  const dt=Math.min(50,lastDraw?t-lastDraw:1000/targetFps);lastDraw=t;last=t;frameN++;
   const b=bands();curB=b;curBbg=bands(bvp);
   const bass=b[0];avg=avg*.92+bass*.08;
-  if(bass>avg*1.4&&bass>.32)scatter(170);
+  if(bass>avg*1.4&&bass>.32)scatter(55);
   pulse=Math.max(pulse*.85,bass);hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
   if(autoOn){autoT+=dt;if(autoT>autoEvery*1000){autoT=0;autoStep();}}
-  if(useVid&&frameN%3===0)maskDirty=true;
+  if(useVid&&shape==='media'&&frameN%12===0)maskDirty=true;
   if(maskDirty){buildMask();maskDirty=false;}
   stepP(b,dt);
 
@@ -922,8 +930,9 @@ function frame(t){
   const punch=1+(pnc/100)*pulse*.06;
   if(punch>1){x.translate(cx,cy);x.scale(punch,punch);x.translate(-cx,-cy);}
   const tr=trla/100;
-  if(tr>0.02){x.fillStyle='rgba(0,0,0,'+(1-tr*.85)+')';x.fillRect(-100,-100,W+200,H+200);}
-  else{x.fillStyle='#000';x.fillRect(-100,-100,W+200,H+200);}
+  const previewWhite=document.body.dataset.theme==='white';
+  if(tr>0.02){x.fillStyle=previewWhite?'rgba(255,255,255,'+(1-tr*.85)+')':'rgba(0,0,0,'+(1-tr*.85)+')';x.fillRect(-100,-100,W+200,H+200);}
+  else{x.fillStyle=previewWhite?'#fff':'#000';x.fillRect(-100,-100,W+200,H+200);}
 
   const clipH=Math.max(0,split/100*H);
   if(clipH>0){
@@ -942,7 +951,7 @@ function frame(t){
     }
     x.restore();
   }
-  if(clipH>0&&clipH<H){x.fillStyle='#000';x.fillRect(0,clipH,W,H-clipH);}
+  if(clipH>0&&clipH<H){x.fillStyle=previewWhite?'#fff':'#000';x.fillRect(0,clipH,W,H-clipH);}
   if(bgOn){x.globalAlpha=.4;x.drawImage(paintLayer(1.4,false),0,0);x.globalAlpha=1;}
 
   const s0=src();
@@ -976,8 +985,9 @@ function frame(t){
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
   x.restore();
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
-    x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
+    x.fillStyle=previewWhite?'#64748b':'#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
     x.fillText('Photo / Video / PNG chuno',cx,cy);}
 }
+updateAutoStatus();
 requestAnimationFrame(frame);
 </script>
