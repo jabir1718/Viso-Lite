@@ -1829,6 +1829,8 @@ async function downloadVISOProject(project,fileName){
   $('templateInfo').textContent='Packing project assets '+(i+1)+' / '+specs.length+'…';
  }
  project.assets=manifest;
+ const preview=await new Promise(resolve=>c.toBlob(resolve,'image/png'));
+ if(preview){files.push({name:'preview.png',data:new Uint8Array(await preview.arrayBuffer())});project.preview='preview.png';}
  const json=new TextEncoder().encode(JSON.stringify(project));
  files.unshift({name:'project.json',data:json});
  const blob=visoZip(files);
