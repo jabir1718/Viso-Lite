@@ -251,6 +251,7 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <label><span>Glow</span><input id="sLogoGlow" type="range" min="0" max="100" value="42"></label>
     <label><span>Bounce</span><input id="sLogoBounce" type="range" min="0" max="100" value="18"></label>
     <label><span>Shake</span><input id="sLogoShake" type="range" min="0" max="100" value="8"></label>
+    <label><span>Audio-reactive size</span><input id="sLogoPulse" type="range" min="0" max="100" value="35"></label>
     <label><span>Rotation</span><input id="sLogoRot" type="range" min="-180" max="180" value="0"></label>
     <label><span>Reflection</span><input id="sLogoReflection" type="range" min="0" max="100" value="0"></label>
     <label><span>Particles</span><input id="sLogoParticles" type="range" min="0" max="100" value="0"></label>
@@ -1297,7 +1298,7 @@ let speed=100,pitchSemis=0,pitchLock=true,eightD=false,eightW=80,eightS=22,eight
 let bpm=0,beatFlash=0,flashAmt=0,driftAmt=0,driftX=0,driftY=0,lastOnset=0,onsetGaps=[];
 let beatSensitivity=34,beatScale=0,beatMarkersOn=false,metronomeOn=false,downbeatOn=true,beatColor='#ffffff';
 let sym='off',vigOn=false,vigAmt=45,progOn=false,progSz=12,progPos=96,logoImg=null,logoSize=16,logoX=92,logoY=92,logoAlpha=90,progStyle='gradient';
-let logoGlow=42,logoBounce=18,logoShake=8,logoRotation=0,logoReflection=0,logoParticles=0;
+let logoGlow=42,logoBounce=18,logoShake=8,logoPulse=35,logoRotation=0,logoReflection=0,logoParticles=0;
 let surfaceReflectionOn=false,reflStrength=35,reflDistance=12,reflBlur=18,reflFade=78,reflRipples=24,reflPerspective=18;
 let filmOn=false,filmGrain=24,filmDust=12,filmScratches=8,filmFlicker=10,filmSepia=0,filmWeave=6;
 let atmosphereOn=false,hazeStrength=24,hazeAngle=25,hazeSpeed=30,smokeAmount=18,smokeSize=48,smokeSpeed=24,smokeColor='#c5d7d0';
@@ -1356,7 +1357,7 @@ $('sLogoSize').oninput=e=>logoSize=+e.target.value;
 $('sLogoX').oninput=e=>logoX=+e.target.value;
 $('sLogoY').oninput=e=>logoY=+e.target.value;
 $('sLogoAlpha').oninput=e=>logoAlpha=+e.target.value;
-$('sLogoGlow').oninput=e=>logoGlow=+e.target.value;$('sLogoBounce').oninput=e=>logoBounce=+e.target.value;$('sLogoShake').oninput=e=>logoShake=+e.target.value;$('sLogoRot').oninput=e=>logoRotation=+e.target.value;$('sLogoReflection').oninput=e=>logoReflection=+e.target.value;$('sLogoParticles').oninput=e=>logoParticles=+e.target.value;
+$('sLogoGlow').oninput=e=>logoGlow=+e.target.value;$('sLogoBounce').oninput=e=>logoBounce=+e.target.value;$('sLogoShake').oninput=e=>logoShake=+e.target.value;$('sLogoPulse').oninput=e=>logoPulse=+e.target.value;$('sLogoRot').oninput=e=>logoRotation=+e.target.value;$('sLogoReflection').oninput=e=>logoReflection=+e.target.value;$('sLogoParticles').oninput=e=>logoParticles=+e.target.value;
 $('fLogo').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{logoImg=im;};im.src=URL.createObjectURL(f);};
 $('bLogoX').onclick=()=>{logoImg=null;};
 $('bFont').onclick=()=>$('fFont').click();
@@ -1420,7 +1421,7 @@ function drawBeatIndicator(ctx){
 }
 function drawCustomLogo(ctx){
   if(!logoImg)return;
-  const lw=W*logoSize/100,lh=logoImg.height/logoImg.width*lw,t=performance.now()*.001,b=pulse||0;
+  const b=pulse||0,pulseScale=1+b*logoPulse/100*.18,lw=W*logoSize/100*pulseScale,lh=logoImg.height/logoImg.width*lw,t=performance.now()*.001;
   const bounce=Math.sin(t*3.2)*H*.012*(logoBounce/100)-b*H*.018*(logoBounce/100);
   const shakeX=Math.sin(t*41.7)*W*.009*(logoShake/100)*(0.25+b),shakeY=Math.cos(t*35.1)*H*.006*(logoShake/100)*(0.25+b);
   const lx=W*logoX/100+shakeX,ly=H*logoY/100+bounce+shakeY;
@@ -1907,7 +1908,7 @@ document.querySelectorAll('#visoTemplates button').forEach(q=>q.onclick=async()=
  try{await downloadVISOProject(project,'VISO-'+key+'.viso');$('templateInfo').textContent=preset.name+' editable project package downloaded with imported assets';}
  catch(err){$('templateInfo').textContent='Template package failed: '+err.message;}
 });
-function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specRange,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining,logoGlow,logoBounce,logoShake,logoRotation,logoReflection,logoParticles,surfaceReflectionOn,reflStrength,reflDistance,reflBlur,reflFade,reflRipples,reflPerspective,filmOn,filmGrain,filmDust,filmScratches,filmFlicker,filmSepia,filmWeave,atmosphereOn,hazeStrength,hazeAngle,hazeSpeed,smokeAmount,smokeSize,smokeSpeed,smokeColor};}
+function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specRange,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining,logoGlow,logoBounce,logoShake,logoPulse,logoRotation,logoReflection,logoParticles,surfaceReflectionOn,reflStrength,reflDistance,reflBlur,reflFade,reflRipples,reflPerspective,filmOn,filmGrain,filmDust,filmScratches,filmFlicker,filmSepia,filmWeave,atmosphereOn,hazeStrength,hazeAngle,hazeSpeed,smokeAmount,smokeSize,smokeSpeed,smokeColor};}
 function restoreAdvancedState(s){
  if(!s)return;
  if(s.speed!==undefined)speed=s.speed;if(s.pitchSemis!==undefined)pitchSemis=s.pitchSemis;if(s.pitchLock!==undefined)pitchLock=s.pitchLock;
@@ -1922,14 +1923,14 @@ function restoreAdvancedState(s){
  if(s.shockStrength!==undefined)shockStrength=s.shockStrength;if(s.shockSpeed!==undefined)shockSpeed=s.shockSpeed;if(s.shockThickness!==undefined)shockThickness=s.shockThickness;if(s.shockRgb!==undefined)shockRgb=s.shockRgb;
  if(s.lensAmount!==undefined)lensAmount=s.lensAmount;if(s.lensFocus!==undefined)lensFocus=s.lensFocus;if(s.lensBokeh!==undefined)lensBokeh=s.lensBokeh;if(s.lensBlur!==undefined)lensBlur=s.lensBlur;
  if(s.progThickness!==undefined)progThickness=s.progThickness;if(s.progRound!==undefined)progRound=s.progRound;if(s.progGlow!==undefined)progGlow=s.progGlow;if(s.progRotation!==undefined)progRotation=s.progRotation;if(s.progX!==undefined)progX=s.progX;if(s.progColor!==undefined)progColor=s.progColor;if(s.progRemaining!==undefined)progRemaining=s.progRemaining;
- if(s.logoGlow!==undefined)logoGlow=s.logoGlow;if(s.logoBounce!==undefined)logoBounce=s.logoBounce;if(s.logoShake!==undefined)logoShake=s.logoShake;if(s.logoRotation!==undefined)logoRotation=s.logoRotation;if(s.logoReflection!==undefined)logoReflection=s.logoReflection;if(s.logoParticles!==undefined)logoParticles=s.logoParticles;
+ if(s.logoGlow!==undefined)logoGlow=s.logoGlow;if(s.logoBounce!==undefined)logoBounce=s.logoBounce;if(s.logoShake!==undefined)logoShake=s.logoShake;if(s.logoPulse!==undefined)logoPulse=s.logoPulse;if(s.logoRotation!==undefined)logoRotation=s.logoRotation;if(s.logoReflection!==undefined)logoReflection=s.logoReflection;if(s.logoParticles!==undefined)logoParticles=s.logoParticles;
  if(s.surfaceReflectionOn!==undefined)surfaceReflectionOn=s.surfaceReflectionOn;if(s.reflStrength!==undefined)reflStrength=s.reflStrength;if(s.reflDistance!==undefined)reflDistance=s.reflDistance;if(s.reflBlur!==undefined)reflBlur=s.reflBlur;if(s.reflFade!==undefined)reflFade=s.reflFade;if(s.reflRipples!==undefined)reflRipples=s.reflRipples;if(s.reflPerspective!==undefined)reflPerspective=s.reflPerspective;
  if(s.filmOn!==undefined)filmOn=s.filmOn;if(s.filmGrain!==undefined)filmGrain=s.filmGrain;if(s.filmDust!==undefined)filmDust=s.filmDust;if(s.filmScratches!==undefined)filmScratches=s.filmScratches;if(s.filmFlicker!==undefined)filmFlicker=s.filmFlicker;if(s.filmSepia!==undefined)filmSepia=s.filmSepia;if(s.filmWeave!==undefined)filmWeave=s.filmWeave;
  if(s.atmosphereOn!==undefined)atmosphereOn=s.atmosphereOn;if(s.hazeStrength!==undefined)hazeStrength=s.hazeStrength;if(s.hazeAngle!==undefined)hazeAngle=s.hazeAngle;if(s.hazeSpeed!==undefined)hazeSpeed=s.hazeSpeed;if(s.smokeAmount!==undefined)smokeAmount=s.smokeAmount;if(s.smokeSize!==undefined)smokeSize=s.smokeSize;if(s.smokeSpeed!==undefined)smokeSpeed=s.smokeSpeed;if(s.smokeColor!==undefined)smokeColor=s.smokeColor;
  const sync=(id,val)=>{const el=$(id);if(el&&val!==undefined){el.value=val;el.dispatchEvent(new Event('input'));}};
  [['sSpeed',speed],['sPitch',pitchSemis],['s8w',eightW],['s8s',eightS],['s8r',eightR],['sDrift',driftAmt],['sFlash',flashAmt],['sVig',vigAmt],['sProgSz',progSz],['sProgPos',progPos],['sLogoSize',logoSize],['sLogoX',logoX],['sLogoY',logoY],['sLogoAlpha',logoAlpha],['sSpecBars',specBars],['sSpecRad',specRad],['sSpecThick',specThick],['sSpecGlow',specGlow],['sSpecLevel',specLevel],['sSpecAtk',specAtk*100],['sSpecRel',specRel*100],['sSpecPeak',specPeakHold],['sSpecSpin',specSpin*100],['sBgDriftSpeed',bgDriftSpeed],['sBgDriftRot',bgDriftRot],['sBgDriftTravel',bgDriftTravel],['sMotionFx',motionFx],['sVhsScan',vhsScan],['sVhsNoise',vhsNoise],['sVhsJitter',vhsJitter],['sVhsBleed',vhsBleed],['sShockStrength',shockStrength],['sShockSpeed',shockSpeed],['sShockThickness',shockThickness],['sShockRgb',shockRgb],['sLensAmount',lensAmount],['sLensFocus',lensFocus],['sLensBokeh',lensBokeh],['sLensBlur',lensBlur],['sProgThickness',progThickness],['sProgRound',progRound],['sProgGlow',progGlow],['sProgRot',progRotation],['sProgX',progX]].forEach(([id,val])=>sync(id,val));
  sync('progColor',progColor);sync('progRemaining',progRemaining);
- sync('sLogoGlow',logoGlow);sync('sLogoBounce',logoBounce);sync('sLogoShake',logoShake);sync('sLogoRot',logoRotation);sync('sLogoReflection',logoReflection);sync('sLogoParticles',logoParticles);
+ sync('sLogoGlow',logoGlow);sync('sLogoBounce',logoBounce);sync('sLogoShake',logoShake);sync('sLogoPulse',logoPulse);sync('sLogoRot',logoRotation);sync('sLogoReflection',logoReflection);sync('sLogoParticles',logoParticles);
  sync('sReflStrength',reflStrength);sync('sReflDistance',reflDistance);sync('sReflBlur',reflBlur);sync('sReflFade',reflFade);sync('sReflRipples',reflRipples);sync('sReflPerspective',reflPerspective);
  const btn=(id,on,label)=>{const el=$(id);if(!el)return;el.classList.toggle('on',!!on);if(label)el.textContent=label;};
  btn('bSurfaceReflection',surfaceReflectionOn,'Reflection: '+(surfaceReflectionOn?'ON':'OFF'));
@@ -1953,7 +1954,7 @@ function resetVISOAdvancedControls(){
   bgDriftOn:false,bgBeatSync:true,bgDriftSpeed:24,bgDriftRot:18,bgDriftTravel:22,vhsOn:false,shockOn:false,lensOn:false,motionFx:45,shockPhase:0,
   vhsScan:32,vhsNoise:24,vhsJitter:18,vhsBleed:22,shockStrength:58,shockSpeed:52,shockThickness:5,shockRgb:16,
   lensAmount:42,lensFocus:58,lensBokeh:22,lensBlur:28,progThickness:100,progRound:70,progGlow:48,progRotation:0,progX:0,progColor:'#8b5cf6',progRemaining:'#dfe8dc',
-  logoGlow:42,logoBounce:18,logoShake:8,logoRotation:0,logoReflection:0,logoParticles:0,surfaceReflectionOn:false,reflStrength:35,reflDistance:12,reflBlur:18,reflFade:78,reflRipples:24,reflPerspective:18,filmOn:false,filmGrain:24,filmDust:12,filmScratches:8,filmFlicker:10,filmSepia:0,filmWeave:6,atmosphereOn:false,hazeStrength:24,hazeAngle:25,hazeSpeed:30,smokeAmount:18,smokeSize:48,smokeSpeed:24,smokeColor:'#c5d7d0'});
+  logoGlow:42,logoBounce:18,logoShake:8,logoPulse:35,logoRotation:0,logoReflection:0,logoParticles:0,surfaceReflectionOn:false,reflStrength:35,reflDistance:12,reflBlur:18,reflFade:78,reflRipples:24,reflPerspective:18,filmOn:false,filmGrain:24,filmDust:12,filmScratches:8,filmFlicker:10,filmSepia:0,filmWeave:6,atmosphereOn:false,hazeStrength:24,hazeAngle:25,hazeSpeed:30,smokeAmount:18,smokeSize:48,smokeSpeed:24,smokeColor:'#c5d7d0'});
 }
 // Project assets are packed into a single .viso archive (ZIP/store) so media travels with editable settings.
 const VISO_ASSET_FILES={audio:null,mediaImage:null,mediaVideo:null,backgroundImage:null,backgroundVideo:null,logo:null,font:null,overlays:[]};
