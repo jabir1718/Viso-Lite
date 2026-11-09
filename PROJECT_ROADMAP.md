@@ -11,7 +11,7 @@
 - Android shell: Kotlin / Jetpack Compose with the studio hosted in Android WebView.
 - Current reference input: user-provided working HTML file named `Viso working Index.html` (uploaded 2026-11-10; 1,133 lines). Treat it as a reference/baseline to compare, not permission to overwrite newer repository work.
 - Reference application package previously inspected: Aspectrum / MP3 Visualizer (Unity Android app, package `com.MDA.MP3Visualizer`, version 2.7.2). The supplied archive is the reference app's package/assets, not a font pack.
-- Latest repository head at this checkpoint: `ca2a75c2893b79ba5874e60173c2766a8c1fc2af`. Latest HTML asset blob: `c4516701bfbb404acc0cfab64197d6401159a8f3` (159,708 characters, 2,050 lines, 255 unique element IDs, no duplicate IDs). The uploaded 1,133-line baseline was compared earlier; all 129 original element IDs remain in the current branch.
+- Latest repository head at this checkpoint: `5f1e3e21f8ff4afa0987b126401cb39da40d5fbf`. Latest HTML asset blob: `daa9aff78bcb1b8da15882fe0d9e39eb79bfecb5` (159,784 characters, 2,050 lines, 255 unique element IDs, no duplicate IDs). The uploaded 1,133-line baseline was compared earlier; all 129 original element IDs remain in the current branch.
 - Main branch must be preserved. Develop on `viso/advanced-studio-ui` unless the owner explicitly directs otherwise.
 
 ## 2. Product goal
@@ -76,7 +76,7 @@ The current working branch already contains a substantial HTML visualizer studio
 - Save/Open Project now writes a versioned `.viso` v3 ZIP/store package containing `project.json`, embedded imported audio/image/video/background/logo/font/overlay files, editable layer metadata, and a `preview.png` canvas thumbnail. The importer verifies CRC32 checksums, supports the v3 archive plus legacy v1/v2 JSON projects, and guards 180 MB save / 220 MB import size limits.
 - Template downloads now use the same editable project-package pipeline, so current imported assets and editable settings travel together. Android's native save bridge routes `.viso` packages to `Downloads/Viso` rather than the image gallery.
 - Undo/redo was corrected to capture state before control changes and retain image-object references for layer history; project switches clear old history.
-- Last verified passing build before the current batch: run `42709089380` for commit `a74bebd1963bf28cc361c4f89d88340220d18447`. The current branch has newer source changes; current head `ca2a75c2893b79ba5874e60173c2766a8c1fc2af` is undergoing a fresh CI run. Do not reuse the older APK as the latest build. Installation and real-device testing on the user's Infinix Android phone are not confirmed.
+- Latest verified passing build: workflow run `42709656380` (run #56), commit `5f1e3e21f8ff4afa0987b126401cb39da40d5fbf`; HTML/JavaScript validation, Android SDK setup, debug APK build and artifact upload all succeeded. Artifact `VISO-Studio-advanced-debug-apk`, artifact ID `13715516468`, ZIP digest `sha256:accc5cd9f306d8220093aecb1ed6e7797c386c87b62d940401c603e2e752669`. Extracted `app-debug.apk` size 84,458,291 bytes; SHA-256 `eacdf3e1db497b8a27ace8a4f48b22f7baf6c5d6aef339c4db9e36fc6005375f`. Installation and real-device testing on the user's Infinix Android phone are not confirmed.
 
 ## 5. Reference feature audit — required work
 
@@ -151,8 +151,8 @@ For every milestone, update the status table below and record commit SHA, build 
 | VHS / Shockwave / Lens effects | Expanded in source | Individual parameters and rendering added; Film, Atmosphere and Surface Reflection panels added; export/device QA still required |
 | Complete editable template packages | Implemented in source; QA pending | `.viso` v3 ZIP package with settings, imported assets, layers, preview thumbnail and CRC checks; verify full round-trip on device |
 | Modular future-tools architecture | Partial implementation | Searchable/favourite tool registry with stable IDs, categories, schema version, defaults and lifecycle hooks; refactor rendering pipeline incrementally |
-| Single integrated Android APK | In progress | Keep one package and one installable app |
-| CI build | Current build in progress | Latest run `42709466043` targets `ca2a75c2893b79ba5874e60173c2766a8c1fc2af`; await validation, Android build and artifact upload |
+| Single integrated Android APK | Build verified | One debug APK produced successfully (`app-debug.apk`, 84,458,291 bytes); install and device runtime still need owner-side QA |
+| CI build | Latest run passed | Run `42709656380` / commit `5f1e3e21f8ff4afa0987b126401cb39da40d5fbf`; validation, Android build and artifact upload all passed; APK artifact verified and extracted |
 | Real-device QA | Not confirmed | Install and test on user's Android device before final release |
 
 ## 9. Required continuity procedure for every new chat
@@ -173,3 +173,14 @@ If a future chat starts with no context, the first instruction is: **“Read PRO
 ## 10. Owner's product direction
 
 The owner wants a modern, trend-aware visualizer that can create distinctive social-media content, not an outdated/basic visualizer. Add original advanced capabilities where they improve real results, but keep the workflow practical on a phone. The owner expects the assistant to handle technical problems, maintain the project record, preserve working code, and deliver one reliable APK with room for future expansion.
+
+
+## 11. Latest verified checkpoint — 2026-11-10
+
+- Branch head: `5f1e3e21f8ff4afa0987b126401cb39da40d5fbf`.
+- Latest source asset: `app/src/main/assets/index.html`, blob `daa9aff78bcb1b8da15882fe0d9e39eb79bfecb5`, 159,784 characters / 2,050 lines / 255 unique IDs / no duplicate IDs.
+- Latest CI run: `42709656380` (run #56), conclusion `success`; HTML/JS validation, Android SDK setup, debug APK build and artifact upload all passed.
+- Artifact ID: `13715516468`; artifact name `VISO-Studio-advanced-debug-apk`; archive digest `sha256:accc5cd9f306d8220093aecb1ed6e7797c386c87b62d940401c603e2e752669`.
+- Extracted APK: `app-debug.apk`, 84,458,291 bytes; SHA-256 `eacdf3e1db497b8a27ace8a4f48b22f7baf6c5d6aef339c4db9e36fc6005375f`.
+- Recent source commits include project archive validation/CRC and size guards, modular tool workspace and effects work, restoration of overlay image URLs, and safe audio-context shutdown. Current HTML contains the v3 project-package path, two text layers, Film/Haze/Smoke and Spectrum features; CI success verifies buildability, not complete runtime correctness.
+- Device QA remains unconfirmed. Next priority: test project/template round-trip and imported media restoration, then regressions across audio, preview, undo/redo and export; continue the reference UI audit and record verified ranges/defaults rather than relying on metadata strings alone.
