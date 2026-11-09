@@ -15,6 +15,10 @@ for (const id of ['bBpm', 'bTap', 'sBeatSens', 'sBeatScale', 'bBeatMarkers', 'bM
 }
 assert(html.includes("const SPEC_MODES=[['radial','Radial'],['ring','Ring'],['sphere','Sphere 3D'],['tunnel','Tunnel'],['mirror','Mirror'],['dual','Dual'],['wave','Wave'],['led','LED']]"), 'all spectrum visual modes must be registered');
 assert(html.includes("const SPEC_RANGES=[['full','Full'],['low','Low'],['balanced','Balanced'],['high','High'],['vocals','Vocals'],['changes','Changes']]"), 'all spectrum frequency focus modes must be registered');
+assert(html.includes('id="sLogoPulse"'), 'custom logo audio-reactive size control must exist');
+assert(html.includes('logoPulse,logoRotation'), 'logo pulse must be included in saved advanced state');
+assert(html.includes('sync(\'sLogoPulse\',logoPulse)'), 'logo pulse must restore its UI value');
+assert(html.includes('pulseScale=1+b*logoPulse/100*.18'), 'logo pulse must react to audio level in the renderer');
 for (const kind of ['audio', 'media-image', 'media-video', 'background-image', 'background-video', 'logo', 'font']) {
   assert(html.includes("['" + kind + "',VISO_ASSET_FILES."), 'editable project must package asset kind: ' + kind);
 }
