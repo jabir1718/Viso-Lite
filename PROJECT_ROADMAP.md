@@ -11,7 +11,7 @@
 - Android shell: Kotlin / Jetpack Compose with the studio hosted in Android WebView.
 - Current reference input: user-provided working HTML file named `Viso working Index.html` (uploaded 2026-11-10; 1,133 lines). Treat it as a reference/baseline to compare, not permission to overwrite newer repository work.
 - Reference application package previously inspected: Aspectrum / MP3 Visualizer (Unity Android app, package `com.MDA.MP3Visualizer`, version 2.7.2). The supplied archive is the reference app's package/assets, not a font pack.
-- Latest repository head at this checkpoint: `2bc6bb088bfe579ac1451f835669145711380b11`. Latest HTML asset blob: `1e02c2e34d26179292edd51481b696565986a0dc` (165,493 characters, 2,114 lines, 255 unique element IDs, no duplicate IDs). The uploaded 1,133-line baseline was compared earlier; all 129 original element IDs remain in the current branch.
+- Latest repository head at this checkpoint: `607b3a782b8e995f9acdaeccbb37863ee76cb882`. Latest HTML asset blob: `fff46e2201cd53d57db969920d42da9af185b3b3` (165,829 characters, 2,123 lines, 255 unique element IDs, no duplicate IDs). The uploaded 1,133-line baseline was compared earlier; all 129 original element IDs remain in the current branch.
 - Main branch must be preserved. Develop on `viso/advanced-studio-ui` unless the owner explicitly directs otherwise.
 
 ## 2. Product goal
@@ -76,7 +76,7 @@ The current working branch already contains a substantial HTML visualizer studio
 - Save/Open Project now writes a versioned `.viso` v3 ZIP/store package containing `project.json`, embedded imported audio/image/video/background/logo/font/overlay files, editable layer metadata, and a `preview.png` canvas thumbnail. The importer verifies CRC32 checksums, supports the v3 archive plus legacy v1/v2 JSON projects, and guards 180 MB save / 220 MB import size limits.
 - Template downloads now use the same editable project-package pipeline, so current imported assets and editable settings travel together. Android's native save bridge routes `.viso` packages to `Downloads/Viso` rather than the image gallery.
 - Undo/redo was corrected to capture state before control changes and retain image-object references for layer history; project switches clear old history.
-- Latest verified passing build: workflow run `42713268370` (run #91), pinned to commit `2bc6bb088bfe579ac1451f835669145711380b11`; HTML/JavaScript validation, ZIP/manifest/registry/render-order tests, Android SDK setup, debug APK build and artifact upload all succeeded. Artifact `VISO-Studio-advanced-debug-apk`, artifact ID `13716357839`, ZIP digest `sha256:75e909b3567fc81327c1fb35d3fc34957c0b96b3bab039279353e59cc0414df6`. Extracted `app-debug.apk` size 84,460,235 bytes; SHA-256 `9c11c2202ae91b9fcef3c3351001a2c7d1871322595332b989f6dd6866f41eb2`. Installation and real-device testing on the user's Infinix Android phone are not confirmed.
+- Latest verified passing build: workflow run `42713814662` (run #97), pinned to commit `607b3a782b8e995f9acdaeccbb37863ee76cb882`; HTML/JavaScript validation, ZIP/manifest/registry/stage/cache-order tests, Android SDK setup, debug APK build and artifact upload all succeeded. Artifact `VISO-Studio-advanced-debug-apk`, artifact ID `13717211608`, ZIP digest `sha256:44bdf727cddf1a9c9df6cab20f08be9a3201be582da229c7ebbab617833185ae`. Extracted `app-debug.apk` size 84,460,343 bytes; SHA-256 `91855b936f1e761cf3ba722f56b92c651633c32e4458264bf968e73bc4aee72e`. Installation and real-device testing on the user's Infinix Android phone are not confirmed.
 
 ## 5. Reference feature audit — required work
 
@@ -151,8 +151,8 @@ For every milestone, update the status table below and record commit SHA, build 
 | VHS / Shockwave / Lens effects | Expanded in source | Individual parameters and rendering added; Film, Atmosphere and Surface Reflection panels added; export/device QA still required |
 | Complete editable template packages | Implemented in source; QA pending | `.viso` v3 ZIP package with settings, imported assets, layers, preview thumbnail and CRC checks; verify full round-trip on device |
 | Modular future-tools architecture | Partial implementation | Searchable/favourite tool registry with stable IDs, categories, schema version, defaults and lifecycle hooks; refactor rendering pipeline incrementally |
-| Single integrated Android APK | Build verified | One debug APK produced successfully (`app-debug.apk`, 84,460,235 bytes); install and device runtime still need owner-side QA |
-| CI build | Latest run passed | Run `42713268370` / commit `2bc6bb088bfe579ac1451f835669145711380b11`; exact-commit checkout, HTML/JS checks, ZIP/manifest/registry/stage-order tests, Android build and artifact upload all passed |
+| Single integrated Android APK | Build verified | One debug APK produced successfully (`app-debug.apk`, 84,460,343 bytes); install and device runtime still need owner-side QA |
+| CI build | Latest run passed | Run `42713814662` / commit `607b3a782b8e995f9acdaeccbb37863ee76cb882`; exact-commit checkout, HTML/JS checks, ZIP/manifest/registry/stage/cache-order tests, Android build and artifact upload all passed |
 | Real-device QA | Not confirmed | Install and test on user's Android device before final release |
 
 ## 9. Required continuity procedure for every new chat
@@ -221,10 +221,10 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 ## 15. Ordered effect-render pipeline checkpoint — 2026-11-10
 
 - Latest source commit `e2baa6cedbc588a2158317261ecbcb28515c115b`; HTML blob `21f713640f0025ea0379e82043eec586a0f83ec4` (165,088 characters, 2,109 lines, 255 unique IDs, no duplicates).
-- Added `VISO_RENDER_MODULES` and `renderVISOStage(stage, ctx, bands, dt)`. Current rendering is routed through ordered stages: Background (image/video, drift, split and background visualizer), Scene (media layers and lights), Overlay (vignette/progress/custom logo, Motion FX, Film, Atmosphere and Text/Logo Studio), then post-composite Surface Reflection. Existing draw order is preserved.
+- Added `VISO_RENDER_MODULES` and `renderVISOStage(stage, ctx, bands, dt)`. Current rendering is routed through ordered stages: Background (image/video, drift, split and background visualizer), Media (media/visualizer compositing and `mediaFront` ordering), Scene (media layers and lights), Overlay (vignette/progress/custom logo, Motion FX, Film, Atmosphere and Text/Logo Studio), then post-composite Surface Reflection. Existing draw order is preserved.
 - Tool registry supports per-module render stage/order plus default serialize/restore hooks. New effects can register a render function and stage/order without editing the main frame loop.
-- CI tests validate default serialize/restore behaviour, registered stage assignments and deterministic render ordering; archive/manifest tests and JS validation also pass.
-- Latest passing build: run `42713268370` (run #91), exact commit `2bc6bb088bfe579ac1451f835669145711380b11`; artifact ID `13716357839`, archive digest `sha256:75e909b3567fc81327c1fb35d3fc34957c0b96b3bab039279353e59cc0414df6`; APK 84,460,235 bytes; SHA-256 `9c11c2202ae91b9fcef3c3351001a2c7d1871322595332b989f6dd6866f41eb2`.
+- CI tests validate default serialize/restore behaviour, registered stage assignments, deterministic render ordering, and a cached per-stage render list that is re-sorted only when a tool is registered; archive/manifest tests and JS validation also pass.
+- Latest passing build: run `42713814662` (run #97), exact commit `607b3a782b8e995f9acdaeccbb37863ee76cb882`; artifact ID `13717211608`, archive digest `sha256:44bdf727cddf1a9c9df6cab20f08be9a3201be582da229c7ebbab617833185ae`; APK 84,460,343 bytes; SHA-256 `91855b936f1e761cf3ba722f56b92c651633c32e4458264bf968e73bc4aee72e`.
 - Device QA remains unconfirmed. Next: add remaining effect modules through registry where safe, review effect order visually on device, continue reference app control/range parity audit, and verify `.viso` media/template round-trip.
 
 
@@ -236,3 +236,12 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Added CI assertions for the Background and Layers/Tools Box stage assignments. Latest test, HTML validation, Android build and artifact upload passed in run `42713268370`.
 - Latest artifact: ID `13716357839`, archive digest `sha256:75e909b3567fc81327c1fb35d3fc34957c0b96b3bab039279353e59cc0414df6`; APK 84,460,235 bytes; SHA-256 `9c11c2202ae91b9fcef3c3351001a2c7d1871322595332b989f6dd6866f41eb2`.
 - Device visual QA remains pending. Next: validate the render-stage order on an actual phone with media, overlays, lights and reflection enabled; continue modularizing only where current draw order can be preserved.
+
+
+## 17. Cached render pipeline and media stage — 2026-11-10
+
+- Added the `media` render stage and moved the media/visualizer compositing block into `drawVISOMedia(ctx,b,dt)`, preserving `mediaFront` ordering. Current frame pipeline order is `background` → `media` → `scene` → `overlay` → `post`.
+- The render cache now stores each stage's ordered tool list and updates it only when a module registers. The frame loop no longer creates/filter/sorts tool arrays on every frame, reducing per-frame allocation work on mobile.
+- CI tests validate media/background/scene/overlay/post assignments, render order, and cache reordering after dynamic tool registration. Latest test and Android build passed.
+- Latest verified APK: run `42713814662` (run #97), artifact ID `13717211608`; ZIP digest `sha256:44bdf727cddf1a9c9df6cab20f08be9a3201be582da229c7ebbab617833185ae`; APK 84,460,343 bytes; SHA-256 `91855b936f1e761cf3ba722f56b92c651633c32e4458264bf968e73bc4aee72e`.
+- Device QA remains pending. Next: profile actual frame time on device with several stages enabled, test mediaFront + background video + lights + overlays together, and continue the reference-app feature/range parity audit.
