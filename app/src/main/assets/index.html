@@ -59,6 +59,47 @@ body{height:100dvh;display:flex;flex-direction:column;background:#090b10!importa
 body:has(.sheet:target) #sheetBackdrop{display:block}
 @media(min-width:700px){#wrap{padding:14px 24px}.sheet{left:50%;right:auto;width:min(640px,100%);transform:translateX(-50%)}}
 @media(max-height:650px){#topbar{height:48px;min-height:48px}#bar{top:48px;bottom:60px}#bottomToolbar{height:60px;min-height:60px}#sheetBackdrop{inset:48px 0 60px}.sheet{height:70dvh}}
+
+/* VISO mobile editor layout repair */
+:root{--viso-top:76px;--viso-bottom:78px;--viso-surface:#171c25;--viso-card:#222a36;--viso-line:#343e4c;--viso-accent:#9b7af7}
+html,body{width:100%;height:100%;min-height:100%;overflow:hidden}
+body{height:100dvh;min-height:0;display:flex;flex-direction:column;padding:0;background:#0b0e14!important}
+#topbar{position:relative;flex:0 0 var(--viso-top);height:var(--viso-top);min-height:var(--viso-top);padding:24px 12px 6px;gap:8px;display:flex;align-items:center;background:#111722;border-bottom:1px solid #303846;z-index:60}
+#topbar .top-icon{width:40px;height:40px;flex:0 0 40px;border-radius:13px;font-size:25px}
+#topbar .resolution{height:40px;min-width:94px;padding:0 12px;border-radius:12px;font-size:13px}
+#topbar .save-action{height:40px;padding:0 8px;font-size:12px}
+#topbar .export-action{height:40px;padding:0 17px;border-radius:13px;font-size:13px}
+#wrap{position:relative;flex:1 1 auto;min-height:0;width:100%;padding:12px 14px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#090c12}
+#c{max-width:100%;max-height:100%;width:auto;height:auto;aspect-ratio:9/16;border-radius:12px;background:#000;box-shadow:0 12px 34px #0009,0 0 0 1px #ffffff18}
+#monitorDock{bottom:12px;max-width:calc(100% - 32px);padding:7px 14px;font-size:11px}
+#bar{position:fixed;z-index:50;left:0;right:0;top:var(--viso-top);bottom:var(--viso-bottom);height:auto;display:block;overflow:hidden;padding:0;background:transparent;pointer-events:none}
+.sheet{position:absolute;inset:auto 0 0;height:min(78dvh,760px);max-height:calc(100dvh - var(--viso-top) - var(--viso-bottom) - 8px);display:none;flex-direction:column;gap:12px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:16px 14px 24px;background:var(--viso-surface);border:1px solid #394454;border-bottom:0;border-radius:24px 24px 0 0;box-shadow:0 -16px 46px #000b;color:#f4f6fb;pointer-events:auto}
+.sheet:target{display:flex}
+.sheet-close{position:sticky;top:0;align-self:flex-end;z-index:8;width:40px;height:40px;min-height:40px;margin:0 0 -42px auto;border-radius:13px;background:#303a49;border:1px solid #536074;font-size:24px}
+.sheet .sec.panel{display:flex;flex:0 0 auto;flex-direction:column;gap:12px;padding:15px;background:var(--viso-card);border:1px solid var(--viso-line);border-radius:17px;box-shadow:0 2px 8px #0002}
+.sheet .sec.panel h4{min-height:32px;padding:2px 46px 2px 0;font-size:12px;letter-spacing:.08em;color:#f0f2fa}
+.panel.collapsed>:not(h4){display:flex!important}
+.sheet .row{display:flex;flex-wrap:wrap;gap:8px;overflow:visible;align-items:center;padding:2px 0}
+.sheet .row button{max-width:100%;white-space:normal;min-height:42px;padding:0 13px;font-size:12px;border-radius:11px}
+.sheet label{display:grid;grid-template-columns:minmax(92px,31%) minmax(0,1fr);align-items:center;gap:12px;width:100%;font-size:12px;margin:3px 0}
+.sheet label span{width:auto;min-width:0;color:#cbd3df;flex:none}
+.sheet input[type=range]{width:100%;min-width:0;height:30px;accent-color:var(--viso-accent)}
+.sheet input[type=text],.sheet select{min-height:42px;border-radius:11px;font-size:13px}
+.sheet .status{padding:10px 12px;border-radius:11px;font-size:11px}
+.sheet .subhead{font-size:11px;padding-top:6px}
+#exportMonitor{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+#bottomToolbar{position:fixed;left:0;right:0;bottom:0;width:100%;height:var(--viso-bottom);min-height:var(--viso-bottom);display:flex;align-items:stretch;justify-content:space-around;gap:2px;padding:7px 7px 14px;background:#111720;border-top:1px solid #303a49;z-index:70;box-shadow:0 -8px 24px #0004}
+#bottomToolbar a{flex:1 1 0;min-width:0;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#aeb8c8;text-decoration:none;border-radius:12px}
+#bottomToolbar a span{font-size:22px;line-height:24px;font-weight:700}
+#bottomToolbar a small{font-size:10px;font-weight:700;letter-spacing:.01em}
+#bottomToolbar a:focus,#bottomToolbar a:active{background:#302747;color:#d5c5ff}
+#sheetBackdrop{position:fixed;inset:var(--viso-top) 0 var(--viso-bottom);z-index:40;background:#0009;backdrop-filter:blur(2px);pointer-events:auto}
+#sheetBackdrop a{display:block;width:100%;height:100%}
+body:has(.sheet:target) #sheetBackdrop{display:block}
+input[type=file]{display:none!important}
+@media(min-width:700px){.sheet{left:50%;right:auto;width:min(680px,100%);transform:translateX(-50%)}}
+@media(max-height:650px){:root{--viso-top:64px;--viso-bottom:66px}#topbar{padding-top:16px}.sheet{height:82dvh;padding-top:12px}}
+
 </style>
 <header id="topbar">
   <a class="top-icon" href="#" aria-label="Close panel">×</a>
@@ -218,7 +259,7 @@ body:has(.sheet:target) #sheetBackdrop{display:block}
 <video id="bvid" playsinline muted loop style="display:none"></video>
 
 <script>
-document.querySelectorAll('.panel').forEach(p=>{if(p.id!=='mediaPanel'&&p.id!=='exportPanel')p.classList.add('collapsed');const h=p.querySelector('h4');if(h){h.setAttribute('role','button');h.setAttribute('tabindex','0');h.addEventListener('click',()=>p.classList.toggle('collapsed'));h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();p.classList.toggle('collapsed');}});}});
+document.querySelectorAll('.panel').forEach(p=>{const h=p.querySelector('h4');if(h){h.setAttribute('role','button');h.setAttribute('tabindex','0');h.addEventListener('click',()=>p.classList.toggle('collapsed'));h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();p.classList.toggle('collapsed');}});}});
 </script>
 <script>
 "use strict";
