@@ -138,7 +138,7 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <button type="button" class="toolFilter" data-filter="templates">Templates</button>
   </div>
 </div>
-<div id="wrap"><canvas id="c" width="540" height="960"></canvas></div>
+<div id="wrap"><canvas id="c" width="360" height="640"></canvas></div>
 <div id="monitorDock"><div class="subhead">SONG MONITOR</div>
     <div class="monitorStats"><div id="songInfo" class="status">Song: not loaded · 00:00 / 00:00</div></div>
     <div class="row"><button id="bLoop" class="on">Loop song: ON</button></div></div>
@@ -442,7 +442,7 @@ document.querySelectorAll('.panel').forEach(p=>{if(p.id!=='mediaPanel'&&p.id!=='
 "use strict";
 const c=document.getElementById('c'),x=c.getContext('2d');
 let W=c.width,H=c.height,cx=W/2,cy=H/2,targetW=1080,targetH=1920;
-const PREVIEW_MAX_W=540,PREVIEW_MAX_H=960;
+const PREVIEW_MAX_W=360,PREVIEW_MAX_H=640;
 const mk=document.createElement('canvas'),mx=mk.getContext('2d');
 const o=document.createElement('canvas'),ox=o.getContext('2d');
 const bl=document.createElement('canvas'),bx=bl.getContext('2d');
@@ -1545,16 +1545,16 @@ function drawSpectrum(ctx,scale){
     glow.addColorStop(0,'rgba(255,255,255,'+(.08*gl)+')');glow.addColorStop(1,'transparent');
     ctx.fillStyle=glow;ctx.beginPath();ctx.ellipse(cx,cy,R0,ry,0,0,6.2832);ctx.fill();
   } else if(M==='tunnel'){
-    const base=Math.min(W,H)*(specRad/100)*.12;
-    for(let ring=0;ring<6;ring++){
-      const depth=(ring+1)/6,radius=base+depth*Math.min(W,H)*.38,alpha=.18+depth*.55;
+    const base=Math.min(W,H)*(specRad/100)*.12,rings=4,stride=Math.max(1,Math.ceil(n/48));
+    for(let ring=0;ring<rings;ring++){
+      const depth=(ring+1)/rings,radius=base+depth*Math.min(W,H)*.38,alpha=.18+depth*.55;
       ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=Math.max(1,thick*.3);
       ctx.beginPath();ctx.ellipse(cx,cy,radius,radius*.72,0,0,6.2832);ctx.stroke();
-      for(let i=0;i<n;i++){
+      for(let i=0;i<n;i+=stride){
         const a=rot+(i/n)*6.2832+ring*.055,v=specSmooth[i]/255;
         const spike=v*Math.min(W,H)*(.035+.055*depth);
         const r1=radius,r2=radius+spike;
-        ctx.strokeStyle=col(i);ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=thick*3*gl*depth;ctx.lineWidth=Math.max(1,thick*(.25+.55*depth));
+        ctx.strokeStyle=col(i);ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=thick*1.35*gl*depth;ctx.lineWidth=Math.max(1,thick*(.25+.55*depth));
         ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1*.72);
         ctx.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2*.72);ctx.stroke();
       }
@@ -1591,14 +1591,14 @@ function drawSpectrum(ctx,scale){
     }
     ctx.globalAlpha=1;
   } else {
-    const rows=14,gw=W/n,gh=H*.55/rows,base=H*.96;
+    const rows=10,gw=W/n,gh=H*.55/rows,base=H*.96;
     for(let i=0;i<n;i++){
       const v=specSmooth[i]/255,lit=Math.round(v*rows),pk=Math.round(specPeak[i]/255*rows);
       for(let r=0;r<rows;r++){
         const on=r<lit,peak=specPeakHold>0&&r===pk&&pk>lit;
         if(!on&&!peak)continue;
         ctx.fillStyle=on?col(i):'rgba(255,255,255,.45)';
-        ctx.shadowColor=on?ctx.fillStyle:'transparent';ctx.shadowBlur=on?gh*2*gl:0;
+        ctx.shadowColor=on?ctx.fillStyle:'transparent';ctx.shadowBlur=on?gh*.9*gl:0;
         ctx.beginPath();ctx.arc(i*gw+gw/2,base-r*gh,Math.min(gw,gh)*.3,0,6.283);ctx.fill();
       }
     }
