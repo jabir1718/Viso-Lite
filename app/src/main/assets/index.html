@@ -1713,8 +1713,8 @@ function restoreAdvancedState(s){
  sync('progColor',progColor);sync('progRemaining',progRemaining);
  sync('sLogoGlow',logoGlow);sync('sLogoBounce',logoBounce);sync('sLogoShake',logoShake);sync('sLogoRot',logoRotation);sync('sLogoReflection',logoReflection);sync('sLogoParticles',logoParticles);
  sync('sReflStrength',reflStrength);sync('sReflDistance',reflDistance);sync('sReflBlur',reflBlur);sync('sReflFade',reflFade);sync('sReflRipples',reflRipples);sync('sReflPerspective',reflPerspective);
- btn('bSurfaceReflection',surfaceReflectionOn,'Reflection: '+(surfaceReflectionOn?'ON':'OFF'));
  const btn=(id,on,label)=>{const el=$(id);if(!el)return;el.classList.toggle('on',!!on);if(label)el.textContent=label;};
+ btn('bSurfaceReflection',surfaceReflectionOn,'Reflection: '+(surfaceReflectionOn?'ON':'OFF'));
  btn('b8d',eightD,'8D audio: '+(eightD?'ON':'OFF'));btn('bPreserve',pitchLock,'Pitch lock: '+(pitchLock?'ON':'OFF'));
  btn('bVig',vigOn);btn('bProg',progOn);btn('bSpec',specOn,'Spectrum: '+(specOn?'ON':'OFF'));
  btn('bBgDrift',bgDriftOn,'Background drift: '+(bgDriftOn?'ON':'OFF'));btn('bDriftBeat',bgBeatSync,'Beat sync: '+(bgBeatSync?'ON':'OFF'));
