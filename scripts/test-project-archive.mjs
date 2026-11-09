@@ -169,6 +169,6 @@ registry.registerVISOEffectTool({
 });
 registry.renderVISOStage('overlay', {}, new Float32Array(3), 16);
 assert.deepEqual(renderOrder, ['early', 'late'], 'effect modules render in declared order');
-assert.deepEqual(registry.cache.overlay.map(tool => tool.id), ['early-render', 'late-render'], 'render stage cache stays sorted after registration');
+assert.deepEqual(JSON.parse(JSON.stringify(registry.cache.overlay.map(tool => tool.id))), ['early-render', 'late-render'], 'render stage cache stays sorted after registration');
 
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
