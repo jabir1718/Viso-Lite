@@ -272,6 +272,15 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <div class="row"><label><span>Progress colour</span><input id="progColor" type="color" value="#8b5cf6"></label><label><span>Remaining</span><input id="progRemaining" type="color" value="#dfe8dc"></label></div>
     <div class="status" id="progressInfo">Choose a progress style · enable Progress bar in Overlay</div>
   </div>
+  <div class="sec panel"><h4>Surface Reflection</h4>
+    <div class="row"><button id="bSurfaceReflection">Reflection: OFF</button></div>
+    <label><span>Strength</span><input id="sReflStrength" type="range" min="0" max="100" value="35"></label>
+    <label><span>Distance</span><input id="sReflDistance" type="range" min="0" max="100" value="12"></label>
+    <label><span>Blur</span><input id="sReflBlur" type="range" min="0" max="100" value="18"></label>
+    <label><span>Fade</span><input id="sReflFade" type="range" min="0" max="100" value="78"></label>
+    <label><span>Ripples</span><input id="sReflRipples" type="range" min="0" max="100" value="24"></label>
+    <label><span>Perspective</span><input id="sReflPerspective" type="range" min="0" max="100" value="18"></label>
+  </div>
   <div class="sec panel"><h4>Templates · Editable Projects</h4>
     <div class="status">Download a template, then open it in the editor as editable settings. Add or replace your own song, photo, video and logo.</div>
     <div class="row" id="visoTemplates">
@@ -383,7 +392,8 @@ let W=c.width,H=c.height,cx=W/2,cy=H/2;
 const mk=document.createElement('canvas'),mx=mk.getContext('2d');
 const o=document.createElement('canvas'),ox=o.getContext('2d');
 const bl=document.createElement('canvas'),bx=bl.getContext('2d');
-mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=W>>1;bl.height=H>>1;
+const reflectionCanvas=document.createElement('canvas'),reflectionCtx=reflectionCanvas.getContext('2d');
+mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=W>>1;bl.height=H>>1;reflectionCanvas.width=W;reflectionCanvas.height=H;
 const $=id=>document.getElementById(id);
 const vid=$('vid'),bvid=$('bvid');
 
@@ -1208,6 +1218,7 @@ let speed=100,pitchSemis=0,pitchLock=true,eightD=false,eightW=80,eightS=22,eight
 let bpm=0,beatFlash=0,flashAmt=0,driftAmt=0,driftX=0,driftY=0,lastOnset=0,onsetGaps=[];
 let sym='off',vigOn=false,vigAmt=45,progOn=false,progSz=12,progPos=96,logoImg=null,logoSize=16,logoX=92,logoY=92,logoAlpha=90,progStyle='gradient';
 let logoGlow=42,logoBounce=18,logoShake=8,logoRotation=0,logoReflection=0,logoParticles=0;
+let surfaceReflectionOn=false,reflStrength=35,reflDistance=12,reflBlur=18,reflFade=78,reflRipples=24,reflPerspective=18;
 let progThickness=100,progRound=70,progGlow=48,progRotation=0,progX=0,progColor='#8b5cf6',progRemaining='#dfe8dc';
 function makeImpulse(sec,decay){const r=ctxA.sampleRate,len=Math.floor(r*sec),b=ctxA.createBuffer(2,len,r);
   for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);
@@ -1612,6 +1623,7 @@ requestAnimationFrame(frame);
   drawVignette(x);drawProgress(x);drawCustomLogo(x);drawMotionFx(x,b);
   drawStudioText(x,b);
   x.restore();
+  drawSurfaceReflection(x);
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
     x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
     x.fillText('Photo / Video / PNG chuno',cx,cy);}
@@ -1640,6 +1652,8 @@ const VISO_FX_SETTERS={vhsScan:v=>vhsScan=v,vhsNoise:v=>vhsNoise=v,vhsJitter:v=>
 document.querySelectorAll('#progressStyles button').forEach(q=>q.onclick=()=>{progStyle=q.dataset.prog;document.querySelectorAll('#progressStyles button').forEach(b=>b.classList.toggle('on',b===q));$('progressInfo').textContent='Progress style: '+progStyle;});
 $('sProgThickness').oninput=e=>progThickness=+e.target.value;$('sProgRound').oninput=e=>progRound=+e.target.value;$('sProgGlow').oninput=e=>progGlow=+e.target.value;$('sProgRot').oninput=e=>progRotation=+e.target.value;$('sProgX').oninput=e=>progX=+e.target.value;
 $('progColor').oninput=e=>progColor=e.target.value;$('progRemaining').oninput=e=>progRemaining=e.target.value;
+$('bSurfaceReflection').onclick=e=>{surfaceReflectionOn=!surfaceReflectionOn;e.currentTarget.textContent='Reflection: '+(surfaceReflectionOn?'ON':'OFF');e.currentTarget.classList.toggle('on',surfaceReflectionOn);};
+[['sReflStrength','reflStrength'],['sReflDistance','reflDistance'],['sReflBlur','reflBlur'],['sReflFade','reflFade'],['sReflRipples','reflRipples'],['sReflPerspective','reflPerspective']].forEach(([id,key])=>$(id).oninput=e=>{const v=+e.target.value;if(key==='reflStrength')reflStrength=v;else if(key==='reflDistance')reflDistance=v;else if(key==='reflBlur')reflBlur=v;else if(key==='reflFade')reflFade=v;else if(key==='reflRipples')reflRipples=v;else reflPerspective=v;});
 const VISO_TEMPLATES={
  aura:{name:'Aura Pulse',vig:true,prog:true,progStyle:'gradient',progSz:16,progPos:94,drift:true,speed:34,rot:26,travel:34,flash:55,studio:true,text:'AURA',anim:'pulse',glow:42,stroke:9,vhs:false,shock:true,lens:true},
  romance:{name:'Soft Romance',vig:true,prog:true,progStyle:'thin',progSz:9,progPos:96,drift:true,speed:14,rot:10,travel:15,flash:8,studio:true,text:'LOVE',anim:'float',glow:30,stroke:2,vhs:false,shock:false,lens:true},
@@ -1677,7 +1691,7 @@ document.querySelectorAll('#visoTemplates button').forEach(q=>q.onclick=async()=
  try{await downloadVISOProject(project,'VISO-'+key+'.viso');$('templateInfo').textContent=preset.name+' editable project package downloaded with imported assets';}
  catch(err){$('templateInfo').textContent='Template package failed: '+err.message;}
 });
-function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining,logoGlow,logoBounce,logoShake,logoRotation,logoReflection,logoParticles};}
+function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining,logoGlow,logoBounce,logoShake,logoRotation,logoReflection,logoParticles,surfaceReflectionOn,reflStrength,reflDistance,reflBlur,reflFade,reflRipples,reflPerspective};}
 function restoreAdvancedState(s){
  if(!s)return;
  if(s.speed!==undefined)speed=s.speed;if(s.pitchSemis!==undefined)pitchSemis=s.pitchSemis;if(s.pitchLock!==undefined)pitchLock=s.pitchLock;
@@ -1693,10 +1707,13 @@ function restoreAdvancedState(s){
  if(s.lensAmount!==undefined)lensAmount=s.lensAmount;if(s.lensFocus!==undefined)lensFocus=s.lensFocus;if(s.lensBokeh!==undefined)lensBokeh=s.lensBokeh;if(s.lensBlur!==undefined)lensBlur=s.lensBlur;
  if(s.progThickness!==undefined)progThickness=s.progThickness;if(s.progRound!==undefined)progRound=s.progRound;if(s.progGlow!==undefined)progGlow=s.progGlow;if(s.progRotation!==undefined)progRotation=s.progRotation;if(s.progX!==undefined)progX=s.progX;if(s.progColor!==undefined)progColor=s.progColor;if(s.progRemaining!==undefined)progRemaining=s.progRemaining;
  if(s.logoGlow!==undefined)logoGlow=s.logoGlow;if(s.logoBounce!==undefined)logoBounce=s.logoBounce;if(s.logoShake!==undefined)logoShake=s.logoShake;if(s.logoRotation!==undefined)logoRotation=s.logoRotation;if(s.logoReflection!==undefined)logoReflection=s.logoReflection;if(s.logoParticles!==undefined)logoParticles=s.logoParticles;
+ if(s.surfaceReflectionOn!==undefined)surfaceReflectionOn=s.surfaceReflectionOn;if(s.reflStrength!==undefined)reflStrength=s.reflStrength;if(s.reflDistance!==undefined)reflDistance=s.reflDistance;if(s.reflBlur!==undefined)reflBlur=s.reflBlur;if(s.reflFade!==undefined)reflFade=s.reflFade;if(s.reflRipples!==undefined)reflRipples=s.reflRipples;if(s.reflPerspective!==undefined)reflPerspective=s.reflPerspective;
  const sync=(id,val)=>{const el=$(id);if(el&&val!==undefined){el.value=val;el.dispatchEvent(new Event('input'));}};
  [['sSpeed',speed],['sPitch',pitchSemis],['s8w',eightW],['s8s',eightS],['s8r',eightR],['sDrift',driftAmt],['sFlash',flashAmt],['sVig',vigAmt],['sProgSz',progSz],['sProgPos',progPos],['sLogoSize',logoSize],['sLogoX',logoX],['sLogoY',logoY],['sLogoAlpha',logoAlpha],['sSpecBars',specBars],['sSpecRad',specRad],['sSpecThick',specThick],['sSpecGlow',specGlow],['sSpecLevel',specLevel],['sSpecAtk',specAtk*100],['sSpecRel',specRel*100],['sSpecPeak',specPeakHold],['sSpecSpin',specSpin*100],['sBgDriftSpeed',bgDriftSpeed],['sBgDriftRot',bgDriftRot],['sBgDriftTravel',bgDriftTravel],['sMotionFx',motionFx],['sVhsScan',vhsScan],['sVhsNoise',vhsNoise],['sVhsJitter',vhsJitter],['sVhsBleed',vhsBleed],['sShockStrength',shockStrength],['sShockSpeed',shockSpeed],['sShockThickness',shockThickness],['sShockRgb',shockRgb],['sLensAmount',lensAmount],['sLensFocus',lensFocus],['sLensBokeh',lensBokeh],['sLensBlur',lensBlur],['sProgThickness',progThickness],['sProgRound',progRound],['sProgGlow',progGlow],['sProgRot',progRotation],['sProgX',progX]].forEach(([id,val])=>sync(id,val));
  sync('progColor',progColor);sync('progRemaining',progRemaining);
  sync('sLogoGlow',logoGlow);sync('sLogoBounce',logoBounce);sync('sLogoShake',logoShake);sync('sLogoRot',logoRotation);sync('sLogoReflection',logoReflection);sync('sLogoParticles',logoParticles);
+ sync('sReflStrength',reflStrength);sync('sReflDistance',reflDistance);sync('sReflBlur',reflBlur);sync('sReflFade',reflFade);sync('sReflRipples',reflRipples);sync('sReflPerspective',reflPerspective);
+ btn('bSurfaceReflection',surfaceReflectionOn,'Reflection: '+(surfaceReflectionOn?'ON':'OFF'));
  const btn=(id,on,label)=>{const el=$(id);if(!el)return;el.classList.toggle('on',!!on);if(label)el.textContent=label;};
  btn('b8d',eightD,'8D audio: '+(eightD?'ON':'OFF'));btn('bPreserve',pitchLock,'Pitch lock: '+(pitchLock?'ON':'OFF'));
  btn('bVig',vigOn);btn('bProg',progOn);btn('bSpec',specOn,'Spectrum: '+(specOn?'ON':'OFF'));
@@ -1827,6 +1844,27 @@ $('fProjectOpen').onchange=async e=>{
  }catch(err){$('templateInfo').textContent='Could not open project: '+err.message;}
  e.target.value='';
 };
+function drawSurfaceReflection(ctx){
+ if(!surfaceReflectionOn||reflStrength<=0)return;
+ const targetY=Math.round(H*(.58+reflDistance/100*.12)),targetH=H-targetY;
+ if(targetH<8)return;
+ reflectionCtx.clearRect(0,0,W,H);reflectionCtx.save();
+ const width=W*(1-reflPerspective/100*.24),left=(W-width)/2;
+ reflectionCtx.filter=reflBlur>0?'blur('+((reflBlur/100)*Math.min(W,H)*.018)+'px)':'none';
+ reflectionCtx.translate(0,targetY*2+targetH);reflectionCtx.scale(1,-1);
+ reflectionCtx.drawImage(c,0,0,W,H,left,targetY,width,targetH);
+ reflectionCtx.restore();reflectionCtx.filter='none';
+ reflectionCtx.save();reflectionCtx.globalCompositeOperation='destination-in';
+ const fade=reflectionCtx.createLinearGradient(0,targetY,0,H);
+ fade.addColorStop(0,'rgba(255,255,255,'+(1-reflFade/100*.35)+')');fade.addColorStop(1,'rgba(255,255,255,0)');
+ reflectionCtx.fillStyle=fade;reflectionCtx.fillRect(0,targetY,W,targetH);reflectionCtx.restore();
+ ctx.save();ctx.globalAlpha=reflStrength/100;ctx.drawImage(reflectionCanvas,0,0);ctx.restore();
+ if(reflRipples>0){ctx.save();ctx.beginPath();ctx.rect(0,targetY,W,targetH);ctx.clip();ctx.globalAlpha=reflStrength/100*reflRipples/100*.18;ctx.strokeStyle='#ffffff';ctx.lineWidth=Math.max(1,H*.0008);
+  const time=performance.now()*.001,amp=reflRipples/100*H*.004;
+  for(let y=targetY+8;y<H;y+=Math.max(12,Math.round(H/90))){ctx.beginPath();ctx.moveTo(0,y);ctx.quadraticCurveTo(W*.5,y+Math.sin(time*1.7+y*.03)*amp,W,y);ctx.stroke();}
+  ctx.restore();
+ }
+}
 function drawMotionFx(ctx,b){
  const amt=motionFx/100,now=performance.now()*.001;
  if(lensOn&&lensAmount>0){
