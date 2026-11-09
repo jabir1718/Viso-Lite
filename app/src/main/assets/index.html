@@ -1702,6 +1702,7 @@ function frame(t){
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
     x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
     x.fillText('Photo / Video / PNG chuno',cx,cy);}
+  requestAnimationFrame(frame);
 }
 
 // VISO advanced studio modules: editable templates, motion, and project files.
