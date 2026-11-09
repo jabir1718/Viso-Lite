@@ -313,3 +313,13 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Latest workflow run `42719273173` (run #124), exact commit `48294451ede9f69ff278caa68f616a64291f14b7`, passed HTML/JavaScript validation, archive/manifest/registry/spectrum tests, Android debug APK build, APK package/source verification, and artifact upload.
 - Verified artifact ID `13719596657`; archive digest `sha256:6e49d021863042910fac11abc52f8160f82652f8b86bb937d11145edc570b8f0`. ZIP integrity passed. Extracted APK size: 84,463,147 bytes; APK SHA-256: `7cfb6258be5b765c10714d9fa5f420ba80b90626f09a0324ecc4683fec5cca8b`. The extracted APK contains both the audio-reactive Ring renderer and corrected Dual geometry.
 - Device runtime QA remains unconfirmed; the workflow verifies source/build packaging but cannot substitute for playback, rendering and export tests on the target phone.
+
+
+## 25. Mobile preview performance and verified APK — 2026-11-10
+
+- Reduced live preview canvas to a maximum of 360×640 while preserving the selected output dimensions separately. PNG and video export switch to the selected full resolution and restore the low-cost preview resolution afterward. Export bitrate is calculated from the selected output dimensions, not the preview canvas.
+- Optimized heavy spectrum modes for mobile preview: Tunnel uses three depth rings and samples at most about 32 angular segments per ring; LED grid reduced to 10 rows with reduced glow blur. Added CI assertions for the mobile preview bounds, full-resolution export path, export bitrate and spectrum workload limits.
+- Latest successful workflow run #132, ID `42721348307`, exact commit `07e0900639075b611ca668abdffed56011d5b487`. HTML/JavaScript validation, project archive tests, Android debug build, APK ZIP/package/source verification and artifact upload all passed.
+- Artifact ID `13720601471`, archive SHA-256 `31e7c45138c26998f6d887b1c1a14e0533af2daacd51edf51d099734bd4fd4d1`. Downloaded ZIP integrity passed. Extracted APK: 84,463,427 bytes, SHA-256 `a8f37e2d6ec9cfdf4d6253f50f236e1c968424757a3c48189548f113cdbd3fb5`. Packaged `assets/index.html` byte-matches the source HTML (SHA-256 `65cafe0e931a87ff7f7d8ed102c80f99dc8693fb1eb9973faa6b0af5f911ad00`).
+- Video export source review confirms it adds the Web Audio `MediaStreamDestination` audio tracks to the captured canvas stream when available. Real playback/export still needs an Android device test.
+- Remaining: full reference-app parity audit, verify actual audio response and smoothness on Android, verify PNG/video export and audio track, project/template asset round-trip, and general startup/stability. No claim of physical-device testing.
