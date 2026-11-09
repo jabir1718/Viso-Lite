@@ -11,7 +11,7 @@
 - Android shell: Kotlin / Jetpack Compose with the studio hosted in Android WebView.
 - Current reference input: user-provided working HTML file named `Viso working Index.html` (uploaded 2026-11-10; 1,133 lines). Treat it as a reference/baseline to compare, not permission to overwrite newer repository work.
 - Reference application package previously inspected: Aspectrum / MP3 Visualizer (Unity Android app, package `com.MDA.MP3Visualizer`, version 2.7.2). The supplied archive is the reference app's package/assets, not a font pack.
-- Latest repository head at this checkpoint: `e6d007ba00caa149b233a8c534d9b01321188039`. Latest HTML asset blob: `5f0306f792733ae0b8cd3351279da85ee523932c` (161,596 characters, 2,067 lines, 255 unique element IDs, no duplicate IDs). The uploaded 1,133-line baseline was compared earlier; all 129 original element IDs remain in the current branch.
+- Latest repository head at this checkpoint: `5ec3beb56a8cff33ebff41c3e4c6ef0fa22bc5e1`. Latest HTML asset blob: `45a9666c37fd8e254ec6b1305e9f3bd7486b37f2` (163,085 characters, 2,078 lines, 255 unique element IDs, no duplicate IDs). The uploaded 1,133-line baseline was compared earlier; all 129 original element IDs remain in the current branch.
 - Main branch must be preserved. Develop on `viso/advanced-studio-ui` unless the owner explicitly directs otherwise.
 
 ## 2. Product goal
@@ -76,7 +76,7 @@ The current working branch already contains a substantial HTML visualizer studio
 - Save/Open Project now writes a versioned `.viso` v3 ZIP/store package containing `project.json`, embedded imported audio/image/video/background/logo/font/overlay files, editable layer metadata, and a `preview.png` canvas thumbnail. The importer verifies CRC32 checksums, supports the v3 archive plus legacy v1/v2 JSON projects, and guards 180 MB save / 220 MB import size limits.
 - Template downloads now use the same editable project-package pipeline, so current imported assets and editable settings travel together. Android's native save bridge routes `.viso` packages to `Downloads/Viso` rather than the image gallery.
 - Undo/redo was corrected to capture state before control changes and retain image-object references for layer history; project switches clear old history.
-- Latest verified passing build: workflow run `42710588670` (run #63), pinned to commit `e6d007ba00caa149b233a8c534d9b01321188039`; HTML/JavaScript validation, Android SDK setup, debug APK build and artifact upload all succeeded. Artifact `VISO-Studio-advanced-debug-apk`, artifact ID `13716235748`, ZIP digest `sha256:e3155450f2197013b629857c9bff0446286c3392f3d29483e3feaa3231cf27b9`. Extracted `app-debug.apk` size 84,458,859 bytes; SHA-256 `6de88152b64b63251d060a2f49aa0724816b026c8ec31c1dbc810c5c5b810888`. Installation and real-device testing on the user's Infinix Android phone are not confirmed.
+- Latest verified passing build: workflow run `42711674533` (run #76), pinned to commit `5ec3beb56a8cff33ebff41c3e4c6ef0fa22bc5e1`; HTML/JavaScript validation, project archive and manifest tests, Android SDK setup, debug APK build and artifact upload all succeeded. Artifact `VISO-Studio-advanced-debug-apk`, artifact ID `13715449375`, ZIP digest `sha256:23a1080cd8252bb71c418b9915748bc737145c2c57f0ef03755cf6cb7d4e7918`. Extracted `app-debug.apk` size 84,459,363 bytes; SHA-256 `fbe25d2f7391817f729a9e9741cd48b7f1cded110abbcaf279aa36809d32c61d`. Installation and real-device testing on the user's Infinix Android phone are not confirmed.
 
 ## 5. Reference feature audit — required work
 
@@ -151,8 +151,8 @@ For every milestone, update the status table below and record commit SHA, build 
 | VHS / Shockwave / Lens effects | Expanded in source | Individual parameters and rendering added; Film, Atmosphere and Surface Reflection panels added; export/device QA still required |
 | Complete editable template packages | Implemented in source; QA pending | `.viso` v3 ZIP package with settings, imported assets, layers, preview thumbnail and CRC checks; verify full round-trip on device |
 | Modular future-tools architecture | Partial implementation | Searchable/favourite tool registry with stable IDs, categories, schema version, defaults and lifecycle hooks; refactor rendering pipeline incrementally |
-| Single integrated Android APK | Build verified | One debug APK produced successfully (`app-debug.apk`, 84,458,859 bytes); install and device runtime still need owner-side QA |
-| CI build | Latest run passed | Run `42710588670` / commit `e6d007ba00caa149b233a8c534d9b01321188039`; exact-commit checkout, validation, Android build and artifact upload all passed; APK artifact verified and extracted |
+| Single integrated Android APK | Build verified | One debug APK produced successfully (`app-debug.apk`, 84,459,363 bytes); install and device runtime still need owner-side QA |
+| CI build | Latest run passed | Run `42711674533` / commit `5ec3beb56a8cff33ebff41c3e4c6ef0fa22bc5e1`; exact-commit checkout, HTML/JS checks, ZIP/manifest tests, Android build and artifact upload all passed |
 | Real-device QA | Not confirmed | Install and test on user's Android device before final release |
 
 ## 9. Required continuity procedure for every new chat
@@ -196,3 +196,13 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Verified artifact: ID `13716235748`; archive digest `sha256:e3155450f2197013b629857c9bff0446286c3392f3d29483e3feaa3231cf27b9`; extracted APK 84,458,859 bytes; SHA-256 `6de88152b64b63251d060a2f49aa0724816b026c8ec31c1dbc810c5c5b810888`.
 - Current HTML: 161,596 characters, 2,067 lines, 255 unique IDs, no duplicate IDs, no watermark references. Tool registry is before `frame(t)`; two `requestAnimationFrame(frame)` calls are expected (one to start, one inside the frame loop).
 - Device testing remains unconfirmed. Next: real phone QA for startup/performance, imported audio/image/video, save/open `.viso` with multiple media assets, template round-trip, undo/redo and export. Continue the reference app's screen-by-screen control/range audit and implement remaining verified parity items.
+
+
+## 13. Project-package QA checkpoint — 2026-11-10
+
+- Latest source: `5ec3beb56a8cff33ebff41c3e4c6ef0fa22bc5e1`; HTML blob `45a9666c37fd8e254ec6b1305e9f3bd7486b37f2` (163,085 characters, 2,078 lines, 255 unique IDs, no duplicates).
+- Project import validates manifest structure, supported asset kinds, unique asset types, exact file sizes, 180 MB asset ceiling, overlay index sequence, and layer counts. Overlay images are decoded before the current editor is cleared; only then are embedded assets restored and project settings applied.
+- Project save refuses to create a package if any overlay layer lacks its source image file.
+- Added `scripts/test-project-archive.mjs` and a CI step. Tests cover ZIP/CRC32 round-trip, corrupted data, unsafe paths, duplicate entries, local/central header mismatch, missing/incorrect-size assets, unsupported/duplicate asset kinds, overlay ordering/count, and invalid paths. Latest CI test step passed.
+- Latest passing build: run `42711674533` (run #76), exact commit `5ec3beb56a8cff33ebff41c3e4c6ef0fa22bc5e1`. Artifact ID `13715449375`; archive digest `sha256:23a1080cd8252bb71c418b9915748bc737145c2c57f0ef03755cf6cb7d4e7918`; extracted APK 84,459,363 bytes; SHA-256 `fbe25d2f7391817f729a9e9741cd48b7f1cded110abbcaf279aa36809d32c61d`.
+- Device QA remains unconfirmed. Next priority: install and exercise on the user's phone; test media load, project save/open with audio/background/logo/overlays, template download/import, undo/redo and video export. Continue reference-app screen/control parity audit.
