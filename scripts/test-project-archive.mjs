@@ -54,11 +54,11 @@ assert(html.includes('BIT=Math.round(targetW*targetH*FPS*0.13*(quality/100))'), 
 assert(html.includes("setPreviewCanvasSize();if(b)dl(b,exportFileName('png'))"), 'PNG export must restore the mobile preview resolution after capture');
 assert(html.includes('function initRecordGL()'), 'video export must initialize the GPU recording scaler when WebGL is available');
 assert(html.includes('function drawRecordFrame()'), 'video export must composite each preview frame to the selected output canvas');
-assert(s.includes('let exportFailed=false,exportFinalized=false'), 'video export must track failure and finalization state');
-assert(s.includes('if(exportFinalized)return;exportFinalized=true;'), 'video export cleanup must run only once');
-assert(s.includes("else finishRecorder('Export failed: recorder returned no video data')"), 'empty video recordings must not be reported as successful');
-assert(s.includes("exportFailed=true;"), 'video recorder errors must mark the export failed');
-assert(s.includes("setPreviewCanvasSize();"), 'video recorder completion and failure must restore preview resolution');
+assert(html.includes('let exportFailed=false,exportFinalized=false'), 'video export must track failure and finalization state');
+assert(html.includes('if(exportFinalized)return;exportFinalized=true;'), 'video export cleanup must run only once');
+assert(html.includes("else finishRecorder('Export failed: recorder returned no video data')"), 'empty video recordings must not be reported as successful');
+assert(html.includes("exportFailed=true;"), 'video recorder errors must mark the export failed');
+assert(html.includes("setPreviewCanvasSize();"), 'video recorder completion and failure must restore preview resolution');
 assert(html.includes('recordCanvas.captureStream(FPS)'), 'video export must capture the full-resolution output canvas');
 assert(html.includes("if(rec&&rec.state==='recording')drawRecordFrame()"), 'recording canvas must receive each completed render frame');
 assert(html.includes('streamDest.stream.getAudioTracks().forEach(t=>st.addTrack(t))'), 'video export must include the audio stream');
