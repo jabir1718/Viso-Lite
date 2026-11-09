@@ -22,8 +22,8 @@ assert(spectrumSource.includes("if(M==='ring')"), 'Ring spectrum must have its o
 assert(spectrumSource.includes('outer=R0+v*amp'), 'Ring spectrum bars must respond to live audio amplitude');
 assert(spectrumSource.includes("else if(M==='sphere')"), 'Sphere spectrum must have its own renderer');
 assert(spectrumSource.includes("else if(M==='tunnel')"), 'Tunnel spectrum must have its own renderer');
-assert(spectrumSource.includes('for(let ring=0;ring<rings;ring++)'), 'Tunnel spectrum must render multiple depth rings');
-assert(spectrumSource.includes('stride=Math.max(1,Math.ceil(n/48))'), 'Tunnel spectrum must cap per-ring segments for mobile performance');
+assert(spectrumSource.includes('rings=3,'), 'Tunnel spectrum must render multiple depth rings');
+assert(spectrumSource.includes('stride=Math.max(1,Math.ceil(n/32))'), 'Tunnel spectrum must cap per-ring segments for mobile performance');
 assert(spectrumSource.includes('const rows=10'), 'LED spectrum must use a mobile-friendly dot grid');
 assert(spectrumSource.includes('ctx.fillRect(cx-len,yl,len,bh*.86);ctx.fillRect(cx,yr,len,bh*.86)'), 'Dual spectrum bars must extend horizontally from the centre');
 assert(html.includes('id="sLogoPulse"'), 'custom logo audio-reactive size control must exist');
