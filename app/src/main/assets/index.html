@@ -1153,7 +1153,7 @@ $('bBpm').onclick=()=>{onsetGaps=[];bpm=0;updateBpm();
     if(curB[0]>.34){const n=performance.now();if(n-lh>200){if(lh)onsetGaps.push(n-lh);lh=n;
       if(onsetGaps.length>=6){bpm=Math.round(60000/(onsetGaps.reduce((x,y)=>x+y,0)/onsetGaps.length));updateBpm();clearInterval(iv);}}}},40);};
 bind('sDrift',v=>driftAmt=v);bind('sFlash',v=>flashAmt=v);bind('sVig',v=>vigAmt=v);
-bind('sProgSz',v=>progSz=v);bind('sProgPos',v=>progPos=v);bind('sWm',v=>wmOpacity=v);
+bind('sProgSz',v=>progSz=v);bind('sProgPos',v=>progPos=v);
 const SYMS=[['off','Off'],['x','Mirror X'],['y','Mirror Y'],['quad','Quad']];
 SYMS.forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;if(k==='off')b.classList.add('on');
   b.onclick=()=>{sym=k;document.querySelectorAll('#symModes button').forEach(q=>q.classList.remove('on'));b.classList.add('on');};
@@ -1189,7 +1189,7 @@ function drawProgress(ctx){if(!progOn||!audio)return;
   else {ctx.fillStyle='rgba(255,255,255,.2)';ctx.fillRect(0,y,W,th);ctx.fillStyle=g;ctx.shadowColor=grad(.5);ctx.shadowBlur=th*2;ctx.fillRect(0,y,W*p,th);}
   ctx.restore();
 }
-function drawWatermark(ctx){
+function drawCustomLogo(ctx){
   if(!logoImg)return;
   const lw=W*logoSize/100,lh=logoImg.height/logoImg.width*lw;
   ctx.save();ctx.globalAlpha=logoAlpha/100;
@@ -1409,7 +1409,7 @@ function frame(t){
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
   if(flashAmt>0&&beatFlash>0){x.fillStyle='rgba(255,255,255,'+(beatFlash*flashAmt/100*.22)+')';x.fillRect(0,0,W,H);}
-  drawVignette(x);drawProgress(x);drawWatermark(x);drawMotionFx(x,b);
+  drawVignette(x);drawProgress(x);drawCustomLogo(x);drawMotionFx(x,b);
   drawStudioText(x,b);
   x.restore();
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
