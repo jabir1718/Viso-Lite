@@ -729,7 +729,7 @@ $('bRec').onclick=()=>{
   recClock=setInterval(()=>{$('recInfo').textContent='Exporting · '+clockText((Date.now()-recStarted)/1000);},250);
   if(audio&&!playing){$('bP').click();}
 };
-function captureProjectState(){return {colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState()};}
+function captureProjectState(){return {colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
 function snap(){const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
   if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
   redo.forEach(old=>objectSnapshotCache.delete(old));redo.length=0;}
@@ -764,7 +764,7 @@ function apply(s){const d=JSON.parse(s);
   $('sTextSize').value=studioTextSize;$('sTextPos').value=studioTextPos;$('sTextAlpha').value=studioTextAlpha;$('studioTextColor').value=studioTextColor;
   $('sTextX').value=studioTextX;$('sTextRot').value=studioTextRot;$('sTextStroke').value=studioTextStroke;$('sTextGlow').value=studioTextGlow;$('sTextAnim').value=studioTextAnim;$('sTextFont').value=studioTextFont;$('sTextAlign').value=studioTextAlign;$('bTextPlate').textContent='Text plate: '+(studioTextPlate?'ON':'OFF');$('bTextPlate').classList.toggle('on',studioTextPlate);
   $('sText2Size').value=studioText2Size;$('sText2Pos').value=studioText2Pos;$('sText2Alpha').value=studioText2Alpha;$('studioText2Color').value=studioText2Color;$('sText2X').value=studioText2X;$('sText2Rot').value=studioText2Rot;$('sText2Stroke').value=studioText2Stroke;$('sText2Glow').value=studioText2Glow;$('sText2Anim').value=studioText2Anim;$('sText2Align').value=studioText2Align;$('bText2Plate').textContent='Text 2 plate: '+(studioText2Plate?'ON':'OFF');$('bText2Plate').classList.toggle('on',studioText2Plate);
-  drawPals();drawMixers();if(d.advanced)restoreAdvancedState(d.advanced);}
+  drawPals();drawMixers();if(d.advanced)restoreAdvancedState(d.advanced);if(d.tools)restoreVISORegistryState(d.tools);}
 $('bUndo').onclick=()=>{if(!undo.length)return;const current=JSON.stringify(captureProjectState()),previous=undo.pop();objectSnapshotCache.set(current,objects.map(o=>({...o})));redo.push(current);apply(previous);};
 $('bRedo').onclick=()=>{if(!redo.length)return;const current=JSON.stringify(captureProjectState()),next=redo.pop();objectSnapshotCache.set(current,objects.map(o=>({...o})));undo.push(current);apply(next);};
 $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
@@ -1522,10 +1522,26 @@ function registerVISOEffectTool(def){
  if(!def||!def.id||!def.name||!def.category||!def.panel)throw new Error('Tool requires id, name, category and panel');
  if(VISO_TOOL_REGISTRY[def.id])throw new Error('Duplicate VISO tool id: '+def.id);
  const controls=(def.controls||[]).map(c=>Object.freeze({...c}));
+ const elements=[...def.panel.querySelectorAll('input,select')].filter(el=>el.id&&el.type!=='file');
  const defaults=def.defaults||Object.fromEntries(controls.filter(c=>c.id).map(c=>[c.id,c.defaultValue]));
+ const serialize=typeof def.serialize==='function'?def.serialize:()=>Object.fromEntries(elements.map(el=>[el.id,el.type==='checkbox'?el.checked:el.value]));
+ const restore=typeof def.restore==='function'?def.restore:state=>{
+  if(!state||typeof state!=='object')return;
+  elements.forEach(el=>{if(!Object.prototype.hasOwnProperty.call(state,el.id))return;
+   if(el.type==='checkbox')el.checked=!!state[el.id];else el.value=state[el.id];
+   el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));
+  });
+ };
  VISO_TOOL_REGISTRY[def.id]=Object.freeze({...def,version:def.version||1,defaults:Object.freeze({...defaults}),controls:Object.freeze(controls),
-  render:typeof def.render==='function'?def.render:null,serialize:typeof def.serialize==='function'?def.serialize:null,restore:typeof def.restore==='function'?def.restore:null});
+  render:typeof def.render==='function'?def.render:null,serialize,restore});
  return VISO_TOOL_REGISTRY[def.id];
+}
+function collectVISORegistryState(){
+ const state={};Object.values(VISO_TOOL_REGISTRY).forEach(tool=>{if(typeof tool.serialize==='function')state[tool.id]=tool.serialize();});return state;
+}
+function restoreVISORegistryState(state){
+ if(!state||typeof state!=='object')return;
+ Object.values(VISO_TOOL_REGISTRY).forEach(tool=>{const saved=state[tool.id];if(saved&&typeof saved==='object'&&typeof tool.restore==='function')tool.restore(saved);});
 }
 function visoToolCategory(title){
  const t=title.toLowerCase();
