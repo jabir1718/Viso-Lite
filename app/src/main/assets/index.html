@@ -52,6 +52,32 @@
     border-radius:9px;padding:8px 10px;font-variant-numeric:tabular-nums;line-height:1.4}
   .progress{height:7px;border-radius:99px;background:#dce7a1;overflow:hidden}
   #recProgress{height:100%;width:0;background:linear-gradient(90deg,#a8ca00,#e2ff32);transition:width .2s}
+
+/* VISO mobile layout: screenshot-matched light controls, black preview */
+:root{color-scheme:light;--lemon:#dfff43;--ink:#303322;--panel:#fff;--line:#e0e5d2;--accent:#a5ce00}
+body{color:var(--ink);background:linear-gradient(180deg,#fff 0%,#f7f9ef 48%,#edf5df 100%)}
+#wrap{background:transparent;padding:8px 12px}
+canvas{background:#000!important;box-shadow:0 8px 28px #26300020,0 0 0 1px #dfe5d4!important;border-radius:24px}
+#bar{max-height:46dvh;padding:8px 12px 24px;gap:9px;overscroll-behavior:contain}
+.sec{background:#fff;border:1px solid #e1e6d8;border-radius:22px;padding:12px 13px;gap:9px;box-shadow:0 2px 8px #2934000c}
+.sec h4{color:#737d3e;font-size:10px;letter-spacing:.1em;cursor:pointer;display:flex;align-items:center;justify-content:space-between;min-height:17px}
+.sec h4:after{content:'⌄';font-size:15px;color:#929b69}
+.sec.collapsed h4:after{content:'›'}
+.sec.collapsed>:not(h4){display:none!important}
+.row{gap:8px}
+button{background:#f7f8f1;color:#363a2d;border:1px solid #dfe4d2;border-radius:17px;min-height:48px;padding:0 16px;font-size:13px;font-weight:600}
+button:active{background:#eef5d5}
+button.on{background:#e9ff75;border-color:#b7d83d;color:#303a0c}
+button.lock{background:#f0f8dc;border-color:#c9dc91;color:#4e6416}
+button.prim{background:linear-gradient(180deg,#d9ff47,#aee600);border-color:#9fc900;color:#293600}
+label{color:#697044;font-size:11px}
+label span{width:88px}
+input[type=range]{accent-color:#a8d400}
+input[type=text]{background:#fff;border:1px solid #dfe4d2;color:#303322}
+.status{color:#46502a;background:#f7faeb;border:1px solid #e2e9c9}
+.progress{background:#edf2d9}
+#recProgress{background:linear-gradient(90deg,#a6cf00,#e0ff45)}
+
 </style>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
 <div id="bar">
@@ -177,6 +203,15 @@ const o=document.createElement('canvas'),ox=o.getContext('2d');
 const bl=document.createElement('canvas'),bx=bl.getContext('2d');
 mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=W>>1;bl.height=H>>1;
 const $=id=>document.getElementById(id);
+
+// Collapsible tool panels keep the preview spacious as future tools are added.
+document.querySelectorAll('#bar .sec h4').forEach(h=>{
+  h.setAttribute('role','button');h.setAttribute('aria-expanded','true');
+  h.addEventListener('click',()=>{const sec=h.parentElement;sec.classList.toggle('collapsed');
+    h.setAttribute('aria-expanded',String(!sec.classList.contains('collapsed')));
+  });
+});
+
 const vid=$('vid'),bvid=$('bvid');
 
 let FPS=30,BIT=8000000,baseRes=1080,aspect='9:16',quality=100,formatChoice='auto';
