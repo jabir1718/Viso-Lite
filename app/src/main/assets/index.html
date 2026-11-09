@@ -290,6 +290,16 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <label><span>Sepia</span><input id="sFilmSepia" type="range" min="0" max="100" value="0"></label>
     <label><span>Frame weave</span><input id="sFilmWeave" type="range" min="0" max="100" value="6"></label>
   </div>
+  <div class="sec panel"><h4>Atmosphere FX</h4>
+    <div class="row"><button id="bAtmosphere">Atmosphere: OFF</button></div>
+    <label><span>Haze strength</span><input id="sHaze" type="range" min="0" max="100" value="24"></label>
+    <label><span>Haze angle</span><input id="sHazeAngle" type="range" min="0" max="360" value="25"></label>
+    <label><span>Haze speed</span><input id="sHazeSpeed" type="range" min="0" max="100" value="30"></label>
+    <label><span>Smoke amount</span><input id="sSmoke" type="range" min="0" max="100" value="18"></label>
+    <label><span>Smoke size</span><input id="sSmokeSize" type="range" min="10" max="100" value="48"></label>
+    <label><span>Smoke speed</span><input id="sSmokeSpeed" type="range" min="0" max="100" value="24"></label>
+    <label><span>Smoke colour</span><input id="smokeColor" type="color" value="#c5d7d0"></label>
+  </div>
   <div class="sec panel"><h4>Templates · Editable Projects</h4>
     <div class="status">Download a template, then open it in the editor as editable settings. Add or replace your own song, photo, video and logo.</div>
     <div class="row" id="visoTemplates">
@@ -1263,6 +1273,7 @@ let sym='off',vigOn=false,vigAmt=45,progOn=false,progSz=12,progPos=96,logoImg=nu
 let logoGlow=42,logoBounce=18,logoShake=8,logoRotation=0,logoReflection=0,logoParticles=0;
 let surfaceReflectionOn=false,reflStrength=35,reflDistance=12,reflBlur=18,reflFade=78,reflRipples=24,reflPerspective=18;
 let filmOn=false,filmGrain=24,filmDust=12,filmScratches=8,filmFlicker=10,filmSepia=0,filmWeave=6;
+let atmosphereOn=false,hazeStrength=24,hazeAngle=25,hazeSpeed=30,smokeAmount=18,smokeSize=48,smokeSpeed=24,smokeColor='#c5d7d0';
 let progThickness=100,progRound=70,progGlow=48,progRotation=0,progX=0,progColor='#8b5cf6',progRemaining='#dfe8dc';
 function makeImpulse(sec,decay){const r=ctxA.sampleRate,len=Math.floor(r*sec),b=ctxA.createBuffer(2,len,r);
   for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);
@@ -1667,7 +1678,7 @@ requestAnimationFrame(frame);
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
   if(flashAmt>0&&beatFlash>0){x.fillStyle='rgba(255,255,255,'+(beatFlash*flashAmt/100*.22)+')';x.fillRect(0,0,W,H);}
-  drawVignette(x);drawProgress(x);drawCustomLogo(x);drawMotionFx(x,b);drawFilmEffect(x,b);
+  drawVignette(x);drawProgress(x);drawCustomLogo(x);drawMotionFx(x,b);drawFilmEffect(x,b);drawAtmosphere(x,b);
   drawStudioText(x,b);
   x.restore();
   drawSurfaceReflection(x);
@@ -1703,6 +1714,9 @@ $('bSurfaceReflection').onclick=e=>{surfaceReflectionOn=!surfaceReflectionOn;e.c
 [['sReflStrength','reflStrength'],['sReflDistance','reflDistance'],['sReflBlur','reflBlur'],['sReflFade','reflFade'],['sReflRipples','reflRipples'],['sReflPerspective','reflPerspective']].forEach(([id,key])=>$(id).oninput=e=>{const v=+e.target.value;if(key==='reflStrength')reflStrength=v;else if(key==='reflDistance')reflDistance=v;else if(key==='reflBlur')reflBlur=v;else if(key==='reflFade')reflFade=v;else if(key==='reflRipples')reflRipples=v;else reflPerspective=v;});
 $('bFilm').onclick=e=>{filmOn=!filmOn;e.currentTarget.textContent='Film look: '+(filmOn?'ON':'OFF');e.currentTarget.classList.toggle('on',filmOn);};
 [['sFilmGrain','filmGrain'],['sFilmDust','filmDust'],['sFilmScratches','filmScratches'],['sFilmFlicker','filmFlicker'],['sFilmSepia','filmSepia'],['sFilmWeave','filmWeave']].forEach(([id,key])=>$(id).oninput=e=>{const v=+e.target.value;if(key==='filmGrain')filmGrain=v;else if(key==='filmDust')filmDust=v;else if(key==='filmScratches')filmScratches=v;else if(key==='filmFlicker')filmFlicker=v;else if(key==='filmSepia')filmSepia=v;else filmWeave=v;});
+$('bAtmosphere').onclick=e=>{atmosphereOn=!atmosphereOn;e.currentTarget.textContent='Atmosphere: '+(atmosphereOn?'ON':'OFF');e.currentTarget.classList.toggle('on',atmosphereOn);};
+[['sHaze','hazeStrength'],['sHazeAngle','hazeAngle'],['sHazeSpeed','hazeSpeed'],['sSmoke','smokeAmount'],['sSmokeSize','smokeSize'],['sSmokeSpeed','smokeSpeed']].forEach(([id,key])=>$(id).oninput=e=>{const v=+e.target.value;if(key==='hazeStrength')hazeStrength=v;else if(key==='hazeAngle')hazeAngle=v;else if(key==='hazeSpeed')hazeSpeed=v;else if(key==='smokeAmount')smokeAmount=v;else if(key==='smokeSize')smokeSize=v;else smokeSpeed=v;});
+$('smokeColor').oninput=e=>smokeColor=e.target.value;
 const VISO_TEMPLATES={
  aura:{name:'Aura Pulse',vig:true,prog:true,progStyle:'gradient',progSz:16,progPos:94,drift:true,speed:34,rot:26,travel:34,flash:55,studio:true,text:'AURA',anim:'pulse',glow:42,stroke:9,vhs:false,shock:true,lens:true},
  romance:{name:'Soft Romance',vig:true,prog:true,progStyle:'thin',progSz:9,progPos:96,drift:true,speed:14,rot:10,travel:15,flash:8,studio:true,text:'LOVE',anim:'float',glow:30,stroke:2,vhs:false,shock:false,lens:true},
@@ -1744,7 +1758,7 @@ document.querySelectorAll('#visoTemplates button').forEach(q=>q.onclick=async()=
  try{await downloadVISOProject(project,'VISO-'+key+'.viso');$('templateInfo').textContent=preset.name+' editable project package downloaded with imported assets';}
  catch(err){$('templateInfo').textContent='Template package failed: '+err.message;}
 });
-function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining,logoGlow,logoBounce,logoShake,logoRotation,logoReflection,logoParticles,surfaceReflectionOn,reflStrength,reflDistance,reflBlur,reflFade,reflRipples,reflPerspective,filmOn,filmGrain,filmDust,filmScratches,filmFlicker,filmSepia,filmWeave};}
+function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining,logoGlow,logoBounce,logoShake,logoRotation,logoReflection,logoParticles,surfaceReflectionOn,reflStrength,reflDistance,reflBlur,reflFade,reflRipples,reflPerspective,filmOn,filmGrain,filmDust,filmScratches,filmFlicker,filmSepia,filmWeave,atmosphereOn,hazeStrength,hazeAngle,hazeSpeed,smokeAmount,smokeSize,smokeSpeed,smokeColor};}
 function restoreAdvancedState(s){
  if(!s)return;
  if(s.speed!==undefined)speed=s.speed;if(s.pitchSemis!==undefined)pitchSemis=s.pitchSemis;if(s.pitchLock!==undefined)pitchLock=s.pitchLock;
@@ -1762,6 +1776,7 @@ function restoreAdvancedState(s){
  if(s.logoGlow!==undefined)logoGlow=s.logoGlow;if(s.logoBounce!==undefined)logoBounce=s.logoBounce;if(s.logoShake!==undefined)logoShake=s.logoShake;if(s.logoRotation!==undefined)logoRotation=s.logoRotation;if(s.logoReflection!==undefined)logoReflection=s.logoReflection;if(s.logoParticles!==undefined)logoParticles=s.logoParticles;
  if(s.surfaceReflectionOn!==undefined)surfaceReflectionOn=s.surfaceReflectionOn;if(s.reflStrength!==undefined)reflStrength=s.reflStrength;if(s.reflDistance!==undefined)reflDistance=s.reflDistance;if(s.reflBlur!==undefined)reflBlur=s.reflBlur;if(s.reflFade!==undefined)reflFade=s.reflFade;if(s.reflRipples!==undefined)reflRipples=s.reflRipples;if(s.reflPerspective!==undefined)reflPerspective=s.reflPerspective;
  if(s.filmOn!==undefined)filmOn=s.filmOn;if(s.filmGrain!==undefined)filmGrain=s.filmGrain;if(s.filmDust!==undefined)filmDust=s.filmDust;if(s.filmScratches!==undefined)filmScratches=s.filmScratches;if(s.filmFlicker!==undefined)filmFlicker=s.filmFlicker;if(s.filmSepia!==undefined)filmSepia=s.filmSepia;if(s.filmWeave!==undefined)filmWeave=s.filmWeave;
+ if(s.atmosphereOn!==undefined)atmosphereOn=s.atmosphereOn;if(s.hazeStrength!==undefined)hazeStrength=s.hazeStrength;if(s.hazeAngle!==undefined)hazeAngle=s.hazeAngle;if(s.hazeSpeed!==undefined)hazeSpeed=s.hazeSpeed;if(s.smokeAmount!==undefined)smokeAmount=s.smokeAmount;if(s.smokeSize!==undefined)smokeSize=s.smokeSize;if(s.smokeSpeed!==undefined)smokeSpeed=s.smokeSpeed;if(s.smokeColor!==undefined)smokeColor=s.smokeColor;
  const sync=(id,val)=>{const el=$(id);if(el&&val!==undefined){el.value=val;el.dispatchEvent(new Event('input'));}};
  [['sSpeed',speed],['sPitch',pitchSemis],['s8w',eightW],['s8s',eightS],['s8r',eightR],['sDrift',driftAmt],['sFlash',flashAmt],['sVig',vigAmt],['sProgSz',progSz],['sProgPos',progPos],['sLogoSize',logoSize],['sLogoX',logoX],['sLogoY',logoY],['sLogoAlpha',logoAlpha],['sSpecBars',specBars],['sSpecRad',specRad],['sSpecThick',specThick],['sSpecGlow',specGlow],['sSpecLevel',specLevel],['sSpecAtk',specAtk*100],['sSpecRel',specRel*100],['sSpecPeak',specPeakHold],['sSpecSpin',specSpin*100],['sBgDriftSpeed',bgDriftSpeed],['sBgDriftRot',bgDriftRot],['sBgDriftTravel',bgDriftTravel],['sMotionFx',motionFx],['sVhsScan',vhsScan],['sVhsNoise',vhsNoise],['sVhsJitter',vhsJitter],['sVhsBleed',vhsBleed],['sShockStrength',shockStrength],['sShockSpeed',shockSpeed],['sShockThickness',shockThickness],['sShockRgb',shockRgb],['sLensAmount',lensAmount],['sLensFocus',lensFocus],['sLensBokeh',lensBokeh],['sLensBlur',lensBlur],['sProgThickness',progThickness],['sProgRound',progRound],['sProgGlow',progGlow],['sProgRot',progRotation],['sProgX',progX]].forEach(([id,val])=>sync(id,val));
  sync('progColor',progColor);sync('progRemaining',progRemaining);
@@ -1771,6 +1786,8 @@ function restoreAdvancedState(s){
  btn('bSurfaceReflection',surfaceReflectionOn,'Reflection: '+(surfaceReflectionOn?'ON':'OFF'));
  [['sFilmGrain',filmGrain],['sFilmDust',filmDust],['sFilmScratches',filmScratches],['sFilmFlicker',filmFlicker],['sFilmSepia',filmSepia],['sFilmWeave',filmWeave]].forEach(([id,val])=>sync(id,val));
  btn('bFilm',filmOn,'Film look: '+(filmOn?'ON':'OFF'));
+ [['sHaze',hazeStrength],['sHazeAngle',hazeAngle],['sHazeSpeed',hazeSpeed],['sSmoke',smokeAmount],['sSmokeSize',smokeSize],['sSmokeSpeed',smokeSpeed]].forEach(([id,val])=>sync(id,val));sync('smokeColor',smokeColor);
+ btn('bAtmosphere',atmosphereOn,'Atmosphere: '+(atmosphereOn?'ON':'OFF'));
  btn('b8d',eightD,'8D audio: '+(eightD?'ON':'OFF'));btn('bPreserve',pitchLock,'Pitch lock: '+(pitchLock?'ON':'OFF'));
  btn('bVig',vigOn);btn('bProg',progOn);btn('bSpec',specOn,'Spectrum: '+(specOn?'ON':'OFF'));
  btn('bBgDrift',bgDriftOn,'Background drift: '+(bgDriftOn?'ON':'OFF'));btn('bDriftBeat',bgBeatSync,'Beat sync: '+(bgBeatSync?'ON':'OFF'));
@@ -1786,7 +1803,7 @@ function resetVISOAdvancedControls(){
   bgDriftOn:false,bgBeatSync:true,bgDriftSpeed:24,bgDriftRot:18,bgDriftTravel:22,vhsOn:false,shockOn:false,lensOn:false,motionFx:45,shockPhase:0,
   vhsScan:32,vhsNoise:24,vhsJitter:18,vhsBleed:22,shockStrength:58,shockSpeed:52,shockThickness:5,shockRgb:16,
   lensAmount:42,lensFocus:58,lensBokeh:22,lensBlur:28,progThickness:100,progRound:70,progGlow:48,progRotation:0,progX:0,progColor:'#8b5cf6',progRemaining:'#dfe8dc',
-  logoGlow:42,logoBounce:18,logoShake:8,logoRotation:0,logoReflection:0,logoParticles:0,surfaceReflectionOn:false,reflStrength:35,reflDistance:12,reflBlur:18,reflFade:78,reflRipples:24,reflPerspective:18,filmOn:false,filmGrain:24,filmDust:12,filmScratches:8,filmFlicker:10,filmSepia:0,filmWeave:6});
+  logoGlow:42,logoBounce:18,logoShake:8,logoRotation:0,logoReflection:0,logoParticles:0,surfaceReflectionOn:false,reflStrength:35,reflDistance:12,reflBlur:18,reflFade:78,reflRipples:24,reflPerspective:18,filmOn:false,filmGrain:24,filmDust:12,filmScratches:8,filmFlicker:10,filmSepia:0,filmWeave:6,atmosphereOn:false,hazeStrength:24,hazeAngle:25,hazeSpeed:30,smokeAmount:18,smokeSize:48,smokeSpeed:24,smokeColor:'#c5d7d0'});
 }
 // Project assets are packed into a single .viso archive (ZIP/store) so media travels with editable settings.
 const VISO_ASSET_FILES={audio:null,mediaImage:null,mediaVideo:null,backgroundImage:null,backgroundVideo:null,logo:null,font:null,overlays:[]};
@@ -1912,6 +1929,25 @@ $('fProjectOpen').onchange=async e=>{
  }catch(err){$('templateInfo').textContent='Could not open project: '+err.message;}
  e.target.value='';
 };
+function drawAtmosphere(ctx,b){
+ if(!atmosphereOn)return;
+ const t=performance.now()*.001,bass=b&&b[0]||0;
+ ctx.save();
+ if(hazeStrength>0){
+  const a=hazeAngle*Math.PI/180,dx=Math.cos(a)*W,dy=Math.sin(a)*H;
+  const g=ctx.createLinearGradient(cx-dx*.5,cy-dy*.5,cx+dx*.5,cy+dy*.5);
+  g.addColorStop(0,'rgba(224,239,232,0)');g.addColorStop(.5,'rgba(224,239,232,'+(hazeStrength/100*.13)+')');g.addColorStop(1,'rgba(224,239,232,0)');
+  ctx.globalAlpha=.55+.18*Math.sin(t*(.3+hazeSpeed/100));ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ }
+ const count=Math.round(smokeAmount/100*12),radius=Math.min(W,H)*(.06+smokeSize/100*.2);
+ for(let i=0;i<count;i++){
+  const phase=t*(.08+smokeSpeed/100*.65)+i*2.399,px=cx+Math.sin(phase+i*.3)*W*(.18+i%3*.08),py=H*(.25+(i%5)*.13)+Math.cos(phase*.7+i)*H*.12;
+  const r=radius*(.7+(i%4)*.16)*(1+bass*.12),g=ctx.createRadialGradient(px,py,0,px,py,r);
+  g.addColorStop(0,smokeColor);g.addColorStop(.55,smokeColor);g.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.globalAlpha=smokeAmount/100*.16;ctx.fillStyle=g;ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.fill();
+ }
+ ctx.restore();
+}
 function drawFilmEffect(ctx,b){
  if(!filmOn)return;
  const t=performance.now()*.001,bass=b&&b[0]||0;
