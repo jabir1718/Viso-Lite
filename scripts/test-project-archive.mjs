@@ -110,4 +110,43 @@ assert.throws(() => validate({
   assets: [{ name: 'assets/../outside.bin', kind: 'audio', size: 1 }]
 }, { 'assets/../outside.bin': new Uint8Array([1]) }), /invalid project asset record/i);
 
-console.log('VISO project archive tests passed: ZIP round-trip, CRC, corruption, path/header checks, and project manifest validation');
+
+const registryStart = html.indexOf('const VISO_TOOL_REGISTRY=Object.create(null);');
+const registryEnd = html.indexOf('function visoToolCategory', registryStart);
+assert(registryStart >= 0 && registryEnd > registryStart, 'tool registry hooks must exist');
+const registrySandbox = {
+  localStorage: { getItem: () => null, setItem: () => {} },
+  Event: class { constructor(type) { this.type = type; } }
+};
+vm.runInNewContext(
+  html.slice(registryStart, registryEnd) +
+    '\nglobalThis.__registry = { registerVISOEffectTool, collectVISORegistryState, restoreVISORegistryState };',
+  registrySandbox,
+  { timeout: 2000 }
+);
+const registry = registrySandbox.__registry;
+const dispatched = [];
+const rangeControl = {
+  id: 'rangeA', type: 'range', value: '22',
+  dispatchEvent: event => dispatched.push(event.type)
+};
+const checkControl = {
+  id: 'checkA', type: 'checkbox', checked: true,
+  dispatchEvent: event => dispatched.push(event.type)
+};
+const fakePanel = { querySelectorAll: () => [rangeControl, checkControl] };
+registry.registerVISOEffectTool({
+  id: 'test-tool', name: 'Test Tool', category: 'overlay', panel: fakePanel, controls: []
+});
+const registryState = registry.collectVISORegistryState();
+assert.deepEqual(JSON.parse(JSON.stringify(registryState['test-tool'])), {
+  rangeA: '22', checkA: true
+}, 'default tool serialization');
+rangeControl.value = '91';
+checkControl.checked = false;
+registry.restoreVISORegistryState(registryState);
+assert.equal(rangeControl.value, '22', 'default tool restore for range');
+assert.equal(checkControl.checked, true, 'default tool restore for checkbox');
+assert.deepEqual(dispatched, ['input', 'change', 'input', 'change'], 'restore dispatches control events');
+
+console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
