@@ -1353,10 +1353,20 @@ function frame(t){
   if(clipH>0){
     x.save();x.beginPath();x.rect(0,0,W,clipH);x.clip();
     if(bgImg||(bgUseVid&&bvid.readyState>=2)){
+      x.save();
+      if(bgDriftOn){
+        const sec=performance.now()/1000,beatRate=bgBeatSync&&bpm>0?bpm/60:1;
+        const phase=sec*beatRate*(.18+bgDriftSpeed/55);
+        const travel=Math.min(W,H)*bgDriftTravel/100*.12;
+        const dx=Math.sin(phase*6.283)*travel,dy=Math.cos(phase*3.1416)*travel*.65;
+        const rot=Math.sin(phase*3.1416)*bgDriftRot/100*.12;
+        const zoom=1+bgDriftTravel/100*.08;
+        x.translate(cx+dx,cy+dy);x.rotate(rot);x.scale(zoom,zoom);x.translate(-cx,-cy);
+      }
       if(bgb>0)x.filter='blur('+bgb+'px)';
       if(bgUseVid&&bvid.readyState>=2)cover(x,bvid,bvid.videoWidth||W,bvid.videoHeight||H,H);
       else if(bgImg)cover(x,bgImg,bgImg.width,bgImg.height,H);
-      x.filter='none';
+      x.filter='none';x.restore();
       x.fillStyle='rgba(0,0,0,'+(dim/100*.75)+')';x.fillRect(0,0,W,clipH);
       if(bgViz){x.globalCompositeOperation='lighter';x.globalAlpha=bvo/100;
         x.drawImage(paintLayer(1.3,bgVizMask,curBbg),0,0);
