@@ -1514,6 +1514,7 @@ function autoStep(){
 // VISO Tool Registry v1 — stable IDs and parameter metadata for future effect modules.
 const VISO_RENDER_MODULES={
  'Background':{stage:'background',order:10,render:(ctx,b,dt)=>drawVISOBackground(ctx,b,dt)},
+ 'Media':{stage:'media',order:10,render:(ctx,b,dt)=>drawVISOMedia(ctx,b,dt)},
  'Layers · Tools box':{stage:'scene',order:10,render:(ctx,b,dt)=>{drawObjects(ctx,b,dt);drawLights(ctx);}},
  'Overlay':{stage:'overlay',order:10,render:ctx=>{drawVignette(ctx);drawProgress(ctx);drawCustomLogo(ctx);}},
  'Overlay Effects · Motion FX':{stage:'overlay',order:20,render:(ctx,b)=>drawMotionFx(ctx,b)},
@@ -1673,6 +1674,30 @@ function drawVISOBackground(ctx,b,dt){
 
 }
 
+function drawVISOMedia(ctx,b,dt){
+  const s0=src();
+  const drawMedia=()=>{
+    if(!s0||!phOn)return;
+    ctx.save();applyT(ctx);ctx.globalAlpha=pho/100;
+    ctx.filter='brightness('+bri+'%) contrast('+con+'%) saturate('+sat+'%) hue-rotate('+hueSh+'deg)';
+    if(useVid)ctx.drawImage(vid,-W/2,-H/2,W,H);else ctx.drawImage(img,-W/2,-H/2,W,H);
+    ctx.filter='none';ctx.restore();ctx.globalAlpha=1;
+  };
+
+  if(mediaFront){
+    ctx.globalCompositeOperation='lighter';
+    ctx.drawImage(paintLayer(1,maskOn),0,0);
+    ctx.globalCompositeOperation='source-over';
+    drawMedia();
+  } else {
+    drawMedia();
+    ctx.globalCompositeOperation='lighter';
+    ctx.drawImage(paintLayer(1,maskOn),0,0);
+    ctx.globalCompositeOperation='source-over';
+  }
+
+}
+
 function frame(t){
   
   const dt=Math.min(50,t-last||16);last=t;frameN++;
@@ -1700,27 +1725,7 @@ function frame(t){
   else{x.fillStyle='#fff';x.fillRect(-100,-100,W+200,H+200);}
 
   renderVISOStage('background',x,b,dt);
-  const s0=src();
-  const drawMedia=()=>{
-    if(!s0||!phOn)return;
-    x.save();applyT(x);x.globalAlpha=pho/100;
-    x.filter='brightness('+bri+'%) contrast('+con+'%) saturate('+sat+'%) hue-rotate('+hueSh+'deg)';
-    if(useVid)x.drawImage(vid,-W/2,-H/2,W,H);else x.drawImage(img,-W/2,-H/2,W,H);
-    x.filter='none';x.restore();x.globalAlpha=1;
-  };
-
-  if(mediaFront){
-    x.globalCompositeOperation='lighter';
-    x.drawImage(paintLayer(1,maskOn),0,0);
-    x.globalCompositeOperation='source-over';
-    drawMedia();
-  } else {
-    drawMedia();
-    x.globalCompositeOperation='lighter';
-    x.drawImage(paintLayer(1,maskOn),0,0);
-    x.globalCompositeOperation='source-over';
-  }
-
+  renderVISOStage('media',x,b,dt);
   renderVISOStage('scene',x,b,dt);
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
     x.drawImage(paintLayer(.7,false),0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;}
