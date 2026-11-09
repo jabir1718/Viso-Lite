@@ -362,6 +362,19 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
     <label><span>Font</span><select id="sTextFont"><option value="system-ui">Modern</option><option value="Arial">Clean</option><option value="Georgia">Classic</option><option value="monospace">Tech</option><option value="Impact">Heavy</option></select></label>
     <label><span>Alignment</span><select id="sTextAlign"><option value="center">Center</option><option value="left">Left</option><option value="right">Right</option></select></label>
     <div class="row"><button id="bTextPlate">Text plate: OFF</button></div>
+    <div class="fxSubhead">SECOND TEXT LAYER</div>
+    <div class="row"><input id="studioText2" type="text" maxlength="36" value="" placeholder="Artist / subtitle"><button id="bText2On">Text 2: OFF</button></div>
+    <label><span>Text 2 size</span><input id="sText2Size" type="range" min="15" max="80" value="32"></label>
+    <label><span>Vertical</span><input id="sText2Pos" type="range" min="5" max="95" value="88"></label>
+    <label><span>Opacity</span><input id="sText2Alpha" type="range" min="0" max="100" value="85"></label>
+    <label><span>Text colour</span><input id="studioText2Color" type="color" value="#ffffff"></label>
+    <label><span>Horizontal</span><input id="sText2X" type="range" min="5" max="95" value="50"></label>
+    <label><span>Rotation</span><input id="sText2Rot" type="range" min="-180" max="180" value="0"></label>
+    <label><span>Outline</span><input id="sText2Stroke" type="range" min="0" max="18" value="2"></label>
+    <label><span>Glow</span><input id="sText2Glow" type="range" min="0" max="60" value="12"></label>
+    <label><span>Animation</span><select id="sText2Anim"><option value="none">Static</option><option value="pulse">Beat Pulse</option><option value="float">Float</option><option value="bounce">Bounce</option><option value="spin">Slow Spin</option><option value="flicker">Neon Flicker</option></select></label>
+    <label><span>Alignment</span><select id="sText2Align"><option value="center">Center</option><option value="left">Left</option><option value="right">Right</option></select></label>
+    <div class="row"><button id="bText2Plate">Text 2 plate: OFF</button></div>
     <label><span>Preset slot</span><select id="studioPresetSlot"><option value="1">Slot 1</option><option value="2">Slot 2</option><option value="3">Slot 3</option></select></label>
     <div class="row"><button id="bPresetSave">Save slot</button><button id="bPresetLoad">Load slot</button><button id="bPresetClear">Clear slot</button></div>
     <div class="status" id="presetInfo">Save your current visual settings on this device</div>
@@ -470,6 +483,7 @@ let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
 let bassGain=100,midGain=100,highGain=100;
 let studioText='VISO',studioTextOn=false,studioTextSize=65,studioTextPos=78,studioTextAlpha=100,studioTextColor='#ffffff';
 let studioTextX=50,studioTextRot=0,studioTextStroke=7,studioTextGlow=24,studioTextAnim='none',studioTextFont='system-ui',studioTextAlign='center',studioTextPlate=false;
+let studioText2='',studioText2On=false,studioText2Size=32,studioText2Pos=88,studioText2Alpha=85,studioText2Color='#ffffff',studioText2X=50,studioText2Rot=0,studioText2Stroke=2,studioText2Glow=12,studioText2Anim='none',studioText2Align='center',studioText2Plate=false;
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
 let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,bvp=140;
 let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
@@ -694,7 +708,7 @@ $('bRec').onclick=()=>{
   recClock=setInterval(()=>{$('recInfo').textContent='Exporting · '+clockText((Date.now()-recStarted)/1000);},250);
   if(audio&&!playing){$('bP').click();}
 };
-function captureProjectState(){return {colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,advanced:collectAdvancedState()};}
+function captureProjectState(){return {colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,advanced:collectAdvancedState()};}
 function snap(){undo.push(JSON.stringify(captureProjectState()));
   if(undo.length>40)undo.shift();redo.length=0;}
 function apply(s){const d=JSON.parse(s);
@@ -712,6 +726,7 @@ function apply(s){const d=JSON.parse(s);
   studioText=d.studioText??'VISO';studioTextOn=!!d.studioTextOn;studioTextSize=d.studioTextSize??65;
   studioTextPos=d.studioTextPos??78;studioTextAlpha=d.studioTextAlpha??100;studioTextColor=d.studioTextColor??'#ffffff';
   studioTextX=d.studioTextX??50;studioTextRot=d.studioTextRot??0;studioTextStroke=d.studioTextStroke??7;studioTextGlow=d.studioTextGlow??24;studioTextAnim=d.studioTextAnim??'none';studioTextFont=d.studioTextFont??'system-ui';studioTextAlign=d.studioTextAlign??'center';studioTextPlate=!!d.studioTextPlate;
+  studioText2=d.studioText2??'';studioText2On=!!d.studioText2On;studioText2Size=d.studioText2Size??32;studioText2Pos=d.studioText2Pos??88;studioText2Alpha=d.studioText2Alpha??85;studioText2Color=d.studioText2Color??'#ffffff';studioText2X=d.studioText2X??50;studioText2Rot=d.studioText2Rot??0;studioText2Stroke=d.studioText2Stroke??2;studioText2Glow=d.studioText2Glow??12;studioText2Anim=d.studioText2Anim??'none';studioText2Align=d.studioText2Align??'center';studioText2Plate=!!d.studioText2Plate;
   $('sPow').value=pow;$('sCut').value=cut;$('sFea').value=fea;$('sPho').value=pho;$('sDep').value=dep;
   $('sTrl').value=trla;$('sShk').value=shk;$('sPnc').value=pnc;$('sCyc').value=cyc;$('sDir').value=dirG;
   $('sSwy').value=swy;$('sSpd').value=spd;$('sBri').value=bri;$('sCon').value=con;$('sSat').value=sat;
@@ -719,8 +734,10 @@ function apply(s){const d=JSON.parse(s);
   $('txtMask').value=txt;$('sMsc').value=mSc*100;$('sBvo').value=bvo;$('sBvp').value=bvp;
   $('sBassGain').value=bassGain;$('sMidGain').value=midGain;$('sHighGain').value=highGain;
   $('studioText').value=studioText;$('bTextOn').textContent='Text: '+(studioTextOn?'ON':'OFF');$('bTextOn').classList.toggle('on',studioTextOn);
+  $('studioText2').value=studioText2;$('bText2On').textContent='Text 2: '+(studioText2On?'ON':'OFF');$('bText2On').classList.toggle('on',studioText2On);
   $('sTextSize').value=studioTextSize;$('sTextPos').value=studioTextPos;$('sTextAlpha').value=studioTextAlpha;$('studioTextColor').value=studioTextColor;
   $('sTextX').value=studioTextX;$('sTextRot').value=studioTextRot;$('sTextStroke').value=studioTextStroke;$('sTextGlow').value=studioTextGlow;$('sTextAnim').value=studioTextAnim;$('sTextFont').value=studioTextFont;$('sTextAlign').value=studioTextAlign;$('bTextPlate').textContent='Text plate: '+(studioTextPlate?'ON':'OFF');$('bTextPlate').classList.toggle('on',studioTextPlate);
+  $('sText2Size').value=studioText2Size;$('sText2Pos').value=studioText2Pos;$('sText2Alpha').value=studioText2Alpha;$('studioText2Color').value=studioText2Color;$('sText2X').value=studioText2X;$('sText2Rot').value=studioText2Rot;$('sText2Stroke').value=studioText2Stroke;$('sText2Glow').value=studioText2Glow;$('sText2Anim').value=studioText2Anim;$('sText2Align').value=studioText2Align;$('bText2Plate').textContent='Text 2 plate: '+(studioText2Plate?'ON':'OFF');$('bText2Plate').classList.toggle('on',studioText2Plate);
   drawPals();drawMixers();if(d.advanced)restoreAdvancedState(d.advanced);}
 $('bUndo').onclick=()=>{if(!undo.length)return;const s=undo.pop();redo.push(s);apply(s);};
 $('bRedo').onclick=()=>{if(!redo.length)return;const s=redo.pop();undo.push(s);apply(s);};
@@ -738,13 +755,18 @@ $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
   $('sMsc').value=100;autoOn=false;$('bAuto').classList.remove('on');
   bassGain=midGain=highGain=100;studioText='VISO';studioTextOn=false;studioTextSize=65;studioTextPos=78;studioTextAlpha=100;studioTextColor='#ffffff';
   studioTextX=50;studioTextRot=0;studioTextStroke=7;studioTextGlow=24;studioTextAnim='none';studioTextFont='system-ui';studioTextAlign='center';studioTextPlate=false;
+  studioText2='';studioText2On=false;studioText2Size=32;studioText2Pos=88;studioText2Alpha=85;studioText2Color='#ffffff';studioText2X=50;studioText2Rot=0;studioText2Stroke=2;studioText2Glow=12;studioText2Anim='none';studioText2Align='center';studioText2Plate=false;
   $('sBassGain').value=100;$('sMidGain').value=100;$('sHighGain').value=100;$('studioText').value='VISO';
   $('bTextOn').textContent='Text: OFF';$('bTextOn').classList.remove('on');$('sTextSize').value=65;$('sTextPos').value=78;$('sTextAlpha').value=100;$('studioTextColor').value='#ffffff';
   $('sTextX').value=50;$('sTextRot').value=0;$('sTextStroke').value=7;$('sTextGlow').value=24;$('sTextAnim').value='none';$('sTextFont').value='system-ui';$('sTextAlign').value='center';$('bTextPlate').textContent='Text plate: OFF';$('bTextPlate').classList.remove('on');
+  $('studioText2').value='';$('bText2On').textContent='Text 2: OFF';$('bText2On').classList.remove('on');$('sText2Size').value=32;$('sText2Pos').value=88;$('sText2Alpha').value=85;$('studioText2Color').value='#ffffff';$('sText2X').value=50;$('sText2Rot').value=0;$('sText2Stroke').value=2;$('sText2Glow').value=12;$('sText2Anim').value='none';$('sText2Align').value='center';$('bText2Plate').textContent='Text 2 plate: OFF';$('bText2Plate').classList.remove('on');
   drawMixers();resetVISOAdvancedControls();};
 
 $('studioText').oninput=e=>{studioText=e.target.value.slice(0,36);};
 $('studioText').onchange=()=>snap();
+$('studioText2').oninput=e=>{studioText2=e.target.value.slice(0,36);};
+$('studioText2').onchange=()=>snap();
+$('bText2On').onclick=e=>{snap();studioText2On=!studioText2On;e.currentTarget.textContent='Text 2: '+(studioText2On?'ON':'OFF');e.currentTarget.classList.toggle('on',studioText2On);};
 $('bTextOn').onclick=e=>{snap();studioTextOn=!studioTextOn;e.currentTarget.textContent='Text: '+(studioTextOn?'ON':'OFF');e.currentTarget.classList.toggle('on',studioTextOn);};
 function bindStudioSlider(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);el.onchange=()=>snap();}
 bindStudioSlider('sTextSize',v=>studioTextSize=v);bindStudioSlider('sTextPos',v=>studioTextPos=v);
@@ -756,6 +778,10 @@ $('sTextFont').onchange=e=>{snap();studioTextFont=e.target.value;};
 $('sTextAlign').onchange=e=>{snap();studioTextAlign=e.target.value;};
 $('bTextPlate').onclick=e=>{snap();studioTextPlate=!studioTextPlate;e.currentTarget.textContent='Text plate: '+(studioTextPlate?'ON':'OFF');e.currentTarget.classList.toggle('on',studioTextPlate);};
 $('studioTextColor').oninput=e=>studioTextColor=e.target.value;$('studioTextColor').onchange=()=>snap();
+function bindStudio2(id,fn){const el=$(id);el.oninput=e=>fn(e.target.type==='range'?+e.target.value:e.target.value);el.onchange=()=>snap();}
+bindStudio2('sText2Size',v=>studioText2Size=v);bindStudio2('sText2Pos',v=>studioText2Pos=v);bindStudio2('sText2Alpha',v=>studioText2Alpha=v);bindStudio2('studioText2Color',v=>studioText2Color=v);bindStudio2('sText2X',v=>studioText2X=v);bindStudio2('sText2Rot',v=>studioText2Rot=v);bindStudio2('sText2Stroke',v=>studioText2Stroke=v);bindStudio2('sText2Glow',v=>studioText2Glow=v);
+$('sText2Anim').onchange=e=>{snap();studioText2Anim=e.target.value;};$('sText2Align').onchange=e=>{snap();studioText2Align=e.target.value;};
+$('bText2Plate').onclick=e=>{snap();studioText2Plate=!studioText2Plate;e.currentTarget.textContent='Text 2 plate: '+(studioText2Plate?'ON':'OFF');e.currentTarget.classList.toggle('on',studioText2Plate);};
 
 const PRESET_KEY='viso_studio_preset_v2';
 function selectedPresetKey(){return PRESET_KEY+'_slot_'+$('studioPresetSlot').value;}
@@ -1172,28 +1198,31 @@ function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
     ctx.strokeRect(-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);}
   ctx.restore();});}
 
+function drawStudioTextLayer(ctx,b,textValue,enabled,sizeValue,posValue,alphaValue,colorValue,xValue,rotationValue,strokeValue,glowValue,animValue,alignValue,plateValue){
+ if(!enabled||!textValue.trim())return;
+ const bass=b[0]||0,t=performance.now()*.001;
+ let scale=1+bass*.08,alpha=alphaValue/100,dy=0,angle=rotationValue*Math.PI/180;
+ if(animValue==='pulse')scale*=1+Math.max(0,bass)*.24;
+ else if(animValue==='float')dy=Math.sin(t*1.7)*H*.018;
+ else if(animValue==='bounce')dy=-Math.abs(Math.sin(t*2.4))*H*.035;
+ else if(animValue==='spin')angle+=Math.sin(t*.45)*.12;
+ else if(animValue==='flicker')alpha*=.72+.28*Math.abs(Math.sin(t*17.3));
+ const size=H*(sizeValue/1000),label=textValue.trim();
+ ctx.save();ctx.globalAlpha=alpha;ctx.translate(W*xValue/100,H*posValue/100+dy);ctx.rotate(angle);ctx.scale(scale,scale);
+ let fitted=size;ctx.font='800 '+fitted+'px "'+studioTextFont+'", sans-serif';ctx.textAlign=alignValue;ctx.textBaseline='middle';
+ while(ctx.measureText(label).width>W*.84&&fitted>12){fitted*=.94;ctx.font='800 '+fitted+'px "'+studioTextFont+'", sans-serif';}
+ const tw=ctx.measureText(label).width;
+ if(plateValue){ctx.save();ctx.shadowBlur=0;ctx.fillStyle='rgba(0,0,0,.58)';
+  const px=alignValue==='left'?-fitted*.18:alignValue==='right'?-tw-fitted*.18:-tw/2-fitted*.18;
+  ctx.beginPath();ctx.roundRect(px,-fitted*.68,tw+fitted*.36,fitted*1.36,fitted*.16);ctx.fill();ctx.restore();}
+ ctx.lineJoin='round';ctx.lineWidth=fitted*strokeValue/100;ctx.strokeStyle='rgba(0,0,0,.68)';
+ ctx.shadowColor=colorValue;ctx.shadowBlur=glowValue+bass*glowValue*.7;
+ if(strokeValue>0)ctx.strokeText(label,0,0);
+ ctx.fillStyle=colorValue;ctx.fillText(label,0,0);ctx.restore();
+}
 function drawStudioText(ctx,b){
-  if(!studioTextOn||!studioText.trim())return;
-  const bass=b[0]||0,now=performance.now(),t=now*.001;
-  let scale=1+bass*.08,alpha=studioTextAlpha/100,dy=0,angle=studioTextRot*Math.PI/180;
-  if(studioTextAnim==='pulse')scale*=1+Math.max(0,bass)*.24;
-  else if(studioTextAnim==='float')dy=Math.sin(t*1.7)*H*.018;
-  else if(studioTextAnim==='bounce')dy=-Math.abs(Math.sin(t*2.4))*H*.035;
-  else if(studioTextAnim==='spin')angle+=Math.sin(t*.45)*.12;
-  else if(studioTextAnim==='flicker')alpha*=.72+.28*Math.abs(Math.sin(t*17.3));
-  const size=H*(studioTextSize/1000),label=studioText.trim();
-  ctx.save();ctx.globalAlpha=alpha;ctx.translate(W*studioTextX/100,H*studioTextPos/100+dy);
-  ctx.rotate(angle);ctx.scale(scale,scale);
-  let fitted=size;ctx.font='800 '+fitted+'px "'+studioTextFont+'", sans-serif';ctx.textAlign=studioTextAlign;ctx.textBaseline='middle';
-  while(ctx.measureText(label).width>W*.84&&fitted>12){fitted*=.94;ctx.font='800 '+fitted+'px "'+studioTextFont+'", sans-serif';}
-  const tw=ctx.measureText(label).width,anchor=studioTextAlign==='left'?0:studioTextAlign==='right'?-tw/2: -tw/2;
-  if(studioTextPlate){ctx.save();ctx.shadowBlur=0;ctx.fillStyle='rgba(0,0,0,.58)';
-    const px=studioTextAlign==='left'?-fitted*.18:studioTextAlign==='right'?-tw-fitted*.18:-tw/2-fitted*.18;
-    ctx.beginPath();ctx.roundRect(px,-fitted*.68,tw+fitted*.36,fitted*1.36,fitted*.16);ctx.fill();ctx.restore();}
-  ctx.lineJoin='round';ctx.lineWidth=fitted*studioTextStroke/100;ctx.strokeStyle='rgba(0,0,0,.68)';
-  ctx.shadowColor=studioTextColor;ctx.shadowBlur=studioTextGlow+bass*studioTextGlow*.7;
-  if(studioTextStroke>0)ctx.strokeText(label,0,0);
-  ctx.fillStyle=studioTextColor;ctx.fillText(label,0,0);ctx.restore();
+ drawStudioTextLayer(ctx,b,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextAlign,studioTextPlate);
+ drawStudioTextLayer(ctx,b,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate);
 }
 function drawLights(ctx){
   lights.forEach((l,i)=>{
