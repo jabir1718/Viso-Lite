@@ -64,7 +64,7 @@ class AndroidSave(private val context: Context) {
             worker.execute {
                 try {
                     saveFile(file, name, mime)
-                    showMessage("Saved to Gallery / Viso")
+                    showMessage(savedLocation(mime))
                 } catch (error: Exception) {
                     showMessage("Save failed: ${error.message ?: "unknown error"}")
                 } finally {
@@ -97,7 +97,7 @@ class AndroidSave(private val context: Context) {
                 } finally {
                     temp.delete()
                 }
-                showMessage("Saved to Gallery / Viso")
+                showMessage(savedLocation(mimeType))
             } catch (error: Exception) {
                 showMessage("Save failed: ${error.message ?: "unknown error"}")
             }
@@ -106,32 +106,56 @@ class AndroidSave(private val context: Context) {
 
     private fun saveFile(file: File, safeName: String, mimeType: String) {
         val isVideo = mimeType.startsWith("video/")
-        val collection = if (isVideo) MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-            else MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        val isImage = mimeType.startsWith("image/")
+        if (Build.VERSION.SDK_INT < 29) {
+            val folder = when {
+                isVideo -> Environment.DIRECTORY_MOVIES
+                isImage -> Environment.DIRECTORY_PICTURES
+                else -> Environment.DIRECTORY_DOWNLOADS
+            }
+            val directory = File(context.getExternalFilesDir(folder), "Viso")
+            if (!directory.exists() && !directory.mkdirs()) error("Output folder could not be created")
+            FileInputStream(file).use { input ->
+                FileOutputStream(File(directory, safeName)).use { output -> input.copyTo(output) }
+            }
+            return
+        }
+
+        val collection = when {
+            isVideo -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            isImage -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            else -> MediaStore.Downloads.EXTERNAL_CONTENT_URI
+        }
+        val folder = when {
+            isVideo -> Environment.DIRECTORY_MOVIES
+            isImage -> Environment.DIRECTORY_PICTURES
+            else -> Environment.DIRECTORY_DOWNLOADS
+        }
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, safeName)
             put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
-            if (Build.VERSION.SDK_INT >= 29) {
-                val folder = if (isVideo) Environment.DIRECTORY_MOVIES else Environment.DIRECTORY_PICTURES
-                put(MediaStore.MediaColumns.RELATIVE_PATH, "$folder/Viso")
-                put(MediaStore.MediaColumns.IS_PENDING, 1)
-            }
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "$folder/Viso")
+            put(MediaStore.MediaColumns.IS_PENDING, 1)
         }
         val uri = context.contentResolver.insert(collection, values)
-            ?: error("Gallery file could not be created")
+            ?: error("Output file could not be created")
         try {
             context.contentResolver.openOutputStream(uri, "w")?.use { output ->
                 FileInputStream(file).use { input -> input.copyTo(output) }
-            } ?: error("Gallery file could not be written")
-            if (Build.VERSION.SDK_INT >= 29) {
-                context.contentResolver.update(uri, ContentValues().apply {
-                    put(MediaStore.MediaColumns.IS_PENDING, 0)
-                }, null, null)
-            }
+            } ?: error("Output file could not be written")
+            context.contentResolver.update(uri, ContentValues().apply {
+                put(MediaStore.MediaColumns.IS_PENDING, 0)
+            }, null, null)
         } catch (error: Exception) {
             context.contentResolver.delete(uri, null, null)
             throw error
         }
+    }
+
+    private fun savedLocation(mimeType: String): String = when {
+        mimeType.startsWith("video/") -> "Saved to Movies / Viso"
+        mimeType.startsWith("image/") -> "Saved to Pictures / Viso"
+        else -> "Saved to Downloads / Viso"
     }
 
     private fun safeName(fileName: String): String =
