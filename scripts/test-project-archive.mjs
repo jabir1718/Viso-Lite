@@ -15,6 +15,14 @@ for (const id of ['bBpm', 'bTap', 'sBeatSens', 'sBeatScale', 'bBeatMarkers', 'bM
 }
 assert(html.includes("const SPEC_MODES=[['radial','Radial'],['ring','Ring'],['sphere','Sphere 3D'],['tunnel','Tunnel'],['mirror','Mirror'],['dual','Dual'],['wave','Wave'],['led','LED']]"), 'all spectrum visual modes must be registered');
 assert(html.includes("const SPEC_RANGES=[['full','Full'],['low','Low'],['balanced','Balanced'],['high','High'],['vocals','Vocals'],['changes','Changes']]"), 'all spectrum frequency focus modes must be registered');
+for (const kind of ['audio', 'media-image', 'media-video', 'background-image', 'background-video', 'logo', 'font']) {
+  assert(html.includes("['" + kind + "',VISO_ASSET_FILES."), 'editable project must package asset kind: ' + kind);
+}
+assert(html.includes("function downloadVISOProject(project,fileName)"), 'editable project/template package writer must exist');
+assert(html.includes("project.assets=manifest"), 'editable project must include its embedded asset manifest');
+assert(html.includes("if(overlayAssetCount!==objects.length)"), 'every editable overlay layer must be packaged with its source image');
+assert(html.includes("restoreVISOProjectAssets(project,entries)"), 'project import must restore embedded media assets');
+assert(html.includes("downloadVISOProject(project,'VISO-'+key+'.viso')"), 'built-in templates must download as complete editable project packages');
 assert(html.includes("renderVISOStage('overlay'"), 'overlay render stage must remain in the preview frame');
 const start = html.indexOf('const VISO_CRC_TABLE=');
 const end = html.indexOf('function visoSafeFileName', start);
