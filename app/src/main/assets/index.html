@@ -1908,7 +1908,7 @@ function visoSetInputFile(id,file){
 }
 function clearVISOAssets(){
  if(audio){audio.pause();audio.removeAttribute('src');}
- if(ctxA){try{ctxA.close();}catch(_){}}
+ if(ctxA){try{ctxA.close().catch(()=>{});}catch(_){}}
  ctxA=null;an=null;buf=null;streamDest=null;panner=null;conv=null;dryG=null;wetG=null;lfo=null;lfoG=null;
  audio=null;playing=false;$('bP').textContent='Play';updateSongInfo();img=null;useVid=false;bgImg=null;bgUseVid=false;logoImg=null;
  vid.pause();vid.removeAttribute('src');bvid.pause();bvid.removeAttribute('src');objects.length=0;lights.length=0;selObj=-1;selLight=-1;
@@ -1926,7 +1926,7 @@ async function restoreVISOProjectAssets(project,entries){
  for(let i=0;i<overlayMeta.length;i++){
   const meta=overlayMeta[i],data=entries[meta.name];if(!data)continue;
   const file=makeFile({meta,data}),url=URL.createObjectURL(file),im=new Image();
-  await new Promise((resolve,reject)=>{im.onload=resolve;im.onerror=()=>reject(new Error('Overlay image failed: '+file.name));im.src=url;});
+  await new Promise((resolve,reject)=>{im.onload=()=>{URL.revokeObjectURL(url);resolve();};im.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Overlay image failed: '+file.name));};im.src=url;});
   const saved=layerState.objects?.[i]||{};
   objects.push({img:im,file,x:saved.x??cx,y:saved.y??cy,sc:saved.sc??.32,rot:saved.rot??0,motion:saved.motion||guessMotion(file.name),dir:saved.dir??1,phase:saved.phase??0});
  }
