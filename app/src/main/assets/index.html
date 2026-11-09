@@ -566,7 +566,7 @@ $('fV').onchange=e=>{const f=e.target.files[0];if(!f)return;
   vid.src=URL.createObjectURL(f);vid.play();useVid=true;img=null;maskDirty=true;};
 $('bO').onclick=()=>$('fO').click();
 $('fO').onchange=e=>{[...e.target.files].forEach(f=>{const im=new Image();
-  im.onload=()=>{objects.push({img:im,x:Math.random()*W,y:Math.random()*H,sc:.32,rot:0,
+  im.onload=()=>{objects.push({img:im,file:f,x:Math.random()*W,y:Math.random()*H,sc:.32,rot:0,
     motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28});selObj=objects.length-1;};
   im.src=URL.createObjectURL(f);});};
 function guessMotion(n){n=(n||'').toLowerCase();
@@ -1606,7 +1606,7 @@ const VISO_TEMPLATES={
  minimal:{name:'Minimal Wave',vig:false,prog:true,progStyle:'thin',progSz:7,progPos:97,drift:true,speed:10,rot:0,travel:8,flash:0,studio:false,text:'',anim:'none',glow:0,stroke:0,vhs:false,shock:false,lens:false}
 };
 function applyVisoProject(p){
- if(!p||!['viso-project-v1','viso-project-v2'].includes(p.schema))throw new Error('Unsupported VISO project');
+ if(!p||!['viso-project-v1','viso-project-v2','viso-project-v3'].includes(p.schema))throw new Error('Unsupported VISO project');
  const t=p.settings||{};
  if(t.state)apply(JSON.stringify(t.state));
  if(t.template&&VISO_TEMPLATES[t.template]){const v=VISO_TEMPLATES[t.template];vigOn=!!v.vig;progOn=!!v.prog;progStyle=v.progStyle;progSz=v.progSz;progPos=v.progPos;bgDriftOn=v.drift;bgDriftSpeed=v.speed;bgDriftRot=v.rot;bgDriftTravel=v.travel;flashAmt=v.flash;studioTextOn=v.studio;studioText=v.text;studioTextAnim=v.anim;studioTextGlow=v.glow;studioTextStroke=v.stroke;vhsOn=v.vhs;shockOn=v.shock;lensOn=v.lens;}
@@ -1628,13 +1628,12 @@ function applyVisoProject(p){
  document.querySelectorAll('#progressStyles button').forEach(q=>q.classList.toggle('on',q.dataset.prog===progStyle));
  $('templateInfo').textContent='Project loaded: '+(p.name||'Custom project')+' · now replace media and edit layers';
 }
-document.querySelectorAll('#visoTemplates button').forEach(q=>q.onclick=()=>{
+document.querySelectorAll('#visoTemplates button').forEach(q=>q.onclick=async()=>{
  const key=q.dataset.template,preset=VISO_TEMPLATES[key];
- const project={schema:'viso-project-v1',name:preset.name,settings:{template:key}};
- applyVisoProject(project);
- const blob=new Blob([JSON.stringify(project,null,2)],{type:'application/json'});
- const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='VISO-'+key+'.viso';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
- $('templateInfo').textContent=preset.name+' downloaded · open the downloaded .viso file to load its editable project';
+ applyVisoProject({schema:'viso-project-v1',name:preset.name,settings:{template:key}});
+ const project=collectVisoProject();project.name=preset.name;project.settings.template=key;
+ try{await downloadVISOProject(project,'VISO-'+key+'.viso');$('templateInfo').textContent=preset.name+' editable project package downloaded with imported assets';}
+ catch(err){$('templateInfo').textContent='Template package failed: '+err.message;}
 });
 function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur};}
 function restoreAdvancedState(s){
@@ -1661,10 +1660,105 @@ function restoreAdvancedState(s){
  document.querySelectorAll('#specModes button').forEach((q,i)=>q.classList.toggle('on',SPEC_MODES[i]?.[0]===specMode));
  updateBpm();applySpeedPitch();apply8d();
 }
-function collectVisoProject(){return {schema:'viso-project-v2',name:'VISO Custom Project',settings:{state:captureProjectState(),assetNote:'Media and custom logo files must be reselected after opening this settings project.'}};}
-$('bProjectSave').onclick=()=>{const blob=new Blob([JSON.stringify(collectVisoProject(),null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='VISO-project.viso';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);};
+// Project assets are packed into a single .viso archive (ZIP/store) so media travels with editable settings.
+const VISO_ASSET_FILES={audio:null,mediaImage:null,mediaVideo:null,backgroundImage:null,backgroundVideo:null,logo:null,font:null,overlays:[]};
+[['fA','audio'],['fI','mediaImage'],['fV','mediaVideo'],['fBgI','backgroundImage'],['fBgV','backgroundVideo'],['fLogo','logo'],['fFont','font']]
+ .forEach(([id,key])=>$(id).addEventListener('change',e=>{VISO_ASSET_FILES[key]=e.target.files?.[0]||null;}));
+$('fO').addEventListener('change',e=>{VISO_ASSET_FILES.overlays=[...(VISO_ASSET_FILES.overlays||[]),...Array.from(e.target.files||[])];});
+const VISO_CRC_TABLE=(()=>{const table=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);table[n]=c>>>0;}return table;})();
+function visoCRC32(bytes){let crc=0xffffffff;for(let i=0;i<bytes.length;i++)crc=VISO_CRC_TABLE[(crc^bytes[i])&255]^(crc>>>8);return (crc^0xffffffff)>>>0;}
+function visoZip(files){
+ const enc=new TextEncoder(),locals=[],centrals=[];let offset=0;
+ files.forEach(file=>{
+  const name=enc.encode(file.name),data=file.data,crc=visoCRC32(data);
+  const local=new Uint8Array(30+name.length),lv=new DataView(local.buffer);
+  lv.setUint32(0,0x04034b50,true);lv.setUint16(4,20,true);lv.setUint16(6,0x0800,true);lv.setUint16(8,0,true);
+  lv.setUint16(10,0,true);lv.setUint16(12,0,true);lv.setUint32(14,crc,true);lv.setUint32(18,data.length,true);lv.setUint32(22,data.length,true);lv.setUint16(26,name.length,true);lv.setUint16(28,0,true);local.set(name,30);
+  locals.push(local,data);
+  const central=new Uint8Array(46+name.length),cv=new DataView(central.buffer);
+  cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint16(8,0x0800,true);cv.setUint16(10,0,true);
+  cv.setUint16(12,0,true);cv.setUint16(14,0,true);cv.setUint32(16,crc,true);cv.setUint32(20,data.length,true);cv.setUint32(24,data.length,true);
+  cv.setUint16(28,name.length,true);cv.setUint16(30,0,true);cv.setUint16(32,0,true);cv.setUint16(34,0,true);cv.setUint16(36,0,true);cv.setUint32(38,0,true);cv.setUint32(42,offset,true);central.set(name,46);
+  centrals.push(central);offset+=local.length+data.length;
+ });
+ const centralSize=centrals.reduce((n,b)=>n+b.length,0),end=new Uint8Array(22),ev=new DataView(end.buffer);
+ ev.setUint32(0,0x06054b50,true);ev.setUint16(4,0,true);ev.setUint16(6,0,true);ev.setUint16(8,files.length,true);ev.setUint16(10,files.length,true);ev.setUint32(12,centralSize,true);ev.setUint32(16,offset,true);ev.setUint16(20,0,true);
+ return new Blob([...locals,...centrals,end],{type:'application/vnd.viso.project+zip'});
+}
+function visoUnzip(bytes){
+ const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);let end=-1;
+ for(let i=bytes.length-22;i>=Math.max(0,bytes.length-65557);i--){if(view.getUint32(i,true)===0x06054b50){end=i;break;}}
+ if(end<0)throw new Error('Project package ZIP directory is missing');
+ const count=view.getUint16(end+10,true),dirOffset=view.getUint32(end+16,true),out={};let p=dirOffset;
+ for(let n=0;n<count;n++){
+  if(view.getUint32(p,true)!==0x02014b50)throw new Error('Invalid project archive entry');
+  const method=view.getUint16(p+10,true),size=view.getUint32(p+24,true),nameLen=view.getUint16(p+28,true),extraLen=view.getUint16(p+30,true),commentLen=view.getUint16(p+32,true),localOffset=view.getUint32(p+42,true);
+  const name=new TextDecoder().decode(bytes.slice(p+46,p+46+nameLen));p+=46+nameLen+extraLen+commentLen;
+  if(name.endsWith('/'))continue;if(method!==0)throw new Error('Unsupported project compression method');
+  if(view.getUint32(localOffset,true)!==0x04034b50)throw new Error('Invalid local project asset');
+  const localName=view.getUint16(localOffset+26,true),localExtra=view.getUint16(localOffset+28,true),start=localOffset+30+localName+localExtra;
+  out[name]=bytes.slice(start,start+size);
+ }
+ return out;
+}
+function visoSafeFileName(name){return (name||'asset').replace(/[^a-zA-Z0-9._-]/g,'_').slice(-90)||'asset';}
+function collectVisoProject(){return {schema:'viso-project-v3',name:'VISO Custom Project',settings:{state:captureProjectState(),template:null,layers:{objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin}))}},assets:[]};}
+async function downloadVISOProject(project,fileName){
+ const specs=[['audio',VISO_ASSET_FILES.audio],['media-image',VISO_ASSET_FILES.mediaImage],['media-video',VISO_ASSET_FILES.mediaVideo],['background-image',VISO_ASSET_FILES.backgroundImage],['background-video',VISO_ASSET_FILES.backgroundVideo],['logo',VISO_ASSET_FILES.logo],['font',VISO_ASSET_FILES.font],...(objects.map((o,i)=>['overlay-'+i,o.file||VISO_ASSET_FILES.overlays[i]||null]))].filter(x=>x[1]);
+ const total=specs.reduce((n,x)=>n+x[1].size,0);if(total>180*1024*1024)throw new Error('Project assets exceed 180 MB. Reduce large video files and save again.');
+ const files=[],manifest=[];
+ for(let i=0;i<specs.length;i++){
+  const [kind,file]=specs[i],name='assets/'+String(i+1).padStart(2,'0')+'-'+kind+'-'+visoSafeFileName(file.name);
+  files.push({name,data:new Uint8Array(await file.arrayBuffer())});manifest.push({kind,name,fileName:file.name,mime:file.type||'application/octet-stream',size:file.size});
+  $('templateInfo').textContent='Packing project assets '+(i+1)+' / '+specs.length+'…';
+ }
+ project.assets=manifest;
+ const json=new TextEncoder().encode(JSON.stringify(project));
+ files.unshift({name:'project.json',data:json});
+ const blob=visoZip(files),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=fileName;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+function visoSetInputFile(id,file){
+ const input=$(id);if(!input||!file)return;
+ const transfer=new DataTransfer();transfer.items.add(file);input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));
+}
+function clearVISOAssets(){
+ if(audio){audio.pause();audio.removeAttribute('src');}
+ audio=null;playing=false;img=null;useVid=false;bgImg=null;bgUseVid=false;bgViz=false;logoImg=null;
+ vid.pause();vid.removeAttribute('src');bvid.pause();bvid.removeAttribute('src');objects.length=0;lights.length=0;selObj=-1;selLight=-1;
+ VISO_ASSET_FILES.audio=null;VISO_ASSET_FILES.mediaImage=null;VISO_ASSET_FILES.mediaVideo=null;VISO_ASSET_FILES.backgroundImage=null;VISO_ASSET_FILES.backgroundVideo=null;VISO_ASSET_FILES.logo=null;VISO_ASSET_FILES.font=null;VISO_ASSET_FILES.overlays=[];
+}
+async function restoreVISOProjectAssets(project,entries){
+ clearVISOAssets();const assets=project.assets||[],byKind={};
+ assets.forEach((meta,i)=>{const data=entries[meta.name];if(data)byKind[meta.kind]={meta,data};});
+ const makeFile=({meta,data})=>new File([data],meta.fileName||meta.name.split('/').pop(),{type:meta.mime||'application/octet-stream'});
+ for(const [kind,id] of [['audio','fA'],['media-image','fI'],['media-video','fV'],['background-image','fBgI'],['background-video','fBgV'],['logo','fLogo'],['font','fFont']]){
+  if(byKind[kind])visoSetInputFile(id,makeFile(byKind[kind]));
+ }
+ const layerState=project.settings?.layers||{},overlayMeta=assets.filter(a=>a.kind.startsWith('overlay-'));
+ for(let i=0;i<overlayMeta.length;i++){
+  const meta=overlayMeta[i],data=entries[meta.name];if(!data)continue;
+  const file=makeFile({meta,data}),url=URL.createObjectURL(file),im=new Image();
+  await new Promise((resolve,reject)=>{im.onload=resolve;im.onerror=()=>reject(new Error('Overlay image failed: '+file.name));im.src=url;});
+  const saved=layerState.objects?.[i]||{};
+  objects.push({img:im,file,x:saved.x??cx,y:saved.y??cy,sc:saved.sc??.32,rot:saved.rot??0,motion:saved.motion||guessMotion(file.name),dir:saved.dir??1,phase:saved.phase??0});
+ }
+ (layerState.lights||[]).forEach(l=>lights.push({...l}));
+ selObj=objects.length?objects.length-1:-1;maskDirty=true;
+ $('templateInfo').textContent='Project restored · '+assets.length+' embedded assets · all imported media and layers are editable';
+}
+$('bProjectSave').onclick=async()=>{try{await downloadVISOProject(collectVisoProject(),'VISO-project.viso');$('templateInfo').textContent='Complete editable VISO project package saved';}catch(err){$('templateInfo').textContent='Project save failed: '+err.message;}};
 $('bProjectOpen').onclick=()=>$('fProjectOpen').click();
-$('fProjectOpen').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{applyVisoProject(JSON.parse(await f.text()));}catch(err){$('templateInfo').textContent='Could not open project: '+err.message;}e.target.value='';};
+$('fProjectOpen').onchange=async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{
+  const bytes=new Uint8Array(await file.arrayBuffer());let project,entries={};
+  if(bytes[0]===0x50&&bytes[1]===0x4b){entries=visoUnzip(bytes);if(!entries['project.json'])throw new Error('project.json missing');project=JSON.parse(new TextDecoder().decode(entries['project.json']));}
+  else project=JSON.parse(new TextDecoder().decode(bytes));
+  applyVisoProject(project);
+  if(project.schema==='viso-project-v3')await restoreVISOProjectAssets(project,entries);
+ }catch(err){$('templateInfo').textContent='Could not open project: '+err.message;}
+ e.target.value='';
+};
 function drawMotionFx(ctx,b){
  const amt=motionFx/100,now=performance.now()*.001;
  if(lensOn&&lensAmount>0){
