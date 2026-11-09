@@ -1720,7 +1720,7 @@ function applyVisoProject(p){
 }
 document.querySelectorAll('#visoTemplates button').forEach(q=>q.onclick=async()=>{
  const key=q.dataset.template,preset=VISO_TEMPLATES[key];
- applyVisoProject({schema:'viso-project-v1',name:preset.name,settings:{template:key}});
+ snap();applyVisoProject({schema:'viso-project-v1',name:preset.name,settings:{template:key}});
  const project=collectVisoProject();project.name=preset.name;project.settings.template=key;
  try{await downloadVISOProject(project,'VISO-'+key+'.viso');$('templateInfo').textContent=preset.name+' editable project package downloaded with imported assets';}
  catch(err){$('templateInfo').textContent='Template package failed: '+err.message;}
@@ -1884,6 +1884,7 @@ $('fProjectOpen').onchange=async e=>{
   else project=JSON.parse(new TextDecoder().decode(bytes));
   applyVisoProject(project);
   if(project.schema==='viso-project-v3')await restoreVISOProjectAssets(project,entries);
+  undo.length=0;redo.length=0;objectSnapshotCache.clear();
  }catch(err){$('templateInfo').textContent='Could not open project: '+err.message;}
  e.target.value='';
 };
