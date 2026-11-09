@@ -741,7 +741,7 @@ $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
   $('sBassGain').value=100;$('sMidGain').value=100;$('sHighGain').value=100;$('studioText').value='VISO';
   $('bTextOn').textContent='Text: OFF';$('bTextOn').classList.remove('on');$('sTextSize').value=65;$('sTextPos').value=78;$('sTextAlpha').value=100;$('studioTextColor').value='#ffffff';
   $('sTextX').value=50;$('sTextRot').value=0;$('sTextStroke').value=7;$('sTextGlow').value=24;$('sTextAnim').value='none';$('sTextFont').value='system-ui';$('sTextAlign').value='center';$('bTextPlate').textContent='Text plate: OFF';$('bTextPlate').classList.remove('on');
-  drawMixers();};
+  drawMixers();resetVISOAdvancedControls();};
 
 $('studioText').oninput=e=>{studioText=e.target.value.slice(0,36);};
 $('studioText').onchange=()=>snap();
@@ -1722,6 +1722,15 @@ function restoreAdvancedState(s){
  document.querySelectorAll('#progressStyles button').forEach(q=>q.classList.toggle('on',q.dataset.prog===progStyle));
  document.querySelectorAll('#specModes button').forEach((q,i)=>q.classList.toggle('on',SPEC_MODES[i]?.[0]===specMode));
  updateBpm();applySpeedPitch();apply8d();
+}
+function resetVISOAdvancedControls(){
+ restoreAdvancedState({speed:100,pitchSemis:0,pitchLock:true,eightD:false,eightW:80,eightS:22,eightR:22,bpm:0,beatFlash:0,flashAmt:0,driftAmt:0,sym:'off',
+  vigOn:false,vigAmt:45,progOn:false,progSz:12,progPos:96,logoSize:16,logoX:92,logoY:92,logoAlpha:90,progStyle:'gradient',
+  specOn:false,specMode:'radial',specBars:48,specRad:42,specThick:100,specGlow:60,specLevel:100,specAtk:.55,specRel:.14,specPeakHold:10,specSpin:.25,
+  bgDriftOn:false,bgBeatSync:true,bgDriftSpeed:24,bgDriftRot:18,bgDriftTravel:22,vhsOn:false,shockOn:false,lensOn:false,motionFx:45,shockPhase:0,
+  vhsScan:32,vhsNoise:24,vhsJitter:18,vhsBleed:22,shockStrength:58,shockSpeed:52,shockThickness:5,shockRgb:16,
+  lensAmount:42,lensFocus:58,lensBokeh:22,lensBlur:28,progThickness:100,progRound:70,progGlow:48,progRotation:0,progX:0,progColor:'#8b5cf6',progRemaining:'#dfe8dc',
+  logoGlow:42,logoBounce:18,logoShake:8,logoRotation:0,logoReflection:0,logoParticles:0,surfaceReflectionOn:false,reflStrength:35,reflDistance:12,reflBlur:18,reflFade:78,reflRipples:24,reflPerspective:18});
 }
 // Project assets are packed into a single .viso archive (ZIP/store) so media travels with editable settings.
 const VISO_ASSET_FILES={audio:null,mediaImage:null,mediaVideo:null,backgroundImage:null,backgroundVideo:null,logo:null,font:null,overlays:[]};
