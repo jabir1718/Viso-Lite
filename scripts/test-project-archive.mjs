@@ -15,6 +15,14 @@ for (const id of ['bBpm', 'bTap', 'sBeatSens', 'sBeatScale', 'bBeatMarkers', 'bM
 }
 assert(html.includes("const SPEC_MODES=[['radial','Radial'],['ring','Ring'],['sphere','Sphere 3D'],['tunnel','Tunnel'],['mirror','Mirror'],['dual','Dual'],['wave','Wave'],['led','LED']]"), 'all spectrum visual modes must be registered');
 assert(html.includes("const SPEC_RANGES=[['full','Full'],['low','Low'],['balanced','Balanced'],['high','High'],['vocals','Vocals'],['changes','Changes']]"), 'all spectrum frequency focus modes must be registered');
+const spectrumStart = html.indexOf('function drawSpectrum(ctx,scale)');
+const spectrumEnd = html.indexOf('\nfunction ', spectrumStart + 20);
+const spectrumSource = html.slice(spectrumStart, spectrumEnd);
+assert(spectrumSource.includes("if(M==='ring')"), 'Ring spectrum must have its own renderer');
+assert(spectrumSource.includes('outer=R0+v*amp'), 'Ring spectrum bars must respond to live audio amplitude');
+assert(spectrumSource.includes("else if(M==='sphere')"), 'Sphere spectrum must have its own renderer');
+assert(spectrumSource.includes("else if(M==='tunnel')"), 'Tunnel spectrum must have its own renderer');
+assert(spectrumSource.includes('for(let ring=0;ring<6;ring++)'), 'Tunnel spectrum must render multiple depth rings');
 assert(html.includes('id="sLogoPulse"'), 'custom logo audio-reactive size control must exist');
 assert(html.includes('logoPulse,logoRotation'), 'logo pulse must be included in saved advanced state');
 assert(html.includes('sync(\'sLogoPulse\',logoPulse)'), 'logo pulse must restore its UI value');
