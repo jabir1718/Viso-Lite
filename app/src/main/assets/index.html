@@ -592,7 +592,7 @@ body.preview-fullscreen #previewExit{display:block}
  mergeGroup('Overlay FX',['Overlay','Overlay Effects · Motion FX','Progress Bar Studio','Surface Reflection','Film & Vintage','Atmosphere FX'],'overlayFxPanel');
  mergeGroup('Background',['Background','Background Drift'],'backgroundPanel');
  const tempo=all().find(p=>title(p)==='Beat · BPM Sync');if(tempo){tempo.id='tempoPanel';tempo.querySelector('h4').textContent='Tempo';}
- const elements=all().find(p=>title(p)==='Lights · Tools box');if(elements){elements.id='elementsPanel';elements.querySelector('h4').textContent='Elements';}
+ const elements=all().find(p=>title(p)==='Lights · Tools box');if(elements){elements.id='elementsPanel';elements.querySelector('h4').textContent='Elements';const group=document.createElement('div');group.className='elementToggles';group.innerHTML='<div class="fxSubhead">AUDIO-REACTIVE ELEMENTS</div><label><span>Particles</span><input id="bElementParticles" type="checkbox" checked></label><label><span>Sparkles</span><input id="bElementSparkles" type="checkbox"></label><label><span>Light elements</span><input id="bElementLight" type="checkbox" checked></label><label><span>Reactive frame</span><input id="bElementReactiveFrame" type="checkbox"></label>';elements.appendChild(group);}
  const textPanel=all().find(p=>title(p)==='Text · Logo Studio');if(textPanel){textPanel.id='textPanel';textPanel.querySelector('h4').textContent='Text';}
  const turningPanel=document.createElement('div');turningPanel.className='sec panel';turningPanel.id='turningPointPanel';
  turningPanel.innerHTML='<h4>Turning Point</h4><div class="row"><button id="bAddTurningPoint" class="prim" type="button">＋ Add point at playhead</button><button id="bRemoveTurningPoint" type="button">Remove selected</button></div><label><span>Transition</span><select id="sTurningTransition"><option value="fade">Fade</option><option value="crossfade">Crossfade</option><option value="flash">Flash</option><option value="glitch">Glitch</option><option value="shake">Shake</option><option value="rgb">RGB Split</option><option value="blur">Blur</option><option value="zoom">Zoom</option><option value="spin">Spin</option><option value="wipe-left">Wipe Left</option><option value="wipe-right">Wipe Right</option><option value="wipe-up">Wipe Up</option><option value="wipe-down">Wipe Down</option><option value="circle">Circle</option><option value="diamond">Diamond</option><option value="pixel">Pixelate</option><option value="scanline">Scanline</option><option value="invert">Invert</option><option value="light-leak">Light Leak</option><option value="vhs">VHS</option></select></label><label><span>Duration</span><input id="sTurningDuration" type="range" min="200" max="3000" step="50" value="800"></label><div class="status" id="turningPointList">No turning points yet. Move the playhead and add one.</div>';
@@ -752,7 +752,7 @@ let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
 const autoOn=false,autoEvery=3;const lockChip=Object.freeze({color:false,vis:false,shape:false,sway:false});
 const objects=[];let selObj=-1;
-const lights=[];let selLight=-1;let lint=60,lsz=100;
+const lights=[];let selLight=-1;let lint=60,lsz=100,elementsLightOn=true;
 const undo=[],redo=[],objectSnapshotCache=new Map();
 let restoringState=false;
 
@@ -768,6 +768,10 @@ function drawMixers(){$('mixers').innerHTML='';mstate.forEach(m=>{if(!m.on)retur
   const r=document.createElement('input');r.type='range';r.min=0;r.max=100;r.value=m.op*100;
   r.oninput=()=>{m.op=+r.value/100;};d.appendChild(r);$('mixers').appendChild(d);});}
 drawMixers();
+function syncElementToggle(id,name){const idx=MODES.indexOf(name),el=$(id);if(!el||idx<0)return;el.checked=!!mstate[idx].on;el.onchange=()=>{mstate[idx].on=el.checked;document.querySelectorAll('#modes button').forEach((b,i)=>b.classList.toggle('on',mstate[i].on));drawMixers();snap();};}
+syncElementToggle('bElementParticles','Dust');syncElementToggle('bElementSparkles','Sparkle');
+$('bElementLight').checked=elementsLightOn;$('bElementLight').onchange=e=>{elementsLightOn=e.target.checked;snap();};
+$('bElementReactiveFrame').checked=frOn;$('bElementReactiveFrame').onchange=e=>{frOn=e.target.checked;$('tFr').classList.toggle('on',frOn);snap();};
 
 const SHAPES=[['media','Media'],['circle','Circle'],['ring','Ring'],['blob','Blob'],['frame','Frame'],['text','Text'],
   ['hexagon','Hexagon'],['star','Star'],['diamond','Diamond'],['triangle','Triangle'],['heart','Heart']];
@@ -1009,13 +1013,14 @@ function restoreVISOExportState(d){
  fmtButton.textContent=formatChoice==='auto'?'Auto format':'WebM';fmtButton.classList.toggle('on',formatChoice==='auto');
  setRes();
 }
-function captureProjectState(){return {logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor,turningPoints:turningPoints.map(p=>({...p})),turningTransition,turningDuration,metronomeSoundOn,metronomeVolume,exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
+function captureProjectState(){return {elementsLightOn,logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor,turningPoints:turningPoints.map(p=>({...p})),turningTransition,turningDuration,metronomeSoundOn,metronomeVolume,exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
 function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are intentionally ignored when opening older projects. */}
 function snap(){if(restoringState)return;const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
   if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
   redo.forEach(old=>objectSnapshotCache.delete(old));redo.length=0;}
 function apply(s){const d=JSON.parse(s),previousRestoringState=restoringState;restoringState=true;try{
   restoreVISOAutoState(d);
+  elementsLightOn=d.elementsLightOn!==undefined?!!d.elementsLightOn:true;$('bElementLight').checked=elementsLightOn;$('bElementParticles').checked=!!mstate[MODES.indexOf('Dust')]?.on;$('bElementSparkles').checked=!!mstate[MODES.indexOf('Sparkle')]?.on;$('bElementReactiveFrame').checked=!!d.frOn;
   logoArtworkShape=d.logoArtworkShape||'original';logoVinyl=!!d.logoVinyl;logoVinylSpeed=Math.max(0,Math.min(100,Number(d.logoVinylSpeed)||28));logoColorKeyOn=!!d.logoColorKeyOn;logoColorKey=d.logoColorKey||'#00ff00';logoColorKeyTolerance=Math.max(0,Math.min(100,Number(d.logoColorKeyTolerance)||24));logoInkOn=!!d.logoInkOn;logoInkAmount=Math.max(0,Math.min(100,Number.isFinite(Number(d.logoInkAmount))?Number(d.logoInkAmount):35));logoInkColor=d.logoInkColor||'#70e7d4';rebuildLogoColorKey();$('logoArtworkShape').value=logoArtworkShape;$('bLogoVinyl').checked=logoVinyl;$('sLogoVinylSpeed').value=logoVinylSpeed;$('bLogoColorKey').checked=logoColorKeyOn;$('logoColorKeyColor').value=logoColorKey;$('sLogoColorKeyTolerance').value=logoColorKeyTolerance;$('bLogoInk').checked=logoInkOn;$('sLogoInkAmount').value=logoInkAmount;$('logoInkColor').value=logoInkColor;
   turningPoints=Array.isArray(d.turningPoints)?d.turningPoints.filter(p=>p&&Number.isFinite(Number(p.time))).map(p=>({time:Math.max(0,Number(p.time)),type:String(p.type||'fade'),duration:Math.max(200,Math.min(3000,Number(p.duration)||800))})):[];turningTransition=d.turningTransition||'fade';turningDuration=Math.max(200,Math.min(3000,Number(d.turningDuration)||800));metronomeSoundOn=!!d.metronomeSoundOn;metronomeVolume=Math.max(0,Math.min(100,Number.isFinite(Number(d.metronomeVolume))?Number(d.metronomeVolume):45));selectedTurningPoint=-1;renderTurningPointList();$('sTurningTransition').value=turningTransition;$('sTurningDuration').value=turningDuration;$('bMetronomeSound').checked=metronomeSoundOn;$('sMetronomeVolume').value=metronomeVolume;$('bTempoSyncBar').checked=beatMarkersOn;
   colors=d.colors;mstate.forEach((m,i)=>{m.on=d.mstate[i].on;m.op=d.mstate[i].op;});
@@ -1535,6 +1540,7 @@ function drawStudioText(ctx,b){
  drawStudioTextLayer(ctx,b,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate);
 }
 function drawLights(ctx){
+  if(!elementsLightOn)return;
   lights.forEach((l,i)=>{
     const px=l.pin>=0&&objects[l.pin]?objects[l.pin].x:l.x;
     const py=l.pin>=0&&objects[l.pin]?objects[l.pin].y:l.y;
@@ -2381,6 +2387,7 @@ function restoreAdvancedState(s){
  updateBpm();applySpeedPitch();apply8d();
 }
 function resetVISOAdvancedControls(){
+ elementsLightOn=true;$('bElementLight').checked=true;$('bElementParticles').checked=true;$('bElementSparkles').checked=false;$('bElementReactiveFrame').checked=false;
  logoArtworkShape='original';logoVinyl=false;logoVinylSpeed=28;logoColorKeyOn=false;logoColorKey='#00ff00';logoColorKeyTolerance=24;logoInkOn=false;logoInkAmount=35;logoInkColor='#70e7d4';$('logoArtworkShape').value=logoArtworkShape;$('bLogoVinyl').checked=false;$('sLogoVinylSpeed').value=28;$('bLogoColorKey').checked=false;$('logoColorKeyColor').value=logoColorKey;$('sLogoColorKeyTolerance').value=24;$('bLogoInk').checked=false;$('sLogoInkAmount').value=35;$('logoInkColor').value=logoInkColor;rebuildLogoColorKey();
  restoreAdvancedState({speed:100,pitchSemis:0,pitchLock:true,eightD:false,eightW:80,eightS:22,eightR:22,bpm:0,beatFlash:0,flashAmt:0,driftAmt:0,sym:'off',
   vigOn:false,vigAmt:45,progOn:false,progSz:12,progPos:96,logoSize:16,logoX:92,logoY:92,logoAlpha:90,progStyle:'gradient',
