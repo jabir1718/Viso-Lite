@@ -543,7 +543,56 @@ body.preview-fullscreen #previewExit{display:block}
 <video id="bvid" playsinline muted loop style="display:none"></video>
 
 <script>
-document.querySelectorAll('.panel').forEach(p=>{if(p.id!=='mediaPanel'&&p.id!=='exportPanel')p.classList.add('collapsed');const h=p.querySelector('h4');if(h){h.setAttribute('role','button');h.setAttribute('tabindex','0');h.addEventListener('click',()=>p.classList.toggle('collapsed'));h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();p.classList.toggle('collapsed');}});}});
+(function organizeEditorTools(){
+ const bar=document.getElementById('bar');
+ const title=p=>p?.querySelector('h4')?.textContent.trim()||'';
+ const all=()=>[...bar.querySelectorAll(':scope > .panel')];
+ function mergeGroup(name,matchTitles,id){
+  const members=all().filter(p=>matchTitles.includes(title(p)));
+  if(!members.length)return null;
+  const host=members[0],head=host.querySelector('h4');
+  host.id=id;head.textContent=name;
+  members.forEach(p=>{
+   const oldTitle=title(p),h=p.querySelector('h4');
+   const section=document.createElement('div');section.className='fxSubhead';section.textContent=oldTitle;
+   if(p===host)host.insertBefore(section,head.nextSibling);
+   else{host.appendChild(section);[...p.children].forEach(child=>{if(child!==h)host.appendChild(child);});p.remove();}
+  });
+  return host;
+ }
+ const overlay=all().find(p=>title(p)==='Overlay');
+ const logoPanel=document.createElement('div');logoPanel.className='sec panel';logoPanel.id='logoPanel';
+ const logoHead=document.createElement('h4');logoHead.textContent='Logo';logoPanel.appendChild(logoHead);
+ if(overlay){
+  const logoIds=['bLogo','bLogoX','sLogoSize','sLogoX','sLogoY','sLogoAlpha','sLogoGlow','sLogoBounce','sLogoShake','sLogoPulse','sLogoRot','sLogoReflection','sLogoParticles'];
+  const moved=new Set();
+  logoIds.forEach(id=>{
+   const el=document.getElementById(id);if(!el)return;
+   const block=el.closest('label')||el.closest('.row')||el;
+   if(moved.has(block))return;moved.add(block);logoPanel.appendChild(block);
+  });
+  const textPanel=all().find(p=>title(p)==='Text · Logo Studio');
+  if(textPanel)bar.insertBefore(logoPanel,textPanel);
+ }
+ const media=all().find(p=>p.id==='mediaPanel');
+ if(media){
+  const stickerPanel=document.createElement('div');stickerPanel.className='sec panel';stickerPanel.id='stickerPanel';
+  const h=document.createElement('h4');h.textContent='Sticker';stickerPanel.appendChild(h);
+  const row=document.createElement('div');row.className='row';
+  ['bO','bDel'].forEach(id=>{const el=document.getElementById(id);if(el)row.appendChild(el);});
+  stickerPanel.appendChild(row);
+  const note=document.createElement('div');note.className='status';note.textContent='Add a transparent PNG or image sticker, then drag it on the canvas to position and resize it.';stickerPanel.appendChild(note);
+  bar.appendChild(stickerPanel);
+ }
+ mergeGroup('Audio',['Audio Motion','Audio Frequency Response'],'audioPanel');
+ mergeGroup('Visualizer',['Look','Visuals','Spectrum Studio','Symmetry','Colour','Mask shape','Layers · Tools box','Position','Shape','Video grade','Shape · Gradient · Motion'],'visualizerPanel');
+ mergeGroup('Overlay FX',['Overlay','Overlay Effects · Motion FX','Progress Bar Studio','Surface Reflection','Film & Vintage','Atmosphere FX'],'overlayFxPanel');
+ mergeGroup('Background',['Background','Background Drift'],'backgroundPanel');
+ const tempo=all().find(p=>title(p)==='Beat · BPM Sync');if(tempo){tempo.id='tempoPanel';tempo.querySelector('h4').textContent='Tempo';}
+ const elements=all().find(p=>title(p)==='Lights · Tools box');if(elements){elements.id='elementsPanel';elements.querySelector('h4').textContent='Elements';}
+ const textPanel=all().find(p=>title(p)==='Text · Logo Studio');if(textPanel){textPanel.id='textPanel';textPanel.querySelector('h4').textContent='Text';}
+ all().forEach(p=>{if(p.id!=='mediaPanel'&&p.id!=='exportPanel')p.classList.add('collapsed');const h=p.querySelector('h4');if(h){h.setAttribute('role','button');h.setAttribute('tabindex','0');h.addEventListener('click',()=>p.classList.toggle('collapsed'));h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();p.classList.toggle('collapsed');}});}});
+})();
 </script>
 <script>
 "use strict";
@@ -1942,7 +1991,7 @@ visoPanels.forEach(panel=>{
  btn.append(icon,label);btn.addEventListener('click',()=>activateDockPanel(panel));dockNav.appendChild(btn);
 });
 
-const dockOrder=['Media','Look','Visuals','Spectrum Studio','Symmetry','Shape','Mask shape','Position','Video grade','Colour','Lights','Layers','Text · Logo Studio','Audio Frequency Response','Audio Motion','Beat · BPM Sync','Overlay','Progress Bar Studio','Overlay Effects · Motion FX','Surface Reflection','Film & Vintage','Atmosphere FX','Templates · Editable Projects','Background Drift','Background'];
+const dockOrder=['Media','Logo','Audio','Text','Visualizer','Elements','Overlay FX','Sticker','Turning Point','Tempo','Templates · Editable Projects','Background'];
 const dockRank=name=>{const i=dockOrder.findIndex(v=>name.toLowerCase().includes(v.toLowerCase()));return i<0?dockOrder.length:i;};
 [...visoPanels].sort((a,b)=>dockRank(a.querySelector('.toolHeading')?.textContent||'')-dockRank(b.querySelector('.toolHeading')?.textContent||'')).forEach(panel=>{
  const btn=[...dockNav.children].find(b=>b.dataset.panel===panel.id);if(btn)dockNav.appendChild(btn);
