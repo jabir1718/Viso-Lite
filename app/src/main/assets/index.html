@@ -2029,11 +2029,12 @@ const controlIconMap=[[/audio|mp3|song|music/i,'♫'],[/photo|image|picture|medi
 document.querySelectorAll('#bar>.panel button').forEach(button=>{
  if(button.classList.contains('toolFav')||button.querySelector('.controlGlyph'))return;
  const label=(button.textContent||'').trim();
- const hit=controlIconMap.find(([re])=>re.test(label));
- if(!hit||!label)return;
+ const hit=controlIconMap.find(([re])=>re.test(label))||[null,'◈'];
+ if(!label)return;
  const glyph=document.createElement('span');glyph.className='controlGlyph';glyph.setAttribute('aria-hidden','true');glyph.textContent=hit[1];
  button.insertBefore(glyph,button.firstChild);
 });
+document.querySelectorAll('#bar>.panel label').forEach(label=>{const target=label.querySelector('span');if(!target||target.querySelector('.controlGlyph'))return;const labelText=(target.textContent||'').trim();const hit=controlIconMap.find(([re])=>re.test(labelText))||[null,'◈'];const glyph=document.createElement('span');glyph.className='controlGlyph';glyph.setAttribute('aria-hidden','true');glyph.textContent=hit[1];target.insertBefore(glyph,target.firstChild);});
 const previewToggle=$('previewToggle'),previewExit=$('previewExit');
 function setPreviewMode(on){
  document.body.classList.toggle('preview-fullscreen',!!on);
