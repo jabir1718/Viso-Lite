@@ -21,6 +21,8 @@ assert(html.includes('(specPointWidth/100)'), 'point width must affect spectrum 
 assert(html.includes('(specMultiplier/100)'), 'audio multiplier must affect live spectrum amplitude');
 assert(html.includes("if(specRainbow)return 'hsl('"), 'rainbow gradient must change spectrum colours');
 assert(html.includes('specShadowOn?specShadowColor'), 'custom shadow colour must reach spectrum rendering');
+assert(html.includes("el.addEventListener('pointerdown',()=>snap());el.oninput=e=>fn(+e.target.value)"), 'Spectrum sliders must capture undo snapshots before changes');
+assert(html.includes("'bSpecGlow','specGlowCoreColor','specGlowMode','bSpecGlowIntensitySync'"), 'Spectrum toggles and colour/select controls must capture undo snapshots');
 assert(html.includes("['sSpecGlowBlur',specGlowBlur]") && html.includes("['sSpecShadowExpand',specShadowExpand]"), 'advanced spectrum sliders must restore from saved project state');
 assert(html.includes("['specGlowCoreColor',specGlowCoreColor]") && html.includes("['specShadowColor',specShadowColor]"), 'advanced spectrum colour pickers must restore from saved project state');
 for (const id of ['bSpecLayerSpin','sSpecLayerSpinForce','sSpecLayerSpinMomentum','sSpecLayerSpinSpeed']) {
