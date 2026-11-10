@@ -1968,8 +1968,20 @@ function drawSpectrum(ctx,scale){
  layers.forEach((layer,layerIndex)=>{ctx.save();const shake=specShakeOn?Math.sin(performance.now()/47+(layer.id||0))*specShake*.08:0,stackOffset=specLayerMode==='stack'?layerIndex*Math.min(W,H)*.025:0;ctx.translate(W*(layer.x||0)/100+shake,H*(layer.y||0)/100+Math.cos(performance.now()/53+(layer.id||0))*shake+stackOffset);const spin=layer.spinEnabled?(t*(layer.spinSpeed??25)*.9*(layer.spinForce??50)/100*(.25+(layer.spinMomentum??50)/100*.75)):0;ctx.rotate(((layer.rotation||0)+spin)*Math.PI/180);const layerScale=Math.max(.1,Math.min(2,Number(layer.scale||100)/100));ctx.scale(layerScale,layerScale);drawSpectrumLayer(ctx,scale,layer);ctx.restore();});
 }
 function drawSpectrumLayer(ctx,scale,layer,isTrail=false){
+ const mode=specSymmetry||'none';
+ const symmetryCopies=mode==='x'?[[1,1,1,0],[-1,1,1,0]]:
+  mode==='xy'?[[1,1,1,0],[-1,1,1,0],[1,-1,1,0],[-1,-1,1,0]]:
+  mode==='across'?[[1,1,1,0],[1,-1,1,0]]:
+  mode==='triple-x'?[[1,1,.54,-.34],[1,1,.54,0],[1,1,.54,.34]]:[[1,1,1,0]];
+ symmetryCopies.forEach(([sx,sy,scaleFactor,offsetY])=>{
+  ctx.save();ctx.translate(cx,cy+offsetY*H);ctx.scale(sx*scaleFactor,sy*scaleFactor);ctx.translate(-cx,-cy);
+  drawSpectrumLayerGeometry(ctx,scale,layer,isTrail);
+  ctx.restore();
+ });
+}
+function drawSpectrumLayerGeometry(ctx,scale,layer,isTrail=false){
   const t=performance.now()/1000,n=Math.min(SPEC_N,Math.max(1,Math.min(specResolution,specBars|0,specPointCount)));
-  if(!isTrail&&specTrailOn&&specTrailCount){for(let i=0;i<SPEC_N;i++)specTrailCurrent[i]=specSmooth[i];const frames=Math.min(3,specTrailCount);for(let age=frames;age>=1;age--){const frame=specTrailBuffers[(specTrailHead-age+specTrailFrames)%specTrailFrames];for(let i=0;i<SPEC_N;i++)specSmooth[i]=frame[i];ctx.save();ctx.globalAlpha=Math.max(.035,(specTrailAmount/100)*(.58/age));drawSpectrumLayer(ctx,scale,layer,true);ctx.restore();}for(let i=0;i<SPEC_N;i++)specSmooth[i]=specTrailCurrent[i];}
+  if(!isTrail&&specTrailOn&&specTrailCount){for(let i=0;i<SPEC_N;i++)specTrailCurrent[i]=specSmooth[i];const frames=Math.min(3,specTrailCount);for(let age=frames;age>=1;age--){const frame=specTrailBuffers[(specTrailHead-age+specTrailFrames)%specTrailFrames];for(let i=0;i<SPEC_N;i++)specSmooth[i]=frame[i];ctx.save();ctx.globalAlpha=Math.max(.035,(specTrailAmount/100)*(.58/age));drawSpectrumLayerGeometry(ctx,scale,layer,true);ctx.restore();}for(let i=0;i<SPEC_N;i++)specSmooth[i]=specTrailCurrent[i];}
   const materialWidth=specMaterial==='plastic'?1.16:specMaterial==='diamond'?.9:specMaterial==='liquid-glass'?1.08:1,materialGlow=specMaterial==='fire'?1.32:specMaterial==='diamond'?1.18:specMaterial==='liquid-glass'?1.1:1,materialShadowColor=specMaterial==='fire'?'#ff5a18':specMaterial==='chrome'?'#dce9f8':specMaterial==='plastic'?'#15516f':specMaterial==='diamond'?'#d9fbff':specMaterial==='liquid-glass'?'#aef7ff':null;
   const thick=Math.max(1,Math.min(W,H)*.011*(specThick/100)*(specPointWidth/100)*(layer.thickness??100)/100*materialWidth),gl=specGlowOn?(specGlow/100)*(specGlowBlur/100)*(specGlowScale/100)*(specGlowMode==='neon'?1.45:specGlowMode==='core'?.62:1)*materialGlow*(specGlowIntensitySync?(.35+avg*1.8):1):0,rot=t*specSpin,M=specMode;
   ctx.save();ctx.scale(scale,scale);ctx.translate((1/scale-1)*cx,(1/scale-1)*cy);
@@ -2000,14 +2012,13 @@ function drawSpectrumLayer(ctx,scale,layer,isTrail=false){
   };
   const outlineBar=(x1,y1,x2,y2)=>{if((layer.outline??0)<=0)return;ctx.save();ctx.strokeStyle=layer.outlineColor||'#ffffff';ctx.lineWidth=thick+Number(layer.outline);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore();};
   if(['flats','square','ncs'].includes(specShape)){
-   const bars=n,amp=Math.min(W,H)*.27,mirrorY=['xy','across','triple-x'].includes(specSymmetry),mirrorX=['x','xy','across','triple-x'].includes(specSymmetry);
+   const bars=n,amp=Math.min(W,H)*.27,mirrorY=false,mirrorX=false;
    for(let i=0;i<bars;i++){const v=val(i),c=col(i),pos=(i+.5)/bars;
     if(specShape==='flats'){
      const bw=W/bars*.72,bh=Math.max(1,v*amp),px=pos*W-bw/2,base=cy+H*.28+H*(layer.offset||0)/100;
      ctx.fillStyle=c;ctx.shadowColor=specShadowOn?specShadowColor:(materialShadowColor||c);ctx.shadowBlur=thick*(3*gl+specShadowExpand/25);
      if(specStyle==='point'){ctx.beginPath();ctx.arc(px+bw/2,base-bh,Math.max(1,thick*.75),0,Math.PI*2);ctx.fill();}
      else{ctx.fillRect(px,base-bh,bw,specStyle==='solid'?Math.max(thick,bh):bh);if(mirrorY)ctx.fillRect(px,base,bw,bh);}
-     if(specSymmetry==='triple-x'){ctx.globalAlpha=.55;ctx.fillRect(px,cy-H*.36,bw,bh*.7);ctx.globalAlpha=1;}
     }else if(specShape==='square'){
      const side=i%4,idx=Math.floor(i/4),count=Math.max(1,Math.ceil(bars/4)),u=(idx+.5)/count,edge=Math.min(W,H)*.24,len=v*amp;
      const px=cx-edge+u*edge*2,py=cy-edge+u*edge*2;
