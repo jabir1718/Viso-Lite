@@ -29,6 +29,9 @@ assert(spectrumSource.includes('ctx.fillRect(cx-len,yl,len,bh*.86);ctx.fillRect(
 assert(html.includes('id="sLogoPulse"'), 'custom logo audio-reactive size control must exist');
 assert(html.includes('autoOn,autoEvery,lockChip:{...lockChip}'), 'auto mode timing and lock toggles must be saved in project and undo state');
 assert(html.includes('restoreVISOAutoState(d)'), 'auto mode and lock controls must restore from saved projects');
+assert(html.includes('exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd}'), 'export profile, resolution, FPS, format and playback toggles must be saved');
+assert(html.includes('restoreVISOExportState(d.exportSettings||{})'), 'saved export settings must restore with old-project defaults');
+assert(html.includes('restoreVISOExportState({});};'), 'reset must restore default export settings');
 assert(html.includes('autoEvery=3;Object.keys(lockChip).forEach(key=>lockChip[key]=false)'), 'reset must restore auto mode timing and unlocked defaults');
 assert(html.includes('logoPulse,logoRotation'), 'logo pulse must be included in saved advanced state');
 assert(html.includes('sync(\'sLogoPulse\',logoPulse)'), 'logo pulse must restore its UI value');
@@ -267,5 +270,37 @@ autoSandbox.restoreVISOAutoState({});
 assert.equal(autoSandbox.autoOn, false, 'older projects default auto mode off');
 assert.equal(autoSandbox.autoEvery, 3, 'older projects default auto interval');
 assert.deepEqual({ ...autoSandbox.lockChip }, { color:false, vis:false, shape:false, sway:false }, 'older projects default all auto locks off');
+
+
+const exportStart = html.indexOf('function restoreVISOExportState(');
+const exportEnd = html.indexOf('function captureProjectState', exportStart);
+assert(exportStart >= 0 && exportEnd > exportStart, 'export state restore helper must exist');
+const makeButton = text => ({ textContent:text, classList:{ values:new Set(), toggle(name,on){ if(on)this.values.add(name); else this.values.delete(name); } } });
+const exportControls = {
+  bLoop:makeButton('Loop song: ON'), bStopAtEnd:makeButton('Stop export at song end: OFF'), sQuality:{value:100}
+};
+const exportLists = {
+  '#aspect button':['9:16 TikTok','16:9 YouTube','1:1','4:5'].map(makeButton),
+  '#res button':['1080','1440','4K'].map(makeButton),
+  '#fps button':['30 fps','60 fps'].map(makeButton)
+};
+const exportSandbox = {
+  aspect:'9:16',baseRes:1080,FPS:30,quality:100,formatChoice:'auto',loopSong:true,stopAtSongEnd:false,
+  audio:{loop:true},fmtButton:makeButton('Auto format'),$:(id)=>exportControls[id],
+  document:{querySelectorAll:selector=>exportLists[selector]||[]},setRes(){this.setResCalls=(this.setResCalls||0)+1;}
+};
+vm.runInNewContext(html.slice(exportStart,exportEnd),exportSandbox,{timeout:2000});
+exportSandbox.restoreVISOExportState({aspect:'16:9',baseRes:2160,FPS:60,quality:130,formatChoice:'webm',loopSong:false,stopAtSongEnd:true});
+assert.equal(exportSandbox.aspect,'16:9');assert.equal(exportSandbox.baseRes,2160);assert.equal(exportSandbox.FPS,60);
+assert.equal(exportSandbox.quality,130);assert.equal(exportSandbox.formatChoice,'webm');
+assert.equal(exportSandbox.loopSong,false);assert.equal(exportSandbox.stopAtSongEnd,true);assert.equal(exportSandbox.audio.loop,false);
+assert(exportLists['#aspect button'][1].classList.values.has('on'),'aspect button sync');
+assert(exportLists['#res button'][2].classList.values.has('on'),'resolution button sync');
+assert(exportLists['#fps button'][1].classList.values.has('on'),'FPS button sync');
+assert.equal(exportControls.sQuality.value,130);assert.equal(exportSandbox.fmtButton.textContent,'WebM');
+exportSandbox.restoreVISOExportState({});
+assert.equal(exportSandbox.aspect,'9:16');assert.equal(exportSandbox.baseRes,1080);assert.equal(exportSandbox.FPS,30);
+assert.equal(exportSandbox.quality,100);assert.equal(exportSandbox.formatChoice,'auto');
+assert.equal(exportSandbox.loopSong,true);assert.equal(exportSandbox.stopAtSongEnd,false);assert.equal(exportSandbox.audio.loop,true);
 
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
