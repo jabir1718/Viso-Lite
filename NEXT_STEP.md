@@ -4,15 +4,15 @@ Read `PROJECT_ROADMAP.md`, `CURRENT_STATUS.md`, and `DO_NOT_BREAK.md` first.
 
 ## Resume point
 Branch: `viso/advanced-studio-ui`
-Latest successful CI: run #323 / `42855684313`
-Successful head commit: `a9adc746f37f1a9829c0b9794faf16dd9d06d428`
-Source commit: `dac5fe26a4f8007e3e08ff0caf00ba6266fcbeba`
-Regression-test commit: `a9adc746f37f1a9829c0b9794faf16dd9d06d428`
-APK artifact: `13782896586` (`VISO-Studio-advanced-debug-apk`)
-Artifact ZIP digest: `sha256:91110f0b9487c1b47108e181df42e11f16bdeb15ebdd4e45d4f654abcdee29e0`
+Latest successful CI: run #330 / `42856294617`
+Successful head commit: `75ec34f71b4c3ce30bc7019483945eb9c6305f47`
+Spectrum symmetry source commit: `f8418100dbb73d68dd54ee82f4ef287f604afdf3`
+Workflow regression update: `b2feb9d2d2d87b891ce497aaa6809b706d2dfe73`
+APK artifact: `13782762494` (`VISO-Studio-advanced-debug-apk`)
+Artifact ZIP digest: `sha256:a4e773be83cbb0db4f46bd2a2645abd5bfa56099550ae375480625742917189b`
 
 ## Next implementation and QA batch
-1. Finish Spectrum Symmetry behaviour across all shapes (preserve existing meanings; verify exact reference semantics where possible).
+1. Confirm symmetry semantics against any recoverable Aspectrum reference evidence; current implementation provides consistent standard interpretations for all shapes.
 2. Audit all 12 dock groups for real controls, grouping, event handlers, state persistence, undo/redo and preview/export behaviour.
 3. Verify Logo/Photo and Sticker independent layers, upload, colour key, transforms, effects, animation and embedded assets.
 4. Verify Text layers, artist/track-name, font upload/gallery, timer, styling, alignment and per-layer transforms.
