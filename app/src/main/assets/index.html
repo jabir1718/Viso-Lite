@@ -254,6 +254,7 @@ body.preview-fullscreen #previewExit{display:block}
 .toolGroupBody{display:flex;flex-direction:column;gap:8px;min-height:0}
 .toolGroupBody>.toolSubpanel{display:flex!important;flex:0 0 auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:9px!important;border:1px solid #e0e9e0!important;border-radius:11px!important;background:linear-gradient(150deg,#fff,#f8fbf7)!important;box-shadow:none!important}
 .toolGroupBody>.toolSubpanel>h4{display:none!important}
+#tFr{display:none!important;}
 </style>
 <div id="studioHeader">
   <div class="studioBrand">
@@ -842,21 +843,21 @@ const MODES=['Dust','Aurora','Beams','Bars','Ripple','Grid','Sparkle','Vortex','
 const mstate=MODES.map((n,i)=>({name:n,on:i===0,op:i===0?.95:.7}));
 MODES.forEach((n,i)=>{const b=document.createElement('button');b.textContent=n;
   if(mstate[i].on)b.classList.add('on');
-  b.onclick=()=>{mstate[i].on=!mstate[i].on;b.classList.toggle('on',mstate[i].on);drawMixers();snap();};
+  b.onclick=()=>{snap();mstate[i].on=!mstate[i].on;b.classList.toggle('on',mstate[i].on);drawMixers();};
   $('modes').appendChild(b);});
 function drawMixers(){$('mixers').innerHTML='';mstate.forEach(m=>{if(!m.on)return;
   const d=document.createElement('div');d.className='mline';d.innerHTML='<b>'+m.name+'</b>';
   const r=document.createElement('input');r.type='range';r.min=0;r.max=100;r.value=m.op*100;
-  r.oninput=()=>{m.op=+r.value/100;const linked=$('sElement'+(m.name==='Dust'?'Particles':m.name==='Sparkle'?'Sparkles':''));if(linked)linked.value=r.value;};d.appendChild(r);$('mixers').appendChild(d);});}
+  r.addEventListener('pointerdown',()=>snap());r.addEventListener('focus',()=>snap());r.oninput=()=>{m.op=+r.value/100;const linked=$('sElement'+(m.name==='Dust'?'Particles':m.name==='Sparkle'?'Sparkles':''));if(linked)linked.value=r.value;};d.appendChild(r);$('mixers').appendChild(d);});}
 drawMixers();
-function syncElementToggle(id,name){const idx=MODES.indexOf(name),el=$(id);if(!el||idx<0)return;el.checked=!!mstate[idx].on;el.onchange=()=>{mstate[idx].on=el.checked;document.querySelectorAll('#modes button').forEach((b,i)=>b.classList.toggle('on',mstate[i].on));drawMixers();snap();};}
+function syncElementToggle(id,name){const idx=MODES.indexOf(name),el=$(id);if(!el||idx<0)return;el.checked=!!mstate[idx].on;el.onchange=()=>{snap();mstate[idx].on=el.checked;document.querySelectorAll('#modes button').forEach((b,i)=>b.classList.toggle('on',mstate[i].on));drawMixers();};}
 function bindElementAmount(id,name){const idx=MODES.indexOf(name),el=$(id);if(!el||idx<0)return;el.value=Math.round(mstate[idx].op*100);el.addEventListener('pointerdown',()=>snap());el.addEventListener('focus',()=>snap());el.oninput=()=>{mstate[idx].op=Number(el.value)/100;const mixer=[...document.querySelectorAll('#mixers .mline')].find(line=>line.querySelector('b')?.textContent===name);if(mixer)mixer.querySelector('input').value=el.value;};}
 function syncElementAmountControls(){const dust=MODES.indexOf('Dust'),sparkle=MODES.indexOf('Sparkle');if($('sElementParticles')&&dust>=0)$('sElementParticles').value=Math.round(mstate[dust].op*100);if($('sElementSparkles')&&sparkle>=0)$('sElementSparkles').value=Math.round(mstate[sparkle].op*100);if($('sReactiveFrameIntensity'))$('sReactiveFrameIntensity').value=reactiveFrameIntensity;}
 bindElementAmount('sElementParticles','Dust');bindElementAmount('sElementSparkles','Sparkle');
-$('sReactiveFrameIntensity').oninput=e=>reactiveFrameIntensity=+e.target.value;
+$('sReactiveFrameIntensity').addEventListener('pointerdown',()=>snap());$('sReactiveFrameIntensity').addEventListener('focus',()=>snap());$('sReactiveFrameIntensity').oninput=e=>reactiveFrameIntensity=+e.target.value;
 syncElementToggle('bElementParticles','Dust');syncElementToggle('bElementSparkles','Sparkle');
-$('bElementLight').checked=elementsLightOn;$('bElementLight').onchange=e=>{elementsLightOn=e.target.checked;snap();};
-$('bElementReactiveFrame').checked=frOn;$('bElementReactiveFrame').onchange=e=>{frOn=e.target.checked;$('tFr').classList.toggle('on',frOn);snap();};
+$('bElementLight').checked=elementsLightOn;$('bElementLight').onchange=e=>{snap();elementsLightOn=e.target.checked;};
+$('bElementReactiveFrame').checked=frOn;$('bElementReactiveFrame').onchange=e=>{snap();frOn=e.target.checked;$('tFr').classList.toggle('on',frOn);};
 
 const SHAPES=[['media','Media'],['circle','Circle'],['ring','Ring'],['blob','Blob'],['frame','Frame'],['text','Text'],
   ['hexagon','Hexagon'],['star','Star'],['diamond','Diamond'],['triangle','Triangle'],['heart','Heart']];
