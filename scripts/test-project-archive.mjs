@@ -530,7 +530,7 @@ assert(textLayerAudit.includes('class="textTypeButton"')&&textLayerAudit.include
 assert(html.includes('extraTextLayers:extraTextLayers.map(layer=>({...layer}))')&&html.includes('extraTextLayers=Array.isArray(d.extraTextLayers)'),'independent text layers must persist and restore');
 assert(html.includes('logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor'),'Logo shape, vinyl, colour key and ink settings must be captured in project state');
 assert(html.includes("logoArtworkShape=d.logoArtworkShape||'original'")&&html.includes("$('logoArtworkShape').value=logoArtworkShape"),'Logo settings must restore into state and controls');
-assert(html.includes("$('bLogo').onclick=()=>$('fLogo').click()")&&html.includes("VISO_ASSET_FILES[key]=e.target.files?.[0]||null"),'Logo upload must retain its original file for editable project packages');
+assert(html.includes("$('bLogo').onclick=()=>{snap();$('fLogo').click();}")&&html.includes("VISO_ASSET_FILES[key]=e.target.files?.[0]||null"),'Logo upload must retain its original file for editable project packages');
 assert(html.includes("objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,alpha:o.alpha,glow:o.glow,outline:o.outline"),'Sticker transform/effect state must be serialized per independent object layer');
 assert(html.includes("function bindStickerControl(id,key,convert=v=>v)")&&html.includes("el.addEventListener('pointerdown',()=>snap())"),'Sticker edits must participate in undo snapshots');
 assert(html.includes("...(objects.map((o,i)=>['overlay-'+i,o.file||VISO_ASSET_FILES.overlays[i]||null]))")&&html.includes("if(overlayAssetCount!==objects.length)"),'each Sticker source image must be embedded in project packages');
