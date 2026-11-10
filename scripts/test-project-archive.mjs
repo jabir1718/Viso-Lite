@@ -590,4 +590,12 @@ assert(html.includes("mstate[idx].op=Number(el.value)/100"),'particle and sparkl
 assert(html.includes("x.globalAlpha=reactiveFrameIntensity/100"),'Reactive Frame intensity must affect the rendered frame');
 assert(html.includes('smokeColor,reactiveFrameIntensity}')&&html.includes('s.reactiveFrameIntensity!==undefined'),'Reactive Frame intensity must persist and restore');
 assert(html.includes('function syncElementAmountControls()')&&html.includes('syncElementAmountControls();'),'Element amount controls must stay in sync with Visuals sliders and project restore');
+
+assert(html.includes("b.onclick=()=>{snap();mstate[i].on=!mstate[i].on"),'Visual mode toggles must snapshot before changing state');
+assert(html.includes("el.onchange=()=>{snap();mstate[idx].on=el.checked"),'Particles and Sparkles toggles must snapshot before changing state');
+assert(html.includes("onchange=e=>{snap();elementsLightOn=e.target.checked"),'Light element toggle must snapshot before changing state');
+assert(html.includes("onchange=e=>{snap();frOn=e.target.checked"),'Reactive Frame toggle must snapshot before changing state');
+assert(html.includes("sReactiveFrameIntensity').addEventListener('pointerdown',()=>snap())"),'Reactive Frame intensity must be undoable');
+assert(html.includes("#tFr{display:none!important;}"),'Reactive Frame must have one visible control in the Elements group');
+assert(html.includes("r.addEventListener('pointerdown',()=>snap())"),'Visual mode intensity sliders must be undoable');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
