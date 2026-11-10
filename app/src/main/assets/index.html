@@ -616,7 +616,7 @@ body.preview-fullscreen #previewExit{display:block}
   ['bO','bDel'].forEach(id=>{const el=document.getElementById(id);if(el)row.appendChild(el);});
   stickerPanel.appendChild(row);
   const stickerControls=document.createElement('div');stickerControls.className='stickerControls';
-  stickerControls.innerHTML='<div class="status" id="stickerSelectionInfo">Select a sticker on the canvas to edit its appearance.</div><div class="fxSubhead">TRANSFORM</div><label><span>Position X</span><input id="sStickerX" type="range" min="0" max="100" value="50"></label><label><span>Position Y</span><input id="sStickerY" type="range" min="0" max="100" value="50"></label><label><span>Size</span><input id="sStickerScale" type="range" min="5" max="200" value="32"></label><label><span>Rotation</span><input id="sStickerRotation" type="range" min="-180" max="180" value="0"></label><label><span>Opacity</span><input id="sStickerAlpha" type="range" min="0" max="100" value="100"></label><div class="fxSubhead">OVERLAY EFFECTS</div><label><span>Glow</span><input id="sStickerGlow" type="range" min="0" max="100" value="35"></label><label><span>Outline thickness</span><input id="sStickerOutline" type="range" min="0" max="20" value="0"></label><label><span>Outline colour</span><input id="stickerOutlineColor" type="color" value="#ffffff"></label><label><span>Colour key</span><input id="bStickerColorKey" type="checkbox"></label><label><span>Key colour</span><input id="stickerKeyColor" type="color" value="#00ff00"></label><label><span>Key tolerance</span><input id="sStickerKeyTolerance" type="range" min="0" max="100" value="24"></label><label><span>Blend mode</span><select id="selStickerBlend"><option value="stacked">Stacked</option><option value="additive">Additive</option></select></label>';
+  stickerControls.innerHTML='<div class="status" id="stickerSelectionInfo">Select a sticker on the canvas to edit its appearance.</div><div class="fxSubhead">TRANSFORM</div><label><span>Position X</span><input id="sStickerX" type="range" min="0" max="100" value="50"></label><label><span>Position Y</span><input id="sStickerY" type="range" min="0" max="100" value="50"></label><label><span>Size</span><input id="sStickerScale" type="range" min="5" max="200" value="32"></label><label><span>Rotation</span><input id="sStickerRotation" type="range" min="-180" max="180" value="0"></label><label><span>Opacity</span><input id="sStickerAlpha" type="range" min="0" max="100" value="100"></label><div class="fxSubhead">OVERLAY EFFECTS</div><label><span>Glow</span><input id="sStickerGlow" type="range" min="0" max="100" value="35"></label><label><span>Outline thickness</span><input id="sStickerOutline" type="range" min="0" max="20" value="0"></label><label><span>Outline colour</span><input id="stickerOutlineColor" type="color" value="#ffffff"></label><label><span>Colour key</span><input id="bStickerColorKey" type="checkbox"></label><label><span>Key colour</span><input id="stickerKeyColor" type="color" value="#00ff00"></label><label><span>Key tolerance</span><input id="sStickerKeyTolerance" type="range" min="0" max="100" value="24"></label><label><span>Blend mode</span><select id="selStickerBlend"><option value="stacked">Stacked</option><option value="additive">Additive</option></select></label><label><span>Motion</span><select id="selStickerMotion"><option value="None">None</option><option value="Float">Float</option><option value="Orbit">Orbit</option><option value="Drive">Drive</option><option value="Walk">Walk</option><option value="Rain">Rain</option></select></label><label><span>Motion speed</span><input id="sStickerMotionSpeed" type="range" min="0" max="200" value="100"></label>';
   stickerPanel.appendChild(stickerControls);
   const note=document.createElement('div');note.className='status';note.textContent='Add a transparent PNG or image sticker, then drag it on the canvas to position and resize it.';stickerPanel.appendChild(note);
   bar.appendChild(stickerPanel);
@@ -903,7 +903,7 @@ $('fV').onchange=e=>{const f=e.target.files[0];if(!f)return;
 $('bO').onclick=()=>$('fO').click();
 $('fO').onchange=e=>{if(e.target.files?.length)snap();[...e.target.files].forEach(f=>{const im=new Image();
   im.onload=()=>{objects.push({img:im,file:f,x:Math.random()*W,y:Math.random()*H,sc:.32,rot:0,alpha:100,glow:35,outline:0,outlineColor:'#ffffff',colorKeyOn:false,keyColor:'#00ff00',keyTolerance:24,blend:'stacked',
-    motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28});selObj=objects.length-1;syncStickerControls();};
+    motion:'None',motionSpeed:100,dir:Math.random()<.5?1:-1,phase:Math.random()*6.28});selObj=objects.length-1;syncStickerControls();};
   im.src=URL.createObjectURL(f);});};
 function guessMotion(n){n=(n||'').toLowerCase();
   if(/car|truck|bike|bus|taxi|train|plane|rocket/.test(n))return'Drive';
@@ -1048,7 +1048,7 @@ function restoreVISOExportState(d){
  fmtButton.textContent=formatChoice==='auto'?'Auto format':'WebM';fmtButton.classList.toggle('on',formatChoice==='auto');
  setRes();
 }
-function captureProjectState(){return {extraTextLayers:extraTextLayers.map(layer=>({...layer})),nextExtraTextId,elementsLightOn,logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor,turningPoints:turningPoints.map(p=>({...p})),turningTransition,turningDuration,metronomeSoundOn,metronomeVolume,exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,alpha:o.alpha,glow:o.glow,outline:o.outline,outlineColor:o.outlineColor,colorKeyOn:o.colorKeyOn,keyColor:o.keyColor,keyTolerance:o.keyTolerance,blend:o.blend,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
+function captureProjectState(){return {extraTextLayers:extraTextLayers.map(layer=>({...layer})),nextExtraTextId,elementsLightOn,logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor,turningPoints:turningPoints.map(p=>({...p})),turningTransition,turningDuration,metronomeSoundOn,metronomeVolume,exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,alpha:o.alpha,glow:o.glow,outline:o.outline,outlineColor:o.outlineColor,colorKeyOn:o.colorKeyOn,keyColor:o.keyColor,keyTolerance:o.keyTolerance,blend:o.blend,motion:o.motion,motionSpeed:o.motionSpeed,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
 function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are intentionally ignored when opening older projects. */}
 function snap(){if(restoringState)return;const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
   if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
@@ -1166,7 +1166,7 @@ function move(e){if(!ptr.has(e.pointerId))return;e.preventDefault();const p=pos(
     const ang=Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x);const k=Math.max(.08,Math.min(6,d/Math.max(1,start.d)));
     if(start.m==='o2'&&b){b.sc=start.sc*k;b.rot=start.rot+(ang-start.ang);}
     else if(start.m==='p2'){isc=Math.max(.15,Math.min(5,start.sc*k));irot=start.rot+(ang-start.ang);}}}
-function up(e){ptr.delete(e.pointerId);if(!ptr.size)start=null;}
+function up(e){ptr.delete(e.pointerId);if(!ptr.size){start=null;syncStickerControls();}}
 c.addEventListener('pointerdown',down);c.addEventListener('pointermove',move);
 c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up);
 
@@ -1528,18 +1528,19 @@ function drawMode(ctx,m,b,scale){
   ctx.restore();ctx.globalAlpha=1;
 }
 
-function stepObject(ob,b,dt){const bass=b[0],hi=b[5];ob.phase+=dt*(.002+hi*.02);
+function stepObject(ob,b,dt){const bass=b[0],hi=b[5],motionSpeed=(ob.motionSpeed??100)/100;ob.phase+=dt*(.002+hi*.02)*motionSpeed;
   const w=ob.img.width*ob.sc,h=ob.img.height*ob.sc;
-  if(ob.motion==='Drive'){ob.x+=(2+bass*26)*ob.dir;ob.y+=Math.sin(ob.phase*9)*(1+bass*5);
+  if(ob.motion==='None')return;
+  if(ob.motion==='Drive'){ob.x+=(2+bass*26)*ob.dir*motionSpeed;ob.y+=Math.sin(ob.phase*9)*(1+bass*5)*motionSpeed;
     ob.rot=Math.sin(ob.phase*3)*.03+(ob.dir<0?Math.PI:0);
     if(ob.x-w>W)ob.x=-w;if(ob.x+w<0)ob.x=W;}
-  else if(ob.motion==='Walk'){ob.x+=(1+bass*10)*ob.dir;ob.y+=Math.abs(Math.sin(ob.phase*10))*(3+bass*22);
+  else if(ob.motion==='Walk'){ob.x+=(1+bass*10)*ob.dir*motionSpeed;ob.y+=Math.abs(Math.sin(ob.phase*10))*(3+bass*22)*motionSpeed;
     ob.rot=Math.sin(ob.phase*10)*.07;if(ob.x-w>W)ob.x=-w;if(ob.x+w<0)ob.x=W;}
-  else if(ob.motion==='Rain'){ob.y+=(3+bass*34);ob.x+=Math.sin(ob.phase*4)*3;ob.rot+=(Math.random()-.5)*.06;
+  else if(ob.motion==='Rain'){ob.y+=(3+bass*34)*motionSpeed;ob.x+=Math.sin(ob.phase*4)*3*motionSpeed;ob.rot+=(Math.random()-.5)*.06;
     if(ob.y-h>H){ob.y=-h;ob.x=Math.random()*W;}}
   else if(ob.motion==='Orbit'){const rad=220+bass*60;ob.x=cx+Math.cos(ob.phase)*rad;
     ob.y=cy+Math.sin(ob.phase)*rad;ob.rot=ob.phase+1.57;}
-  else{ob.x+=Math.cos(ob.phase)*(1+b[2]*8);ob.y+=Math.sin(ob.phase*1.4)*(1+b[2]*8);
+  else{ob.x+=Math.cos(ob.phase)*(1+b[2]*8)*motionSpeed;ob.y+=Math.sin(ob.phase*1.4)*(1+b[2]*8)*motionSpeed;
     ob.rot=Math.sin(ob.phase)*.12;if(ob.x<-w)ob.x=W;if(ob.x>W)ob.x=-w;
     if(ob.y<-h)ob.y=H;if(ob.y>H)ob.y=-h;}}
 function getStickerRenderSource(ob){
@@ -1554,10 +1555,10 @@ function getStickerRenderSource(ob){
  stickerKeyCache.set(ob,{signature,canvas});return canvas;
 }
 function syncStickerControls(){
- const ob=selObj>=0?objects[selObj]:null,ids=['sStickerX','sStickerY','sStickerScale','sStickerRotation','sStickerAlpha','sStickerGlow','sStickerOutline','stickerOutlineColor','bStickerColorKey','stickerKeyColor','sStickerKeyTolerance','selStickerBlend'];
+ const ob=selObj>=0?objects[selObj]:null,ids=['sStickerX','sStickerY','sStickerScale','sStickerRotation','sStickerAlpha','sStickerGlow','sStickerOutline','stickerOutlineColor','bStickerColorKey','stickerKeyColor','sStickerKeyTolerance','selStickerBlend','selStickerMotion','sStickerMotionSpeed'];
  $('stickerSelectionInfo').textContent=ob?'Editing sticker '+(selObj+1)+' of '+objects.length:'Select a sticker on the canvas to edit its appearance.';
  ids.forEach(id=>{const el=$(id);if(!el)return;el.disabled=!ob;if(!ob)return;
-  if(id==='sStickerX')el.value=Math.round(ob.x/W*100);else if(id==='sStickerY')el.value=Math.round(ob.y/H*100);else if(id==='sStickerScale')el.value=Math.round(ob.sc*100);else if(id==='sStickerRotation')el.value=Math.round(ob.rot*180/Math.PI);else if(id==='sStickerAlpha')el.value=ob.alpha??100;else if(id==='sStickerGlow')el.value=ob.glow??35;else if(id==='sStickerOutline')el.value=ob.outline??0;else if(id==='stickerOutlineColor')el.value=ob.outlineColor||'#ffffff';else if(id==='bStickerColorKey')el.checked=!!ob.colorKeyOn;else if(id==='stickerKeyColor')el.value=ob.keyColor||'#00ff00';else if(id==='sStickerKeyTolerance')el.value=ob.keyTolerance??24;else if(id==='selStickerBlend')el.value=ob.blend||'stacked';
+  if(id==='sStickerX')el.value=Math.round(ob.x/W*100);else if(id==='sStickerY')el.value=Math.round(ob.y/H*100);else if(id==='sStickerScale')el.value=Math.round(ob.sc*100);else if(id==='sStickerRotation')el.value=Math.round(ob.rot*180/Math.PI);else if(id==='sStickerAlpha')el.value=ob.alpha??100;else if(id==='sStickerGlow')el.value=ob.glow??35;else if(id==='sStickerOutline')el.value=ob.outline??0;else if(id==='stickerOutlineColor')el.value=ob.outlineColor||'#ffffff';else if(id==='bStickerColorKey')el.checked=!!ob.colorKeyOn;else if(id==='stickerKeyColor')el.value=ob.keyColor||'#00ff00';else if(id==='sStickerKeyTolerance')el.value=ob.keyTolerance??24;else if(id==='selStickerBlend')el.value=ob.blend||'stacked';else if(id==='selStickerMotion')el.value=ob.motion||'None';else if(id==='sStickerMotionSpeed')el.value=ob.motionSpeed??100;
  });
 }
 function bindStickerControl(id,key,convert=v=>v){const el=$(id);el.addEventListener('focus',()=>snap());el.addEventListener('pointerdown',()=>snap());el.addEventListener('input',()=>{const ob=selObj>=0?objects[selObj]:null;if(!ob)return;ob[key]=convert(el.type==='checkbox'?el.checked:el.value);if(key==='colorKeyOn')stickerKeyCache.delete(ob);});el.addEventListener('change',()=>{const ob=selObj>=0?objects[selObj]:null;if(!ob)return;ob[key]=convert(el.type==='checkbox'?el.checked:el.value);if(key==='colorKeyOn')stickerKeyCache.delete(ob);});}
@@ -1569,7 +1570,7 @@ function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
   if((ob.outline??0)>0){ctx.shadowBlur=0;ctx.strokeStyle=ob.outlineColor||'#ffffff';ctx.lineWidth=ob.outline/s;ctx.strokeRect(-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);}
   if(i===selObj){ctx.shadowBlur=0;ctx.strokeStyle='#4a9cf2';ctx.lineWidth=2/s;ctx.setLineDash([8/s,5/s]);ctx.strokeRect(-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);ctx.setLineDash([]);}
   ctx.restore();});}
-['sStickerX','sStickerY','sStickerScale','sStickerRotation','sStickerAlpha','sStickerGlow','sStickerOutline','stickerOutlineColor','bStickerColorKey','stickerKeyColor','sStickerKeyTolerance','selStickerBlend'].forEach(id=>{const el=$(id);if(!el)return;const map={sStickerX:['x',v=>W*Number(v)/100],sStickerY:['y',v=>H*Number(v)/100],sStickerScale:['sc',v=>Number(v)/100],sStickerRotation:['rot',v=>Number(v)*Math.PI/180],sStickerAlpha:['alpha',Number],sStickerGlow:['glow',Number],sStickerOutline:['outline',Number],stickerOutlineColor:['outlineColor',String],bStickerColorKey:['colorKeyOn',v=>!!v],stickerKeyColor:['keyColor',String],sStickerKeyTolerance:['keyTolerance',Number],selStickerBlend:['blend',String]};const [key,convert]=map[id];bindStickerControl(id,key,convert);});
+['sStickerX','sStickerY','sStickerScale','sStickerRotation','sStickerAlpha','sStickerGlow','sStickerOutline','stickerOutlineColor','bStickerColorKey','stickerKeyColor','sStickerKeyTolerance','selStickerBlend','selStickerMotion','sStickerMotionSpeed'].forEach(id=>{const el=$(id);if(!el)return;const map={sStickerX:['x',v=>W*Number(v)/100],sStickerY:['y',v=>H*Number(v)/100],sStickerScale:['sc',v=>Number(v)/100],sStickerRotation:['rot',v=>Number(v)*Math.PI/180],sStickerAlpha:['alpha',Number],sStickerGlow:['glow',Number],sStickerOutline:['outline',Number],stickerOutlineColor:['outlineColor',String],bStickerColorKey:['colorKeyOn',v=>!!v],stickerKeyColor:['keyColor',String],sStickerKeyTolerance:['keyTolerance',Number],selStickerBlend:['blend',String],selStickerMotion:['motion',String],sStickerMotionSpeed:['motionSpeed',Number]};const [key,convert]=map[id];bindStickerControl(id,key,convert);});
 syncStickerControls();
 
 function drawStudioTextLayer(ctx,b,textValue,enabled,sizeValue,posValue,alphaValue,colorValue,xValue,rotationValue,strokeValue,glowValue,animValue,alignValue,plateValue){
@@ -2683,7 +2684,7 @@ async function restoreVISOProjectAssets(project,entries){
   if(byKind[kind])visoSetInputFile(id,makeFile(byKind[kind]));
  }
  if(fontFile){const transfer=new DataTransfer();transfer.items.add(fontFile);$('fFont').files=transfer.files;installVISOFont(fontFile,preparedFont);}
- prepared.forEach(({img,file,saved})=>objects.push({img,file,x:saved.x??cx,y:saved.y??cy,sc:saved.sc??.32,rot:saved.rot??0,alpha:saved.alpha??100,glow:saved.glow??35,outline:saved.outline??0,outlineColor:saved.outlineColor||'#ffffff',colorKeyOn:!!saved.colorKeyOn,keyColor:saved.keyColor||'#00ff00',keyTolerance:saved.keyTolerance??24,blend:saved.blend||'stacked',motion:saved.motion||guessMotion(file.name),dir:saved.dir??1,phase:saved.phase??0}));
+ prepared.forEach(({img,file,saved})=>objects.push({img,file,x:saved.x??cx,y:saved.y??cy,sc:saved.sc??.32,rot:saved.rot??0,alpha:saved.alpha??100,glow:saved.glow??35,outline:saved.outline??0,outlineColor:saved.outlineColor||'#ffffff',colorKeyOn:!!saved.colorKeyOn,keyColor:saved.keyColor||'#00ff00',keyTolerance:saved.keyTolerance??24,blend:saved.blend||'stacked',motion:saved.motion||'None',motionSpeed:saved.motionSpeed??100,dir:saved.dir??1,phase:saved.phase??0}));
  (layerState.lights||[]).forEach(l=>lights.push({...l}));
  selObj=objects.length?objects.length-1:-1;syncStickerControls();maskDirty=true;
  $('templateInfo').textContent='Project restored · '+assets.length+' embedded assets · all imported media and layers are editable';
