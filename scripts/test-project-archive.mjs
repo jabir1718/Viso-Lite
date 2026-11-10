@@ -583,4 +583,11 @@ assert(html.includes('id="selBgFit"')&&html.includes('<option value="fit">Fit</o
 assert(html.includes("function drawBackgroundMedia(ctx,source,sourceW,sourceH)")&&html.includes("if(bgFitMode==='fill')")&&html.includes("if(bgFitMode==='fit')"),'background media rendering must implement Fill and Fit separately, with Crop using cover');
 assert(html.includes('bgFitMode,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel'),'background fit mode must persist in advanced project state');
 assert(html.includes("if(s.bgFitMode!==undefined)bgFitMode=s.bgFitMode")&&html.includes("$('selBgFit').value=bgFitMode"),'background fit mode must restore into state and UI');
+
+assert(html.includes('id="sElementParticles"')&&html.includes('id="sElementSparkles"'),'Particles and Sparkles must have their own amount controls in Elements');
+assert(html.includes('id="sReactiveFrameIntensity"'),'Reactive Frame must have its own intensity control in Elements');
+assert(html.includes("mstate[idx].op=Number(el.value)/100"),'particle and sparkle amount controls must update the live mode intensity');
+assert(html.includes("x.globalAlpha=reactiveFrameIntensity/100"),'Reactive Frame intensity must affect the rendered frame');
+assert(html.includes('smokeColor,reactiveFrameIntensity}')&&html.includes('s.reactiveFrameIntensity!==undefined'),'Reactive Frame intensity must persist and restore');
+assert(html.includes('function syncElementAmountControls()')&&html.includes('syncElementAmountControls();'),'Element amount controls must stay in sync with Visuals sliders and project restore');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
