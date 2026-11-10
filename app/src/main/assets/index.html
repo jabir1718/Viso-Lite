@@ -1929,10 +1929,10 @@ function specBands(){
 const SPEC_MODES=[['radial','Radial'],['ring','Ring'],['sphere','Sphere 3D'],['tunnel','Tunnel'],['mirror','Mirror'],['dual','Dual'],['wave','Wave'],['led','LED']];
 SPEC_MODES.forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;
   if(k==='radial')b.classList.add('on');
-  b.onclick=()=>{specMode=k;specShape=['ring','sphere','tunnel','mirror'].includes(k)?k:'circle';$('specShape').value=specShape;document.querySelectorAll('#specModes button').forEach(q=>q.classList.remove('on'));b.classList.add('on');};
+  b.onclick=()=>{snap();specMode=k;specShape=['ring','sphere','tunnel','mirror'].includes(k)?k:'circle';$('specShape').value=specShape;document.querySelectorAll('#specModes button').forEach(q=>q.classList.remove('on'));b.classList.add('on');};
   $('specModes').appendChild(b);});
 const SPEC_RANGES=[['full','Full'],['low','Low'],['balanced','Balanced'],['high','High'],['vocals','Vocals'],['changes','Changes']];
-SPEC_RANGES.forEach(([k,label])=>{const b=document.createElement('button');b.textContent=label;if(k===specRange)b.classList.add('on');b.onclick=()=>{specRange=k;specPrev.fill(0);document.querySelectorAll('#specRangeModes button').forEach(q=>q.classList.toggle('on',q===b));};$('specRangeModes').appendChild(b);});
+SPEC_RANGES.forEach(([k,label])=>{const b=document.createElement('button');b.textContent=label;if(k===specRange)b.classList.add('on');b.onclick=()=>{snap();specRange=k;specPrev.fill(0);document.querySelectorAll('#specRangeModes button').forEach(q=>q.classList.toggle('on',q===b));};$('specRangeModes').appendChild(b);});
 $('bSpec').onclick=e=>{specOn=!specOn;e.currentTarget.textContent='Spectrum: '+(specOn?'ON':'OFF');e.currentTarget.classList.toggle('on',specOn);};
 $('bSpecClr').onclick=()=>{for(let i=0;i<SPEC_N;i++){specPeak[i]=0;specPeakT[i]=99;}};
 function bindSpec(id,fn){const el=$(id);el.addEventListener('focus',()=>snap());el.addEventListener('pointerdown',()=>snap());el.oninput=e=>fn(+e.target.value);}
