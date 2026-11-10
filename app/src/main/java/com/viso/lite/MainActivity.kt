@@ -23,6 +23,10 @@ class MainActivity : ComponentActivity() {
         if (callback != null) {
             val uris = if (result.resultCode == RESULT_OK && result.data != null) {
                 WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data)
+                    ?: result.data.clipData?.let { clip ->
+                        Array(clip.itemCount) { index -> clip.getItemAt(index).uri }
+                    }
+                    ?: result.data.data?.let { uri -> arrayOf(uri) }
             } else null
             callback.onReceiveValue(uris)
         }
@@ -57,24 +61,42 @@ class MainActivity : ComponentActivity() {
                     if (callback == null || params == null) return false
                     fileCallback?.onReceiveValue(null)
                     fileCallback = callback
-                    val accepted = params.acceptTypes
-                        .flatMap { it.split(",") }
-                        .map { it.trim() }
-                        .filter { it.isNotEmpty() }
-                        .distinct()
-                        .toTypedArray()
-                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = if (accepted.size == 1) accepted[0] else "*/*"
-                        if (accepted.isNotEmpty()) putExtra(Intent.EXTRA_MIME_TYPES, accepted)
-                        putExtra(Intent.EXTRA_ALLOW_MULTIPLE, params.mode == FileChooserParams.MODE_OPEN_MULTIPLE)
+                    val intent = try {
+                        // Use WebView's own chooser intent so Android receives its expected
+                        // action, MIME filters, capture hints and single/multiple selection mode.
+                        params.createIntent()
+                    } catch (_: Exception) {
+                        Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "*/*"
+                            putExtra(
+                                Intent.EXTRA_ALLOW_MULTIPLE,
+                                params.mode == FileChooserParams.MODE_OPEN_MULTIPLE
+                            )
+                        }
                     }
                     return try {
                         filePicker.launch(intent)
                         true
                     } catch (_: Exception) {
-                        fileCallback = null
-                        false
+                        // Some OEM document providers reject GET_CONTENT; retry with
+                        // the platform document picker before returning failure to WebView.
+                        try {
+                            val fallback = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "*/*"
+                                putExtra(
+                                    Intent.EXTRA_ALLOW_MULTIPLE,
+                                    params.mode == FileChooserParams.MODE_OPEN_MULTIPLE
+                                )
+                            }
+                            filePicker.launch(fallback)
+                            true
+                        } catch (_: Exception) {
+                            fileCallback?.onReceiveValue(null)
+                            fileCallback = null
+                            false
+                        }
                     }
                 }
             }
