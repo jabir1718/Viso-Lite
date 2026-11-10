@@ -58,7 +58,7 @@ assert(html.includes('VISO clean mobile editor chrome: top actions, lower tool d
 assert(!html.includes('id="toolSearch"')&&!html.includes('id="toolFavorites"')&&!html.includes('id="toolFilters"'), 'unneeded top search and favorites controls must be removed');
 assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'top toolbar must include undo redo and export');
 assert(html.includes("bar.appendChild(dockNav)"), 'tool navigation must appear after grouped control panels at the bottom');
-assert(html.includes("const dockOrder=['media','text','audio','visualizer','elements','overlay','sticker','templates','background']"), 'tool dock must follow the grouped editor order and keep Background Video last');
+assert(html.includes("const dockOrder=['media','logo','audio','text','visualizer','elements','overlay','sticker','turning','tempo','templates','background']"), 'tool dock must follow the grouped editor order and keep Background Video last');
 assert(html.includes("const visoGroups={}"), 'legacy controls must be consolidated into grouped tool boxes');
 assert(html.includes("groupMeta={"), 'each grouped tool must have its own clear label and icon');
 assert(html.includes("toolGroupBody>.toolSubpanel"), 'existing working controls must be preserved inside their grouped tool box');
