@@ -623,6 +623,8 @@ body.preview-fullscreen #previewExit{display:block}
  }
  mergeGroup('Audio',['Audio Motion','Audio Frequency Response'],'audioPanel');
  mergeGroup('Visualizer',['Look','Visuals','Spectrum Studio','Symmetry','Colour','Mask shape','Layers · Tools box','Position','Shape','Video grade','Shape · Gradient · Motion'],'visualizerPanel');
+ const visualizerPanel=all().find(p=>p.id==='visualizerPanel');
+ if(visualizerPanel){const layers=document.createElement('div');layers.className='specLayerControls';layers.innerHTML='<div class="fxSubhead">VISUALIZER LAYERS</div><div class="row"><button id="bSpecLayerAdd" type="button">＋ Add layer</button><button id="bSpecLayerRemove" type="button">Remove layer</button></div><label><span>Selected layer</span><select id="selSpecLayer"></select></label><label><span>Layer enabled</span><input id="bSpecLayerEnabled" type="checkbox" checked></label><label><span>Layer colour</span><input id="specLayerColor" type="color" value="#8edcf3"></label><label><span>Outline colour</span><input id="specLayerOutlineColor" type="color" value="#ffffff"></label><label><span>Outline thickness</span><input id="sSpecLayerOutline" type="range" min="0" max="30" value="0"></label><label><span>Layer thickness</span><input id="sSpecLayerThickness" type="range" min="1" max="200" value="100"></label><label><span>Offset</span><input id="sSpecLayerOffset" type="range" min="-100" max="100" value="0"></label><label><span>Invert</span><input id="bSpecLayerInvert" type="checkbox"></label><div class="fxSubhead">LAYER TRANSFORM</div><label><span>X position</span><input id="sSpecLayerX" type="range" min="-50" max="50" value="0"></label><label><span>Y position</span><input id="sSpecLayerY" type="range" min="-50" max="50" value="0"></label><label><span>Rotation</span><input id="sSpecLayerRotation" type="range" min="-180" max="180" value="0"></label><label><span>Size</span><input id="sSpecLayerScale" type="range" min="10" max="200" value="100"></label>';visualizerPanel.appendChild(layers);}
  mergeGroup('Overlay FX',['Overlay','Overlay Effects · Motion FX','Progress Bar Studio','Surface Reflection','Film & Vintage','Atmosphere FX'],'overlayFxPanel');
  mergeGroup('Background',['Background','Background Drift'],'backgroundPanel');
  const tempo=all().find(p=>title(p)==='Beat · BPM Sync');if(tempo){tempo.id='tempoPanel';tempo.querySelector('h4').textContent='Tempo';}
@@ -1841,7 +1843,7 @@ function drawCustomLogo(ctx){
 
 const SPEC_N=200;
 const specRaw=new Uint8Array(SPEC_N),specSmooth=new Float32Array(SPEC_N),specPeak=new Float32Array(SPEC_N),specPeakT=new Uint8Array(SPEC_N);
-let specOn=false,specMode='radial',specRange='full',specBars=48,specResolution=96,specShape='circle',specStyle='bar',specSymmetry='none',specMaterial='solid',specLayerMode='web',specLayerBlend='stacked',specRad=42,specThick=100,specGlow=60,specLevel=100,specAtk=.55,specRel=.14,specPeakHold=10,specSpin=.25;
+let specOn=false,specMode='radial',specRange='full',specBars=48,specResolution=96,specShape='circle',specStyle='bar',specSymmetry='none',specMaterial='solid',specLayerMode='web',specLayerBlend='stacked',specLayers=[{id:1,enabled:true,color:'#8edcf3',outlineColor:'#ffffff',outline:0,thickness:100,offset:0,invert:false,x:0,y:0,rotation:0,scale:100}],selectedSpecLayerId=1,nextSpecLayerId=2,specRad=42,specThick=100,specGlow=60,specLevel=100,specAtk=.55,specRel=.14,specPeakHold=10,specSpin=.25;
 const specPrev=new Float32Array(SPEC_N);
 function specBands(){
   if(!an||!playing){for(let i=0;i<SPEC_N;i++)specRaw[i]=0;}
