@@ -406,3 +406,19 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Feature source commit `e916b511e5dae3c9cea83cf62c78bd7d6eb3a726` passed workflow #263 (ID `42849520675`). Regression-test commit `bb37ba27411562d38d52061132ab17161ec396f1` passed workflow #264 (ID `42849553313`).
 - This confirms automated source/build checks only. Actual perceived spin motion, touch control, undo/redo and performance remain pending device QA.
 - Next: implement remaining Spectrum controls (shake, trail, wave delay/reverse/gradient, glow mode/intensity sync), then complete tool-by-tool behaviour and export/save QA.
+
+
+## 34. Spectrum motion, glow and trail completion checkpoint — 2026-11-10
+
+- Added Spectrum shake enable/amount and wired the canvas transform to audio-responsive motion.
+- Added wave delay enable/time, reverse direction and selectable spectrum/rainbow/solid gradient. Fixed a renderer scope error in the gradient path by drawing each segment with a locally scoped gradient position.
+- Added glow modes (Soft, Neon, Core) and audio intensity sync; both affect actual renderer glow strength.
+- Added a bounded four-frame reusable spectrum history for visualizer trails, including adjustable trail strength. History buffers are cleared when the feature is toggled or restored disabled.
+- Reused a fixed 200-point wave buffer instead of allocating a new typed array on each frame to reduce garbage collection on mobile.
+- Added project state capture/restore and UI synchronization for new settings; added regression checks for controls, rendering, state persistence, bounded history and reusable buffers.
+- Regression test initially exposed a stale test assumption about the renderer function signature and ring branch; the test was updated to match the actual implementation without removing the feature checks.
+- Latest confirmed build: workflow #277, ID `42851394517`, commit `6cdd37944da0670adebc1976d4bcf832c80d9e4b`, success. Run #276 (ID `42851369268`) also succeeded.
+- Latest HTML blob SHA: `56b89329258e620d40d13d101631297f45dce853`.
+- APK artifact: `VISO-Studio-advanced-debug-apk`, artifact ID `13780247825`, ZIP digest `sha256:6ee4867373601208b83cd319566f3b1308c10b2dd94980f6832079e2b5dfc4de`. Extracted APK: 84,492,335 bytes; SHA-256 `4ef719d615ea4c49e25224749d73e5bad635929c2447f8f1137cd03c2639cf61`. The workflow's APK verification step confirmed package `com.viso.lite` and byte-identical packaged `assets/index.html` against the branch source; the downloaded artifact ZIP and APK ZIP both passed integrity tests.
+- This is automated build/package verification only; physical-device playback, visual appearance, heat, battery and touch QA are still pending.
+- Next: audit shape/style/symmetry/material/layer-mode behaviour and per-layer controls, then proceed through each dock group, project/template asset round-trip, undo/redo and export/audio sync. Do not release yet.
