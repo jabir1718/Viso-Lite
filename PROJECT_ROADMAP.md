@@ -332,3 +332,20 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Corrected the 2D recording fallback to scale the preview frame to the actual recording canvas dimensions. Previously it drew at full target dimensions, which could crop the frame when the fallback canvas was smaller.
 - Added regression assertions for both behaviours to `scripts/test-project-archive.mjs`. Android build/CI for these latest commits is pending.
 - This is source-level correction and automated regression coverage; actual recording output, quality and audio playback still require runtime verification.
+
+
+## 27. Reference-style editor workspace and tool dock — 2026-11-10
+
+- Reworked the editor controls from a long vertical stack into a horizontally scrollable tool dock. Each tool opens one focused panel, leaving the live preview more room and allowing new tools to be added without extending a giant settings list.
+- Removed the competing top category strip while retaining tool search and favorites; the dock itself is the primary tool navigation.
+- Moved the song monitor into the preview as a compact overlay instead of a separate full-width layout block.
+- Matched the reference editor's dark workspace treatment and made the preview preserve the selected canvas aspect ratio rather than forcing portrait dimensions.
+- Added automated checks for the dock, compact monitor, dark theme and adaptive aspect ratio.
+
+## 28. Unified spectrum/audio frame processing — 2026-11-10
+
+- Removed spectrum drawing from reusable background/media paint layers and now render it once in the main frame pipeline. This prevents the same spectrum from being redrawn every time those layers are composited.
+- Read the Web Audio frequency analyser once per animation frame and share that buffer with both beat-band and spectrum-band calculations instead of refreshing it repeatedly.
+- Reduced the particle pool to a responsive mobile-safe budget and skip particle simulation when the Dust visualizer is disabled.
+- Added regression assertions for one spectrum render, one analyser read per frame and the mobile particle budget.
+- Source-level and CI validation only. Real spectrum smoothness, heat/battery behaviour, touch interaction and playback/export still require runtime testing on the target Android device.
