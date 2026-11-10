@@ -525,13 +525,9 @@ assert(html.includes("objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,alp
 assert(html.includes("function bindStickerControl(id,key,convert=v=>v)")&&html.includes("el.addEventListener('pointerdown',()=>snap())"),'Sticker edits must participate in undo snapshots');
 assert(html.includes("...(objects.map((o,i)=>['overlay-'+i,o.file||VISO_ASSET_FILES.overlays[i]||null]))")&&html.includes("if(overlayAssetCount!==objects.length)"),'each Sticker source image must be embedded in project packages');
 
-const audioGroupAuditStart=html.indexOf("mergeGroup('Audio',['Audio Motion','Audio Frequency Response'],'audioPanel')");
-const audioGroupAuditEnd=html.indexOf("mergeGroup('Visualizer'",audioGroupAuditStart);
-assert(audioGroupAuditStart>=0&&audioGroupAuditEnd>audioGroupAuditStart,'Audio tool group must be constructed');
-const audioGroupAudit=html.slice(audioGroupAuditStart,audioGroupAuditEnd);
-assert(audioGroupAudit.includes("audioPanel=all().find(p=>p.id==='audioPanel')")&&audioGroupAudit.includes("audioUpload=document.getElementById('bA')"),'Audio upload button must be moved into the Audio group');
-assert(audioGroupAudit.includes("audioUpload.textContent='Upload / Replace Audio'"),'Audio group must clearly expose upload and replace');
-assert(html.includes("id=\"bLoop\"")&&html.includes("id=\"sBassGain\"")&&html.includes("id=\"sMidGain\"")&&html.includes("id=\"sHighGain\""),'Audio loop and frequency response controls must remain grouped and available');
+assert(!html.includes("mergeGroup('Audio'"), 'the recovered editor must not merge the original Audio panels');
+assert(html.includes('<h4>Audio Motion</h4>')&&html.includes('<h4>Audio Frequency Response</h4>'), 'original Audio Motion and Frequency Response panels must remain separate');
+assert(html.includes('id="bA"')&&html.includes('id="bLoop"')&&html.includes('id="sBassGain"')&&html.includes('id="sMidGain"')&&html.includes('id="sHighGain"'), 'audio upload, loop and frequency response controls must remain available');
 
 assert(html.includes('id="sTempoBpm"')&&html.includes('Manual BPM (0 = auto)'),'Tempo tool must provide a manual BPM adjustment with auto mode');
 assert(html.includes("$('sTempoBpm').oninput=e=>{bpm=Math.max(0,Math.min(240,Math.round(Number(e.target.value)||0)));updateBpm();}"),'manual BPM adjustment must update the live beat clock');
