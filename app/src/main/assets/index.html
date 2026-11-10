@@ -936,19 +936,19 @@ $('bLight').onclick=()=>{snap();lights.push({x:cx,y:cy,r:1,on:true,pin:-1});selL
 $('bLightDel').onclick=()=>{if(selLight>=0){snap();lights.splice(selLight,1);selLight=-1;}};
 $('bLightPin').onclick=()=>{if(selLight>=0){snap();lights[selLight].pin=selObj;}};
 
-$('bBgI').onclick=()=>$('fBgI').click();
+$('bBgI').onclick=()=>{snap();$('fBgI').click();};
 $('fBgI').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();
   im.onload=()=>{bgImg=im;bgUseVid=false;bgViz=false;bvid.pause();maskDirty=true;};im.src=URL.createObjectURL(f);};
-$('bBgV').onclick=()=>$('fBgV').click();
+$('bBgV').onclick=()=>{snap();$('fBgV').click();};
 $('fBgV').onchange=e=>{const f=e.target.files[0];if(!f)return;
   bvid.src=URL.createObjectURL(f);bvid.play();bgUseVid=true;bgViz=false;bgImg=null;maskDirty=true;};
-$('bBgX').onclick=()=>{bgImg=null;bgUseVid=false;bgViz=false;bvid.pause();bvid.removeAttribute('src');};
-$('bBgViz').onclick=e=>{bgViz=!bgViz;e.currentTarget.classList.toggle('on',bgViz);};
+$('bBgX').onclick=()=>{snap();bgImg=null;bgUseVid=false;bgViz=false;bvid.pause();bvid.removeAttribute('src');};
+$('bBgViz').onclick=e=>{snap();bgViz=!bgViz;e.currentTarget.classList.toggle('on',bgViz);};
 
-$('bI').onclick=()=>$('fI').click();
+$('bI').onclick=()=>{snap();$('fI').click();};
 $('fI').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();
   im.onload=()=>{img=im;useVid=false;vid.pause();maskDirty=true;};im.src=URL.createObjectURL(f);};
-$('bV').onclick=()=>$('fV').click();
+$('bV').onclick=()=>{snap();$('fV').click();};
 $('fV').onchange=e=>{const f=e.target.files[0];if(!f)return;
   vid.src=URL.createObjectURL(f);vid.play();useVid=true;img=null;maskDirty=true;};
 $('bO').onclick=()=>$('fO').click();
@@ -961,7 +961,7 @@ function guessMotion(n){n=(n||'').toLowerCase();
   if(/walk|man|woman|girl|boy|human|person|people|kid/.test(n))return'Walk';
   if(/money|cash|coin|note|dollar|rupee|gold|star/.test(n))return'Rain';return'Float';}
 
-$('bA').onclick=()=>$('fA').click();
+$('bA').onclick=()=>{snap();$('fA').click();};
 $('fA').onchange=e=>{const f=e.target.files[0];if(!f)return;
   if(!ctxA)ctxA=new(window.AudioContext||window.webkitAudioContext)();
   if(audio)audio.pause();
@@ -1776,7 +1776,7 @@ SYMS.forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;
 const symC=document.createElement('canvas'),symX=symC.getContext('2d');
 $('bVig').onclick=e=>{snap();vigOn=!vigOn;e.currentTarget.classList.toggle('on',vigOn);};
 $('bProg').onclick=e=>{snap();progOn=!progOn;e.currentTarget.classList.toggle('on',progOn);};
-$('bLogo').onclick=()=>$('fLogo').click();
+$('bLogo').onclick=()=>{snap();$('fLogo').click();};
 $('sLogoSize').oninput=e=>logoSize=+e.target.value;
 $('sLogoX').oninput=e=>logoX=+e.target.value;
 $('sLogoY').oninput=e=>logoY=+e.target.value;
@@ -1787,8 +1787,8 @@ $('bLogoVinyl').onchange=e=>logoVinyl=e.target.checked;$('sLogoVinylSpeed').onin
 $('bLogoColorKey').onchange=e=>{logoColorKeyOn=e.target.checked;rebuildLogoColorKey();};$('logoColorKeyColor').oninput=e=>{logoColorKey=e.target.value;rebuildLogoColorKey();};$('sLogoColorKeyTolerance').oninput=e=>{logoColorKeyTolerance=+e.target.value;rebuildLogoColorKey();};
 $('bLogoInk').onchange=e=>logoInkOn=e.target.checked;$('sLogoInkAmount').oninput=e=>logoInkAmount=+e.target.value;$('logoInkColor').oninput=e=>logoInkColor=e.target.value;
 $('fLogo').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{logoImg=im;rebuildLogoColorKey();};im.src=URL.createObjectURL(f);};
-$('bLogoX').onclick=()=>{logoImg=null;logoProcessedCanvas.width=logoProcessedCanvas.height=1;};
-$('bFont').onclick=()=>$('fFont').click();
+$('bLogoX').onclick=()=>{snap();logoImg=null;logoProcessedCanvas.width=logoProcessedCanvas.height=1;};
+$('bFont').onclick=()=>{snap();$('fFont').click();};
 function visoFontFamily(fileName,checksum){
  const base=String(fileName||'Custom').replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9_-]+/g,'_').slice(0,24)||'Custom';
  return 'VISOFont_'+base+'_'+(Number(checksum)>>>0).toString(16);
@@ -2570,8 +2570,8 @@ let vhsScan=32,vhsNoise=24,vhsJitter=18,vhsBleed=22;
 let shockStrength=58,shockSpeed=52,shockThickness=5,shockRgb=16;
 let lensAmount=42,lensFocus=58,lensBokeh=22,lensBlur=28;
 $('selBgFit').onchange=e=>{snap();bgFitMode=e.target.value;maskDirty=true;};
-$('bBgDrift').onclick=e=>{bgDriftOn=!bgDriftOn;e.currentTarget.textContent='Background drift: '+(bgDriftOn?'ON':'OFF');e.currentTarget.classList.toggle('on',bgDriftOn);};
-$('bDriftBeat').onclick=e=>{bgBeatSync=!bgBeatSync;e.currentTarget.textContent='Beat sync: '+(bgBeatSync?'ON':'OFF');e.currentTarget.classList.toggle('on',bgBeatSync);};
+$('bBgDrift').onclick=e=>{snap();bgDriftOn=!bgDriftOn;e.currentTarget.textContent='Background drift: '+(bgDriftOn?'ON':'OFF');e.currentTarget.classList.toggle('on',bgDriftOn);};
+$('bDriftBeat').onclick=e=>{snap();bgBeatSync=!bgBeatSync;e.currentTarget.textContent='Beat sync: '+(bgBeatSync?'ON':'OFF');e.currentTarget.classList.toggle('on',bgBeatSync);};
 $('sBgDriftSpeed').oninput=e=>bgDriftSpeed=+e.target.value;
 $('sBgDriftRot').oninput=e=>bgDriftRot=+e.target.value;
 $('sBgDriftTravel').oninput=e=>bgDriftTravel=+e.target.value;
