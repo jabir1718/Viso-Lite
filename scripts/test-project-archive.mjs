@@ -65,11 +65,16 @@ assert(html.includes("mergeGroup('Visualizer',['Look','Visuals','Spectrum Studio
 assert(html.includes("mergeGroup('Overlay FX',['Overlay','Overlay Effects · Motion FX'"), 'overlay effects must be consolidated into one Overlay FX tool');
 assert(html.includes("logoPanel.id='logoPanel'")&&html.includes("stickerPanel.id='stickerPanel'"), 'Logo and Sticker must have independent tools');
 assert(html.includes("tempo.id='tempoPanel'")&&html.includes("elements.id='elementsPanel'"), 'Tempo and Elements must have independent tools');
-assert(html.includes('id="turningPointPanel"')&&html.includes('id="bAddTurningPoint"')&&html.includes('id="bRemoveTurningPoint"'), 'Turning Point must provide add and remove controls');
+assert(html.includes("turningPanel.id='turningPointPanel'")&&html.includes('id="bAddTurningPoint"')&&html.includes('id="bRemoveTurningPoint"'), 'Turning Point must provide add and remove controls');
 assert((html.match(/<option value="(?:fade|crossfade|flash|glitch|shake|rgb|blur|zoom|spin|wipe-left|wipe-right|wipe-up|wipe-down|circle|diamond|pixel|scanline|invert|light-leak|vhs)">/g)||[]).length>=20, 'Turning Point must provide twenty transition types');
 assert(html.includes('function drawTurningPointTransitions(ctx)')&&html.includes('drawTurningPointTransitions(x)'), 'turning point transitions must render in the shared preview and export frame');
 assert(html.includes('turningPoints:turningPoints.map')&&html.includes('turningPoints=Array.isArray(d.turningPoints)'), 'turning points must save and restore with the project');
 assert(html.includes('id="bMetronomeSound"')&&html.includes('function playMetronomeTick'), 'Tempo must provide audible metronome control');
+assert(html.includes('id="bTempoSyncBar"')&&html.includes("$('bTempoSyncBar').onchange"), 'Tempo must provide an independent sync-bar toggle');
+assert(['bElementParticles','bElementSparkles','bElementLight','bElementReactiveFrame'].every(id=>html.includes('id="'+id+'"')), 'Elements tool must expose particles, sparkles, lights and reactive frame');
+assert(['logoArtworkShape','bLogoVinyl','bLogoColorKey','bLogoInk'].every(id=>html.includes('id="'+id+'"')), 'Logo tool must expose shape, vinyl, colour key and ink controls');
+assert(html.includes('function rebuildLogoColorKey()')&&html.includes('logoProcessedCtx.putImageData'), 'logo colour key must process the uploaded image rather than remain a decorative control');
+assert(html.includes('logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor'), 'logo effects must persist in project state');
 assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'undo, redo and export must be available in the top toolbar');
 assert(html.includes("$('bar').appendChild(dockNav)"), 'tool dock must sit after the selected control panel at the bottom');
 assert(html.includes("const dockOrder=['Media','Logo','Audio','Text','Visualizer','Elements','Overlay FX','Sticker','Turning Point','Tempo','Templates · Editable Projects','Background']"), 'background tools must be placed at the end of the bottom tool dock');
