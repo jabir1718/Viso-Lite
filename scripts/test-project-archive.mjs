@@ -598,4 +598,8 @@ assert(html.includes("onchange=e=>{snap();frOn=e.target.checked"),'Reactive Fram
 assert(html.includes("sReactiveFrameIntensity').addEventListener('pointerdown',()=>snap())"),'Reactive Frame intensity must be undoable');
 assert(html.includes("#tFr{display:none!important;}"),'Reactive Frame must have one visible control in the Elements group');
 assert(html.includes("r.addEventListener('pointerdown',()=>snap())"),'Visual mode intensity sliders must be undoable');
+
+assert(html.includes("$('bar').addEventListener('pointerdown',e=>{if(e.target.matches('input,select,textarea'))snap();},true)"),'all current and dynamically added editor controls must snapshot before pointer edits');
+assert(html.includes("$('bar').addEventListener('focusin',e=>{if(e.target.matches('input,select,textarea'))snap();},true)"),'keyboard edits to editor controls must snapshot before focus changes');
+assert(html.includes('function bind(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);}'),'generic slider binding must not snapshot after the value has already changed');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
