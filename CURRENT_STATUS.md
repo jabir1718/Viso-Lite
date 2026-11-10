@@ -9,20 +9,20 @@ Permanent roadmap: `PROJECT_ROADMAP.md`
 ## Latest verified Spectrum implementation
 - Glow enable/blur/scale/core colour, Glow mode (Soft/Neon/Core), live-audio intensity sync.
 - Point count/width, audio multiplier, rainbow gradient, shadow enable/colour/expansion.
-- Per-layer spin enable/force/momentum/speed.
+- Per-layer spin enable/force/momentum/speed; layer transforms, colour source, outline, thickness, offset and invert.
 - Spectrum shake, wave delay/time, reverse wave, spectrum/rainbow/solid wave gradient.
 - Bounded 4-frame trail history with adjustable strength; fixed-size reusable wave buffer.
-- All new Spectrum settings are in advanced project state capture/restore. Spectrum sliders, toggles, colour/select controls and per-layer controls capture undo snapshots before edits.
-- Regression tests cover control presence, renderer/state wiring, restore and undo hooks.
+- Spectrum settings are included in advanced project state capture/restore; slider, toggle, colour, select and per-layer controls capture undo snapshots.
+- **New fix:** radial, ring, sphere, tunnel, mirror, dual, wave and dot-style renderer branches now use the shared processed spectrum response, so invert, multiplier and uniform response are applied consistently rather than being ignored by several shapes.
+- Regression test asserts all shape branches use the shared response path.
 
 ## Latest verified CI and APK
-- Latest test commit: `af0164f48ffd0a34ad91d015c893262920531454`.
-- CI run #289, ID `42853217150`, conclusion **success**. Run #288 (feature code) also succeeded.
-- APK artifact ID: `13781557416`, `VISO-Studio-advanced-debug-apk`.
-- Downloaded outer ZIP and inner APK ZIP both passed integrity checks.
-- APK size: 84,492,415 bytes. APK SHA-256: `8cafe76ae1ecdb0fb97e45232583d35ff6f51094aadcc81e3bdc044af508287e`.
-- APK contains `assets/index.html` (273,301 bytes); workflow packaged APK verification passed.
-- Physical-device install/runtime QA is not performed.
+- Source commit: `d7d5a83e6bcdbc79f4d02cf3de49ede4001f173d`.
+- Regression-test commit: `a813bf5ae012261384f7dcaaa77e41d7ff3de02c`.
+- CI run #542, ID `42854308879`, exact head commit `a813bf5ae012261384f7dcaaa77e41d7ff3de02c`, conclusion **success**.
+- HTML/JavaScript validation, project archive regression tests, Android debug APK build, packaged APK verification and artifact upload all passed.
+- Artifact: `VISO-Studio-advanced-debug-apk`, artifact ID `13781912155`, size 32,188,351 bytes, SHA-256 digest of outer artifact ZIP `c9a1a50ceb4aa3abd42bbda555b49334bbb98d94b2a90c9052c5a29360106615`.
+- Workflow verified package `com.viso.lite` and packaged HTML/source integrity. Physical-device install/runtime QA is not performed.
 
 ## Dock architecture
 12 bottom dock groups: Media, Logo, Audio, Text, Visualizer, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video. Background Video last; panels above dock; Export top-right.
