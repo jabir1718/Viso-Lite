@@ -2478,9 +2478,18 @@ function drawTurningPointTransitions(ctx){
 function renderTurningPointList(){
  const list=$('turningPointList');if(!list)return;list.innerHTML='';
  if(!turningPoints.length){list.textContent='No turning points yet. Move the playhead and add one.';return;}
- turningPoints.forEach((point,index)=>{const button=document.createElement('button');button.type='button';button.className='turningPointItem'+(index===selectedTurningPoint?' active':'');button.textContent=(index+1)+'. '+point.time.toFixed(2)+'s · '+point.type+' · '+(point.duration/1000).toFixed(2)+'s';button.onclick=()=>{selectedTurningPoint=index;turningTransition=point.type;turningDuration=point.duration;$('sTurningTransition').value=turningTransition;$('sTurningDuration').value=turningDuration;renderTurningPointList();};list.appendChild(button);});
+ const timelineMax=Math.max(1,Number(audio?.duration)||60);
+ turningPoints.forEach((point,index)=>{
+  const row=document.createElement('div');row.className='turningPointRow';
+  const button=document.createElement('button');button.type='button';button.className='turningPointItem'+(index===selectedTurningPoint?' active':'');button.textContent=(index+1)+'. '+point.time.toFixed(2)+'s · '+point.type+' · '+(point.duration/1000).toFixed(2)+'s';button.onclick=()=>{selectedTurningPoint=index;turningTransition=point.type;turningDuration=point.duration;$('sTurningTransition').value=turningTransition;$('sTurningDuration').value=turningDuration;renderTurningPointList();};
+  const label=document.createElement('label');label.className='turningPointTime';const caption=document.createElement('span');caption.textContent='Timeline · '+point.time.toFixed(2)+'s';
+  const timeSlider=document.createElement('input');timeSlider.type='range';timeSlider.min='0';timeSlider.max=String(timelineMax);timeSlider.step='.01';timeSlider.value=String(Math.min(timelineMax,point.time));timeSlider.addEventListener('focus',()=>snap());timeSlider.addEventListener('pointerdown',()=>snap());
+  timeSlider.addEventListener('input',()=>{point.time=Number(timeSlider.value);caption.textContent='Timeline · '+point.time.toFixed(2)+'s';});
+  timeSlider.addEventListener('change',()=>{turningPoints.sort((left,right)=>left.time-right.time);selectedTurningPoint=turningPoints.indexOf(point);renderTurningPointList();});
+  label.append(caption,timeSlider);row.append(button,label);list.appendChild(row);
+ });
 }
-$('sTurningTransition').onchange=e=>{turningTransition=e.target.value;if(selectedTurningPoint>=0){snap();turningPoints[selectedTurningPoint].type=turningTransition;renderTurningPointList();}};
+$('sTurningTransition').onchange=e=>{snap();turningTransition=e.target.value;if(selectedTurningPoint>=0){turningPoints[selectedTurningPoint].type=turningTransition;renderTurningPointList();}};
 $('sTurningDuration').onfocus=()=>snap();
 $('sTurningDuration').oninput=e=>{turningDuration=+e.target.value;if(selectedTurningPoint>=0){turningPoints[selectedTurningPoint].duration=turningDuration;renderTurningPointList();}};
 $('bAddTurningPoint').onclick=()=>{if(!audio){$('turningPointList').textContent='Load audio first, then add a point at the playhead.';return;}const time=audio.currentTime;if(turningPoints.some(p=>Math.abs(p.time-time)<.12)){$('turningPointList').textContent='A turning point already exists at this time.';return;}snap();turningPoints.push({time,type:turningTransition,duration:turningDuration});turningPoints.sort((a,b)=>a.time-b.time);selectedTurningPoint=turningPoints.findIndex(p=>p.time===time);renderTurningPointList();};
