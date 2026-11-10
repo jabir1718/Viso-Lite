@@ -96,17 +96,15 @@ assert(html.indexOf('snap();',html.indexOf("#visoTemplates [data-template]"))<ht
 assert(html.includes('templateGrid.portraitGrid{grid-template-columns:repeat(3,minmax(0,1fr))}'), 'portrait templates must use a compact three-column gallery');
 for (const key of ['aura','romance','vhs','club','minimal','phonk','neon','cosmic','city','fire','snow','pride','rose','storm']) assert(html.includes('data-template="'+key+'"'), 'template card must exist: '+key);
 
-assert(html.includes('#bar>.toolGroupPanel.dock-active{display:flex!important}'), 'only the selected grouped tool panel should occupy the editor dock');
+assert(html.includes('#bar>.panel{display:flex!important;'), 'legacy tool panels must remain visible in the scrollable editor');
 assert(html.includes('canvas{aspect-ratio:auto!important;width:auto!important;height:auto!important;'), 'preview must preserve selected landscape, square or portrait aspect ratio');
 assert(html.includes('VISO clean mobile editor chrome: top actions, lower tool dock'), 'editor must use clean mobile editor chrome');
 assert(!html.includes('id="toolSearch"')&&!html.includes('id="toolFavorites"')&&!html.includes('id="toolFilters"'), 'unneeded top search and favorites controls must be removed');
 assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'top toolbar must include undo redo and export');
-assert(html.includes("bar.appendChild(dockNav)"), 'tool navigation must appear after grouped control panels at the bottom');
-assert(html.includes("const dockOrder=['media','logo','audio','text','visualizer','elements','overlay','sticker','turning','tempo','templates','background']"), 'tool dock must follow the grouped editor order and keep Background Video last');
-assert(html.includes("const visoGroups={}"), 'legacy controls must be consolidated into grouped tool boxes');
-assert(html.includes("groupMeta={"), 'each grouped tool must have its own clear label and icon');
-assert(html.includes("toolGroupBody>.toolSubpanel"), 'existing working controls must be preserved inside their grouped tool box');
-assert(html.includes("panel.classList.remove('collapsed');panel.classList.add('toolSubpanel')"), 'grouped controls must not inherit collapsed hidden state');
+assert(!html.includes("const dockNav=document.createElement('div')"), 'the recovered editor must not replace the old panel layout with a new bottom dock');
+assert(!html.includes("const dockOrder=["), 'the recovered editor must retain the original scrollable panel order');
+assert(html.includes("panel.classList.remove('collapsed','toolSubpanel','dock-active')"), 'all original panels must be independently accessible and expanded');
+assert(html.includes("panel.style.display='flex'"), 'all original panels must remain visible in the editor scroll area');
 assert(html.includes("if(t.includes('audio'))return 'audio'")&&html.includes("if(t.includes('beat')||t.includes('bpm')||t.includes('tempo'))return 'tempo'"), 'audio and tempo settings must be categorized into their own tool boxes');
 assert(html.includes("if(t.includes('overlay fx')||t.includes('overlay effects')||t.includes('progress bar')"), 'overlay effects must be categorized together');
 assert(html.includes("logoPanel.id='logoPanel'")&&html.includes("stickerPanel.id='stickerPanel'"), 'Logo and Sticker must have independent tools');
@@ -131,13 +129,10 @@ assert(html.includes('function formatStudioTimer()')&&html.includes('layer.timer
 assert(html.includes('extraTextLayers:extraTextLayers.map(layer=>({...layer}))')&&html.includes('extraTextLayers=Array.isArray(d.extraTextLayers)'), 'additional text boxes must save and restore with editable settings');
 assert(html.includes("'Overlay FX':{stage:'overlay'")&&html.includes("'Logo':{stage:'overlay'")&&html.includes("'Sticker':{stage:'scene'")&&html.includes("'Tempo':{stage:'overlay'"), 'merged tool panels must remain connected to the original render pipeline');
 assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'undo, redo and export must be available in the top toolbar');
-assert(html.includes("bar.appendChild(dockNav)"), 'tool dock must sit after grouped control panels at the bottom');
-assert(html.includes("const dockOrder=['media','logo','audio','text','visualizer','elements','overlay','sticker','turning','tempo','templates','background']"), 'grouped dock must keep Background Video last and expose Logo, Turning Point and Tempo');
-assert(html.includes("$('topExport').addEventListener('click',()=>activateDockPanel(exportPanel))"), 'top export action must open the export settings panel');
-assert(!html.includes('<h4>Auto + Lock</h4>')&&!html.includes("$('bAuto').onclick"), 'legacy Auto + Lock panel and actions must be removed');
-assert(html.includes('<h4>Audio Frequency Response</h4>\n    <div class="row"><button id="bLoop"'), 'song loop control must live inside the Audio tool');
-assert(html.includes('#monitorDock>.subhead{display:none!important}'), 'song monitor must be compacted into the preview rather than consuming editor space');
-assert(html.includes('#monitorDock>.subhead{display:none!important}'), 'song monitor must be compacted into the preview rather than consuming editor space');
+assert(html.includes("$('topExport').addEventListener('click',()=>exportPanel?.scrollIntoView"), 'top export action must open the original export settings panel');
+assert(html.includes('<h4>Auto + Lock</h4>')&&html.includes("$('bAuto').onclick")&&html.includes("$('sAuto').oninput"), 'original Auto + Lock controls and handlers must be restored');
+assert(html.includes('SONG & EXPORT MONITOR')&&html.includes('id="bLoop"')&&html.includes('id="bStopAtEnd"'), 'song loop and stop-at-end controls must be restored in the full monitor strip');
+assert(html.includes('#monitorDock{position:static!important;'), 'song and export monitor must remain visible beneath the canvas');
 
 const specNormAuditStart = html.indexOf('function drawSpectrum(ctx,scale)');
 const spectrumLayerStart = html.indexOf('function drawSpectrumLayer(ctx,scale,layer', specNormAuditStart);
@@ -513,11 +508,8 @@ const dockCategorySandbox={};
 vm.runInNewContext(html.slice(dockCategoryStart,dockCategoryEnd),dockCategorySandbox,{timeout:2000});
 const expectedDockCategories=[['Media','media'],['Logo','logo'],['Audio','audio'],['Text','text'],['Visualizer','visualizer'],['Elements','elements'],['Overlay FX','overlay'],['Sticker','sticker'],['Turning Point','turning'],['Tempo','tempo'],['Templates · Editable Projects','templates'],['Background','background']];
 expectedDockCategories.forEach(([title,category])=>assert.equal(dockCategorySandbox.visoToolCategory(title),category,'dock group '+title+' must map to '+category));
-const dockOrderStart=html.indexOf('const dockOrder=[');
-const dockOrderEnd=html.indexOf('];',dockOrderStart);
-assert(dockOrderStart>=0&&dockOrderEnd>dockOrderStart,'12-group dock order must exist');
-const actualDockOrder=[...html.slice(dockOrderStart,dockOrderEnd).matchAll(/'([^']+)'/g)].map(match=>match[1]);
-assert.deepEqual(actualDockOrder,['media','logo','audio','text','visualizer','elements','overlay','sticker','turning','tempo','templates','background'],'dock order must preserve the 12 requested tool groups');
+assert(!html.includes("const dockOrder=["), 'the original editor must not impose a replacement dock order');
+assert(html.includes("const bar=$('bar');")&&html.includes("visoPanels.forEach(panel=>{"), 'the original editor must retain its complete scrollable panel collection');
 
 const textPanelAudit=html.slice(html.indexOf("Text · Logo Studio"),html.indexOf("function drawLights"));
 assert(textPanelAudit.includes('TRACK NAME')&&textPanelAudit.includes('ARTIST'),'Text tool must have separate Track Name and Artist controls');
