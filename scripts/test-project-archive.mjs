@@ -447,7 +447,7 @@ assert.equal(exportSandbox.loopSong,true);assert.equal(exportSandbox.stopAtSongE
 
 
 const snapStart=html.indexOf('function snap(){');
-const snapEnd=html.indexOf('function apply(s)',snapStart);
+const snapEnd=html.indexOf('\n',snapStart);
 assert(snapStart>=0&&snapEnd>snapStart,'guarded undo snapshot function must exist');
 let snapshotCalls=0;
 const snapSandbox={restoringState:true,captureProjectState:()=>{snapshotCalls++;return {state:1};},undo:[],redo:[],objects:[],objectSnapshotCache:{set(){},delete(){}}};
