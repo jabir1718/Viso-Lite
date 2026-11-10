@@ -6,31 +6,26 @@ Working branch: `viso/advanced-studio-ui`
 Main source: `app/src/main/assets/index.html`
 Permanent roadmap: `PROJECT_ROADMAP.md`
 
-## Latest verified implementation
-- Advanced Spectrum response: glow enable/blur/scale/core colour, Soft/Neon/Core glow modes, audio intensity sync, point count/width, multiplier, rainbow gradient, shadow enable/colour/expansion.
-- Spectrum motion: audio-responsive shake, wave delay/time, reverse direction and spectrum/rainbow/solid wave gradient.
-- Spectrum trail: adjustable afterimages using a bounded four-frame reusable history buffer; clears stale history when disabled/restored.
-- Wave rendering uses a reusable 200-point typed array rather than allocating a new array per frame.
-- Visualizer Layers: independent spin enable, force, momentum and speed; per-layer state is preserved and animated rotation is applied independently.
-- New spectrum controls are connected to project state capture/restore and restore-time UI synchronization; regression tests cover renderer wiring and persistence.
-
-## Latest verified CI and APK
-- Run #277 / ID `42851394517`: success on commit `6cdd37944da0670adebc1976d4bcf832c80d9e4b`.
-- Run #276 / ID `42851369268`: success.
-- Latest source blob SHA: `56b89329258e620d40d13d101631297f45dce853`.
-- APK artifact ID: `13780247825`; artifact ZIP digest: `sha256:6ee4867373601208b83cd319566f3b1308c10b2dd94980f6832079e2b5dfc4de`.
-- Extracted APK: 84,492,335 bytes; SHA-256 `4ef719d615ea4c49e25224749d73e5bad635929c2447f8f1137cd03c2639cf61`.
-- Workflow verified package ID `com.viso.lite` and exact equality between packaged `assets/index.html` and branch source. Downloaded artifact ZIP and APK ZIP integrity tests passed.
+## Latest verified Spectrum implementation
+- Glow enable/blur/scale/core colour, Glow mode (Soft/Neon/Core), live-audio intensity sync.
+- Point count/width, audio multiplier, rainbow gradient, shadow enable/colour/expansion.
+- Per-layer spin enable/force/momentum/speed.
+- Spectrum shake, wave delay/time, reverse wave, spectrum/rainbow/solid wave gradient.
+- Bounded 4-frame trail history with adjustable strength; fixed-size reusable wave buffer.
+- New settings are wired to renderer and advanced state capture/restore; regression tests cover control/state/render integration.
+- Latest verified CI: run #278, ID `42851839470`, exact commit `0f8ad3028a5d5ff09d1f3cb94940cacdca347fd3`, success.
+- Latest APK artifact ID: `13779639787`; must still be downloaded and checked before final release.
+- Older failures #272–#275 were stale Ring-renderer test assertions; corrected checks and later runs #276–#278 passed.
 
 ## Dock architecture
 12 bottom dock groups: Media, Logo, Audio, Text, Visualizer, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video. Background Video last; panels above dock; Export top-right.
 
 ## Not complete
-- Audit all spectrum shapes, styles, symmetry, materials, layer modes/blends and per-layer behaviour beyond static assertions.
-- Full behaviour audit for all 12 groups and original VISO features.
-- Undo/redo, project/template asset round-trip, preview/export parity and output/audio verification.
-- Physical Android device QA: install, media selection, playback, export, layout/touch, heat/battery, startup and stability.
-- Aspectrum reference APK was malformed/truncated; only recoverable metadata is available, so exact UI parity is not yet proven.
+- Validate spectrum trail visually/performance; add undo/redo coverage for all newly added Spectrum settings.
+- Audit remaining material-specific visualizer controls and exact Aspectrum parity.
+- Full end-to-end audit of Audio, Logo, Text, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video and original VISO features.
+- Project/template asset round-trip, preview/export parity, video/audio sync and full export verification.
+- Physical Android QA: install, media selection, playback, export, touch/layout, heat/battery, startup/stability.
 
 ## Safety rules
 - Preserve `main` and uploaded baseline.
