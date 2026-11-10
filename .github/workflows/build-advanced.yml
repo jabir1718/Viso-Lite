@@ -66,6 +66,13 @@ jobs:
           for removed in ("toolSearch", "toolFavorites", "toolFilters", "bAuto", "kCol", "kVis", "kShp", "kSwy"):
               if f'id="{removed}"' in html:
                   raise SystemExit(f"Removed clutter control is still present: {removed}")
+          # Custom logo must render once through the dedicated Logo tool, never again in the legacy Overlay stage.
+          if html.count("drawCustomLogo(ctx)") != 2:
+              raise SystemExit("Custom logo must have one function definition and exactly one render call")
+          if "'Overlay':{stage:'overlay',order:10,render:ctx=>{drawVignette(ctx);drawProgress(ctx);drawCustomLogo(ctx);}}" in html:
+              raise SystemExit("Legacy Overlay stage still draws the custom logo twice")
+          if "'Logo':{stage:'overlay',order:65,render:ctx=>drawCustomLogo(ctx)}" not in html:
+              raise SystemExit("Dedicated Logo render stage is missing")
           for required_source in (
               "VISO_TOOL_REGISTRY", "viso-project-v3", "function visoZip",
               "function visoUnzip", "function visoCRC32", "Project asset checksum failed",
