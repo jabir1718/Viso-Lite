@@ -291,7 +291,7 @@ const exportLists = {
 const exportSandbox = {
   aspect:'9:16',baseRes:1080,FPS:30,quality:100,formatChoice:'auto',loopSong:true,stopAtSongEnd:false,
   audio:{loop:true},fmtButton:makeButton('Auto format'),$:(id)=>exportControls[id],
-  document:{querySelectorAll:selector=>exportLists[selector]||[]},setRes(){exportSandbox.setResCalls=(exportSandbox.setResCalls||0)+1;}
+  document:{querySelectorAll:selector=>exportLists[selector]||[]},setRes(){}
 };
 vm.runInNewContext(html.slice(exportStart,exportEnd),exportSandbox,{timeout:2000});
 exportSandbox.restoreVISOExportState({aspect:'16:9',baseRes:2160,FPS:60,quality:130,formatChoice:'webm',loopSong:false,stopAtSongEnd:true});
