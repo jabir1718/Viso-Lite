@@ -610,4 +610,7 @@ for(const [id,state] of [['bVhs','vhsOn'],['bShock','shockOn'],['bLens','lensOn'
 
 for(const [id,state] of [['bBgDrift','bgDriftOn'],['bDriftBeat','bgBeatSync'],['bBgViz','bgViz']])assert(html.includes("$('"+id+"').onclick=e=>{snap();"+state+"=!"+state+";"),id+' must snapshot before changing Background state');
 for(const id of ['bBgX','bBgI','bBgV','bI','bV','bA','bLogo','bLogoX','bFont'])assert(html.includes("$('"+id+"').onclick=()=>{snap();"),id+' must snapshot before clearing or replacing an imported asset');
+
+for(const [id,state] of [['tBg','bgOn'],['tPh','phOn'],['tMask','maskOn'],['tBvm','bgVizMask']])assert(html.includes("$('"+id+"').onclick=e=>{snap();"+state+"=!"+state+";"),id+' must snapshot before toggling the media stage');
+for(const id of ['bL','bRt','bU','bD','bBig','bSm','bMediaClear','mL','mR','mU','mD','mBig','mSm','mRot','mRst','bZup','bZdn'])assert(html.includes("$('"+id+"').onclick=()=>{snap();"),id+' must snapshot before changing media/mask transform state');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
