@@ -82,3 +82,12 @@ The original independent, vertically scrollable editor panels are restored; the 
 - CI run #414 `42887881938`: HTML/JS, archive tests, Android build, packaged APK verification and upload all successful.
 - APK SHA-256: `7e881514a7ee7ae7008ec3583d455524d5d4b0a11c0ed6abd27d7444ae56bdf2`; artifact ID `13797372054`.
 - Device QA remains open; this is not a production-signed release.
+
+
+## Media picker + Audio UI repair — CI #425
+- Media picker repaired for Photo, Video, Audio, PNG, Background, Logo, Font and .viso project import. Uses WebView `showPicker()` / click fallback, off-screen file inputs and Android `FileChooserParams.createIntent()` with ACTION_OPEN_DOCUMENT fallback.
+- Undo snapshot now occurs after the user actually selects a file; picker launch remains directly inside the tap gesture.
+- Removed bottom Song & Export Monitor card. Song/export status, Loop Song and Stop-at-end controls moved into Audio Motion.
+- Branch head: `4724f9be579475c1852859836d43f8ff2b933e7e`; CI #425 / `42894937402` successful.
+- APK SHA-256: `b48764a939a6dee37f03cd81df2131f330d582a80f5a635eb432b2ee3725ac38`; artifact ID `13799752934`.
+- Real Android file selection and import still require owner device QA; do not claim verified on device.
