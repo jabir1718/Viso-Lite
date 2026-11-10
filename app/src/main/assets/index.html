@@ -2207,7 +2207,7 @@ async function restoreVISOProjectAssets(project,entries){
  const assets=project.assets||[],byKind={},layerState=project.settings?.layers||{};
  assets.forEach(meta=>{const data=entries[meta.name];if(data)byKind[meta.kind]={meta,data};});
  const makeFile=({meta,data})=>new File([data],meta.fileName||meta.name.split('/').pop(),{type:meta.mime||'application/octet-stream'});
- const overlayMeta=assets.filter(a=>a.kind.startsWith('overlay-')),prepared=[];
+ const overlayMeta=assets.filter(a=>a.kind.startsWith('overlay-')).sort((a,b)=>Number(a.kind.slice(8))-Number(b.kind.slice(8))),prepared=[];
  for(let i=0;i<overlayMeta.length;i++){
   const meta=overlayMeta[i],data=entries[meta.name],file=makeFile({meta,data}),url=URL.createObjectURL(file),im=new Image();
   try{await new Promise((resolve,reject)=>{im.onload=resolve;im.onerror=()=>reject(new Error('Overlay image failed: '+file.name));im.src=url;});}
