@@ -66,10 +66,10 @@ assert(html.includes("mergeGroup('Overlay FX',['Overlay','Overlay Effects · Mot
 assert(html.includes("logoPanel.id='logoPanel'")&&html.includes("stickerPanel.id='stickerPanel'"), 'Logo and Sticker must have independent tools');
 assert(html.includes("tempo.id='tempoPanel'")&&html.includes("elements.id='elementsPanel'"), 'Tempo and Elements must have independent tools');
 assert(html.includes('id="turningPointPanel"')&&html.includes('id="bAddTurningPoint"')&&html.includes('id="bRemoveTurningPoint"'), 'Turning Point must provide add and remove controls');
-assert((t.match(/<option value="(?:fade|crossfade|flash|glitch|shake|rgb|blur|zoom|spin|wipe-left|wipe-right|wipe-up|wipe-down|circle|diamond|pixel|scanline|invert|light-leak|vhs)">/g)||[]).length>=20, 'Turning Point must provide twenty transition types');
-assert(t.includes('function drawTurningPointTransitions(ctx)')&&t.includes('drawTurningPointTransitions(x)'), 'turning point transitions must render in the shared preview and export frame');
-assert(t.includes('turningPoints:turningPoints.map')&&t.includes('turningPoints=Array.isArray(d.turningPoints)'), 'turning points must save and restore with the project');
-assert(t.includes('id="bMetronomeSound"')&&t.includes('function playMetronomeTick'), 'Tempo must provide audible metronome control');
+assert((html.match(/<option value="(?:fade|crossfade|flash|glitch|shake|rgb|blur|zoom|spin|wipe-left|wipe-right|wipe-up|wipe-down|circle|diamond|pixel|scanline|invert|light-leak|vhs)">/g)||[]).length>=20, 'Turning Point must provide twenty transition types');
+assert(html.includes('function drawTurningPointTransitions(ctx)')&&html.includes('drawTurningPointTransitions(x)'), 'turning point transitions must render in the shared preview and export frame');
+assert(html.includes('turningPoints:turningPoints.map')&&html.includes('turningPoints=Array.isArray(d.turningPoints)'), 'turning points must save and restore with the project');
+assert(html.includes('id="bMetronomeSound"')&&html.includes('function playMetronomeTick'), 'Tempo must provide audible metronome control');
 assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'undo, redo and export must be available in the top toolbar');
 assert(html.includes("$('bar').appendChild(dockNav)"), 'tool dock must sit after the selected control panel at the bottom');
 assert(html.includes("const dockOrder=['Media','Logo','Audio','Text','Visualizer','Elements','Overlay FX','Sticker','Turning Point','Tempo','Templates · Editable Projects','Background']"), 'background tools must be placed at the end of the bottom tool dock');
