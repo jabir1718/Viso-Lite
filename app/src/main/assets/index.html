@@ -113,6 +113,19 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
 #toolEmpty.show{display:block}
 @media(max-width:390px){#studioHeader{padding:7px 8px 6px}.brandCopy span{font-size:6px}.brandLive{font-size:7px;padding:4px 6px}.navAction{padding:0 7px!important}#toolCount{min-width:30px;font-size:7px}.toolFilter{padding:0 8px!important}}
 @media(max-height:740px){#studioHeader{padding-top:6px;padding-bottom:5px}.studioNav{margin-top:5px}.toolSearchWrap{height:30px}#toolSearch{height:27px}#toolFilters{padding-top:5px}}
+
+/* Compact editor with horizontally browsable tool panels */
+#monitorDock{position:absolute!important;left:12px!important;right:12px!important;bottom:8px!important;width:auto!important;max-width:360px!important;margin:0 auto!important;padding:5px 8px!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:6px!important;opacity:.94;z-index:3}
+#monitorDock>.subhead{display:none!important}#monitorDock .monitorStats{flex:1;min-width:0}#monitorDock .status{font-size:9px!important;padding:4px 6px!important;background:#ffffffdf!important}#monitorDock .row{flex:0 0 auto}#monitorDock button{min-height:27px!important;padding:0 8px!important;font-size:9px!important}
+#wrap{position:relative!important;min-height:0!important;padding:5px 8px!important}
+#bar{position:relative;flex:0 0 auto!important;max-height:39dvh!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;gap:6px!important;padding:5px 7px calc(8px + env(safe-area-inset-bottom))!important;border-top:1px solid #d8e7d4;background:linear-gradient(180deg,#f7fbf4,#eaf4e8)!important}
+#toolDockNav{display:flex;flex:0 0 auto;gap:6px;overflow-x:auto;overflow-y:hidden;padding:2px 1px 5px;scrollbar-width:none;overscroll-behavior-x:contain}#toolDockNav::-webkit-scrollbar{display:none}
+#toolDockNav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:62px;min-height:47px;padding:4px 7px;border:1px solid #d3e2cf;border-radius:10px;background:#fff;color:#49664b;font-size:8px;font-weight:700;white-space:nowrap}
+#toolDockNav button .dockGlyph{font-size:17px;line-height:1.1}#toolDockNav button.active{background:#dff4d9;border-color:#74b76c;color:#174c2c;box-shadow:inset 0 0 0 1px #9bcf91}
+#bar>.panel{display:none!important;flex:1 1 auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;margin:0!important;padding:8px!important;background:#fff!important;border:1px solid #d8e7d4!important;border-radius:12px!important;box-shadow:0 3px 12px #183d2510}
+#bar>.panel.dock-active{display:flex!important}#bar>.panel h4{position:sticky;top:-8px;z-index:2;background:#fff;padding:3px 0 6px;color:#39764b!important}
+#toolEmpty{display:none}#toolEmpty.show{display:block;flex:1;padding:16px;text-align:center;color:#648168;font-size:11px}
+@media(max-height:740px){#bar{max-height:36dvh!important}#toolDockNav button{min-height:40px;min-width:56px}#wrap{padding:3px 6px!important}}
 </style>
 <div id="studioHeader">
   <div class="studioBrand">
@@ -1848,6 +1861,9 @@ function applyVISOFilters(){
  });
  $('toolCount').textContent=visible+' / '+visoPanels.length;
  $('toolEmpty').classList.toggle('show',visible===0);
+ dockNav.querySelectorAll('button').forEach(btn=>{const panel=visoPanels.find(p=>p.id===btn.dataset.panel);btn.hidden=!panel||panel.classList.contains('search-hidden');});
+ if(activeDockPanel?.classList.contains('search-hidden'))activeDockPanel=null;
+ if(!activeDockPanel&&visible)activateDockPanel(visoPanels.find(p=>!p.classList.contains('search-hidden')));
 }
 $('toolSearch').addEventListener('input',applyVISOFilters);
 $('toolSearchClear').addEventListener('click',()=>{$('toolSearch').value='';applyVISOFilters();$('toolSearch').focus();});
@@ -1865,6 +1881,25 @@ document.querySelectorAll('.toolFilter').forEach(btn=>btn.addEventListener('clic
 }));
 const empty=document.createElement('div');empty.id='toolEmpty';empty.textContent='No matching tools. Try another search or choose All tools.';
 $('bar').appendChild(empty);
+const dockNav=document.createElement('div');dockNav.id='toolDockNav';dockNav.setAttribute('aria-label','Editor tools');
+const dockGlyphs={'Media':'▧','Export Studio':'⇧','Visualizer':'▥','Spectrum':'◉','Background':'▧','Audio':'♫','Text':'T','Logo':'◉','Elements':'◇','Overlay':'✧','Stickers':'▢','Tempo':'♢','Project':'▣','Template':'▦'};
+let activeDockPanel=null;
+function activateDockPanel(panel){
+ if(!panel||panel.classList.contains('search-hidden'))return;
+ activeDockPanel=panel;
+ visoPanels.forEach(p=>p.classList.toggle('dock-active',p===panel));
+ dockNav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.panel===panel.id));
+}
+visoPanels.forEach(panel=>{
+ const clean=(panel.querySelector('h4 .toolHeading')?.textContent||panel.querySelector('h4')?.textContent||'Tool').replace(/\s+/g,' ').trim();
+ const key=Object.keys(dockGlyphs).find(k=>clean.toLowerCase().includes(k.toLowerCase()));
+ const btn=document.createElement('button');btn.type='button';btn.dataset.panel=panel.id;
+ const icon=document.createElement('span');icon.className='dockGlyph';icon.textContent=dockGlyphs[key]||'◈';
+ const label=document.createElement('span');label.textContent=clean.replace(/\s+Studio$/i,'').slice(0,19);
+ btn.append(icon,label);btn.addEventListener('click',()=>activateDockPanel(panel));dockNav.appendChild(btn);
+});
+$('bar').insertBefore(dockNav,$('bar').firstChild);
+
 window.VISO_TOOL_REGISTRY=VISO_TOOL_REGISTRY;
 window.registerVISOEffectTool=registerVISOEffectTool;
 applyVISOFilters();
