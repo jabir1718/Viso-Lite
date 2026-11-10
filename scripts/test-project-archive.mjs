@@ -483,4 +483,13 @@ assert(spectrumModeAudit.includes("specLayerMode==='scale'?Math.min(1,raw*1.35):
 assert(spectrumModeAudit.includes("if(specLayerMode==='web')"),'Web layer mode must render a connecting spectrum line');
 assert(spectrumModeAudit.includes("else if(specLayerMode==='combo')"),'Combo layer mode must render its overlay baseline');
 assert(spectrumModeAudit.split('drawSpectrumModeFinish(ctx,n,col,val,thick)').length-1>=2,'Web and Combo finish must be applied to flat and other spectrum shapes');
+
+const spectrumMaterialAuditStart=html.indexOf('function drawSpectrumLayer(');
+const spectrumMaterialAuditEnd=html.indexOf('let curB=',spectrumMaterialAuditStart);
+assert(spectrumMaterialAuditStart>=0&&spectrumMaterialAuditEnd>spectrumMaterialAuditStart,'spectrum material renderer must exist');
+const spectrumMaterialAudit=html.slice(spectrumMaterialAuditStart,spectrumMaterialAuditEnd);
+assert(spectrumMaterialAudit.includes('materialWidth=specMaterial'), 'material must alter rendered stroke width');
+assert(spectrumMaterialAudit.includes('materialGlow=specMaterial'), 'material must alter rendered glow response');
+assert(spectrumMaterialAudit.includes('materialShadowColor=specMaterial'), 'materials must have distinct light/shadow character');
+assert(spectrumMaterialAudit.includes("ctx.lineCap=specMaterial==='chrome'?'square':'round'"), 'Chrome material must use a distinct edge treatment');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
