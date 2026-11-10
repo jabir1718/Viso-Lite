@@ -36,6 +36,8 @@
   .mline{display:flex;align-items:center;gap:8px}
   .mline b{font-size:10px;color:#b9b3c9;width:64px;flex:0 0 auto;font-weight:500}
   .chip{min-height:32px;font-size:10.5px;padding:0 10px;border-radius:9px}
+  .template-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .template-grid button{min-width:0;min-height:42px;text-align:left;padding:0 10px}
 </style>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
 <div id="bar">
@@ -75,6 +77,12 @@
     <label><span>Beat power</span><input id="ctPower" type="range" min="20" max="260" value="120"></label>
     <label><span>Glow</span><input id="ctGlow" type="range" min="0" max="80" value="32"></label>
     <label><span>Spin speed</span><input id="ctSpin" type="range" min="0" max="100" value="24"></label>
+    <label><span>Position X</span><input id="ctX" type="range" min="-30" max="30" value="0"></label>
+    <label><span>Position Y</span><input id="ctY" type="range" min="-30" max="30" value="0"></label>
+  </div>
+  <div class="sec"><h4>Ready-made templates</h4>
+    <div class="template-grid" id="templateGrid"></div>
+    <div class="ratio-note">Templates change visual style only. Your photo, music, canvas ratio and existing layers stay untouched.</div>
   </div>
   <div class="sec"><h4>Export quality</h4>
     <div class="row" id="res"></div>
@@ -243,7 +251,7 @@ let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
 let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,bvp=140;
 let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
-let centerVizOn=true,centerVizStyle='bars',centerVizSize=22,centerVizPower=120,centerVizGlow=32,centerVizSpin=24,centerVizAngle=0;
+let centerVizOn=true,centerVizStyle='bars',centerVizSize=22,centerVizPower=120,centerVizGlow=32,centerVizSpin=24,centerVizAngle=0,centerVizX=0,centerVizY=0;
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
@@ -287,6 +295,27 @@ PRESETS.forEach(p=>{const b=document.createElement('button');b.textContent=p.n;
     bloom=p.bl;drawMixers();};
   $('presets').appendChild(b);});
 
+const VISUAL_TEMPLATES=[
+ {n:'Neon Pulse',c:[185,285,320],style:'pulse',size:25,power:145,glow:58,spin:22,m:{Neon:1,Dust:.55},bl:.72},
+ {n:'Chromatic Halo',c:[0,48,185,285],style:'double',size:23,power:130,glow:48,spin:30,m:{Aurora:.8,Orbitals:.7},bl:.62},
+ {n:'Aura Wave',c:[265,195,320],style:'wave',size:27,power:155,glow:66,spin:18,m:{Aurora:1,Dust:.65},bl:.75},
+ {n:'Double Orbit',c:[190,215,285],style:'double',size:24,power:120,glow:52,spin:48,m:{Orbit3D:1,Orbitals:.65},bl:.58},
+ {n:'Fire Ring',c:[0,18,42,330],style:'star',size:24,power:175,glow:72,spin:36,m:{Beams:.85,Sparkle:.7},bl:.82},
+ {n:'Ice Core',c:[175,195,225],style:'bars',size:22,power:135,glow:60,spin:12,m:{Grid:.7,Hex:.8},bl:.58},
+ {n:'Gold Sparks',c:[38,48,18],style:'pulse',size:26,power:150,glow:70,spin:26,m:{Sparkle:1,Dust:.65},bl:.8},
+ {n:'City Glow',c:[185,205,280],style:'wave',size:20,power:120,glow:46,spin:16,m:{Neon:.8,Depth:.8},bl:.65}
+];
+VISUAL_TEMPLATES.forEach(p=>{const b=document.createElement('button');b.className='chip';b.textContent=p.n;
+ b.onclick=()=>{snap();colors=p.c.slice();selColor=0;drawPals();centerVizOn=true;centerVizStyle=p.style;
+ centerVizSize=p.size;centerVizPower=p.power;centerVizGlow=p.glow;centerVizSpin=p.spin;centerVizX=0;centerVizY=0;
+ $('ctViz').textContent='Center spectrum ON';$('ctViz').classList.add('on');
+ $('ctSize').value=p.size;$('ctPower').value=p.power;$('ctGlow').value=p.glow;$('ctSpin').value=p.spin;$('ctX').value=0;$('ctY').value=0;
+ document.querySelectorAll('[data-ctstyle]').forEach(q=>q.classList.toggle('on',q.dataset.ctstyle===p.style));
+ mstate.forEach(m=>{const v=p.m[m.name];m.on=!!v;m.op=v||.7;});
+ document.querySelectorAll('#modes button').forEach((q,j)=>q.classList.toggle('on',mstate[j].on));
+ bloom=p.bl;drawMixers();};
+ $('templateGrid').appendChild(b);});
+
 $('bAuto').onclick=e=>{autoOn=!autoOn;e.currentTarget.classList.toggle('on',autoOn);};
 [['kCol','color'],['kVis','vis'],['kShp','shape'],['kSwy','sway']].forEach(([id,k])=>{
   $(id).onclick=e=>{lockChip[k]=!lockChip[k];e.currentTarget.classList.toggle('lock',!lockChip[k]);
@@ -309,6 +338,15 @@ bind('sBri',v=>bri=v);bind('sCon',v=>con=v);bind('sSat',v=>sat=v);bind('sHue',v=
 bind('sDim',v=>dim=v);bind('sSplit',v=>split=v);bind('sBgb',v=>bgb=v);
 bind('sBvo',v=>bvo=v);bind('sBvp',v=>bvp=v);
 bind('sMsc',v=>{mSc=v/100;maskDirty=true;});bind('sLint',v=>lint=v);bind('sLsz',v=>lsz=v);
+['ctSize','ctPower','ctGlow','ctSpin','ctX','ctY'].forEach(id=>$(id).oninput=e=>{
+  const v=+e.target.value;if(id==='ctSize')centerVizSize=v;else if(id==='ctPower')centerVizPower=v;
+  else if(id==='ctGlow')centerVizGlow=v;else if(id==='ctSpin')centerVizSpin=v;
+  else if(id==='ctX')centerVizX=v;else centerVizY=v;
+});
+document.querySelectorAll('[data-ctstyle]').forEach(q=>q.onclick=()=>{centerVizStyle=q.dataset.ctstyle;
+  document.querySelectorAll('[data-ctstyle]').forEach(z=>z.classList.toggle('on',z===q));});
+$('ctViz').onclick=()=>{centerVizOn=!centerVizOn;$('ctViz').classList.toggle('on',centerVizOn);
+  $('ctViz').textContent='Center spectrum '+(centerVizOn?'ON':'OFF');};
 
 function drawPals(){$('pals').innerHTML='';colors.forEach((h,i)=>{
   const b=document.createElement('div');b.className='pal'+(i===selColor?' on':'');
@@ -790,7 +828,7 @@ function drawCenterSpectrum(ctx,b,dt){
   if(an&&playing&&buf){an.getByteFrequencyData(buf);bins=buf;}
   const hueA=colors[0]||190,hueB=colors[1]||285;
   const colorAt=(v)=>'hsl('+((hueA+(hueB-hueA)*v+360)%360)+' 100% 66%)';
-  ctx.save();ctx.translate(cx,cy);ctx.rotate(centerVizAngle);
+  ctx.save();ctx.translate(cx+W*centerVizX/100,cy+H*centerVizY/100);ctx.rotate(centerVizAngle);
   ctx.globalCompositeOperation='lighter';
   ctx.lineCap='round';
   if(centerVizStyle==='bars'){
@@ -803,6 +841,20 @@ function drawCenterSpectrum(ctx,b,dt){
       ctx.beginPath();ctx.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);
       ctx.lineTo(Math.cos(a)*outer,Math.sin(a)*outer);ctx.stroke();
     }
+  }else if(centerVizStyle==='pulse'){
+    const k=bins?Math.min(1,bins[8]/180):(.08+b[0]*.25);
+    const radius=base*(1+k*.24*power);
+    ctx.strokeStyle=colorAt(.5);ctx.lineWidth=Math.max(3,H*.004);ctx.globalAlpha=.9;
+    ctx.beginPath();ctx.arc(0,0,radius,0,Math.PI*2);ctx.stroke();
+    ctx.globalAlpha=.55;ctx.lineWidth=Math.max(2,H*.002);
+    ctx.beginPath();ctx.arc(0,0,radius*(.78+k*.08),0,Math.PI*2);ctx.stroke();
+  }else if(centerVizStyle==='star'){
+    const spikes=12;ctx.beginPath();
+    for(let i=0;i<=spikes*2;i++){const a=i*Math.PI/spikes;
+      const k=bins?Math.min(1,bins[Math.floor((i/(spikes*2))*bins.length)]/180):(.08+b[i%6]*.25);
+      const rr=base*(i%2?1.04:1.32+k*.28*power);
+      const px=Math.cos(a)*rr,py=Math.sin(a)*rr;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+    ctx.closePath();ctx.strokeStyle=colorAt(.45);ctx.lineWidth=Math.max(3,H*.0035);ctx.globalAlpha=.9;ctx.stroke();
   }else{
     const rings=centerVizStyle==='double'?2:1;
     for(let ring=0;ring<rings;ring++){
