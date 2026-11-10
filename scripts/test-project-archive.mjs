@@ -23,6 +23,8 @@ assert(html.includes("if(specRainbow)return 'hsl('"), 'rainbow gradient must cha
 assert(html.includes('specShadowOn?specShadowColor'), 'custom shadow colour must reach spectrum rendering');
 assert(html.includes("el.addEventListener('pointerdown',()=>snap());el.oninput=e=>fn(+e.target.value)"), 'Spectrum sliders must capture undo snapshots before changes');
 assert(html.includes("'bSpecGlow','specGlowCoreColor','specGlowMode','bSpecGlowIntensitySync'"), 'Spectrum toggles and colour/select controls must capture undo snapshots');
+assert(html.includes("'bSpec','bSpecClr','specShape','specStyle','specSymmetry','specMaterial','specLayerMode','specLayerBlend','sSpecResolution'"), 'all global Spectrum mode, resolution and reset controls must capture undo snapshots');
+assert(html.includes("el.addEventListener('focus',()=>snap());el.addEventListener('pointerdown',()=>snap());"), 'global Spectrum controls must snapshot before interaction');
 assert(html.includes("['sSpecGlowBlur',specGlowBlur]") && html.includes("['sSpecShadowExpand',specShadowExpand]"), 'advanced spectrum sliders must restore from saved project state');
 assert(html.includes("['specGlowCoreColor',specGlowCoreColor]") && html.includes("['specShadowColor',specShadowColor]"), 'advanced spectrum colour pickers must restore from saved project state');
 for (const id of ['bSpecLayerSpin','sSpecLayerSpinForce','sSpecLayerSpinMomentum','sSpecLayerSpinSpeed']) {
