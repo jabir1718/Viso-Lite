@@ -534,4 +534,12 @@ assert(html.includes("$('bLogo').onclick=()=>$('fLogo').click()")&&html.includes
 assert(html.includes("objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,alpha:o.alpha,glow:o.glow,outline:o.outline"),'Sticker transform/effect state must be serialized per independent object layer');
 assert(html.includes("function bindStickerControl(id,key,convert=v=>v)")&&html.includes("el.addEventListener('pointerdown',()=>snap())"),'Sticker edits must participate in undo snapshots');
 assert(html.includes("...(objects.map((o,i)=>['overlay-'+i,o.file||VISO_ASSET_FILES.overlays[i]||null]))")&&html.includes("if(overlayAssetCount!==objects.length)"),'each Sticker source image must be embedded in project packages');
+
+const audioGroupAuditStart=html.indexOf("mergeGroup('Audio',['Audio Motion','Audio Frequency Response'],'audioPanel')");
+const audioGroupAuditEnd=html.indexOf("mergeGroup('Visualizer'",audioGroupAuditStart);
+assert(audioGroupAuditStart>=0&&audioGroupAuditEnd>audioGroupAuditStart,'Audio tool group must be constructed');
+const audioGroupAudit=html.slice(audioGroupAuditStart,audioGroupAuditEnd);
+assert(audioGroupAudit.includes("audioPanel=all().find(p=>p.id==='audioPanel')")&&audioGroupAudit.includes("audioUpload=document.getElementById('bA')"),'Audio upload button must be moved into the Audio group');
+assert(audioGroupAudit.includes("audioUpload.textContent='Upload / Replace Audio'"),'Audio group must clearly expose upload and replace');
+assert(html.includes("id=\"bLoop\"")&&html.includes("id=\"sBassGain\"")&&html.includes("id=\"sMidGain\"")&&html.includes("id=\"sHighGain\""),'Audio loop and frequency response controls must remain grouped and available');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
