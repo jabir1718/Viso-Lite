@@ -541,3 +541,17 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Artifact: `VISO-Studio-advanced-debug-apk`, ID `13782504681`; outer ZIP size 32,189,381 bytes; digest `sha256:9df4ea5cc76444510355582f656fe97cbac0b04628647c27336871950896f146`.
 - This is automated code/build/package verification, not physical-device testing.
 - Next: audit Overlay FX, Turning Point, Templates, Background Video and Elements, then end-to-end export/project QA.
+
+
+## 43. Turning Point timeline, clean Templates panel and video export canvas — 2026-11-10
+
+- Turning Point: each point now has an editable time slider bounded by the audio duration (60 seconds fallback); edits update the point time, reorder points chronologically and select the moved point. Transition changes now snapshot before modifying the selected point.
+- Audited the 20 transition choices and added a regression test proving each UI option has a corresponding renderer case.
+- Templates: removed the template search bar to honor the clean-editor/no-search requirement; layout and downloaded filters remain.
+- Export: found the recording canvas was never resized from its browser default 300×150. `setVideoRenderCanvasSize()` now resizes `recordCanvas` to W×H before `captureStream()`. Normal visualizer export now renders up to 1080p; heavy Tunnel/Mirror/Dual modes use a 720p mobile-safe cap. Bitrate and export-info dimensions now use the actual recording size. Preview sizing restores selected-target info.
+- Source commits: Turning Point `61d16ce2d13b9d0cd4afc23135229dcbad87ed20`; template search removal `35ce4896b61d7b32e68dce0c95ca007d8fb1d6be`; export canvas `30cd181e8fc716e464eb91820354c912d5788687`.
+- Test commit: `3cafe7b29f034a3e65d39ca097ab1d97f3a3a1e4`.
+- CI workflow run #358 (ID `42859376527`) passed: HTML/JS validation, project archive tests, Android debug APK build, packaged APK verification and artifact upload.
+- Artifact: `VISO-Studio-advanced-debug-apk`, ID `13783603518`; outer ZIP size 32,189,625 bytes; digest `sha256:202d6fc26f76630ec0960902fd5cc3327b25969d3bdde6be9912cbcc7d3ab8be`.
+- This confirms static/code/build/package gates. Actual exported video dimensions, audio sync, background-video capture and playback must still be checked on the target Android device.
+- Next: audit Background Video, Elements, Overlay FX, Templates and end-to-end export behaviour.
