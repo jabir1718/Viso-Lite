@@ -605,4 +605,6 @@ assert(html.includes('function bind(id,fn){const el=$(id);el.oninput=e=>fn(+e.ta
 
 assert(html.includes("MODES.findIndex(mode=>mode.name===name)"),'Elements controls must resolve mode objects by their name, not array string lookup');
 assert(html.includes("MODES.findIndex(mode=>mode.name==='Dust')")&&html.includes("MODES.findIndex(mode=>mode.name==='Sparkle')"),'particle and sparkle amount controls must sync against the actual mode objects');
+
+for(const [id,state] of [['bVhs','vhsOn'],['bShock','shockOn'],['bLens','lensOn'],['bFilm','filmOn'],['bAtmosphere','atmosphereOn'],['bSurfaceReflection','surfaceReflectionOn'],['bVig','vigOn'],['bProg','progOn']])assert(html.includes("$('"+id+"').onclick=e=>{snap();"+state+"=!"+state+";"),id+' must snapshot before toggling its effect');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
