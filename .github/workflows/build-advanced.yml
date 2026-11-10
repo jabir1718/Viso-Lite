@@ -71,7 +71,7 @@ jobs:
               "function visoUnzip", "function visoCRC32", "Project asset checksum failed",
               "restoreVISOProjectAssets", "AndroidSave.appendChunk", "drawFilmEffect",
               "drawAtmosphere", "drawSurfaceReflection", "drawStudioTextLayer",
-              "specTrailBuffers", "drawSpectrumLayer(ctx,scale,layer,true)",
+              "specTrailBuffers", "drawSpectrumLayerGeometry(ctx,scale,layer,true)",
               "specTrailOn,specTrailAmount", "specGlowIntensitySync", "specGlowMode",
               "waveY[i+1]", "specWaveReverse?n-1-i:i"
           ):
