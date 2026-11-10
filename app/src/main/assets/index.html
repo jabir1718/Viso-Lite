@@ -109,6 +109,7 @@
       <option value="mountain">17 · Spectrum Mountain</option><option value="halo">18 · Pulse Halo</option>
       <option value="clock">19 · Circular Clock</option><option value="grid">20 · Equalizer Grid</option>
     </select></label></div>
+    <div class="row"><label>100 more spectrum designs <select id="spExtra100"><option value="none">Off — no extra design</option><option value="extra01">21 · Prism Ray</option><option value="extra02">22 · Solar Flare</option><option value="extra03">23 · Nova Burst</option><option value="extra04">24 · Comet Fan</option><option value="extra05">25 · Photon Crown</option><option value="extra06">26 · Laser Bloom</option><option value="extra07">27 · Radiant Wheel</option><option value="extra08">28 · Pulse Compass</option><option value="extra09">29 · Aurora Spokes</option><option value="extra10">30 · Starlight Rotor</option><option value="extra11">31 · Dual Wave</option><option value="extra12">32 · Ribbon Flow</option><option value="extra13">33 · Sine River</option><option value="extra14">34 · Tidal Sweep</option><option value="extra15">35 · Wave Ladder</option><option value="extra16">36 · Echo Ribbon</option><option value="extra17">37 · Vortex Stream</option><option value="extra18">38 · Liquid Thread</option><option value="extra19">39 · Frequency Silk</option><option value="extra20">40 · Ripple Track</option><option value="extra21">41 · Crystal Polygon</option><option value="extra22">42 · Hexa Pulse</option><option value="extra23">43 · Octagon Beat</option><option value="extra24">44 · Diamond Orbit</option><option value="extra25">45 · Triangulum</option><option value="extra26">46 · Prism Cage</option><option value="extra27">47 · Geo Burst</option><option value="extra28">48 · Facet Spinner</option><option value="extra29">49 · Polygon Storm</option><option value="extra30">50 · Fractal Frame</option><option value="extra31">51 · Double Spiral</option><option value="extra32">52 · Galaxy Coil</option><option value="extra33">53 · Nebula Twist</option><option value="extra34">54 · Helix Vortex</option><option value="extra35">55 · Cosmic Whirl</option><option value="extra36">56 · Infinity Swirl</option><option value="extra37">57 · Whirlpool Trace</option><option value="extra38">58 · Orbit Spiral</option><option value="extra39">59 · Quantum Coil</option><option value="extra40">60 · Stardust Curl</option><option value="extra41">61 · Triple Halo</option><option value="extra42">62 · Eclipse Rings</option><option value="extra43">63 · Saturn Rings</option><option value="extra44">64 · Orbital Bands</option><option value="extra45">65 · Concentric Pulse</option><option value="extra46">66 · Ripple Circles</option><option value="extra47">67 · Echo Rings</option><option value="extra48">68 · Lunar Phases</option><option value="extra49">69 · Ring Cascade</option><option value="extra50">70 · Pulse Chamber</option><option value="extra51">71 · Tower Bars</option><option value="extra52">72 · Twin Towers</option><option value="extra53">73 · Metro Equalizer</option><option value="extra54">74 · Vertical Rain</option><option value="extra55">75 · Bass Columns</option><option value="extra56">76 · Pixel Stacks</option><option value="extra57">77 · Frequency Skyline</option><option value="extra58">78 · Bar Cascade</option><option value="extra59">79 · Mirror Towers</option><option value="extra60">80 · Spectrum Pillars</option><option value="extra61">81 · Arc Bridge</option><option value="extra62">82 · Crescent Meter</option><option value="extra63">83 · Wave Arch</option><option value="extra64">84 · Rainbow Arch</option><option value="extra65">85 · Pulse Bridge</option><option value="extra66">86 · Orbit Arcs</option><option value="extra67">87 · Lunar Arc</option><option value="extra68">88 · Prism Arches</option><option value="extra69">89 · Arc Reactor</option><option value="extra70">90 · Halo Gate</option><option value="extra71">91 · Particle Comets</option><option value="extra72">92 · Spark Shower</option><option value="extra73">93 · Meteor Field</option><option value="extra74">94 · Firefly Cloud</option><option value="extra75">95 · Star Dust</option><option value="extra76">96 · Pixel Confetti</option><option value="extra77">97 · Energy Sparks</option><option value="extra78">98 · Cosmic Debris</option><option value="extra79">99 · Glitter Stream</option><option value="extra80">100 · Pulse Particles</option><option value="extra81">101 · Neon Lattice</option><option value="extra82">102 · Grid Tunnel</option><option value="extra83">103 · Mesh Wave</option><option value="extra84">104 · Wireframe Dome</option><option value="extra85">105 · Digital Matrix</option><option value="extra86">106 · Prism Net</option><option value="extra87">107 · Energy Grid</option><option value="extra88">108 · Warped Mesh</option><option value="extra89">109 · Laser Lattice</option><option value="extra90">110 · Data Horizon</option><option value="extra91">111 · Lotus Pulse</option><option value="extra92">112 · Neon Petals</option><option value="extra93">113 · Flower Beat</option><option value="extra94">114 · Solar Petals</option><option value="extra95">115 · Iris Bloom</option><option value="extra96">116 · Flame Flower</option><option value="extra97">117 · Crystal Bloom</option><option value="extra98">118 · Aura Blossom</option><option value="extra99">119 · Star Flower</option><option value="extra100">120 · Pulse Dahlia</option></select></label></div>
     <div class="row"><label>Frequency <select id="spBand"><option value="balanced">Balanced</option><option value="full">Full</option><option value="low">Low / Bass</option><option value="high">High</option><option value="changes">Changes</option><option value="vocals">Vocals</option></select></label>
       <label>Shape <select id="spShape"><option value="line">Line</option><option value="circle">Circle</option><option value="mirror">Mirror</option><option value="diamond">Diamond</option><option value="capsule">Capsule</option><option value="sharp">Sharp</option></select></label></div>
     <div class="row"><label>Style <select id="spStyle"><option value="neon">Neon</option><option value="gradient">Gradient</option><option value="rainbow">Rainbow</option><option value="solid">Solid</option><option value="fire">Fire</option><option value="ice">Ice</option></select></label>
@@ -320,7 +321,7 @@ let centerVizOn=true,centerVizStyle='bars',centerVizSize=22,centerVizPower=120,c
 let centerLogo=null,centerLogoShape='circle',centerVizThick=8,centerBeatSense=160,centerHeartbeat=65,centerShadow=70,centerShadowColor='#a020f0',centerBeatEnv=0;
 let spectrumOn=true,spMode='bars',spBand='balanced',spShape='line',spStyle='neon',spEffect='none',spMotion='none';
 let spWaveHeight=38,spBaseHeight=18,spBounce=75,spShake=25,spThickness=5,spWidth=88,spSensitivity=140,spSmooth=65,spDelay=0,spTrail=15,spGlow=35,spLow=100,spMid=100,spHigh=100;
-let spSmoothBins=new Float32Array(160),spBeatEnv=0,spTime=0,spWaveTime=new Uint8Array(2048),spBassBoost=100,spReverse=false,spMirror=false,spBeatWave=true,spExtra='none',spExtraBeatCount=0,spExtraWasBeat=false;
+let spSmoothBins=new Float32Array(160),spBeatEnv=0,spTime=0,spWaveTime=new Uint8Array(2048),spBassBoost=100,spReverse=false,spMirror=false,spBeatWave=true,spExtra='none',spExtra100='none',spExtraBeatCount=0,spExtraWasBeat=false;
 
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
@@ -437,6 +438,7 @@ const spNum=(id,key)=>{$(id).oninput=e=>{window[key]=+e.target.value;};};
 $('spToggle').onclick=()=>{spectrumOn=!spectrumOn;$('spToggle').classList.toggle('on',spectrumOn);$('spToggle').textContent='Spectrum '+(spectrumOn?'ON':'OFF');};
 document.querySelectorAll('[data-spmode]').forEach(q=>q.onclick=()=>{spMode=q.dataset.spmode;document.querySelectorAll('[data-spmode]').forEach(z=>z.classList.toggle('on',z===q));});
 $('spExtra').onchange=e=>spExtra=e.target.value;
+$('spExtra100').onchange=e=>spExtra100=e.target.value;
 $('spBand').onchange=e=>spBand=e.target.value;$('spShape').onchange=e=>spShape=e.target.value;
 $('spStyle').onchange=e=>spStyle=e.target.value;$('spEffect').onchange=e=>spEffect=e.target.value;$('spMotion').onchange=e=>spMotion=e.target.value;
 $('spBassBoost').oninput=e=>spBassBoost=+e.target.value;
@@ -1081,6 +1083,64 @@ function drawExtraSpectrum(ctx,b,dt,fd,half,amp,thick,colorAt,t){
  }else if(spExtra==='grid'){
   for(let i=0;i<16;i++)for(let j=0;j<8;j++){const v=spSmoothBins[(i*6+j)%96]||0,x=(i-7.5)*thick*3.2,y=(j-3.5)*thick*3.2;
    ctx.globalAlpha=.15+v*.85;ctx.fillStyle=col(i*6+j);ctx.fillRect(x,y,thick*1.6,thick*(.8+v*2.5));}
+
+ else if(spExtra100!=='none'){
+  const ix=Math.max(0,parseInt(spExtra100.slice(5),10)-1),family=Math.floor(ix/10),v=ix%10;
+  const phase=t*(.45+v*.095),k=1+v*.085,base=r*(.72+v*.035);
+  const bins=(i)=>spSmoothBins[(i*7+v*9)%96]||0;
+  ctx.lineWidth=thick*(.8+v*.13);ctx.globalAlpha=.76;
+  if(family===0){
+   const rays=18+v*4;
+   for(let i=0;i<rays;i++){const a=i/rays*Math.PI*2+phase*.22,energy=bins(i*3),rr=base*(.55+energy*.95)*pulse;
+    ctx.strokeStyle=col(i);ctx.beginPath();ctx.moveTo(Math.cos(a)*base*.22,Math.sin(a)*base*.22);ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);ctx.stroke();}
+  }else if(family===1){
+   for(let q=0;q<2+v%4;q++){ctx.beginPath();for(let i=0;i<=120;i++){const p=i/120,x=-half+p*half*2;
+    const y=Math.sin(p*(8+v*1.7)+phase+q*.7)*base*(.16+bins(i)*.65);
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+    ctx.strokeStyle=col(q*17);ctx.globalAlpha=.38+q*.12;ctx.stroke();}
+  }else if(family===2){
+   const sides=5+v,rr=base*(.75+beat*.3);
+   for(let q=0;q<1+v%4;q++){ctx.beginPath();for(let i=0;i<=sides;i++){const a=i/sides*Math.PI*2+phase*(q%2?-.35:.35),rad=rr*(.65+bins(i*7+q)*.55);
+    const x=Math.cos(a)*rad,y=Math.sin(a)*rad;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+    ctx.closePath();ctx.strokeStyle=col(q*13);ctx.globalAlpha=.45+q*.12;ctx.stroke();}
+  }else if(family===3){
+   for(let q=0;q<2+v%5;q++){ctx.beginPath();for(let i=0;i<=180;i++){const a=i/180*Math.PI*(5+v*.35)+phase*(q%2?1:-1);
+    const rr2=base*(.12+i/180*(.7+q*.12))*(1+beat*.12);
+    const x=Math.cos(a)*rr2,y=Math.sin(a)*rr2;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+    ctx.strokeStyle=col(q*19);ctx.globalAlpha=.65;ctx.stroke();}
+  }else if(family===4){
+   for(let q=0;q<3+v;q++){const rr=base*(.28+q*.18)*(1+beat*.12);
+    ctx.beginPath();ctx.ellipse(0,0,rr,rr*(.55+v*.035),phase*.12+q*.12,phase+q*.25,phase+Math.PI*(1.1+v*.09));
+    ctx.strokeStyle=col(q*11);ctx.globalAlpha=.35+q*.07;ctx.stroke();}
+  }else if(family===5){
+   const bars=12+v*3;
+   for(let i=0;i<bars;i++){const x=(i/(bars-1)-.5)*half*2,energy=bins(i*5),h=base*(.12+energy*(.5+v*.045))*pulse;
+    ctx.fillStyle=col(i);ctx.globalAlpha=.35+energy*.65;
+    ctx.fillRect(x-thick*.65,-h,thick*(1.2+v*.12),h*(1+(v%2)*.25));}
+  }else if(family===6){
+   const arcs=5+v*2;
+   for(let i=0;i<arcs;i++){const rr=base*(.35+i*.095),a=phase*(i%2?1:-1);
+    ctx.beginPath();ctx.arc(0,0,rr,a+i*.22,a+Math.PI*(.55+(v%5)*.12));
+    ctx.strokeStyle=col(i*8);ctx.globalAlpha=.35+i*.055;ctx.stroke();}
+  }else if(family===7){
+   const dots=28+v*12;
+   for(let i=0;i<dots;i++){const a=i*2.399+phase*.25,dist=base*Math.sqrt(i/dots)*(1+bins(i)*.35);
+    const x=Math.cos(a)*dist,y=Math.sin(a)*dist,sz=thick*(.45+bins(i)*2.3);
+    ctx.fillStyle=col(i);ctx.globalAlpha=.3+bins(i)*.7;ctx.beginPath();ctx.arc(x,y,sz,0,Math.PI*2);ctx.fill();}
+  }else if(family===8){
+   const rows=5+v,cols=8+v*2;
+   for(let iy=0;iy<rows;iy++)for(let ix2=0;ix2<cols;ix2++){const p=ix2/(cols-1),q=iy/(rows-1);
+    const x=(p-.5)*half*2,y=(q-.5)*base*1.6+Math.sin(p*9+phase+q*2)*base*.12;
+    const en=bins(ix2*3+iy*7);ctx.strokeStyle=col(ix2+iy*cols);ctx.globalAlpha=.2+en*.7;
+    ctx.beginPath();ctx.arc(x,y,thick*(.4+en*1.5),0,Math.PI*2);ctx.stroke();}
+  }else{
+   const petals=5+v*2;
+   for(let i=0;i<petals;i++){const a=i/petals*Math.PI*2+phase*.18,en=bins(i*6),rr=base*(.55+en*.35);
+    ctx.save();ctx.rotate(a);ctx.beginPath();ctx.ellipse(0,-rr*.55,rr*(.18+v*.018),rr*(.35+en*.18),0,0,Math.PI*2);
+    ctx.strokeStyle=col(i);ctx.globalAlpha=.35+en*.5;ctx.stroke();ctx.restore();}
+   ctx.beginPath();ctx.arc(0,0,base*.18*(1+beat*.5),0,Math.PI*2);ctx.strokeStyle=col(v);ctx.stroke();
+  }
+ }
  }
  ctx.restore();
 }
