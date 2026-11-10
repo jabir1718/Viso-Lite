@@ -2212,7 +2212,8 @@ document.querySelectorAll('#visoTemplates [data-like]').forEach(btn=>btn.addEven
 }));
 applyVISOTemplateFilters();
 document.querySelectorAll('#visoTemplates [data-template]').forEach(q=>q.onclick=async()=>{
- const key=q.dataset.template,preset=VISO_TEMPLATES[key];
+ const key=q.dataset.template,preset=VISO_TEMPLATES[key],layout=q.closest('.templateCard')?.dataset.layout;
+ if(layout){aspect=layout==='portrait'?'9:16':'16:9';document.querySelectorAll('#aspect button').forEach(b=>b.classList.toggle('on',b.textContent.startsWith(aspect)));setRes();}
  snap();applyVisoProject({schema:'viso-project-v1',name:preset.name,settings:{template:key}});
  const project=collectVisoProject();project.name=preset.name;project.settings.template=key;
  try{await downloadVISOProject(project,'VISO-'+key+'.viso');visoTemplateDownloads.add(key);try{localStorage.setItem(VISO_TEMPLATE_DOWNLOADS_KEY,JSON.stringify([...visoTemplateDownloads]));}catch(_){}applyVISOTemplateFilters();$('templateInfo').textContent=preset.name+' editable project package downloaded with imported assets';}
