@@ -59,8 +59,12 @@ assert(!html.includes('id="toolSearch"')&&!html.includes('id="toolFavorites"')&&
 assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'top toolbar must include undo redo and export');
 assert(html.includes("$('bar').appendChild(dockNav)"), 'tool navigation must appear after control panels at the bottom');
 assert(html.includes("if(panel.id==='exportPanel')return;"), 'export panel must be opened from the top-right action instead of duplicated in bottom dock');
-assert(html.includes("const dockOrder=['Media','Look','Visuals'"), 'tool dock must keep legacy tools before Aspectrum controls');
-assert(html.includes("'Background Drift','Background']"), 'background tools must be ordered last');
+assert(html.includes("const dockOrder=['Media','Logo','Audio','Text','Visualizer','Elements','Overlay FX','Sticker','Turning Point','Tempo','Templates · Editable Projects','Background']"), 'tool dock must follow the separated Aspectrum tool order and keep Background last');
+assert(html.includes("mergeGroup('Audio',['Audio Motion','Audio Frequency Response'],'audioPanel')"), 'audio settings must be consolidated into one Audio tool');
+assert(html.includes("mergeGroup('Visualizer',['Look','Visuals','Spectrum Studio'"), 'visualizer settings must be consolidated into one Visualizer tool');
+assert(html.includes("mergeGroup('Overlay FX',['Overlay','Overlay Effects · Motion FX'"), 'overlay effects must be consolidated into one Overlay FX tool');
+assert(html.includes("logoPanel.id='logoPanel'")&&html.includes("stickerPanel.id='stickerPanel'"), 'Logo and Sticker must have independent tools');
+assert(html.includes("tempo.id='tempoPanel'")&&html.includes("elements.id='elementsPanel'"), 'Tempo and Elements must have independent tools');
 assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'undo, redo and export must be available in the top toolbar');
 assert(html.includes("$('bar').appendChild(dockNav)"), 'tool dock must sit after the selected control panel at the bottom');
 assert(html.includes("const dockOrder=['Media','Look','Visuals'")&&html.includes("'Background Drift','Background']"), 'background tools must be placed at the end of the bottom tool dock');
