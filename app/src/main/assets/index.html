@@ -588,6 +588,7 @@ const lockChip={color:false,vis:false,shape:false,sway:false};
 const objects=[];let selObj=-1;
 const lights=[];let selLight=-1;let lint=60,lsz=100;
 const undo=[],redo=[],objectSnapshotCache=new Map();
+let restoringState=false;
 
 const MODES=['Dust','Aurora','Beams','Bars','Ripple','Grid','Sparkle','Vortex','Ribbon','Bokeh','Neon','Confetti','Comet','Hex','Orbitals','Mirage','Cube3D','Hyper','Depth','Warp3D','Orbit3D','Tunnel3D','Voxel','Parallax','Galaxy','Nebula','Waveform',
   'Prism3D','Fractal4D','Quantum5D','Holo6D','Pulse7D','Vector8D','Matrix9D','Orbit10D','Nebula11D','Omni12D'];
@@ -856,10 +857,10 @@ function restoreVISOAutoState(d){
   const el=$(id);el.classList.toggle('lock',!lockChip[key]);el.classList.toggle('on',lockChip[key]);
  });
 }
-function snap(){const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
+function snap(){if(restoringState)return;const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
   if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
   redo.forEach(old=>objectSnapshotCache.delete(old));redo.length=0;}
-function apply(s){const d=JSON.parse(s);
+function apply(s){const d=JSON.parse(s),previousRestoringState=restoringState;restoringState=true;try{
   restoreVISOAutoState(d);
   colors=d.colors;mstate.forEach((m,i)=>{m.on=d.mstate[i].on;m.op=d.mstate[i].op;});
   if(d.bgOn!==undefined)bgOn=!!d.bgOn;if(d.frOn!==undefined)frOn=!!d.frOn;if(d.phOn!==undefined)phOn=!!d.phOn;if(d.maskOn!==undefined)maskOn=!!d.maskOn;if(d.bgViz!==undefined)bgViz=!!d.bgViz;if(d.bgVizMask!==undefined)bgVizMask=!!d.bgVizMask;else bgVizMask=true;if(d.mediaFront!==undefined)mediaFront=!!d.mediaFront;
@@ -891,7 +892,7 @@ function apply(s){const d=JSON.parse(s);
   $('sTextSize').value=studioTextSize;$('sTextPos').value=studioTextPos;$('sTextAlpha').value=studioTextAlpha;$('studioTextColor').value=studioTextColor;
   $('sTextX').value=studioTextX;$('sTextRot').value=studioTextRot;$('sTextStroke').value=studioTextStroke;$('sTextGlow').value=studioTextGlow;$('sTextAnim').value=studioTextAnim;$('sTextFont').value=studioTextFont;$('sTextAlign').value=studioTextAlign;$('bTextPlate').textContent='Text plate: '+(studioTextPlate?'ON':'OFF');$('bTextPlate').classList.toggle('on',studioTextPlate);
   $('sText2Size').value=studioText2Size;$('sText2Pos').value=studioText2Pos;$('sText2Alpha').value=studioText2Alpha;$('studioText2Color').value=studioText2Color;$('sText2X').value=studioText2X;$('sText2Rot').value=studioText2Rot;$('sText2Stroke').value=studioText2Stroke;$('sText2Glow').value=studioText2Glow;$('sText2Anim').value=studioText2Anim;$('sText2Align').value=studioText2Align;$('bText2Plate').textContent='Text 2 plate: '+(studioText2Plate?'ON':'OFF');$('bText2Plate').classList.toggle('on',studioText2Plate);
-  drawPals();drawMixers();if(d.advanced)restoreAdvancedState(d.advanced);if(d.tools)restoreVISORegistryState(d.tools);else{resetVISOBackgroundGrade();resetVISOBPMControls();}restoreVISOExportState(d.exportSettings||{quality:d.tools?Number($('sQuality').value):100});}
+  drawPals();drawMixers();if(d.advanced)restoreAdvancedState(d.advanced);if(d.tools)restoreVISORegistryState(d.tools);else{resetVISOBackgroundGrade();resetVISOBPMControls();}restoreVISOExportState(d.exportSettings||{quality:d.tools?Number($('sQuality').value):100});}finally{restoringState=previousRestoringState;}}
 $('bUndo').onclick=()=>{if(!undo.length)return;const current=JSON.stringify(captureProjectState()),previous=undo.pop();objectSnapshotCache.set(current,objects.map(o=>({...o})));redo.push(current);apply(previous);};
 $('bRedo').onclick=()=>{if(!redo.length)return;const current=JSON.stringify(captureProjectState()),next=redo.pop();objectSnapshotCache.set(current,objects.map(o=>({...o})));undo.push(current);apply(next);};
 $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
