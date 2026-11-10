@@ -13,15 +13,16 @@ Permanent roadmap: `PROJECT_ROADMAP.md`
 - Spectrum shake, wave delay/time, reverse wave, spectrum/rainbow/solid wave gradient.
 - Bounded 4-frame trail history with adjustable strength; fixed-size reusable wave buffer.
 - Spectrum settings are included in advanced project state capture/restore; slider, toggle, colour, select and per-layer controls capture undo snapshots.
-- **New fix:** radial, ring, sphere, tunnel, mirror, dual, wave and dot-style renderer branches now use the shared processed spectrum response, so invert, multiplier and uniform response are applied consistently rather than being ignored by several shapes.
-- Regression test asserts all shape branches use the shared response path.
+- **Shared response fix:** radial, ring, sphere, tunnel, mirror, dual, wave and dot-style renderers now all apply multiplier, uniform response and layer inversion through the same processed response function.
+- **Layer mode fix:** Web and Combo render finishes are now applied to both flat-family and other shapes; Scale changes processed amplitude consistently across shapes. Stack and Uniform behaviour preserved.
+- Regression tests cover shared response and cross-shape layer modes.
 
 ## Latest verified CI and APK
-- Source commit: `d7d5a83e6bcdbc79f4d02cf3de49ede4001f173d`.
-- Regression-test commit: `a813bf5ae012261384f7dcaaa77e41d7ff3de02c`.
-- CI run #542, ID `42854308879`, exact head commit `a813bf5ae012261384f7dcaaa77e41d7ff3de02c`, conclusion **success**.
+- Source commit: `fc7f221d41040f5367d1148f8130058a2b043d93`.
+- Regression-test commit: `5ffac539c464bda38b28c13e36c6c301cf18a040`.
+- CI run #547, ID `42854739363`, exact head commit `5ffac539c464bda38b28c13e36c6c301cf18a040`, conclusion **success**.
 - HTML/JavaScript validation, project archive regression tests, Android debug APK build, packaged APK verification and artifact upload all passed.
-- Artifact: `VISO-Studio-advanced-debug-apk`, artifact ID `13781912155`, size 32,188,351 bytes, SHA-256 digest of outer artifact ZIP `c9a1a50ceb4aa3abd42bbda555b49334bbb98d94b2a90c9052c5a29360106615`.
+- Artifact: `VISO-Studio-advanced-debug-apk`, artifact ID `13782935549`, size 32,188,511 bytes, outer artifact ZIP digest `sha256:bcfd522e869a59fa25c2c5aeb0bba53dafc616333f60e1884a388e50993309a8`.
 - Workflow verified package `com.viso.lite` and packaged HTML/source integrity. Physical-device install/runtime QA is not performed.
 
 ## Dock architecture
