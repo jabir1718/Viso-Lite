@@ -21,6 +21,13 @@ assert(!paintSource.includes('drawSpectrum('), 'spectrum must not be redundantly
 const singlePassFrameStart=html.indexOf('function frame(t)'),singlePassFrameEnd=html.indexOf('\n// VISO advanced studio modules',singlePassFrameStart);
 const singlePassFrameSource=html.slice(singlePassFrameStart,singlePassFrameEnd);
 assert.equal((singlePassFrameSource.match(/drawSpectrum\(x,1\)/g)||[]).length,1,'spectrum must render exactly once in the unified frame pipeline');
+assert.equal((singlePassFrameSource.match(/getByteFrequencyData\(buf\)/g)||[]).length,1,'beat and spectrum analysis must share one frequency read per animation frame');
+const bandStart=html.indexOf('function bands(pw)'),bandEnd=html.indexOf('\nfunction ',bandStart+20);
+const bandSource=html.slice(bandStart,bandEnd);
+const specBandStart=html.indexOf('function specBands()'),specBandEnd=html.indexOf('\nconst SPEC_MODES',specBandStart);
+const specBandSource=html.slice(specBandStart,specBandEnd);
+assert(!bandSource.includes('getByteFrequencyData(')&&!specBandSource.includes('getByteFrequencyData('),'audio analysers must consume the shared frame snapshot instead of reading it again');
+
 assert(html.includes("dockNav.id='toolDockNav'"), 'editor must expose a horizontal tool dock');
 assert(html.includes('function activateDockPanel(panel)'), 'tool dock must activate one focused control panel at a time');
 assert(html.includes('#bar>.panel.dock-active{display:flex!important}'), 'only the selected tool panel should occupy the editor dock');
