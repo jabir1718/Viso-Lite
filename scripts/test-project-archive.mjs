@@ -56,6 +56,11 @@ assert(html.includes('#bar>.panel.dock-active{display:flex!important}'), 'only t
 assert(html.includes('canvas{aspect-ratio:auto!important;width:auto!important;height:auto!important;'), 'preview must preserve selected landscape, square or portrait aspect ratio');
 assert(html.includes('VISO clean mobile editor chrome: top actions, lower tool dock'), 'editor must use clean mobile editor chrome');
 assert(!html.includes('id="toolSearch"')&&!html.includes('id="toolFavorites"')&&!html.includes('id="toolFilters"'), 'unneeded top search and favorites controls must be removed');
+assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'top toolbar must include undo redo and export');
+assert(html.includes("$('bar').appendChild(dockNav)"), 'tool navigation must appear after control panels at the bottom');
+assert(html.includes("if(panel.id==='exportPanel')return;"), 'export panel must be opened from the top-right action instead of duplicated in bottom dock');
+assert(html.includes("const dockOrder=['Media','Look','Visuals'"), 'tool dock must keep legacy tools before Aspectrum controls');
+assert(html.includes("'Background Drift','Background']"), 'background tools must be ordered last');
 assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'undo, redo and export must be available in the top toolbar');
 assert(html.includes("$('bar').appendChild(dockNav)"), 'tool dock must sit after the selected control panel at the bottom');
 assert(html.includes("const dockOrder=['Media','Look','Visuals'")&&html.includes("'Background Drift','Background']"), 'background tools must be placed at the end of the bottom tool dock');
@@ -317,22 +322,11 @@ assert.deepEqual(JSON.parse(JSON.stringify(registry.cache.overlay.map(tool => to
 
 const autoStart = html.indexOf('function restoreVISOAutoState(');
 const autoEnd = html.indexOf('function snap()', autoStart);
-assert(autoStart >= 0 && autoEnd > autoStart, 'auto state restore helper must exist');
-const autoControls = Object.fromEntries(['bAuto','sAuto','kCol','kVis','kShp','kSwy'].map(id => [id, { value: '', classList: { values: new Set(), toggle(name, on) { if (on) this.values.add(name); else this.values.delete(name); } } }]));
-const autoSandbox = { autoOn:false, autoEvery:3, lockChip:{color:false,vis:false,shape:false,sway:false}, $: id => autoControls[id] };
+assert(autoStart >= 0 && autoEnd > autoStart, 'legacy auto state migration helper must exist');
+const autoSandbox = {};
 vm.runInNewContext(html.slice(autoStart, autoEnd), autoSandbox, { timeout: 2000 });
-autoSandbox.restoreVISOAutoState({ autoOn:true, autoEvery:7, lockChip:{color:true,vis:false,shape:true,sway:false} });
-assert.equal(autoSandbox.autoOn, true, 'auto mode restores as enabled');
-assert.equal(autoSandbox.autoEvery, 7, 'auto interval restores');
-assert.deepEqual({ ...autoSandbox.lockChip }, { color:true, vis:false, shape:true, sway:false }, 'individual auto locks restore');
-assert.equal(autoControls.sAuto.value, 7, 'auto interval slider synchronizes');
-assert(autoControls.kCol.classList.values.has('on') && !autoControls.kCol.classList.values.has('lock'), 'locked control UI synchronizes');
-autoSandbox.restoreVISOAutoState({});
-assert.equal(autoSandbox.autoOn, false, 'older projects default auto mode off');
-assert.equal(autoSandbox.autoEvery, 3, 'older projects default auto interval');
-assert.deepEqual({ ...autoSandbox.lockChip }, { color:false, vis:false, shape:false, sway:false }, 'older projects default all auto locks off');
-autoSandbox.restoreVISOAutoState({autoEvery:99});assert.equal(autoSandbox.autoEvery,12,'auto interval clamps to slider maximum');
-autoSandbox.restoreVISOAutoState({autoEvery:0});assert.equal(autoSandbox.autoEvery,1,'auto interval clamps to slider minimum');
+assert.doesNotThrow(() => autoSandbox.restoreVISOAutoState({autoOn:true,autoEvery:99,lockChip:{color:true}}), 'legacy Auto + Lock state must be safely ignored');
+assert(!html.includes('if(autoOn){autoT'), 'removed Auto + Lock feature must not run in the animation loop');
 
 
 assert(html.includes('let restoringState=false;'), 'state restoration guard must exist');
