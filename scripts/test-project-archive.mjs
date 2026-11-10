@@ -30,8 +30,12 @@ assert(html.includes('id="sLogoPulse"'), 'custom logo audio-reactive size contro
 assert(html.includes('autoOn,autoEvery,lockChip:{...lockChip}'), 'auto mode timing and lock toggles must be saved in project and undo state');
 assert(html.includes('restoreVISOAutoState(d)'), 'auto mode and lock controls must restore from saved projects');
 assert(html.includes('exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd}'), 'export profile, resolution, FPS, format and playback toggles must be saved');
+assert(html.includes('stopAtSongEnd},bgVizMask,colors'), 'background visualizer mask toggle must be saved');
+assert(html.includes('if(d.bgVizMask!==undefined)bgVizMask=!!d.bgVizMask;else bgVizMask=true'), 'background visualizer mask must restore with legacy default');
+assert(html.includes("['tBvm',bgVizMask]"), 'background visualizer mask button must synchronize after restore');
 assert(html.includes('restoreVISOExportState(d.exportSettings||{})'), 'saved export settings must restore with old-project defaults');
 assert(html.includes('restoreVISOExportState({});};'), 'reset must restore default export settings');
+assert(html.includes("bgVizMask=true;$('tBvm').classList.add('on')"), 'reset must restore background visualizer mask default');
 assert(html.includes('autoEvery=3;Object.keys(lockChip).forEach(key=>lockChip[key]=false)'), 'reset must restore auto mode timing and unlocked defaults');
 assert(html.includes('logoPulse,logoRotation'), 'logo pulse must be included in saved advanced state');
 assert(html.includes('sync(\'sLogoPulse\',logoPulse)'), 'logo pulse must restore its UI value');
