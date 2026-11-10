@@ -625,4 +625,7 @@ assert(html.includes('function tapTempo(){snap();const n=performance.now();'),'T
 assert(!html.includes("MODES.indexOf('Dust')")&&!html.includes("MODES.indexOf('Sparkle')")&&!html.includes("MODES.indexOf(name)"),'all Elements mode lookups must resolve object names safely');
 assert(html.includes("mstate[MODES.findIndex(mode=>mode.name==='Dust')]")&&html.includes("mstate[MODES.findIndex(mode=>mode.name==='Sparkle')]"),'Elements checkboxes must restore their actual Dust and Sparkle mode state');
 assert(html.includes("const dustIndex=MODES.findIndex(mode=>mode.name==='Dust'),sparkIndex=MODES.findIndex(mode=>mode.name==='Sparkle');"),'Elements reset must restore Dust and Sparkle modes');
+
+assert(!html.includes("document.querySelectorAll('#bar button').forEach(button=>"),'tool navigation and no-op buttons must not create redundant undo snapshots');
+assert(html.includes("$('bar').addEventListener('keydown',e=>{if(e.target.matches('input[type=\"range\"],input[type=\"color\"],select')"),'keyboard edits must snapshot range, colour and select controls');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
