@@ -71,7 +71,7 @@
       <button id="bA">MP3</button><button id="bI">Photo</button><button id="bV">Video</button>
       <button id="bO">+ PNG</button><button id="bDel">× PNG</button>
       <button id="bP" class="prim">Play</button><button id="bR">Center</button></div><div class="advanced-tools"><label><span>Music volume</span><input id="advVolume" type="range" min="0" max="100" value="100"></label><label><span>Playback speed</span><input id="advRate" type="range" min="50" max="150" value="100"></label><div class="row"><button id="advLoop" class="on">Loop ON</button></div></div></div><div class="sec"><h4>Center logo spectrum</h4>
-    <div class="row"><button id="ctViz" class="on">Center spectrum ON</button>
+    <div class="row"><button id="ctViz">Center spectrum OFF</button>
       <button class="chip on" data-ctstyle="bars">Radial bars</button>
       <button class="chip" data-ctstyle="wave">Wave ring</button>
       <button class="chip" data-ctstyle="double">Double ring</button></div>
@@ -284,7 +284,7 @@ let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
 let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,bvp=140;
 let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
-let centerVizOn=true,centerVizStyle='bars',centerVizSize=22,centerVizPower=120,centerVizGlow=32,centerVizSpin=24,centerVizAngle=0,centerVizX=0,centerVizY=0;
+let centerVizOn=false,centerVizStyle='bars',centerVizSize=22,centerVizPower=120,centerVizGlow=32,centerVizSpin=24,centerVizAngle=0,centerVizX=0,centerVizY=0;
 let centerLogo=null,centerLogoShape='circle',centerVizThick=8,centerBeatSense=160,centerHeartbeat=65,centerShadow=70,centerShadowColor='#a020f0',centerBeatEnv=0;
 let spectrumOn=false,spMode='bars',spBand='balanced',spShape='line',spStyle='neon',spEffect='none',spMotion='none';
 let spWaveHeight=38,spBaseHeight=18,spBounce=75,spShake=25,spThickness=5,spWidth=88,spSensitivity=140,spSmooth=65,spDelay=0,spTrail=15,spGlow=35,spLow=100,spMid=100,spHigh=100;
@@ -300,7 +300,7 @@ const lights=[];let selLight=-1;let lint=60,lsz=100;
 const undo=[],redo=[];
 
 const MODES=['Dust','Aurora','Beams','Bars','Ripple','Grid','Sparkle','Vortex','Ribbon','Bokeh','Neon','Confetti','Comet','Hex','Orbitals','Mirage','Cube3D','Hyper','Depth','Warp3D','Orbit3D','Tunnel3D','Voxel','Parallax','Galaxy','Nebula'];
-const mstate=MODES.map((n,i)=>({name:n,on:i===0,op:i===0?.95:.7}));
+const mstate=MODES.map((n,i)=>({name:n,on:false,op:.7}));
 MODES.forEach((n,i)=>{const b=document.createElement('button');b.textContent=n;
   if(mstate[i].on)b.classList.add('on');
   b.onclick=()=>{mstate[i].on=!mstate[i].on;b.classList.toggle('on',mstate[i].on);drawMixers();snap();};
@@ -1314,11 +1314,13 @@ function autoStep(){
 }
 
 let lastRenderFrame=0,uiBusyUntil=0;
-// Briefly yield the preview renderer while the user scrolls or adjusts controls.
-const yieldPreview=()=>{uiBusyUntil=performance.now()+180;};
+// Pause expensive canvas work for the full duration of touch/scroll interaction.
+const yieldPreview=()=>{uiBusyUntil=performance.now()+420;};
 $('bar').addEventListener('scroll',yieldPreview,{passive:true});
-document.addEventListener('touchstart',yieldPreview,{passive:true});
-document.addEventListener('pointerdown',yieldPreview,{passive:true});
+$('bar').addEventListener('touchmove',yieldPreview,{passive:true});
+$('bar').addEventListener('wheel',yieldPreview,{passive:true});
+document.addEventListener('touchmove',yieldPreview,{passive:true});
+document.addEventListener('pointermove',e=>{if(e.buttons)yieldPreview();},{passive:true});
 function frame(t){
   requestAnimationFrame(frame);
   // Keep preview rendering light so Android WebView can scroll controls smoothly.
