@@ -825,7 +825,27 @@ $('bRec').onclick=()=>{
   recClock=setInterval(()=>{$('recInfo').textContent='Exporting · '+clockText((Date.now()-recStarted)/1000);},250);
   if(audio&&!playing){$('bP').click();}
 };
-function captureProjectState(){return {autoOn,autoEvery,lockChip:{...lockChip},colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
+function restoreVISOExportState(d){
+ const aspects=['9:16','16:9','1:1','4:5'];
+ aspect=aspects.includes(d.aspect)?d.aspect:'9:16';
+ const resolutions=[1080,1440,2160];
+ baseRes=resolutions.includes(Number(d.baseRes))?Number(d.baseRes):1080;
+ FPS=[30,60].includes(Number(d.FPS))?Number(d.FPS):30;
+ quality=Math.min(160,Math.max(40,Number.isFinite(Number(d.quality))?Number(d.quality):100));
+ formatChoice=d.formatChoice==='webm'?'webm':'auto';
+ loopSong=d.loopSong===undefined?true:!!d.loopSong;
+ stopAtSongEnd=d.stopAtSongEnd===undefined?false:!!d.stopAtSongEnd;
+ if(audio)audio.loop=loopSong;
+ $('bLoop').textContent='Loop song: '+(loopSong?'ON':'OFF');$('bLoop').classList.toggle('on',loopSong);
+ $('bStopAtEnd').textContent='Stop export at song end: '+(stopAtSongEnd?'ON':'OFF');$('bStopAtEnd').classList.toggle('on',stopAtSongEnd);
+ $('sQuality').value=quality;
+ document.querySelectorAll('#aspect button').forEach(q=>q.classList.toggle('on',q.textContent.startsWith(aspect)));
+ document.querySelectorAll('#res button').forEach((q,i)=>q.classList.toggle('on',resolutions[i]===baseRes));
+ document.querySelectorAll('#fps button').forEach(q=>q.classList.toggle('on',Number.parseInt(q.textContent,10)===FPS));
+ fmtButton.textContent=formatChoice==='auto'?'Auto format':'WebM';fmtButton.classList.toggle('on',formatChoice==='auto');
+ setRes();
+}
+function captureProjectState(){return {autoOn,autoEvery,lockChip:{...lockChip},exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd},colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
 function restoreVISOAutoState(d){
  autoOn=d.autoOn===undefined?false:!!d.autoOn;
  autoEvery=Number.isFinite(Number(d.autoEvery))?Number(d.autoEvery):3;
@@ -871,7 +891,7 @@ function apply(s){const d=JSON.parse(s);
   $('sTextSize').value=studioTextSize;$('sTextPos').value=studioTextPos;$('sTextAlpha').value=studioTextAlpha;$('studioTextColor').value=studioTextColor;
   $('sTextX').value=studioTextX;$('sTextRot').value=studioTextRot;$('sTextStroke').value=studioTextStroke;$('sTextGlow').value=studioTextGlow;$('sTextAnim').value=studioTextAnim;$('sTextFont').value=studioTextFont;$('sTextAlign').value=studioTextAlign;$('bTextPlate').textContent='Text plate: '+(studioTextPlate?'ON':'OFF');$('bTextPlate').classList.toggle('on',studioTextPlate);
   $('sText2Size').value=studioText2Size;$('sText2Pos').value=studioText2Pos;$('sText2Alpha').value=studioText2Alpha;$('studioText2Color').value=studioText2Color;$('sText2X').value=studioText2X;$('sText2Rot').value=studioText2Rot;$('sText2Stroke').value=studioText2Stroke;$('sText2Glow').value=studioText2Glow;$('sText2Anim').value=studioText2Anim;$('sText2Align').value=studioText2Align;$('bText2Plate').textContent='Text 2 plate: '+(studioText2Plate?'ON':'OFF');$('bText2Plate').classList.toggle('on',studioText2Plate);
-  drawPals();drawMixers();if(d.advanced)restoreAdvancedState(d.advanced);if(d.tools)restoreVISORegistryState(d.tools);else{resetVISOBackgroundGrade();resetVISOBPMControls();}}
+  drawPals();drawMixers();if(d.advanced)restoreAdvancedState(d.advanced);if(d.tools)restoreVISORegistryState(d.tools);else{resetVISOBackgroundGrade();resetVISOBPMControls();}restoreVISOExportState(d.exportSettings||{});}
 $('bUndo').onclick=()=>{if(!undo.length)return;const current=JSON.stringify(captureProjectState()),previous=undo.pop();objectSnapshotCache.set(current,objects.map(o=>({...o})));redo.push(current);apply(previous);};
 $('bRedo').onclick=()=>{if(!redo.length)return;const current=JSON.stringify(captureProjectState()),next=redo.pop();objectSnapshotCache.set(current,objects.map(o=>({...o})));undo.push(current);apply(next);};
 $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
@@ -893,7 +913,7 @@ $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
   $('bTextOn').textContent='Text: OFF';$('bTextOn').classList.remove('on');$('sTextSize').value=65;$('sTextPos').value=78;$('sTextAlpha').value=100;$('studioTextColor').value='#ffffff';
   $('sTextX').value=50;$('sTextRot').value=0;$('sTextStroke').value=7;$('sTextGlow').value=24;$('sTextAnim').value='none';$('sTextFont').value='system-ui';$('sTextAlign').value='center';$('bTextPlate').textContent='Text plate: OFF';$('bTextPlate').classList.remove('on');
   $('studioText2').value='';$('bText2On').textContent='Text 2: OFF';$('bText2On').classList.remove('on');$('sText2Size').value=32;$('sText2Pos').value=88;$('sText2Alpha').value=85;$('studioText2Color').value='#ffffff';$('sText2X').value=50;$('sText2Rot').value=0;$('sText2Stroke').value=2;$('sText2Glow').value=12;$('sText2Anim').value='none';$('sText2Align').value='center';$('bText2Plate').textContent='Text 2 plate: OFF';$('bText2Plate').classList.remove('on');
-  resetVISOBackgroundGrade();resetVISOBPMControls();drawMixers();resetVISOAdvancedControls();};
+  resetVISOBackgroundGrade();resetVISOBPMControls();drawMixers();resetVISOAdvancedControls();restoreVISOExportState({});};
 
 $('studioText').oninput=e=>{studioText=e.target.value.slice(0,36);};
 $('studioText').onchange=()=>{};
