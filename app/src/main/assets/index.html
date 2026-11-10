@@ -205,7 +205,7 @@ let W=c.width,H=c.height,cx=W/2,cy=H/2;
 const mk=document.createElement('canvas'),mx=mk.getContext('2d');
 const o=document.createElement('canvas'),ox=o.getContext('2d');
 const bl=document.createElement('canvas'),bx=bl.getContext('2d');
-mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=Math.max(1,Math.ceil(W/3));bl.height=Math.max(1,Math.ceil(H/3));
+mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=Math.max(1,Math.ceil(W/4));bl.height=Math.max(1,Math.ceil(H/4));
 const $=id=>document.getElementById(id);
 document.querySelectorAll('#bar .sec').forEach((section,index)=>{
   const heading=section.querySelector('h4');
@@ -681,7 +681,7 @@ function gradAt(px,py){const a=dirG/100;return grad((1-a)*py/H+a*px/W);}
 function applyT(ctx){ctx.translate(cx+ix+Math.sin(swayT*spd/100+advSwayPhase*Math.PI/180)*swy*2.2,cy+iy);ctx.rotate(irot+advMediaRotation*Math.PI/180);ctx.scale(isc,isc);}
 function applyMT(ctx){ctx.translate(cx+mX,cy+mY);ctx.rotate(mRot);ctx.scale(mSc*advMaskScale,mSc*advMaskScale);}
 
-const P=[];for(let i=0;i<1500;i++)P.push({x:Math.random()*W,y:Math.random()*H,z:Math.random(),vx:0,vy:0,ph:Math.random()*6.28});
+const P=[];for(let i=0;i<600;i++)P.push({x:Math.random()*W,y:Math.random()*H,z:Math.random(),vx:0,vy:0,ph:Math.random()*6.28});
 function scatter(n){for(let i=0;i<n;i++){const p=P[(Math.random()*P.length)|0];
   p.x=Math.random()*W;p.y=Math.random()*H;p.z=Math.random();
   const a=Math.random()*6.28,v=2+Math.random()*12;p.vx=Math.cos(a)*v;p.vy=Math.sin(a)*v;}}
@@ -1238,7 +1238,7 @@ function drawMainSpectrum(ctx,b,dt){
 function barsafe(v){return Math.max(1,v);}
 function drawCenterSpectrum(ctx,b,dt){
   if(!centerVizOn)return;
-  const base=Math.max(18,H*(centerVizSize/100)),power=centerVizPower/100,n=128,step=Math.PI*2/n;
+  const base=Math.max(18,H*(centerVizSize/100)),power=centerVizPower/100,n=88,step=Math.PI*2/n;
   centerVizAngle+=dt*.00045*(centerVizSpin/100);
   let bins=null,energy=0;
   if(an&&playing&&buf){an.getByteFrequencyData(buf);bins=buf;const lim=Math.min(42,buf.length);for(let i=2;i<lim;i++)energy+=buf[i];energy/=Math.max(1,lim-2)*255;}
@@ -1313,21 +1313,26 @@ function autoStep(){
     $('sSwy').value=swy;$('sSpd').value=spd;}
 }
 
-let lastRenderFrame=0;
+let lastRenderFrame=0,uiBusyUntil=0;
+// Briefly yield the preview renderer while the user scrolls or adjusts controls.
+const yieldPreview=()=>{uiBusyUntil=performance.now()+180;};
+$('bar').addEventListener('scroll',yieldPreview,{passive:true});
+document.addEventListener('touchstart',yieldPreview,{passive:true});
+document.addEventListener('pointerdown',yieldPreview,{passive:true});
 function frame(t){
   requestAnimationFrame(frame);
   // Keep preview rendering light so Android WebView can scroll controls smoothly.
-  if(t-lastRenderFrame<1000/30)return;
+  if(t-lastRenderFrame<1000/30||t<uiBusyUntil)return;
   lastRenderFrame=t;
   const dt=Math.min(50,t-last||33);last=t;frameN++;
   const b=bands();curB=b;curBbg=bands(bvp);
   const bass=b[0];avg=avg*.92+bass*.08;
-  if(bass>avg*1.4&&bass>.32)scatter(170);
+  if(mstate[0].on&&bass>avg*1.4&&bass>.32)scatter(90);
   pulse=Math.max(pulse*.85,bass);hueShift=(hueShift+cyc*.05*advColorFlow*advPaletteDrift)%360;swayT+=dt;
   if(autoOn){autoT+=dt;if(autoT>autoEvery*1000){autoT=0;autoStep();}}
   if(useVid&&frameN%3===0)maskDirty=true;
   if(maskDirty){buildMask();maskDirty=false;}
-  stepP(b,dt);
+  if(mstate[0].on)stepP(b,dt);
 
   x.save();
   const amp=pulse*(shk/100)*26;
@@ -1387,9 +1392,9 @@ function frame(t){
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
     x.drawImage(paintLayer(.7,false),0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;}
   bx.clearRect(0,0,bl.width,bl.height);
-  bx.filter='blur(8px)';bx.drawImage(c,0,0,bl.width,bl.height);bx.filter='none';
-  x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
-  x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
+  if(bloom>.01){bx.filter='blur(6px)';bx.drawImage(c,0,0,bl.width,bl.height);bx.filter='none';}else{bx.clearRect(0,0,bl.width,bl.height);}
+  if(bloom>.01){x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
+    x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;}
   if(advVignette>0){const vg=x.createRadialGradient(cx,cy,Math.min(W,H)*.22,cx,cy,Math.max(W,H)*.72);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,'+(advVignette/100*.85)+')');x.fillStyle=vg;x.fillRect(0,0,W,H);}
   if(advGuides||advGuidesExport){const m=Math.min(W,H)*advGuideMargin/100;x.save();x.globalAlpha=.55;x.strokeStyle='#ffffff';x.lineWidth=Math.max(1,W/900);x.setLineDash([W/90,W/120]);x.strokeRect(m,m,W-2*m,H-2*m);x.setLineDash([]);x.beginPath();x.moveTo(cx,0);x.lineTo(cx,H);x.moveTo(0,cy);x.lineTo(W,cy);x.stroke();x.restore();}
   x.restore();
