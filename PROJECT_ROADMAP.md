@@ -357,3 +357,14 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Expanded editable template presets to 14 styles. Selecting a card still applies the preset to the editor and downloads a complete editable .viso project package with its assets.
 - Added automated coverage for the gallery categories, local collections, successful-download tracking and portrait layout.
 - Thumbnail artwork is currently lightweight in-app artwork rather than downloaded reference-app media. The gallery interactions and editable project packaging are implemented; exact visual parity with every original Aspectrum template still needs further reference asset analysis.
+
+
+## 30. Bright editor refresh and flexible canvas sizing — 2026-11-10
+
+- Replaced the dark editor cascade with a bright blue/white/mint premium theme, including layered gradient controls and dimensional tool-dock icons.
+- Added descriptive glyphs to individual control buttons and kept the horizontal tool dock as the primary lower navigation.
+- Added instant common aspect presets: 9:16, 16:9, 1:1, 4:5, 3:4, 4:3, 3:2, 2:3 and 21:9.
+- Added arbitrary custom canvas width/height inputs, bounded to 64–4320 pixels and normalized to even dimensions.
+- Added an immersive full-screen preview mode with an exit control; preview uses the currently selected canvas dimensions.
+- Added automated assertions for theme, icon treatment, custom dimensions, aspect presets and full-screen mode.
+- Device-level visual and performance validation remains pending on the target Android handset.
