@@ -229,7 +229,7 @@ function updateRatioStatus(){
 }
 function gcd(a,b){return b?gcd(b,a%b):a;}
 function setRes(w,h){
-  W=Math.max(128,Math.min(4320,Math.round(w)));H=Math.max(128,Math.min(4320,Math.round(h)));
+  W=Math.max(128,Math.min(7680,Math.round(w)));H=Math.max(128,Math.min(7680,Math.round(h)));
   cx=W/2;cy=H/2;c.width=W;c.height=H;
   mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=W>>1;bl.height=H>>1;
   maskDirty=true;updateBitrate();updateRatioStatus();
@@ -256,7 +256,7 @@ $('fullPreview').onclick=()=>{fullPreview=!fullPreview;$('wrap').style.position=
   $('bar').style.display=fullPreview?'none':'flex';resizePreview();};
 window.addEventListener('resize',resizePreview);
 updateBitrate();
-[['1080p',1],['1440p',4/3],['4K',2]].forEach(([l,scale],i)=>{
+[['720p · HD',2/3],['1080p · Full HD',1],['1440p · 2K',4/3],['2160p · 4K',2],['4320p · 8K',4.5]].forEach(([l,scale],i)=>{
   const b=document.createElement('button');b.textContent=l;
   if(i===0)b.classList.add('on');
   b.onclick=()=>{qualityScale=scale;document.querySelectorAll('#res button').forEach(q=>q.classList.remove('on'));
