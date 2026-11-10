@@ -622,9 +622,9 @@ mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=W>>1;bl.height=H>>1;reflect
 const $=id=>document.getElementById(id);
 const vid=$('vid'),bvid=$('bvid');
 
-let FPS=30,BIT=8000000,baseRes=1080,aspect='9:16',quality=100,formatChoice='auto';
+let FPS=30,BIT=8000000,baseRes=1080,aspect='9:16',quality=100,formatChoice='auto',customW=1080,customH=1920;
 function outputSize(){
-  if(aspect==='custom'){const cw=Math.max(64,Math.min(4320,Math.round(+$('customWidth').value||1080))),ch=Math.max(64,Math.min(4320,Math.round(+$('customHeight').value||1920)));return [cw+(cw%2),ch+(ch%2)];}
+  if(aspect==='custom'){const cw=Math.max(64,Math.min(4320,Math.round(customW||1080))),ch=Math.max(64,Math.min(4320,Math.round(customH||1920)));return [cw+(cw%2),ch+(ch%2)];}
   const ratios={'9:16':[9,16],'16:9':[16,9],'1:1':[1,1],'4:5':[4,5],'3:4':[3,4],'4:3':[4,3],'3:2':[3,2],'2:3':[2,3],'21:9':[21,9]};
   const [rw,rh]=ratios[aspect]||[9,16],short=Math.min(rw,rh),long=Math.max(rw,rh);
   const scale=baseRes/short;
@@ -659,7 +659,7 @@ function setRes(){
 }
 const aspectItems=['9:16','16:9','1:1','4:5','3:4','4:3','3:2','2:3','21:9'];
 $('applyCustomSize').onclick=()=>{aspect='custom';document.querySelectorAll('#aspect button').forEach(q=>q.classList.remove('on'));$('applyCustomSize').classList.add('on');setRes();};
-$('customWidth').addEventListener('change',()=>{if(aspect==='custom')setRes();});$('customHeight').addEventListener('change',()=>{if(aspect==='custom')setRes();});
+$('customWidth').addEventListener('change',()=>{customW=+$('customWidth').value||1080;if(aspect==='custom')setRes();});$('customHeight').addEventListener('change',()=>{customH=+$('customHeight').value||1920;if(aspect==='custom')setRes();});
 aspectItems.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a+(a==='9:16'?' TikTok':a==='16:9'?' YouTube':'');
   if(i===0)b.classList.add('on');
   b.onclick=()=>{aspect=a;document.querySelectorAll('#aspect button').forEach(q=>q.classList.remove('on'));b.classList.add('on');setRes();};
@@ -969,8 +969,10 @@ $('bRec').onclick=()=>{
   if(audio&&!playing){$('bP').click();}
 };
 function restoreVISOExportState(d){
- const aspects=['9:16','16:9','1:1','4:5'];
+ const aspects=['9:16','16:9','1:1','4:5','3:4','4:3','3:2','2:3','21:9','custom'];
  aspect=aspects.includes(d.aspect)?d.aspect:'9:16';
+ customW=Math.max(64,Math.min(4320,Number(d.customW)||1080));customH=Math.max(64,Math.min(4320,Number(d.customH)||1920));
+ $('customWidth').value=customW;$('customHeight').value=customH;$('applyCustomSize').classList.toggle('on',aspect==='custom');
  const resolutions=[1080,1440,2160];
  baseRes=resolutions.includes(Number(d.baseRes))?Number(d.baseRes):1080;
  FPS=[30,60].includes(Number(d.FPS))?Number(d.FPS):30;
@@ -988,7 +990,7 @@ function restoreVISOExportState(d){
  fmtButton.textContent=formatChoice==='auto'?'Auto format':'WebM';fmtButton.classList.toggle('on',formatChoice==='auto');
  setRes();
 }
-function captureProjectState(){return {autoOn,autoEvery,lockChip:{...lockChip},exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
+function captureProjectState(){return {autoOn,autoEvery,lockChip:{...lockChip},exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
 function restoreVISOAutoState(d){
  autoOn=d.autoOn===undefined?false:!!d.autoOn;
  autoEvery=Math.round(Math.min(12,Math.max(1,Number.isFinite(Number(d.autoEvery))?Number(d.autoEvery):3)));
