@@ -1942,7 +1942,7 @@ bindSpec('sSpecRel',v=>specRel=v/100);bindSpec('sSpecPeak',v=>specPeakHold=v);bi
 bindSpec('sSpecGlowBlur',v=>specGlowBlur=v);bindSpec('sSpecGlowScale',v=>specGlowScale=v);
 bindSpec('sSpecPointCount',v=>specPointCount=v);bindSpec('sSpecPointWidth',v=>specPointWidth=v);
 bindSpec('sSpecMultiplier',v=>specMultiplier=v);bindSpec('sSpecShadowExpand',v=>specShadowExpand=v);
-['bSpecGlow','specGlowCoreColor','specGlowMode','bSpecGlowIntensitySync','bSpecRainbow','bSpecShadow','specShadowColor','bSpecShake','bSpecWaveDelay','bSpecWaveReverse','specWaveGradient','bSpecTrail'].forEach(id=>{const el=$(id);el.addEventListener('focus',()=>snap());el.addEventListener('pointerdown',()=>snap());});
+['bSpec','bSpecClr','specShape','specStyle','specSymmetry','specMaterial','specLayerMode','specLayerBlend','sSpecResolution','bSpecGlow','specGlowCoreColor','specGlowMode','bSpecGlowIntensitySync','bSpecRainbow','bSpecShadow','specShadowColor','bSpecShake','bSpecWaveDelay','bSpecWaveReverse','specWaveGradient','bSpecTrail'].forEach(id=>{const el=$(id);el.addEventListener('focus',()=>snap());el.addEventListener('pointerdown',()=>snap());});
 $('bSpecGlow').onchange=e=>specGlowOn=e.target.checked;
 $('specGlowCoreColor').oninput=e=>specGlowCoreColor=e.target.value;
 $('specGlowMode').onchange=e=>specGlowMode=e.target.value;
