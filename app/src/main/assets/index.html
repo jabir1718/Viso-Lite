@@ -18,7 +18,7 @@
        padding:8px;display:flex;flex-direction:column;gap:7px;flex:0 0 auto}
   .sec h4{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:#a78bfa;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:22px}\n  .sec h4::after{content:"−";font-size:16px;line-height:1;color:#c4b5fd}\n  .sec.collapsed>*:not(h4){display:none!important}\n  .sec.collapsed h4::after{content:"+"}\n  .sec h4:focus-visible{outline:2px solid #a78bfa;outline-offset:3px;border-radius:4px}
   .row{display:flex;gap:6px;overflow-x:auto;flex:0 0 auto;align-items:center;padding-bottom:1px}
-  button{background:#ffffff0f;color:#d9d5e6;border:1px solid #ffffff1f;border-radius:11px;min-height:37px;
+  select{background:#171225;color:#fff;border:1px solid #ffffff26;border-radius:8px;padding:7px;min-height:32px;font-size:10px;max-width:130px}\n  button{background:#ffffff0f;color:#d9d5e6;border:1px solid #ffffff1f;border-radius:11px;min-height:37px;
          padding:0 13px;font-size:11.5px;white-space:nowrap;flex:0 0 auto;font-weight:500}
   button:active{background:#ffffff24}
   button.on{background:#7c3aed40;border-color:#a78bfa;color:#fff}
@@ -51,9 +51,9 @@
       <button data-ratio="16:9">YouTube / Landscape 16:9</button>
     </div>
     <div class="row">
-      <input id="customW" class="ratio-custom" type="number" min="128" max="4320" value="1080" aria-label="Custom width">
+      <input id="customW" class="ratio-custom" type="number" min="128" max="7680" value="1080" aria-label="Custom width">
       <span class="ratio-note">×</span>
-      <input id="customH" class="ratio-custom" type="number" min="128" max="4320" value="1920" aria-label="Custom height">
+      <input id="customH" class="ratio-custom" type="number" min="128" max="7680" value="1920" aria-label="Custom height">
       <button id="applyCustom" class="chip">Apply custom</button>
       <button id="fullPreview" class="chip">Full preview</button>
     </div>
@@ -87,6 +87,32 @@
      <label><span>Shadow colour</span><input id="ctShadowColor" type="color" value="#a020f0"></label>
     <label><span>Position X</span><input id="ctX" type="range" min="-30" max="30" value="0"></label>
     <label><span>Position Y</span><input id="ctY" type="range" min="-30" max="30" value="0"></label>
+  </div>
+  <div class="sec"><h4>Main spectrum / wave studio</h4>
+    <div class="row"><button id="spToggle" class="on">Spectrum ON</button>
+      <button class="chip" data-spmode="bars">Bars</button><button class="chip" data-spmode="mirror">Mirror</button>
+      <button class="chip" data-spmode="wave">Wave</button><button class="chip" data-spmode="circle">Circular</button>
+      <button class="chip" data-spmode="bass">Bass bars</button></div>
+    <div class="row"><label>Frequency <select id="spBand"><option value="balanced">Balanced</option><option value="full">Full</option><option value="low">Low / Bass</option><option value="high">High</option><option value="changes">Changes</option><option value="vocals">Vocals</option></select></label>
+      <label>Shape <select id="spShape"><option value="line">Line</option><option value="circle">Circle</option><option value="mirror">Mirror</option><option value="diamond">Diamond</option><option value="capsule">Capsule</option><option value="sharp">Sharp</option></select></label></div>
+    <div class="row"><label>Style <select id="spStyle"><option value="neon">Neon</option><option value="gradient">Gradient</option><option value="rainbow">Rainbow</option><option value="solid">Solid</option><option value="fire">Fire</option><option value="ice">Ice</option></select></label>
+      <label>Effect <select id="spEffect"><option value="none">None</option><option value="fire">Fire / Burn</option><option value="lightning">Electric Lightning</option><option value="plasma">Neon Plasma</option><option value="laser">Laser Lines</option><option value="pulse">Glow Pulse</option><option value="liquid">Liquid Neon</option><option value="particles">Particle Burst</option><option value="glitch">RGB Glitch</option><option value="rays">Light Rays</option><option value="shockwave">Shockwave</option></select></label>
+      <label>Motion <select id="spMotion"><option value="none">None</option><option value="bounce">Bounce</option><option value="shake">Shake</option><option value="drift">Drift</option><option value="spin">Spin</option><option value="pulse">Pulse</option><option value="orbit">Orbit</option><option value="wave">Wave travel</option></select></label></div>
+    <label><span>Wave height</span><input id="spWaveHeight" type="range" min="5" max="80" value="38"></label>
+    <label><span>Base height</span><input id="spBaseHeight" type="range" min="0" max="90" value="18"></label>
+    <label><span>Bounce intensity</span><input id="spBounce" type="range" min="0" max="200" value="75"></label>
+    <label><span>Shake intensity</span><input id="spShake" type="range" min="0" max="100" value="25"></label>
+    <label><span>Thickness</span><input id="spThickness" type="range" min="1" max="24" value="5"></label>
+    <label><span>Width</span><input id="spWidth" type="range" min="20" max="100" value="88"></label>
+    <label><span>Beat sensitivity</span><input id="spSensitivity" type="range" min="20" max="300" value="140"></label>
+    <label><span>Smoothing</span><input id="spSmooth" type="range" min="0" max="95" value="65"></label>
+    <label><span>Wave delay</span><input id="spDelay" type="range" min="0" max="100" value="0"></label>
+    <label><span>Wave trail</span><input id="spTrail" type="range" min="0" max="90" value="15"></label>
+    <label><span>Glow strength</span><input id="spGlow" type="range" min="0" max="100" value="35"></label>
+    <label><span>Low / Bass mix</span><input id="spLow" type="range" min="0" max="200" value="100"></label>
+    <label><span>Mid mix</span><input id="spMid" type="range" min="0" max="200" value="100"></label>
+    <label><span>High mix</span><input id="spHigh" type="range" min="0" max="200" value="100"></label>
+    <div class="ratio-note">Spectrum layers are independent of the center-logo ring. All spectrum controls are included in the exported video.</div>
   </div>
   <div class="sec"><h4>Ready-made templates</h4>
     <div class="template-grid" id="templateGrid"></div>
@@ -275,6 +301,10 @@ let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,b
 let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
 let centerVizOn=true,centerVizStyle='bars',centerVizSize=22,centerVizPower=120,centerVizGlow=32,centerVizSpin=24,centerVizAngle=0,centerVizX=0,centerVizY=0;
 let centerLogo=null,centerLogoShape='circle',centerVizThick=8,centerBeatSense=160,centerHeartbeat=65,centerShadow=70,centerShadowColor='#a020f0',centerBeatEnv=0;
+let spectrumOn=true,spMode='bars',spBand='balanced',spShape='line',spStyle='neon',spEffect='none',spMotion='none';
+let spWaveHeight=38,spBaseHeight=18,spBounce=75,spShake=25,spThickness=5,spWidth=88,spSensitivity=140,spSmooth=65,spDelay=0,spTrail=15,spGlow=35,spLow=100,spMid=100,spHigh=100;
+let spSmoothBins=new Float32Array(160),spBeatEnv=0,spTime=0,spWaveTime=new Uint8Array(2048);
+
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
@@ -374,6 +404,23 @@ document.querySelectorAll('[data-ctstyle]').forEach(q=>q.onclick=()=>{centerVizS
   document.querySelectorAll('[data-ctstyle]').forEach(z=>z.classList.toggle('on',z===q));});
 $('ctViz').onclick=()=>{centerVizOn=!centerVizOn;$('ctViz').classList.toggle('on',centerVizOn);
   $('ctViz').textContent='Center spectrum '+(centerVizOn?'ON':'OFF');};
+
+
+const spNum=(id,key)=>{$(id).oninput=e=>{window[key]=+e.target.value;};};
+[
+ ['spWaveHeight','spWaveHeight'],['spBaseHeight','spBaseHeight'],['spBounce','spBounce'],['spShake','spShake'],
+ ['spThickness','spThickness'],['spWidth','spWidth'],['spSensitivity','spSensitivity'],['spSmooth','spSmooth'],
+ ['spDelay','spDelay'],['spTrail','spTrail'],['spGlow','spGlow'],['spLow','spLow'],['spMid','spMid'],['spHigh','spHigh']
+].forEach(([id,key])=>$(id).oninput=e=>{const v=+e.target.value;switch(key){
+ case 'spWaveHeight':spWaveHeight=v;break;case 'spBaseHeight':spBaseHeight=v;break;case 'spBounce':spBounce=v;break;
+ case 'spShake':spShake=v;break;case 'spThickness':spThickness=v;break;case 'spWidth':spWidth=v;break;
+ case 'spSensitivity':spSensitivity=v;break;case 'spSmooth':spSmooth=v;break;case 'spDelay':spDelay=v;break;
+ case 'spTrail':spTrail=v;break;case 'spGlow':spGlow=v;break;case 'spLow':spLow=v;break;case 'spMid':spMid=v;break;case 'spHigh':spHigh=v;break;
+ }});
+$('spToggle').onclick=()=>{spectrumOn=!spectrumOn;$('spToggle').classList.toggle('on',spectrumOn);$('spToggle').textContent='Spectrum '+(spectrumOn?'ON':'OFF');};
+document.querySelectorAll('[data-spmode]').forEach(q=>q.onclick=()=>{spMode=q.dataset.spmode;document.querySelectorAll('[data-spmode]').forEach(z=>z.classList.toggle('on',z===q));});
+$('spBand').onchange=e=>spBand=e.target.value;$('spShape').onchange=e=>spShape=e.target.value;
+$('spStyle').onchange=e=>spStyle=e.target.value;$('spEffect').onchange=e=>spEffect=e.target.value;$('spMotion').onchange=e=>spMotion=e.target.value;
 
 function drawPals(){$('pals').innerHTML='';colors.forEach((h,i)=>{
   const b=document.createElement('div');b.className='pal'+(i===selColor?' on':'');
@@ -907,6 +954,125 @@ function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
     ctx.strokeRect(-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);}
   ctx.restore();});}
 
+
+function drawMainSpectrum(ctx,b,dt){
+ if(!spectrumOn)return;
+ spTime+=dt;
+ let energy=0,raw=spSmoothBins.length,fd=null,td=null;
+ if(an&&playing&&buf){
+   an.getByteFrequencyData(buf);fd=buf;
+   if(spWaveTime.length!==an.fftSize)spWaveTime=new Uint8Array(an.fftSize);
+   an.getByteTimeDomainData(spWaveTime);
+   for(let i=1;i<Math.min(48,fd.length);i++)energy+=fd[i]/255;
+   energy/=Math.max(1,Math.min(48,fd.length)-1);
+ }else energy=Math.min(1,(b[0]*.55+b[2]*.3+b[5]*.15));
+ const beat=Math.min(1,energy*spSensitivity/100);
+ spBeatEnv=spBeatEnv*.78+beat*.22;
+ const smooth=spSmooth/100,delay=Math.round(spDelay/100*24),count=96;
+ const vals=new Float32Array(count);
+ for(let i=0;i<count;i++){
+   let v=0;
+   if(fd){
+     let start,end;
+     if(spBand==='low'){start=1;end=Math.max(3,Math.floor(fd.length*.14));}
+     else if(spBand==='high'){start=Math.floor(fd.length*.28);end=fd.length;}
+     else if(spBand==='vocals'){start=Math.floor(fd.length*.035);end=Math.floor(fd.length*.42);}
+     else if(spBand==='changes'){start=Math.floor(fd.length*.015);end=Math.floor(fd.length*.78);}
+     else if(spBand==='full'){start=1;end=fd.length;}
+     else{start=Math.floor(fd.length*.018);end=Math.floor(fd.length*.7);}
+     const p=Math.min(1,(i+delay)/count),idx=Math.floor(start+Math.pow(p,1.65)*(end-start-1));
+     const lo=Math.max(start,idx-2),hi=Math.min(end,idx+3);
+     for(let k=lo;k<hi;k++)v+=fd[k]/255;
+     v/=Math.max(1,hi-lo);
+   }else v=Math.min(1,(b[i%6]||0)*(.38+(i%5)*.12));
+   const lowBand=spBand==='low'||spMode==='bass';
+   if(lowBand)v*=spLow/100;else if(i<count*.33)v*=spLow/100;else if(i<count*.72)v*=spMid/100;else v*=spHigh/100;
+   vals[i]=v;
+   spSmoothBins[i]=spSmoothBins[i]*smooth+v*(1-smooth);
+ }
+ const centerX=cx,baseY=H*(1-spBaseHeight/100),span=W*spWidth/200;
+ const maxH=H*spWaveHeight/100,boost=1+spBeatEnv*spBounce/100;
+ const t=spTime/1000;
+ let shake=spShake/100*(spMotion==='shake'?1.8:1)*spBeatEnv*18;
+ let tx=0,ty=0,rot=0,scale=1;
+ if(spMotion==='bounce')ty=-spBeatEnv*spBounce*.32;
+ if(spMotion==='shake'){tx=(Math.random()-.5)*shake*2;ty=(Math.random()-.5)*shake*2;}
+ if(spMotion==='drift'){tx=Math.sin(t*.8)*W*.018;ty=Math.cos(t*.65)*H*.012;}
+ if(spMotion==='spin'||spMotion==='orbit')rot=t*(spMotion==='spin'?.18:.08);
+ if(spMotion==='pulse')scale=1+spBeatEnv*spBounce/100*.12;
+ if(spMotion==='wave')tx=Math.sin(t*1.7)*W*.025;
+ ctx.save();ctx.translate(centerX+tx,baseY+ty);ctx.rotate(rot);ctx.scale(scale,scale);
+ const half=span,thick=Math.max(1,W/1080*spThickness),amp=maxH*boost;
+ const colorAt=(i)=>{
+   const p=i/(count-1);
+   if(spStyle==='fire'||spEffect==='fire')return 'hsl('+(8+p*48)+' 100% '+(50+p*12)+'%)';
+   if(spStyle==='ice')return 'hsl('+(185+p*38)+' 100% '+(65-p*8)+'%)';
+   if(spStyle==='solid')return gradAt(cx,baseY);
+   if(spStyle==='rainbow')return 'hsl('+((p*360+spTime*.035)%360)+' 100% 62%)';
+   return grad(p);
+ };
+ ctx.globalCompositeOperation='lighter';ctx.lineCap=spShape==='sharp'?'butt':'round';ctx.lineJoin='round';
+ ctx.shadowBlur=spGlow*.7;ctx.shadowColor=colorAt(.45);ctx.lineWidth=thick;
+ if(spEffect==='glitch'&&spBeatEnv>.18){ctx.save();ctx.translate(4+spBeatEnv*10,0);ctx.globalAlpha=.22;ctx.strokeStyle='#00eaff';}
+ const mode=spMode;
+ if(mode==='circle'){
+   const radius=Math.min(W,H)*.17;
+   for(let i=0;i<count;i++){const a=i/count*Math.PI*2-Math.PI/2,v=spSmoothBins[i],len=amp*(.08+v);
+     ctx.strokeStyle=colorAt(i);ctx.globalAlpha=.35+v*.65;ctx.lineWidth=thick;
+     ctx.beginPath();ctx.moveTo(Math.cos(a)*radius,Math.sin(a)*radius);ctx.lineTo(Math.cos(a)*(radius+len),Math.sin(a)*(radius+len));ctx.stroke();}
+ }else if(mode==='wave'){
+   for(let layer=0;layer<(spShape==='mirror'?2:1);layer++){
+     ctx.beginPath();
+     for(let i=0;i<count;i++){const x0=-half+i/(count-1)*span*2;
+       let y0=(spWaveTime.length?((spWaveTime[Math.floor(i/(count-1)*(spWaveTime.length-1))]-128)/128):0)*amp*.75;
+       y0+= (spSmoothBins[i]-.15)*amp*.55;
+       if(layer)y0=-y0;
+       if(spShape==='sharp')y0=Math.sign(y0)*Math.pow(Math.abs(y0),.65)*amp*.7;
+       if(i===0)ctx.moveTo(x0,y0);else ctx.lineTo(x0,y0);}
+     ctx.strokeStyle=colorAt(layer?0.8:.25);ctx.globalAlpha=layer?.48:.92;ctx.lineWidth=thick*(layer?.7:1);ctx.stroke();
+   }
+ }else{
+   const bars=mode==='bass'?32:count;
+   for(let i=0;i<bars;i++){
+     const idx=Math.floor(i/bars*count),v=spSmoothBins[idx],x0=-half+i/bars*span*2;
+     let height=Math.max(2,v*amp);
+     if(spShape==='diamond')height*=.72;
+     if(mode==='mirror'||spShape==='mirror'){
+       ctx.strokeStyle=colorAt(idx);ctx.globalAlpha=.4+v*.6;ctx.lineWidth=thick;
+       ctx.beginPath();ctx.moveTo(x0,-height/2);ctx.lineTo(x0,height/2);ctx.stroke();
+     }else{
+       ctx.strokeStyle=colorAt(idx);ctx.globalAlpha=.3+v*.7;ctx.lineWidth=thick;
+       if(spShape==='capsule')ctx.lineCap='round';
+       ctx.beginPath();ctx.moveTo(x0,0);ctx.lineTo(x0,-height);ctx.stroke();
+       if(spShape==='diamond'&&v>.12){ctx.beginPath();ctx.moveTo(x0,-height-thick*2);ctx.lineTo(x0+thick*1.5,-height);ctx.lineTo(x0,-height+thick*2);ctx.lineTo(x0-thick*1.5,-height);ctx.closePath();ctx.fillStyle=colorAt(idx);ctx.fill();}
+     }
+   }
+ }
+ if(spEffect==='lightning'&&spBeatEnv>.16){
+   ctx.shadowBlur=spGlow+20;ctx.strokeStyle='#b9f7ff';ctx.lineWidth=Math.max(1,thick*.65);ctx.globalAlpha=.25+spBeatEnv*.65;
+   ctx.beginPath();let px=-half,py=-amp*.2;ctx.moveTo(px,py);
+   for(let i=1;i<18;i++){px=-half+i/barsafe(span)*span*2;py=-amp*(.15+Math.random()*.75);ctx.lineTo(px,py);}ctx.stroke();
+ }else if(spEffect==='plasma'||spEffect==='liquid'||spEffect==='laser'){
+   for(let layer=0;layer<(spEffect==='laser'?3:2);layer++){
+     ctx.beginPath();for(let i=0;i<=100;i++){const xx=-half+i/100*span*2;
+       const yy=Math.sin(i*.16+t*(2+layer)+layer*2)*amp*(.08+spBeatEnv*.2)+Math.sin(i*.045-t)*amp*.12;
+       if(i===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);}
+     ctx.strokeStyle=spEffect==='laser'?'#c5f8ff':colorAt(layer*.55);ctx.globalAlpha=.25+spBeatEnv*.4;ctx.lineWidth=thick*(layer?1.5:2);ctx.stroke();
+   }
+ }else if(spEffect==='particles'&&spBeatEnv>.12){
+   for(let i=0;i<36;i++){const xx=(Math.sin(i*91.7+t*(1+i%3))*0.5)*span*2,yy=-Math.abs(Math.sin(i*17.1+t*3))*amp;
+     ctx.fillStyle=colorAt(i/36);ctx.globalAlpha=.25+spBeatEnv*.65;ctx.beginPath();ctx.arc(xx,yy,thick*(.4+spBeatEnv*1.2),0,Math.PI*2);ctx.fill();}
+ }else if(spEffect==='rays'&&spBeatEnv>.1){
+   ctx.globalAlpha=.12+spBeatEnv*.22;ctx.strokeStyle=colorAt(.6);ctx.lineWidth=thick;
+   for(let i=0;i<12;i++){const xx=-half+i/11*span*2;ctx.beginPath();ctx.moveTo(xx,0);ctx.lineTo(xx,-amp*(.35+Math.random()*.4));ctx.stroke();}
+ }else if(spEffect==='shockwave'&&spBeatEnv>.2){
+   ctx.globalAlpha=.25;ctx.strokeStyle=colorAt(.5);ctx.lineWidth=thick*2;ctx.beginPath();ctx.ellipse(0,-amp*.18,span*.2+spBeatEnv*span*.7,amp*.12+spBeatEnv*amp*.35,0,0,Math.PI*2);ctx.stroke();
+ }else if(spEffect==='pulse'){
+   ctx.globalAlpha=.2+spBeatEnv*.35;ctx.strokeStyle=colorAt(.5);ctx.lineWidth=thick*2;ctx.beginPath();ctx.moveTo(-half,0);ctx.lineTo(half,0);ctx.stroke();
+ }
+ ctx.restore();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+}
+function barsafe(v){return Math.max(1,v);}
 function drawCenterSpectrum(ctx,b,dt){
   if(!centerVizOn)return;
   const base=Math.max(18,H*(centerVizSize/100)),power=centerVizPower/100,n=128,step=Math.PI*2/n;
@@ -1047,6 +1213,7 @@ function frame(t){
     x.globalCompositeOperation='source-over';
   }
 
+  drawMainSpectrum(x,b,dt);
   drawCenterSpectrum(x,b,dt);
   drawObjects(x,b,dt);
   drawLights(x);
