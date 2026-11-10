@@ -128,34 +128,6 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
 #toolEmpty{display:none}#toolEmpty.show{display:block;flex:1;padding:16px;text-align:center;color:#648168;font-size:11px}
 @media(max-height:740px){#bar{max-height:36dvh!important}#toolDockNav button{min-height:40px;min-width:56px}#wrap{padding:3px 6px!important}}
 
-/* Match the dark, edge-to-edge editing surface from the reference editor */
-body{color:#f4f4f4!important;background:#111!important}
-#studioHeader{background:#171717!important;border-bottom:1px solid #303030!important;box-shadow:none!important}
-.brandGlyph{background:#292929!important;color:#fff!important;box-shadow:none!important}
-.brandCopy strong{color:#f5f5f5!important}.brandCopy span{color:#a7a7a7!important}
-.brandLive{background:#202020!important;border-color:#383838!important;color:#b9e8bd!important}
-.toolSearchWrap{background:#222!important;border-color:#3a3a3a!important;box-shadow:none!important}
-#toolSearch{color:#f5f5f5!important}#toolSearch::placeholder{color:#9b9b9b!important}
-.navAction{background:#222!important;border-color:#3a3a3a!important;color:#ddd!important}
-.navAction.active{background:#303030!important;border-color:#777!important;color:#fff!important}
-#wrap{background:#111!important}
-canvas{aspect-ratio:auto!important;width:auto!important;height:auto!important;border-radius:0!important;background:#000!important;box-shadow:none!important}
-#monitorDock{background:#171717df!important;border:1px solid #424242!important;box-shadow:none!important}
-#monitorDock .status{background:#222!important;border-color:#444!important;color:#eee!important}
-#monitorDock button{background:#292929!important;border-color:#505050!important;color:#eee!important}
-#bar{background:#151515!important;border-top:1px solid #333!important}
-#toolDockNav button{background:#202020!important;border-color:#393939!important;color:#c9c9c9!important}
-#toolDockNav button.active{background:#303030!important;border-color:#16b9c8!important;color:#fff!important;box-shadow:inset 0 -2px #16b9c8!important}
-#bar>.panel{background:#1b1b1b!important;border-color:#373737!important;box-shadow:none!important;color:#eee!important}
-#bar>.panel h4{background:#1b1b1b!important;color:#f1f1f1!important}
-#bar .status{background:#242424!important;border-color:#3b3b3b!important;color:#ccc!important}
-#bar button{background:#252525!important;border-color:#444!important;color:#eee!important}
-#bar button.on{background:#075e68!important;border-color:#16b9c8!important;color:#fff!important}
-#bar button.prim{background:#08b9ca!important;border-color:#08b9ca!important;color:#071719!important}
-#bar label{color:#c2c2c2!important}
-#bar .subhead{color:#aaa!important}
-#toolEmpty{background:#1c1c1c!important;color:#bbb!important;border-color:#444!important}
-
 /* Aspectrum-inspired template gallery cards and library filters */
 .templateSearch input{width:100%;height:36px;padding:0 11px;border-radius:9px;border:1px solid #444;background:#222;color:#fff;font-size:11px}
 .templateFilters{display:flex;gap:6px;overflow-x:auto;padding:2px 0 5px}
@@ -231,6 +203,23 @@ body.preview-fullscreen #monitorDock{bottom:12px!important;left:12px!important;r
 body.preview-fullscreen #previewExit{display:block}
 @media(max-height:740px){#bar{max-height:40dvh!important}#toolDockNav button{min-height:50px!important;min-width:60px!important}#wrap{padding:4px 7px!important}}
 @media(min-width:700px){#bar{max-height:43dvh!important}#toolDockNav{justify-content:center}#toolDockNav button{min-width:76px!important}}
+
+/* VISO clean mobile editor chrome: top actions, lower tool dock */
+.studioActions{display:flex;align-items:center;gap:7px;margin-top:7px}
+.studioActions button{min-width:37px;min-height:34px;padding:0 10px;border-radius:10px;background:linear-gradient(180deg,#fff,#edf4ff);border:1px solid #cbd9e8;color:#31516e;font-size:17px;font-weight:800;box-shadow:0 2px 4px #284b7014,inset 0 1px #fff}
+.studioActions .topExport{margin-left:auto;min-width:94px;background:linear-gradient(180deg,#40d2c3,#12a99f);border-color:#0b9f98;color:#fff;font-size:11px;box-shadow:0 3px 8px #12a99f35,inset 0 1px #ffffff80}
+#toolDockNav{order:99}
+#bar{display:flex;flex-direction:column}
+#bar>.panel{order:1}
+#toolDockNav{order:2}
+#toolEmpty{display:none!important}
+#monitorDock{pointer-events:none}
+#monitorDock .status{pointer-events:auto}
+#toolDockNav button{min-width:66px;min-height:53px;border-radius:13px;background:linear-gradient(160deg,#fff 0%,#edf4ff 55%,#e3f7f1 100%);border:1px solid #cbdbea;color:#365775;box-shadow:0 3px 7px #244c7215,inset 0 1px #fff}
+#toolDockNav button .dockGlyph{font-size:20px;filter:drop-shadow(0 1px 1px #25415a30)}
+#toolDockNav button.active{background:linear-gradient(160deg,#d9f8f2,#c8eaff);border-color:#72c6c0;color:#145b61;box-shadow:0 3px 8px #2a9b9730,inset 0 1px #fff}
+.panel h4 .toolFav,.templateLike,.studioNav,#toolFilters{display:none!important}
+
 </style>
 <div id="studioHeader">
   <div class="studioBrand">
@@ -238,28 +227,14 @@ body.preview-fullscreen #previewExit{display:block}
     <div class="brandCopy"><strong>VISO STUDIO</strong><span>ADVANCED VISUAL WORKSPACE</span></div>
     <button id="previewToggle" type="button">⛶ Preview</button><div class="brandLive"><i></i> LIVE CANVAS</div>
   </div>
-  <div class="studioNav">
-    <div class="toolSearchWrap"><span class="searchGlyph">⌕</span><input id="toolSearch" type="search" placeholder="Search tools, effects, controls…" autocomplete="off"><button id="toolSearchClear" type="button" aria-label="Clear search">×</button></div>
-    <button id="toolFavorites" class="navAction" type="button" aria-pressed="false">☆ Favorites</button>
-    <span id="toolCount">TOOLS</span>
-  </div>
-  <div id="toolFilters" aria-label="Tool categories">
-    <button type="button" class="toolFilter active" data-filter="all">All tools</button>
-    <button type="button" class="toolFilter" data-filter="media">Media</button>
-    <button type="button" class="toolFilter" data-filter="visualizer">Visualizer</button>
-    <button type="button" class="toolFilter" data-filter="audio">Audio</button>
-    <button type="button" class="toolFilter" data-filter="overlay">Overlay FX</button>
-    <button type="button" class="toolFilter" data-filter="elements">Elements</button>
-    <button type="button" class="toolFilter" data-filter="background">Background</button>
-    <button type="button" class="toolFilter" data-filter="logo">Logo & Text</button>
-    <button type="button" class="toolFilter" data-filter="export">Export</button>
-    <button type="button" class="toolFilter" data-filter="templates">Templates</button>
+  <div class="studioActions">
+    <button id="bUndo" type="button" aria-label="Undo">↶</button>
+    <button id="bRedo" type="button" aria-label="Redo">↷</button>
+    <button id="topExport" class="topExport" type="button"><span>⇧</span> Export</button>
   </div>
 </div>
 <div id="wrap"><canvas id="c" width="360" height="640"></canvas><button id="previewExit" type="button">✕ Exit preview</button>
-<div id="monitorDock"><div class="subhead">SONG MONITOR</div>
-    <div class="monitorStats"><div id="songInfo" class="status">Song: not loaded · 00:00 / 00:00</div></div>
-    <div class="row"><button id="bLoop" class="on">Loop song: ON</button></div></div>
+<div id="monitorDock"><div class="monitorStats"><div id="songInfo" class="status">Song: not loaded · 00:00 / 00:00</div></div></div>
 </div>
 <div id="bar">
 <div class="sec panel open" id="mediaPanel"><h4>Media</h4>
@@ -267,7 +242,7 @@ body.preview-fullscreen #previewExit{display:block}
       <button id="bA">MP3 / Audio</button><button id="bI">Photo</button><button id="bV">Video</button>
       <button id="bO">+ PNG / Overlay</button><button id="bDel">× Remove selected PNG</button><button id="bMediaClear">Remove photo/video</button>
     </div>
-    <div class="row"><button id="bP" class="prim">Play</button><button id="bR">Center media</button><button id="bUndo">Undo</button><button id="bRedo">Redo</button><button id="bReset">Reset</button></div>
+    <div class="row"><button id="bP" class="prim">Play</button><button id="bR">Center media</button><button id="bReset">Reset</button></div>
     <div class="status">Choose your song, photo, video or transparent PNG. Your canvas stays visible above.</div>
 </div>
 <div class="sec panel open" id="exportPanel"><h4>Export Studio</h4>
@@ -308,14 +283,6 @@ body.preview-fullscreen #previewExit{display:block}
     <label><span>BG viz mix</span><input id="sBvo" type="range" min="0" max="100" value="85"></label>
     <label><span>BG viz power</span><input id="sBvp" type="range" min="20" max="300" value="140"></label>
     <div class="row"><button id="tBvm" class="on">BG viz on BG shape</button></div>
-  </div>
-  <div class="sec panel"><h4>Auto + Lock</h4>
-    <div class="row">
-      <button id="bAuto" class="prim">AUTO</button>
-      <button class="chip lock" id="kCol">Lock colour</button><button class="chip lock" id="kVis">Lock visuals</button>
-      <button class="chip lock" id="kShp">Lock shape</button><button class="chip lock" id="kSwy">Lock sway</button>
-    </div>
-    <label><span>Every</span><input id="sAuto" type="range" min="1" max="12" value="3"></label>
   </div>
   <div class="sec panel"><h4>Look</h4>
     <div class="row" id="presets"></div>
@@ -447,24 +414,24 @@ body.preview-fullscreen #previewExit{display:block}
     <div class="templateFilters" id="templateFilters">
       <button type="button" data-template-filter="landscape" class="active">Landscape</button>
       <button type="button" data-template-filter="portrait">Portrait</button>
-      <button type="button" data-template-filter="liked">♡ Liked</button>
+      
       <button type="button" data-template-filter="downloaded">Downloaded</button>
     </div>
     <div class="templateGrid" id="visoTemplates">
-      <article class="templateCard" data-layout="landscape"><button data-template="aura"><span class="templateThumb auraThumb"><i>◉</i></span><span class="templateName">Aura Pulse</span></button><button class="templateLike" data-like="aura" aria-label="Like Aura Pulse">♡</button></article>
-      <article class="templateCard" data-layout="landscape"><button data-template="romance"><span class="templateThumb romanceThumb"><i>♡</i></span><span class="templateName">Soft Romance</span></button><button class="templateLike" data-like="romance" aria-label="Like Soft Romance">♡</button></article>
-      <article class="templateCard" data-layout="landscape"><button data-template="vhs"><span class="templateThumb vhsThumb"><i>▥</i></span><span class="templateName">Retro VHS</span></button><button class="templateLike" data-like="vhs" aria-label="Like Retro VHS">♡</button></article>
-      <article class="templateCard" data-layout="landscape"><button data-template="club"><span class="templateThumb clubThumb"><i>✦</i></span><span class="templateName">Club Energy</span></button><button class="templateLike" data-like="club" aria-label="Like Club Energy">♡</button></article>
-      <article class="templateCard" data-layout="landscape"><button data-template="minimal"><span class="templateThumb minimalThumb"><i>〰</i></span><span class="templateName">Minimal Wave</span></button><button class="templateLike" data-like="minimal" aria-label="Like Minimal Wave">♡</button></article>
-      <article class="templateCard" data-layout="landscape"><button data-template="phonk"><span class="templateThumb phonkThumb"><i>◈</i></span><span class="templateName">Phonk Drive</span></button><button class="templateLike" data-like="phonk" aria-label="Like Phonk Drive">♡</button></article>
-      <article class="templateCard" data-layout="landscape"><button data-template="neon"><span class="templateThumb neonThumb"><i>✧</i></span><span class="templateName">Neon Tunnel</span></button><button class="templateLike" data-like="neon" aria-label="Like Neon Tunnel">♡</button></article>
-      <article class="templateCard" data-layout="landscape"><button data-template="cosmic"><span class="templateThumb cosmicThumb"><i>✺</i></span><span class="templateName">Cosmic Wave</span></button><button class="templateLike" data-like="cosmic" aria-label="Like Cosmic Wave">♡</button></article>
-      <article class="templateCard" data-layout="landscape"><button data-template="city"><span class="templateThumb cityThumb"><i>▥</i></span><span class="templateName">City Lights</span></button><button class="templateLike" data-like="city" aria-label="Like City Lights">♡</button></article>
-      <article class="templateCard" data-layout="landscape"><button data-template="fire"><span class="templateThumb fireThumb"><i>✹</i></span><span class="templateName">Blazing Fire</span></button><button class="templateLike" data-like="fire" aria-label="Like Blazing Fire">♡</button></article>
-      <article class="templateCard" data-layout="portrait"><button data-template="snow"><span class="templateThumb snowThumb"><i>❄</i></span><span class="templateName">Snowfall</span></button><button class="templateLike" data-like="snow" aria-label="Like Snowfall">♡</button></article>
-      <article class="templateCard" data-layout="portrait"><button data-template="pride"><span class="templateThumb prideThumb"><i>≋</i></span><span class="templateName">Pride Spectrum</span></button><button class="templateLike" data-like="pride" aria-label="Like Pride Spectrum">♡</button></article>
-      <article class="templateCard" data-layout="portrait"><button data-template="rose"><span class="templateThumb roseThumb"><i>✿</i></span><span class="templateName">Cherry Rose</span></button><button class="templateLike" data-like="rose" aria-label="Like Cherry Rose">♡</button></article>
-      <article class="templateCard" data-layout="portrait"><button data-template="storm"><span class="templateThumb stormThumb"><i>ϟ</i></span><span class="templateName">Neon Storm</span></button><button class="templateLike" data-like="storm" aria-label="Like Neon Storm">♡</button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="aura"><span class="templateThumb auraThumb"><i>◉</i></span><span class="templateName">Aura Pulse</span></button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="romance"><span class="templateThumb romanceThumb"><i>♡</i></span><span class="templateName">Soft Romance</span></button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="vhs"><span class="templateThumb vhsThumb"><i>▥</i></span><span class="templateName">Retro VHS</span></button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="club"><span class="templateThumb clubThumb"><i>✦</i></span><span class="templateName">Club Energy</span></button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="minimal"><span class="templateThumb minimalThumb"><i>〰</i></span><span class="templateName">Minimal Wave</span></button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="phonk"><span class="templateThumb phonkThumb"><i>◈</i></span><span class="templateName">Phonk Drive</span></button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="neon"><span class="templateThumb neonThumb"><i>✧</i></span><span class="templateName">Neon Tunnel</span></button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="cosmic"><span class="templateThumb cosmicThumb"><i>✺</i></span><span class="templateName">Cosmic Wave</span></button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="city"><span class="templateThumb cityThumb"><i>▥</i></span><span class="templateName">City Lights</span></button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="fire"><span class="templateThumb fireThumb"><i>✹</i></span><span class="templateName">Blazing Fire</span></button></article>
+      <article class="templateCard" data-layout="portrait"><button data-template="snow"><span class="templateThumb snowThumb"><i>❄</i></span><span class="templateName">Snowfall</span></button></article>
+      <article class="templateCard" data-layout="portrait"><button data-template="pride"><span class="templateThumb prideThumb"><i>≋</i></span><span class="templateName">Pride Spectrum</span></button></article>
+      <article class="templateCard" data-layout="portrait"><button data-template="rose"><span class="templateThumb roseThumb"><i>✿</i></span><span class="templateName">Cherry Rose</span></button></article>
+      <article class="templateCard" data-layout="portrait"><button data-template="storm"><span class="templateThumb stormThumb"><i>ϟ</i></span><span class="templateName">Neon Storm</span></button></article>
     </div>
     <div class="status" id="templateEmpty">No templates in this section.</div>
     <div class="row"><button id="bProjectSave">Save Project</button><button id="bProjectOpen">Open Project</button></div>
@@ -559,6 +526,7 @@ body.preview-fullscreen #previewExit{display:block}
     <div class="status" id="presetInfo">Save your current visual settings on this device</div>
   </div>
   <div class="sec panel"><h4>Audio Frequency Response</h4>
+    <div class="row"><button id="bLoop" class="on">Loop song: ON</button></div>
     <label><span>Bass</span><input id="sBassGain" type="range" min="0" max="250" value="100"></label>
     <label><span>Vocals · Mids</span><input id="sMidGain" type="range" min="0" max="250" value="100"></label>
     <label><span>Treble</span><input id="sHighGain" type="range" min="0" max="250" value="100"></label>
@@ -1884,11 +1852,7 @@ const VISO_RENDER_MODULES={
 };
 const VISO_TOOL_REGISTRY=Object.create(null);
 const VISO_RENDER_CACHE=Object.create(null);
-const VISO_TOOL_CATEGORIES=['all','media','visualizer','audio','elements','background','logo','overlay','export','templates'];
-const VISO_FAV_KEY='viso.toolFavorites.v1';
-let visoToolFilter='all',visoFavoritesOnly=false;
-let visoFavorites=new Set();
-try{visoFavorites=new Set(JSON.parse(localStorage.getItem(VISO_FAV_KEY)||'[]'));}catch(_){}
+const VISO_TOOL_CATEGORIES=['media','visualizer','audio','elements','background','logo','overlay','export','templates'];
 function registerVISOEffectTool(def){
  if(!def||!def.id||!def.name||!def.category||!def.panel)throw new Error('Tool requires id, name, category and panel');
  if(VISO_TOOL_REGISTRY[def.id])throw new Error('Duplicate VISO tool id: '+def.id);
@@ -1948,7 +1912,6 @@ function visoToolCategory(title){
  return 'visualizer';
 }
 function visoSlug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
-function saveVISOFavorites(){try{localStorage.setItem(VISO_FAV_KEY,JSON.stringify([...visoFavorites]));}catch(_){}}
 const visoPanels=[...document.querySelectorAll('#bar .panel')];
 visoPanels.forEach(panel=>{
  const heading=panel.querySelector('h4');if(!heading)return;
@@ -1962,49 +1925,18 @@ visoPanels.forEach(panel=>{
  panel.dataset.toolId=id;panel.dataset.toolCategory=category;
  const titleSpan=document.createElement('span');titleSpan.className='toolHeading';titleSpan.textContent=title;
  const meta=document.createElement('span');meta.className='toolMeta';meta.textContent=category.toUpperCase();
- const fav=document.createElement('button');fav.type='button';fav.className='toolFav';fav.textContent='☆';fav.title='Add to favorites';fav.setAttribute('aria-label','Add '+title+' to favorites');
- if(visoFavorites.has(id)){fav.classList.add('active');fav.textContent='★';}
- fav.addEventListener('click',ev=>{
-  ev.stopPropagation();
-  if(visoFavorites.has(id)){visoFavorites.delete(id);fav.classList.remove('active');fav.textContent='☆';fav.title='Add to favorites';}
-  else{visoFavorites.add(id);fav.classList.add('active');fav.textContent='★';fav.title='Remove from favorites';}
-  saveVISOFavorites();applyVISOFilters();
- });
- heading.textContent='';heading.append(titleSpan,meta,fav);
+ heading.textContent='';heading.append(titleSpan,meta);
  registerVISOEffectTool({id,name:title,category,panel,controls});
 });
 function applyVISOFilters(){
- const q=($('toolSearch')?.value||'').trim().toLowerCase();let visible=0;
- visoPanels.forEach(panel=>{
-  const id=panel.dataset.toolId,cat=panel.dataset.toolCategory;
-  const text=panel.textContent.toLowerCase();
-  const matchesText=!q||text.includes(q)||id.includes(q)||cat.includes(q);
-  const matchesCat=visoToolFilter==='all'||cat===visoToolFilter;
-  const matchesFav=!visoFavoritesOnly||visoFavorites.has(id);
-  const show=matchesText&&matchesCat&&matchesFav;
-  panel.classList.toggle('search-hidden',!show);if(show)visible++;
- });
- $('toolCount').textContent=visible+' / '+visoPanels.length;
+ let visible=0;
+ visoPanels.forEach(panel=>{panel.classList.remove('search-hidden');visible++;});
  $('toolEmpty').classList.toggle('show',visible===0);
- dockNav.querySelectorAll('button').forEach(btn=>{const panel=visoPanels.find(p=>p.id===btn.dataset.panel);btn.hidden=!panel||panel.classList.contains('search-hidden');});
+ dockNav.querySelectorAll('button').forEach(btn=>{btn.hidden=false;});
  if(activeDockPanel?.classList.contains('search-hidden'))activeDockPanel=null;
- if(!activeDockPanel&&visible)activateDockPanel(visoPanels.find(p=>!p.classList.contains('search-hidden')));
+ if(!activeDockPanel&&visible)activateDockPanel(visoPanels[0]);
 }
-$('toolSearch').addEventListener('input',applyVISOFilters);
-$('toolSearchClear').addEventListener('click',()=>{$('toolSearch').value='';applyVISOFilters();$('toolSearch').focus();});
-$('toolFavorites').addEventListener('click',()=>{
- visoFavoritesOnly=!visoFavoritesOnly;
- $('toolFavorites').classList.toggle('active',visoFavoritesOnly);
- $('toolFavorites').setAttribute('aria-pressed',String(visoFavoritesOnly));
- $('toolFavorites').textContent=visoFavoritesOnly?'★ Favorites':'☆ Favorites';
- applyVISOFilters();
-});
-document.querySelectorAll('.toolFilter').forEach(btn=>btn.addEventListener('click',()=>{
- visoToolFilter=btn.dataset.filter;
- document.querySelectorAll('.toolFilter').forEach(b=>b.classList.toggle('active',b===btn));
- applyVISOFilters();
-}));
-const empty=document.createElement('div');empty.id='toolEmpty';empty.textContent='No matching tools. Try another search or choose All tools.';
+const empty=document.createElement('div');empty.id='toolEmpty';empty.textContent='No tools available.';
 $('bar').appendChild(empty);
 const dockNav=document.createElement('div');dockNav.id='toolDockNav';dockNav.setAttribute('aria-label','Editor tools');
 const dockGlyphs={'Media':'▧','Export Studio':'⇧','Visualizer':'▥','Spectrum':'◉','Background':'▧','Audio':'♫','Text':'T','Logo':'◉','Elements':'◇','Overlay':'✧','Stickers':'▢','Tempo':'♢','Project':'▣','Template':'▦','Effects':'✧','Camera':'◉','Motion':'↗','Color':'◒','Layer':'▤'};
@@ -2024,7 +1956,13 @@ visoPanels.forEach(panel=>{
  btn.append(icon,label);btn.addEventListener('click',()=>activateDockPanel(panel));dockNav.appendChild(btn);
 });
 
-$('bar').insertBefore(dockNav,$('bar').firstChild);
+const dockOrder=['Media','Look','Visuals','Spectrum Studio','Symmetry','Shape','Mask shape','Position','Video grade','Colour','Lights','Layers','Text · Logo Studio','Audio Frequency Response','Audio Motion','Beat · BPM Sync','Overlay','Progress Bar Studio','Overlay Effects · Motion FX','Surface Reflection','Film & Vintage','Atmosphere FX','Templates · Editable Projects','Export Studio','Background Drift','Background'];
+const dockRank=name=>{const i=dockOrder.findIndex(v=>name.toLowerCase().includes(v.toLowerCase()));return i<0?dockOrder.length:i;};
+[...visoPanels].sort((a,b)=>dockRank(a.querySelector('.toolHeading')?.textContent||'')-dockRank(b.querySelector('.toolHeading')?.textContent||'')).forEach(panel=>{
+ const btn=[...dockNav.children].find(b=>b.dataset.panel===panel.id);if(btn)dockNav.appendChild(btn);
+});
+$('bar').appendChild(dockNav);
+$('topExport').addEventListener('click',()=>activateDockPanel($('exportPanel')));
 const controlIconMap=[[/audio|mp3|song|music/i,'♫'],[/photo|image|picture|media/i,'▧'],[/video|movie/i,'▶'],[/png|overlay/i,'▣'],[/remove|delete|clear/i,'×'],[/play|pause/i,'▶'],[/center|align/i,'⊙'],[/undo/i,'↶'],[/redo/i,'↷'],[/reset|default/i,'⟲'],[/export|render|save|download/i,'⇧'],[/tiktok/i,'♪'],[/reel|instagram/i,'◎'],[/youtube/i,'▷'],[/square|1:1/i,'□'],[/portrait|story|9:16/i,'▯'],[/landscape|16:9/i,'▭'],[/background|wallpaper/i,'▧'],[/spectrum|visualizer|wave/i,'▥'],[/beat|tempo|bpm/i,'♬'],[/text|font|caption/i,'T'],[/logo|brand/i,'◉'],[/sticker|element/i,'◇'],[/color|tint|hue/i,'◒'],[/opacity|alpha/i,'◐'],[/size|scale|width|height/i,'↔'],[/speed|rate/i,'↗'],[/effect|filter|glow/i,'✧'],[/favorite|like/i,'☆'],[/project|template/i,'▦'],[/lock/i,'◆'],[/quality|resolution|fps/i,'▤']];
 document.querySelectorAll('#bar>.panel button').forEach(button=>{
  if(button.classList.contains('toolFav')||button.querySelector('.controlGlyph'))return;
@@ -2255,9 +2193,8 @@ function applyVisoProject(p){
  restoreAdvancedState(collectAdvancedState());
  $('templateInfo').textContent='Project loaded: '+(p.name||'Custom project')+' · now edit layers, effects and media';
 }
-const VISO_TEMPLATE_LIKES_KEY='viso.templateLikes.v1',VISO_TEMPLATE_DOWNLOADS_KEY='viso.templateDownloads.v1';
-let visoTemplateFilter='landscape',visoTemplateLikes=new Set(),visoTemplateDownloads=new Set();
-try{visoTemplateLikes=new Set(JSON.parse(localStorage.getItem(VISO_TEMPLATE_LIKES_KEY)||'[]'));}catch(_){}
+const VISO_TEMPLATE_DOWNLOADS_KEY='viso.templateDownloads.v1';
+let visoTemplateFilter='landscape',visoTemplateDownloads=new Set();
 try{visoTemplateDownloads=new Set(JSON.parse(localStorage.getItem(VISO_TEMPLATE_DOWNLOADS_KEY)||'[]'));}catch(_){}
 function applyVISOTemplateFilters(){
  const q=($('templateSearch')?.value||'').trim().toLowerCase();let count=0;
@@ -2265,7 +2202,7 @@ function applyVISOTemplateFilters(){
  document.querySelectorAll('#visoTemplates .templateCard').forEach(card=>{
   const key=card.querySelector('[data-template]')?.dataset.template||'',name=VISO_TEMPLATES[key]?.name||key;
   const layout=card.dataset.layout,showText=!q||name.toLowerCase().includes(q)||key.includes(q);
-  const showLayout=visoTemplateFilter==='liked'?visoTemplateLikes.has(key):visoTemplateFilter==='downloaded'?visoTemplateDownloads.has(key):layout===visoTemplateFilter;
+  const showLayout=visoTemplateFilter==='downloaded'?visoTemplateDownloads.has(key):layout===visoTemplateFilter;
   card.hidden=!(showText&&showLayout);if(!card.hidden)count++;
   const like=card.querySelector('[data-like]');if(like){const on=visoTemplateLikes.has(key);like.textContent=on?'♥':'♡';like.classList.toggle('active',on);}
  });
@@ -2275,11 +2212,7 @@ document.querySelectorAll('[data-template-filter]').forEach(btn=>btn.addEventLis
  visoTemplateFilter=btn.dataset.templateFilter;document.querySelectorAll('[data-template-filter]').forEach(b=>b.classList.toggle('active',b===btn));applyVISOTemplateFilters();
 }));
 $('templateSearch').addEventListener('input',applyVISOTemplateFilters);
-document.querySelectorAll('#visoTemplates [data-like]').forEach(btn=>btn.addEventListener('click',ev=>{
- ev.stopPropagation();const key=btn.dataset.like;
- if(visoTemplateLikes.has(key))visoTemplateLikes.delete(key);else visoTemplateLikes.add(key);
- try{localStorage.setItem(VISO_TEMPLATE_LIKES_KEY,JSON.stringify([...visoTemplateLikes]));}catch(_){}
- applyVISOTemplateFilters();
+applyVISOTemplateFilters();
 }));
 applyVISOTemplateFilters();
 document.querySelectorAll('#visoTemplates [data-template]').forEach(q=>q.onclick=async()=>{
