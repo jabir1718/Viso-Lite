@@ -464,14 +464,14 @@ assert.equal(fontSandbox.visoFontFamily('My Custom Font.ttf',4660),'VISOFont_My_
 assert.notEqual(fontSandbox.visoFontFamily('My Custom Font.ttf',4660),fontSandbox.visoFontFamily('My Custom Font.ttf',4661),'different font contents receive distinct families');
 
 
-const specNormAuditStart=html.indexOf('function drawSpectrumLayer(');
-const specNormAuditEnd=html.indexOf('\\nlet curB=',specNormAuditStart);
-assert(specNormAuditStart>=0&&specNormAuditEnd>specNormAuditStart,'spectrum renderer must exist');
-const specNormAuditRenderer=html.slice(specNormAuditStart,specNormAuditEnd);
-const specNormRadialStart=specNormAuditRenderer.indexOf("if(M==='radial')");
-assert(specNormRadialStart>=0,'radial spectrum branch must exist');
-const specNormShapeRenderer=specNormAuditRenderer.slice(specNormRadialStart);
-assert(!specNormShapeRenderer.includes('specSmooth[i]/255'),'all spectrum shapes must use shared processed response values');
-assert(!specNormShapeRenderer.includes('specSmooth[idx]/255'),'wave spectrum must use shared processed response values');
-assert((specNormShapeRenderer.match(/val\\(i\\)/g)||[]).length>=8,'radial, ring, sphere, tunnel, mirror, dual, wave and dot renderers must use the normalized response');
+const processedResponseAuditStart=html.indexOf('function drawSpectrumLayer(');
+const processedResponseAuditEnd=html.indexOf('\\nlet curB=',processedResponseAuditStart);
+assert(processedResponseAuditStart>=0&&processedResponseAuditEnd>processedResponseAuditStart,'spectrum renderer must exist');
+const processedResponseAuditRenderer=html.slice(processedResponseAuditStart,processedResponseAuditEnd);
+const processedResponseRadialStart=processedResponseAuditRenderer.indexOf("if(M==='radial')");
+assert(processedResponseRadialStart>=0,'radial spectrum branch must exist');
+const processedResponseShapeRenderer=processedResponseAuditRenderer.slice(processedResponseRadialStart);
+assert(!processedResponseShapeRenderer.includes('specSmooth[i]/255'),'all spectrum shapes must use shared processed response values');
+assert(!processedResponseShapeRenderer.includes('specSmooth[idx]/255'),'wave spectrum must use shared processed response values');
+assert((processedResponseShapeRenderer.match(/val\\(i\\)/g)||[]).length>=8,'radial, ring, sphere, tunnel, mirror, dual, wave and dot renderers must use the normalized response');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
