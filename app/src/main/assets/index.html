@@ -227,6 +227,15 @@ body.preview-fullscreen #previewExit{display:block}
 .toolGroupBody>.toolSubpanel{display:flex!important;flex:0 0 auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:9px!important;border:1px solid #e0e9e0!important;border-radius:11px!important;background:linear-gradient(150deg,#fff,#f8fbf7)!important;box-shadow:none!important}
 .toolGroupBody>.toolSubpanel>h4{display:none!important}
 #tFr{display:none!important;}
+#bar{flex:0 1 auto!important;max-height:40dvh!important;overflow-y:auto!important;display:flex!important;flex-direction:column!important;gap:8px!important;padding:7px 9px 18px!important}
+#bar>.panel{display:flex!important;flex-direction:column!important;flex:0 0 auto!important;max-height:none!important;min-height:0!important;overflow:visible!important}
+#bar>.panel h4{position:static!important}
+#bar>.panel.collapsed>:not(h4){display:block!important}
+#toolDockNav{display:none!important}
+#monitorDock{position:static!important;flex:0 0 auto!important;width:calc(100% - 18px)!important;max-width:560px!important;margin:2px auto 5px!important;display:flex!important;flex-direction:column!important;gap:6px!important}
+#monitorDock .monitorStats{display:flex;gap:6px;min-width:0}
+#monitorDock .status{flex:1;min-width:0}
+#monitorDock .row{display:flex;gap:6px;overflow-x:auto}
 </style>
 <div id="studioHeader">
   <div class="studioBrand">
@@ -240,8 +249,10 @@ body.preview-fullscreen #previewExit{display:block}
     <button id="topExport" class="topExport" type="button"><span>⇧</span> Export</button>
   </div>
 </div>
-<div id="wrap"><canvas id="c" width="360" height="640"></canvas><button id="previewExit" type="button">✕ Exit preview</button>
-<div id="monitorDock"><div class="monitorStats"><div id="songInfo" class="status">Song: not loaded · 00:00 / 00:00</div></div></div>
+<div id="wrap"><canvas id="c" width="360" height="640"></canvas><button id="previewExit" type="button">✕ Exit preview</button></div>
+<div id="monitorDock"><div class="subhead">SONG & EXPORT MONITOR</div>
+  <div class="monitorStats"><div id="songInfo" class="status">Song: not loaded · 00:00 / 00:00</div><div id="recInfo" class="status">Export: ready · 00:00</div></div>
+  <div class="row"><button id="bLoop" class="on">Loop song: ON</button><button id="bStopAtEnd">Stop export at song end: OFF</button></div>
 </div>
 <div id="bar">
 <div class="sec panel open" id="mediaPanel"><h4>Media</h4>
@@ -263,9 +274,6 @@ body.preview-fullscreen #previewExit{display:block}
     <div class="row" id="format"></div>
     <label><span>Quality</span><input id="sQuality" type="range" min="40" max="160" value="100"></label>
     <div id="exportInfo" class="status">1080 · 30 FPS · best available format</div>
-    <div class="subhead">Export monitor</div>
-    <div id="recInfo" class="status">Export: ready · 00:00</div>
-    <div class="row"><button id="bStopAtEnd">Stop export at song end: OFF</button></div>
     <label><span>File name</span><input id="exportName" type="text" maxlength="48" value="VISO-Export" placeholder="Your video name"></label>
     <div class="row"><button id="bShot">Save frame PNG</button><button id="bRec" class="prim">Export video</button></div>
 </div>
@@ -291,6 +299,14 @@ body.preview-fullscreen #previewExit{display:block}
     <label><span>BG viz mix</span><input id="sBvo" type="range" min="0" max="100" value="85"></label>
     <label><span>BG viz power</span><input id="sBvp" type="range" min="20" max="300" value="140"></label>
     <div class="row"><button id="tBvm" class="on">BG viz on BG shape</button></div>
+  </div>
+  <div class="sec panel"><h4>Auto + Lock</h4>
+    <div class="row">
+      <button id="bAuto" class="prim">AUTO</button>
+      <button class="chip lock" id="kCol">Lock colour</button><button class="chip lock" id="kVis">Lock visuals</button>
+      <button class="chip lock" id="kShp">Lock shape</button><button class="chip lock" id="kSwy">Lock sway</button>
+    </div>
+    <label><span>Every</span><input id="sAuto" type="range" min="1" max="12" value="3"></label>
   </div>
   <div class="sec panel"><h4>Look</h4>
     <div class="row" id="presets"></div>
@@ -568,7 +584,6 @@ body.preview-fullscreen #previewExit{display:block}
     <div id="extraTextLayers" class="extraTextLayers"></div>
   </div>
   <div class="sec panel"><h4>Audio Frequency Response</h4>
-    <div class="row"><button id="bLoop" class="on">Loop song: ON</button></div>
     <label><span>Bass</span><input id="sBassGain" type="range" min="0" max="250" value="100"></label>
     <label><span>Vocals · Mids</span><input id="sMidGain" type="range" min="0" max="250" value="100"></label>
     <label><span>Treble</span><input id="sHighGain" type="range" min="0" max="250" value="100"></label>
@@ -624,7 +639,8 @@ body.preview-fullscreen #previewExit{display:block}
   const stickerPanel=document.createElement('div');stickerPanel.className='sec panel';stickerPanel.id='stickerPanel';
   const h=document.createElement('h4');h.textContent='Sticker';stickerPanel.appendChild(h);
   const row=document.createElement('div');row.className='row';
-  ['bO','bDel'].forEach(id=>{const el=document.getElementById(id);if(el)row.appendChild(el);});
+  const addStickerButton=document.createElement('button');addStickerButton.type='button';addStickerButton.textContent='Add sticker PNG';
+  addStickerButton.onclick=()=>document.getElementById('bO')?.click();row.appendChild(addStickerButton);
   stickerPanel.appendChild(row);
   const stickerControls=document.createElement('div');stickerControls.className='stickerControls';
   stickerControls.innerHTML='<div class="status" id="stickerSelectionInfo">Select a sticker on the canvas to edit its appearance.</div><div class="fxSubhead">TRANSFORM</div><label><span>Position X</span><input id="sStickerX" type="range" min="0" max="100" value="50"></label><label><span>Position Y</span><input id="sStickerY" type="range" min="0" max="100" value="50"></label><label><span>Size</span><input id="sStickerScale" type="range" min="5" max="200" value="32"></label><label><span>Rotation</span><input id="sStickerRotation" type="range" min="-180" max="180" value="0"></label><label><span>Opacity</span><input id="sStickerAlpha" type="range" min="0" max="100" value="100"></label><div class="fxSubhead">OVERLAY EFFECTS</div><label><span>Glow</span><input id="sStickerGlow" type="range" min="0" max="100" value="35"></label><label><span>Outline thickness</span><input id="sStickerOutline" type="range" min="0" max="20" value="0"></label><label><span>Outline colour</span><input id="stickerOutlineColor" type="color" value="#ffffff"></label><label><span>Colour key</span><input id="bStickerColorKey" type="checkbox"></label><label><span>Key colour</span><input id="stickerKeyColor" type="color" value="#00ff00"></label><label><span>Key tolerance</span><input id="sStickerKeyTolerance" type="range" min="0" max="100" value="24"></label><label><span>Blend mode</span><select id="selStickerBlend"><option value="stacked">Stacked</option><option value="additive">Additive</option></select></label><label><span>Motion</span><select id="selStickerMotion"><option value="None">None</option><option value="Float">Float</option><option value="Orbit">Orbit</option><option value="Drive">Drive</option><option value="Walk">Walk</option><option value="Rain">Rain</option></select></label><label><span>Motion speed</span><input id="sStickerMotionSpeed" type="range" min="0" max="200" value="100"></label>';
@@ -632,24 +648,19 @@ body.preview-fullscreen #previewExit{display:block}
   const note=document.createElement('div');note.className='status';note.textContent='Add a transparent PNG or image sticker, then drag it on the canvas to position and resize it.';stickerPanel.appendChild(note);
   bar.appendChild(stickerPanel);
  }
- mergeGroup('Audio',['Audio Motion','Audio Frequency Response'],'audioPanel');
- const audioPanel=all().find(p=>p.id==='audioPanel'),audioUpload=document.getElementById('bA');
- if(audioPanel&&audioUpload){const uploadRow=document.createElement('div');uploadRow.className='row audioUploadRow';audioUpload.textContent='Upload / Replace Audio';uploadRow.appendChild(audioUpload);const heading=audioPanel.querySelector('h4');audioPanel.insertBefore(uploadRow,heading?.nextSibling||null);}
-
- mergeGroup('Visualizer',['Look','Visuals','Spectrum Studio','Symmetry','Colour','Mask shape','Layers · Tools box','Position','Shape','Video grade','Shape · Gradient · Motion'],'visualizerPanel');
- const visualizerPanel=all().find(p=>p.id==='visualizerPanel');
+ const audioPanel=all().find(p=>title(p)==='Audio Motion')||all().find(p=>title(p)==='Audio Frequency Response');
+ const visualizerPanel=all().find(p=>title(p)==='Spectrum Studio');
  if(visualizerPanel){const layers=document.createElement('div');layers.className='specLayerControls';layers.innerHTML='<div class="fxSubhead">VISUALIZER LAYERS</div><div class="row"><button id="bSpecLayerAdd" type="button">＋ Add layer</button><button id="bSpecLayerRemove" type="button">Remove layer</button></div><label><span>Selected layer</span><select id="selSpecLayer"></select></label><label><span>Layer enabled</span><input id="bSpecLayerEnabled" type="checkbox" checked></label><label><span>Colour source</span><select id="specLayerColorMode"><option value="material">Use material</option><option value="custom">Custom colour</option></select></label><label><span>Layer colour</span><input id="specLayerColor" type="color" value="#8edcf3"></label><label><span>Outline colour</span><input id="specLayerOutlineColor" type="color" value="#ffffff"></label><label><span>Outline thickness</span><input id="sSpecLayerOutline" type="range" min="0" max="30" value="0"></label><label><span>Layer thickness</span><input id="sSpecLayerThickness" type="range" min="1" max="200" value="100"></label><label><span>Offset</span><input id="sSpecLayerOffset" type="range" min="-100" max="100" value="0"></label><label><span>Invert</span><input id="bSpecLayerInvert" type="checkbox"></label><div class="fxSubhead">LAYER TRANSFORM</div><label><span>X position</span><input id="sSpecLayerX" type="range" min="-50" max="50" value="0"></label><label><span>Y position</span><input id="sSpecLayerY" type="range" min="-50" max="50" value="0"></label><label><span>Rotation</span><input id="sSpecLayerRotation" type="range" min="-180" max="180" value="0"></label><label><span>Size</span><input id="sSpecLayerScale" type="range" min="10" max="200" value="100"></label><div class="fxSubhead">LAYER SPIN</div><label><span>Spin enabled</span><input id="bSpecLayerSpin" type="checkbox"></label><label><span>Spin force</span><input id="sSpecLayerSpinForce" type="range" min="0" max="200" value="50"></label><label><span>Spin momentum</span><input id="sSpecLayerSpinMomentum" type="range" min="0" max="100" value="50"></label><label><span>Spin speed</span><input id="sSpecLayerSpinSpeed" type="range" min="0" max="200" value="25"></label>';visualizerPanel.appendChild(layers);}
- mergeGroup('Overlay FX',['Overlay','Overlay Effects · Motion FX','Progress Bar Studio','Surface Reflection','Film & Vintage','Atmosphere FX'],'overlayFxPanel');
- mergeGroup('Background',['Background','Background Drift'],'backgroundPanel');
- const tempo=all().find(p=>title(p)==='Beat · BPM Sync');if(tempo){tempo.id='tempoPanel';tempo.querySelector('h4').textContent='Tempo';}
- const elements=all().find(p=>title(p)==='Lights · Tools box');if(elements){elements.id='elementsPanel';elements.querySelector('h4').textContent='Elements';const group=document.createElement('div');group.className='elementToggles';group.innerHTML='<div class="fxSubhead">AUDIO-REACTIVE ELEMENTS</div><label><span>Particles</span><input id="bElementParticles" type="checkbox" checked></label><label><span>Particle amount</span><input id="sElementParticles" type="range" min="0" max="100" value="95"></label><label><span>Sparkles</span><input id="bElementSparkles" type="checkbox"></label><label><span>Sparkle amount</span><input id="sElementSparkles" type="range" min="0" max="100" value="70"></label><label><span>Light elements</span><input id="bElementLight" type="checkbox" checked></label><label><span>Reactive frame</span><input id="bElementReactiveFrame" type="checkbox"></label><label><span>Reactive frame intensity</span><input id="sReactiveFrameIntensity" type="range" min="0" max="100" value="30"></label>';elements.appendChild(group);}
- const textPanel=all().find(p=>title(p)==='Text · Logo Studio');if(textPanel){textPanel.id='textPanel';textPanel.querySelector('h4').textContent='Text';const fontButton=document.getElementById('bFont');if(fontButton){const fontRow=fontButton.closest('.row');if(fontRow)textPanel.appendChild(fontRow);const fontInfo=document.getElementById('fontInfo');if(fontInfo)textPanel.appendChild(fontInfo);}}
+
+ const tempo=all().find(p=>title(p)==='Beat · BPM Sync');if(tempo)tempo.id='tempoPanel';
+ const elements=all().find(p=>title(p)==='Lights · Tools box');if(elements){elements.id='elementsPanel';const group=document.createElement('div');group.className='elementToggles';group.innerHTML='<div class="fxSubhead">AUDIO-REACTIVE ELEMENTS</div><label><span>Particles</span><input id="bElementParticles" type="checkbox" checked></label><label><span>Particle amount</span><input id="sElementParticles" type="range" min="0" max="100" value="95"></label><label><span>Sparkles</span><input id="bElementSparkles" type="checkbox"></label><label><span>Sparkle amount</span><input id="sElementSparkles" type="range" min="0" max="100" value="70"></label><label><span>Light elements</span><input id="bElementLight" type="checkbox" checked></label><label><span>Reactive frame</span><input id="bElementReactiveFrame" type="checkbox"></label><label><span>Reactive frame intensity</span><input id="sReactiveFrameIntensity" type="range" min="0" max="100" value="30"></label>';elements.appendChild(group);}
+ const textPanel=all().find(p=>title(p)==='Text · Logo Studio');if(textPanel){textPanel.id='textPanel';const fontButton=document.getElementById('bFont');if(fontButton){const fontRow=fontButton.closest('.row');if(fontRow)textPanel.appendChild(fontRow);const fontInfo=document.getElementById('fontInfo');if(fontInfo)textPanel.appendChild(fontInfo);}}
  const turningPanel=document.createElement('div');turningPanel.className='sec panel';turningPanel.id='turningPointPanel';
  turningPanel.innerHTML='<h4>Turning Point</h4><div class="row"><button id="bAddTurningPoint" class="prim" type="button">＋ Add point at playhead</button><button id="bRemoveTurningPoint" type="button">Remove selected</button></div><label><span>Transition</span><select id="sTurningTransition"><option value="fade">Fade</option><option value="crossfade">Crossfade</option><option value="flash">Flash</option><option value="glitch">Glitch</option><option value="shake">Shake</option><option value="rgb">RGB Split</option><option value="blur">Blur</option><option value="zoom">Zoom</option><option value="spin">Spin</option><option value="wipe-left">Wipe Left</option><option value="wipe-right">Wipe Right</option><option value="wipe-up">Wipe Up</option><option value="wipe-down">Wipe Down</option><option value="circle">Circle</option><option value="diamond">Diamond</option><option value="pixel">Pixelate</option><option value="scanline">Scanline</option><option value="invert">Invert</option><option value="light-leak">Light Leak</option><option value="vhs">VHS</option></select></label><label><span>Duration</span><input id="sTurningDuration" type="range" min="200" max="3000" step="50" value="800"></label><div class="status" id="turningPointList">No turning points yet. Move the playhead and add one.</div>';
  bar.appendChild(turningPanel);
  const tempoPanel=all().find(p=>title(p)==='Tempo');
  if(tempoPanel){const manual=document.createElement('label');manual.innerHTML='<span>Manual BPM (0 = auto)</span><input id="sTempoBpm" type="range" min="0" max="240" value="0">';tempoPanel.appendChild(manual);const syncLabel=document.createElement('label');syncLabel.innerHTML='<span>Sync bar</span><input id="bTempoSyncBar" type="checkbox">';tempoPanel.appendChild(syncLabel);const sub=document.createElement('div');sub.className='fxSubhead';sub.textContent='METRONOME SOUND';tempoPanel.appendChild(sub);const sound=document.createElement('label');sound.innerHTML='<span>Metronome sound</span><input id="bMetronomeSound" type="checkbox">';tempoPanel.appendChild(sound);const volume=document.createElement('label');volume.innerHTML='<span>Sound volume</span><input id="sMetronomeVolume" type="range" min="0" max="100" value="45">';tempoPanel.appendChild(volume);}
- all().forEach(p=>{if(p.id!=='mediaPanel'&&p.id!=='exportPanel')p.classList.add('collapsed');const h=p.querySelector('h4');if(h){h.setAttribute('role','button');h.setAttribute('tabindex','0');h.addEventListener('click',()=>p.classList.toggle('collapsed'));h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();p.classList.toggle('collapsed');}});}});
+
 })();
 </script>
 <script>
@@ -804,7 +815,8 @@ let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
-const autoOn=false,autoEvery=3;const lockChip=Object.freeze({color:false,vis:false,shape:false,sway:false});
+let autoOn=false,autoT=0,autoEvery=3;
+const lockChip={color:false,vis:false,shape:false,sway:false};
 const objects=[];let selObj=-1;const stickerKeyCache=new WeakMap();
 const lights=[];let selLight=-1;let lint=60,lsz=100,elementsLightOn=true,reactiveFrameIntensity=30;
 const undo=[],redo=[],objectSnapshotCache=new Map();
@@ -858,6 +870,11 @@ PRESETS.forEach(p=>{const b=document.createElement('button');b.textContent=p.n;
     bloom=p.bl;drawMixers();};
   $('presets').appendChild(b);});
 
+$('bAuto').onclick=e=>{snap();autoOn=!autoOn;e.currentTarget.classList.toggle('on',autoOn);};
+[['kCol','color'],['kVis','vis'],['kShp','shape'],['kSwy','sway']].forEach(([id,key])=>{
+ $(id).onclick=e=>{snap();lockChip[key]=!lockChip[key];e.currentTarget.classList.toggle('lock',!lockChip[key]);e.currentTarget.classList.toggle('on',lockChip[key]);};
+});
+$('sAuto').oninput=e=>{autoEvery=+e.target.value;};
 $('bMix').onclick=()=>{snap();colors=[];const n=2+((Math.random()*2)|0);
   for(let i=0;i<n;i++)colors.push(Math.floor(Math.random()*360));selColor=0;drawPals();
   mstate.forEach(m=>{m.on=Math.random()<.3;m.op=.4+Math.random()*.6;});
@@ -2254,68 +2271,17 @@ visoPanels.forEach(panel=>{
   min:el.min!==''?Number(el.min):null,max:el.max!==''?Number(el.max):null,step:el.step||null,defaultValue:el.defaultValue??el.value??null
  }));
  panel.dataset.toolId=id;panel.dataset.toolCategory=category;
- const titleSpan=document.createElement('span');titleSpan.className='toolHeading';titleSpan.textContent=title;
- const meta=document.createElement('span');meta.className='toolMeta';meta.textContent=category.toUpperCase();
- heading.textContent='';heading.append(titleSpan,meta);
  registerVISOEffectTool({id,name:title,category,panel,controls});
 });
-const groupMeta={
- media:{label:'Media',glyph:'▧'},logo:{label:'Logo',glyph:'◈'},audio:{label:'Audio',glyph:'♫'},text:{label:'Text',glyph:'T'},
- visualizer:{label:'Visualizer',glyph:'◉'},elements:{label:'Elements',glyph:'✧'},overlay:{label:'Overlay FX',glyph:'✦'},
- sticker:{label:'Sticker',glyph:'▣'},turning:{label:'Turning Point',glyph:'◌'},tempo:{label:'Tempo',glyph:'♩'},
- templates:{label:'Templates',glyph:'▦'},background:{label:'Background Video',glyph:'▶'}
-};
-const visoGroups={};
-Object.keys(groupMeta).forEach(key=>{
- const meta=groupMeta[key],panel=document.createElement('section');panel.className='panel toolGroupPanel';panel.id='group-'+key;panel.dataset.toolCategory=key;
- const h=document.createElement('h4');h.textContent=meta.label;panel.appendChild(h);
- const body=document.createElement('div');body.className='toolGroupBody';panel.appendChild(body);visoGroups[key]=panel;
-});
-visoPanels.forEach(panel=>{
- if(panel.id==='exportPanel')return;
- const category=panel.dataset.toolCategory||'visualizer',group=visoGroups[category]||visoGroups.visualizer;
- const heading=panel.querySelector('h4');if(heading)heading.hidden=true;
- panel.classList.remove('collapsed');panel.classList.add('toolSubpanel');group.querySelector('.toolGroupBody').appendChild(panel);
-});
 const bar=$('bar');
-const empty=document.createElement('div');empty.id='toolEmpty';empty.textContent='No tools available.';
-const dockNav=document.createElement('div');dockNav.id='toolDockNav';dockNav.setAttribute('aria-label','Editor tools');
-const dockOrder=['media','logo','audio','text','visualizer','elements','overlay','sticker','turning','tempo','templates','background'];
-let activeDockPanel=null;
-function activateDockPanel(panel){
- if(!panel)return;const target=typeof panel==='string'?document.getElementById(panel):panel;
- const isExport=target.id==='exportPanel';activeDockPanel=target;
- Object.values(visoGroups).forEach(group=>group.classList.toggle('dock-active',!isExport&&group===target));
- const exportPanel=$('exportPanel');if(exportPanel)exportPanel.classList.toggle('dock-active',isExport);
- dockNav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.panel===target.id));
-}
-function applyVISOFilters(){
- const visible=Object.keys(visoGroups).filter(key=>visoGroups[key].querySelector('.toolSubpanel'));
- $('toolEmpty').classList.toggle('show',visible.length===0);
- dockNav.querySelectorAll('button').forEach(btn=>{btn.hidden=!visible.includes(btn.dataset.group);});
- if(!activeDockPanel)activateDockPanel(visoGroups[visible[0]]);
-}
-dockOrder.forEach(key=>{
- const group=visoGroups[key];if(!group?.querySelector('.toolSubpanel'))return;
- const meta=groupMeta[key],btn=document.createElement('button');btn.type='button';btn.dataset.panel=group.id;btn.dataset.group=key;
- const icon=document.createElement('span');icon.className='dockGlyph';icon.textContent=meta.glyph;
- const label=document.createElement('span');label.textContent=meta.label;
- btn.append(icon,label);btn.addEventListener('click',()=>activateDockPanel(group));dockNav.appendChild(btn);
+visoPanels.forEach(panel=>{
+ panel.classList.remove('collapsed','toolSubpanel','dock-active');
+ panel.style.display='flex';
+ const heading=panel.querySelector('h4');
+ if(heading){heading.hidden=false;heading.removeAttribute('role');heading.removeAttribute('tabindex');}
 });
-Object.values(visoGroups).forEach(group=>bar.appendChild(group));
-bar.appendChild(empty);bar.appendChild(dockNav);
-const exportPanel=$('exportPanel');if(exportPanel)exportPanel.classList.remove('dock-active');
-$('topExport').addEventListener('click',()=>activateDockPanel(exportPanel));
-const controlIconMap=[[/audio|mp3|song|music/i,'♫'],[/photo|image|picture|media/i,'▧'],[/video|movie/i,'▶'],[/png|overlay/i,'▣'],[/remove|delete|clear/i,'×'],[/play|pause/i,'▶'],[/center|align/i,'⊙'],[/undo/i,'↶'],[/redo/i,'↷'],[/reset|default/i,'⟲'],[/export|render|save|download/i,'⇧'],[/tiktok/i,'♪'],[/reel|instagram/i,'◎'],[/youtube/i,'▷'],[/square|1:1/i,'□'],[/portrait|story|9:16/i,'▯'],[/landscape|16:9/i,'▭'],[/background|wallpaper/i,'▧'],[/spectrum|visualizer|wave/i,'▥'],[/beat|tempo|bpm/i,'♬'],[/text|font|caption/i,'T'],[/logo|brand/i,'◉'],[/sticker|element/i,'◇'],[/color|tint|hue/i,'◒'],[/opacity|alpha/i,'◐'],[/size|scale|width|height/i,'↔'],[/speed|rate/i,'↗'],[/effect|filter|glow/i,'✧'],[/project|template/i,'▦'],[/lock/i,'◆'],[/quality|resolution|fps/i,'▤']];
-document.querySelectorAll('#bar>.panel button').forEach(button=>{
- if(button.querySelector('.controlGlyph'))return;
- const label=(button.textContent||'').trim();
- const hit=controlIconMap.find(([re])=>re.test(label))||[null,'◈'];
- if(!label)return;
- const glyph=document.createElement('span');glyph.className='controlGlyph';glyph.setAttribute('aria-hidden','true');glyph.textContent=hit[1];
- button.insertBefore(glyph,button.firstChild);
-});
-document.querySelectorAll('#bar>.panel label').forEach(label=>{const target=label.querySelector('span');if(!target||target.querySelector('.controlGlyph'))return;const labelText=(target.textContent||'').trim();const hit=controlIconMap.find(([re])=>re.test(labelText))||[null,'◈'];const glyph=document.createElement('span');glyph.className='controlGlyph';glyph.setAttribute('aria-hidden','true');glyph.textContent=hit[1];target.insertBefore(glyph,target.firstChild);});
+const exportPanel=$('exportPanel');
+$('topExport').addEventListener('click',()=>exportPanel?.scrollIntoView({behavior:'smooth',block:'start'}));
 const previewToggle=$('previewToggle'),previewExit=$('previewExit');
 function setPreviewMode(on){
  document.body.classList.toggle('preview-fullscreen',!!on);
@@ -2330,7 +2296,6 @@ window.addEventListener('resize',()=>{if(document.body.classList.contains('previ
 
 window.VISO_TOOL_REGISTRY=VISO_TOOL_REGISTRY;
 window.registerVISOEffectTool=registerVISOEffectTool;
-applyVISOFilters();
 // Capture history before any editor button/input changes; Undo and Redo remain direct history actions.
 $('bar').addEventListener('keydown',e=>{if(e.target.matches('input[type="range"],input[type="color"],select')&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End',' '].includes(e.key))snap();},true);
 
