@@ -189,6 +189,7 @@ canvas{aspect-ratio:auto!important;width:auto!important;height:auto!important;bo
 .templateCard[data-layout="portrait"] .templateThumb{aspect-ratio:9/16}
 @media(max-width:370px){.templateGrid{gap:6px}.templateName{font-size:10px}}
 
+#customDimensions{align-items:center}#customDimensions input{width:74px;min-width:0;height:34px;padding:0 7px;font-size:11px}#customDimensions span{color:#7890aa;font-weight:900}#customDimensions #applyCustomSize{font-size:9px;padding:0 9px}
 /* VISO bright premium workspace refresh */
 body{color:#203044!important;background:linear-gradient(145deg,#f8fbff 0%,#edf4ff 48%,#e8fbf5 100%)!important}
 #studioHeader{background:linear-gradient(135deg,#ffffff 0%,#f0f6ff 58%,#e8fff7 100%)!important;border-bottom:1px solid #d6e3f2!important;box-shadow:0 5px 18px #254b7210!important}
@@ -274,6 +275,7 @@ body.preview-fullscreen #previewExit{display:block}
     <div class="row" id="socialPresets"><button data-social="tiktok">TikTok</button><button data-social="reels">Reels</button><button data-social="youtube">YouTube</button><button data-social="square">Square</button><button data-social="portrait">Portrait 4:5</button><button data-social="story4k">Story 4K</button></div>
     <div class="subhead">Custom export settings</div>
     <div class="row" id="aspect"></div>
+    <div class="row" id="customDimensions"><input id="customWidth" type="number" min="64" max="4320" step="2" value="1080" aria-label="Custom canvas width" placeholder="Width"><span>×</span><input id="customHeight" type="number" min="64" max="4320" step="2" value="1920" aria-label="Custom canvas height" placeholder="Height"><button id="applyCustomSize" type="button">Apply custom size</button></div>
     <div class="row" id="res"></div>
     <div class="row" id="fps"></div>
     <div class="row" id="format"></div>
@@ -622,10 +624,11 @@ const vid=$('vid'),bvid=$('bvid');
 
 let FPS=30,BIT=8000000,baseRes=1080,aspect='9:16',quality=100,formatChoice='auto';
 function outputSize(){
+  if(aspect==='custom'){const cw=Math.max(64,Math.min(4320,Math.round(+$('customWidth').value||1080))),ch=Math.max(64,Math.min(4320,Math.round(+$('customHeight').value||1920)));return [cw+(cw%2),ch+(ch%2)];}
   const ratios={'9:16':[9,16],'16:9':[16,9],'1:1':[1,1],'4:5':[4,5],'3:4':[3,4],'4:3':[4,3],'3:2':[3,2],'2:3':[2,3],'21:9':[21,9]};
   const [rw,rh]=ratios[aspect]||[9,16],short=Math.min(rw,rh),long=Math.max(rw,rh);
   const scale=baseRes/short;
-  return rw<rh?[Math.round(rw*scale),Math.round(rh*scale)]:[Math.round(rw*scale),Math.round(rh*scale)];
+  return [Math.round(rw*scale),Math.round(rh*scale)];
 }
 function updateBitrate(){
   BIT=Math.round(targetW*targetH*FPS*0.13*(quality/100));
@@ -655,6 +658,8 @@ function setRes(){
   setPreviewCanvasSize();updateBitrate();
 }
 const aspectItems=['9:16','16:9','1:1','4:5','3:4','4:3','3:2','2:3','21:9'];
+$('applyCustomSize').onclick=()=>{aspect='custom';document.querySelectorAll('#aspect button').forEach(q=>q.classList.remove('on'));$('applyCustomSize').classList.add('on');setRes();};
+$('customWidth').addEventListener('change',()=>{if(aspect==='custom')setRes();});$('customHeight').addEventListener('change',()=>{if(aspect==='custom')setRes();});
 aspectItems.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a+(a==='9:16'?' TikTok':a==='16:9'?' YouTube':'');
   if(i===0)b.classList.add('on');
   b.onclick=()=>{aspect=a;document.querySelectorAll('#aspect button').forEach(q=>q.classList.remove('on'));b.classList.add('on');setRes();};
