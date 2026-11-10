@@ -520,4 +520,18 @@ const dockOrderEnd=html.indexOf('];',dockOrderStart);
 assert(dockOrderStart>=0&&dockOrderEnd>dockOrderStart,'12-group dock order must exist');
 const actualDockOrder=[...html.slice(dockOrderStart,dockOrderEnd).matchAll(/'([^']+)'/g)].map(match=>match[1]);
 assert.deepEqual(actualDockOrder,['media','logo','audio','text','visualizer','elements','overlay','sticker','turning','tempo','templates','background'],'dock order must preserve the 12 requested tool groups');
+
+const textPanelAudit=html.slice(html.indexOf("Text · Logo Studio"),html.indexOf("function drawLights"));
+assert(textPanelAudit.includes('TRACK NAME')&&textPanelAudit.includes('ARTIST'),'Text tool must have separate Track Name and Artist controls');
+assert(['studioText','studioText2','bTextOn','bText2On','sTextFont','sTextAlign','sText2Align'].every(id=>textPanelAudit.includes('id="'+id+'"')),'Track Name and Artist must expose editable text, enable, font and alignment controls');
+const textLayerAudit=html.slice(html.indexOf('function renderExtraTextLayerControls()'),html.indexOf('function createExtraTextLayer'));
+for(const field of ['text','enabled','timer','font','style','color','align','x','y','size','rotation','alpha','glow','shadow'])assert(textLayerAudit.includes('data-field="'+field+'"'),'extra text layer must expose '+field);
+assert(textLayerAudit.includes('class="textTypeButton"')&&textLayerAudit.includes('data-focus'),'each text layer must expose its own type/focus button');
+assert(html.includes('extraTextLayers:extraTextLayers.map(layer=>({...layer}))')&&html.includes('extraTextLayers=Array.isArray(d.extraTextLayers)'),'independent text layers must persist and restore');
+assert(html.includes('logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor'),'Logo shape, vinyl, colour key and ink settings must be captured in project state');
+assert(html.includes("logoArtworkShape=d.logoArtworkShape||'original'")&&html.includes("$('logoArtworkShape').value=logoArtworkShape"),'Logo settings must restore into state and controls');
+assert(html.includes("$('bLogo').onclick=()=>$('fLogo').click()")&&html.includes("VISO_ASSET_FILES[key]=e.target.files?.[0]||null"),'Logo upload must retain its original file for editable project packages');
+assert(html.includes("objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,alpha:o.alpha,glow:o.glow,outline:o.outline"),'Sticker transform/effect state must be serialized per independent object layer');
+assert(html.includes("function bindStickerControl(id,key,convert=v=>v)")&&html.includes("el.addEventListener('pointerdown',()=>snap())"),'Sticker edits must participate in undo snapshots');
+assert(html.includes("...(objects.map((o,i)=>['overlay-'+i,o.file||VISO_ASSET_FILES.overlays[i]||null]))")&&html.includes("if(overlayAssetCount!==objects.length)"),'each Sticker source image must be embedded in project packages');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
