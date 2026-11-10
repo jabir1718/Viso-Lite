@@ -42,6 +42,12 @@ assert(html.includes('const idx=specWaveReverse?n-1-i:i'), 'wave reverse must re
 assert(html.includes('const delay=specWaveDelayOn?'), 'wave delay must alter the wave phase');
 assert(html.includes("specWaveGradient==='rainbow'"), 'wave gradient selector must change rendered colour');
 assert(html.includes("['sSpecShake',specShake]") && html.includes("['sSpecWaveDelayTime',specWaveDelayTime]"), 'wave/motion sliders must restore with saved state');
+for (const id of ['specGlowMode','bSpecGlowIntensitySync']) {
+  assert(html.includes('id="' + id + '"'), 'spectrum glow mode/sync control must exist: ' + id);
+}
+assert(html.includes("specGlowMode==='neon'?1.45"), 'glow mode must alter the rendered glow profile');
+assert(html.includes('specGlowIntensitySync?(.35+avg*1.8)'), 'glow intensity sync must react to live audio level');
+assert(html.includes("['specGlowMode',specGlowMode]") && html.includes('bSpecGlowIntensitySync'), 'glow mode/sync must restore with project state');
 for (const id of ['bBpm', 'bTap', 'sBeatSens', 'sBeatScale', 'bBeatMarkers', 'bMetronome', 'bDownbeat', 'beatColor']) {
   assert(html.includes('id="' + id + '"'), 'beat control must exist: ' + id);
 }
