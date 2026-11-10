@@ -542,4 +542,9 @@ const audioGroupAudit=html.slice(audioGroupAuditStart,audioGroupAuditEnd);
 assert(audioGroupAudit.includes("audioPanel=all().find(p=>p.id==='audioPanel')")&&audioGroupAudit.includes("audioUpload=document.getElementById('bA')"),'Audio upload button must be moved into the Audio group');
 assert(audioGroupAudit.includes("audioUpload.textContent='Upload / Replace Audio'"),'Audio group must clearly expose upload and replace');
 assert(html.includes("id=\"bLoop\"")&&html.includes("id=\"sBassGain\"")&&html.includes("id=\"sMidGain\"")&&html.includes("id=\"sHighGain\""),'Audio loop and frequency response controls must remain grouped and available');
+
+assert(html.includes('id="sTempoBpm"')&&html.includes('Manual BPM (0 = auto)'),'Tempo tool must provide a manual BPM adjustment with auto mode');
+assert(html.includes("$('sTempoBpm').oninput=e=>{bpm=Math.max(0,Math.min(240,Math.round(Number(e.target.value)||0)));updateBpm();}"),'manual BPM adjustment must update the live beat clock');
+assert(html.includes("if(d.advanced&&d.advanced.bpm!==undefined)bpm=Math.max(0,Math.min(240,Number(d.advanced.bpm)||0));updateBpm();"),'manual/detected BPM must survive project restore and update the control');
+assert(html.includes("id=\"bTempoSyncBar\"")&&html.includes("id=\"bMetronomeSound\"")&&html.includes("id=\"sMetronomeVolume\""),'Tempo tool must retain Sync Bar and sound metronome controls');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
