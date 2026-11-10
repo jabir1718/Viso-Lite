@@ -463,4 +463,15 @@ const fontSandbox={};vm.runInNewContext(html.slice(fontStart,fontEnd),fontSandbo
 assert.equal(fontSandbox.visoFontFamily('My Custom Font.ttf',4660),'VISOFont_My_Custom_Font_1234','font family remains stable for same file and checksum');
 assert.notEqual(fontSandbox.visoFontFamily('My Custom Font.ttf',4660),fontSandbox.visoFontFamily('My Custom Font.ttf',4661),'different font contents receive distinct families');
 
+
+const spectrumStart=html.indexOf('function drawSpectrumLayer(');
+const spectrumEnd=html.indexOf('\\nlet curB=',spectrumStart);
+assert(spectrumStart>=0&&spectrumEnd>spectrumStart,'spectrum renderer must exist');
+const spectrumRenderer=html.slice(spectrumStart,spectrumEnd);
+const radialStart=spectrumRenderer.indexOf("if(M==='radial')");
+assert(radialStart>=0,'radial spectrum branch must exist');
+const shapeRenderer=spectrumRenderer.slice(radialStart);
+assert(!shapeRenderer.includes('specSmooth[i]/255'),'all spectrum shapes must use shared processed response values');
+assert(!shapeRenderer.includes('specSmooth[idx]/255'),'wave spectrum must use shared processed response values');
+assert((shapeRenderer.match(/val\\(i\\)/g)||[]).length>=8,'radial, ring, sphere, tunnel, mirror, dual, wave and dot renderers must use the normalized response');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
