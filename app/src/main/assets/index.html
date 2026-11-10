@@ -90,42 +90,22 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
 .brandCopy span{font-size:7px;letter-spacing:.13em;color:#739078;font-weight:800}
 .brandLive{margin-left:auto;display:flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid #d6e8d1;border-radius:99px;background:#f6fcf3;color:#47764d;font-size:8px;font-weight:800;letter-spacing:.07em;white-space:nowrap}
 .brandLive i{width:6px;height:6px;border-radius:50%;background:#61bd57;box-shadow:0 0 0 3px #61bd571d}
-.studioNav{display:flex;align-items:center;gap:7px;margin-top:8px}
-.toolSearchWrap{display:flex;align-items:center;gap:5px;min-width:0;flex:1;height:34px;padding:0 7px;border:1px solid #d4e2d0;border-radius:10px;background:#fff;box-shadow:inset 0 1px 2px #173e2808}
-.searchGlyph{font-size:19px;color:#65936a;line-height:1}
-#toolSearch{min-width:0;width:100%;height:30px;border:0!important;outline:0;background:transparent!important;color:#23482e!important;font-size:10px!important;padding:0 3px!important;box-shadow:none!important}
-#toolSearch::placeholder{color:#9aa99a}
-#toolSearchClear{min-height:24px;width:24px;padding:0;border:0!important;background:transparent!important;color:#7b927d!important;font-size:17px}
-.navAction{min-height:34px!important;padding:0 9px!important;background:#f8fcf5!important;border:1px solid #d3e3cf!important;color:#3d6845!important;font-size:9px!important}
-.navAction.active{background:#e3f4da!important;border-color:#86bd77!important;color:#205c32!important}
-#toolCount{font-size:8px;font-weight:900;letter-spacing:.08em;color:#78917a;white-space:nowrap;min-width:39px;text-align:right}
-#toolFilters{display:flex;gap:5px;overflow-x:auto;padding:7px 0 1px;scrollbar-width:none}
-#toolFilters::-webkit-scrollbar{display:none}
-.toolFilter{min-height:26px!important;padding:0 9px!important;border-radius:99px!important;background:#f7fbf4!important;border:1px solid #dce8d8!important;color:#627b65!important;font-size:8.5px!important;font-weight:800!important}
-.toolFilter.active{background:#e2f3d9!important;border-color:#9bc88e!important;color:#285d35!important}
 .panel h4{display:flex;align-items:center;gap:8px}
 .panel h4 .toolHeading{min-width:0;flex:1}
 .panel h4 .toolMeta{font-size:7px;color:#91a491;font-weight:800;letter-spacing:.08em;white-space:nowrap}
-.panel h4 .toolFav{min-height:24px!important;width:27px;padding:0!important;border:1px solid #e1eadc!important;border-radius:7px!important;background:#fbfef9!important;color:#9aa998!important;font-size:13px!important}
-.panel h4 .toolFav.active{color:#c58b22!important;background:#fff8e6!important;border-color:#ead9ad!important}
-.panel.search-hidden{display:none!important}
-#toolEmpty{display:none;margin:7px 9px;padding:15px;border:1px dashed #cbdcc7;border-radius:12px;background:#f9fcf7;color:#65816a;text-align:center;font-size:10px}
-#toolEmpty.show{display:block}
-@media(max-width:390px){#studioHeader{padding:7px 8px 6px}.brandCopy span{font-size:6px}.brandLive{font-size:7px;padding:4px 6px}.navAction{padding:0 7px!important}#toolCount{min-width:30px;font-size:7px}.toolFilter{padding:0 8px!important}}
-@media(max-height:740px){#studioHeader{padding-top:6px;padding-bottom:5px}.studioNav{margin-top:5px}.toolSearchWrap{height:30px}#toolSearch{height:27px}#toolFilters{padding-top:5px}}
+@media(max-width:390px){#studioHeader{padding:7px 8px 6px}.brandCopy span{font-size:6px}.brandLive{font-size:7px;padding:4px 6px}}
+@media(max-height:740px){#studioHeader{padding-top:6px;padding-bottom:5px}}
 
 /* Compact editor with horizontally browsable tool panels */
 #monitorDock{position:absolute!important;left:12px!important;right:12px!important;bottom:8px!important;width:auto!important;max-width:360px!important;margin:0 auto!important;padding:5px 8px!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:6px!important;opacity:.94;z-index:3}
 #monitorDock>.subhead{display:none!important}#monitorDock .monitorStats{flex:1;min-width:0}#monitorDock .status{font-size:9px!important;padding:4px 6px!important;background:#ffffffdf!important}#monitorDock .row{flex:0 0 auto}#monitorDock button{min-height:27px!important;padding:0 8px!important;font-size:9px!important}
 #wrap{position:relative!important;min-height:0!important;padding:5px 8px!important}
 #bar{position:relative;flex:0 0 auto!important;max-height:39dvh!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;gap:6px!important;padding:5px 7px calc(8px + env(safe-area-inset-bottom))!important;border-top:1px solid #d8e7d4;background:linear-gradient(180deg,#f7fbf4,#eaf4e8)!important}
-#toolFilters{display:none!important}
 #toolDockNav{display:flex;flex:0 0 auto;gap:6px;overflow-x:auto;overflow-y:hidden;padding:2px 1px 5px;scrollbar-width:none;overscroll-behavior-x:contain}#toolDockNav::-webkit-scrollbar{display:none}
 #toolDockNav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:62px;min-height:47px;padding:4px 7px;border:1px solid #d3e2cf;border-radius:10px;background:#fff;color:#49664b;font-size:8px;font-weight:700;white-space:nowrap}
 #toolDockNav button .dockGlyph{font-size:17px;line-height:1.1}#toolDockNav button.active{background:#dff4d9;border-color:#74b76c;color:#174c2c;box-shadow:inset 0 0 0 1px #9bcf91}
 #bar>.panel{display:none!important;flex:1 1 auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;margin:0!important;padding:8px!important;background:#fff!important;border:1px solid #d8e7d4!important;border-radius:12px!important;box-shadow:0 3px 12px #183d2510}
 #bar>.panel.dock-active{display:flex!important}#bar>.panel h4{position:sticky;top:-8px;z-index:2;background:#fff;padding:3px 0 6px;color:#39764b!important}
-#toolEmpty{display:none}#toolEmpty.show{display:block;flex:1;padding:16px;text-align:center;color:#648168;font-size:11px}
 @media(max-height:740px){#bar{max-height:36dvh!important}#toolDockNav button{min-height:40px;min-width:56px}#wrap{padding:3px 6px!important}}
 
 /* Aspectrum-inspired template gallery cards and library filters */
@@ -141,8 +121,6 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
 .templateThumb:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,#ffffff24,transparent 38%),repeating-linear-gradient(135deg,transparent 0 13px,#ffffff12 14px 15px)}
 .templateThumb i{position:relative;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#31002f;color:#fff;font-size:23px;font-style:normal;box-shadow:0 0 18px currentColor;border:1px solid #ffffff88}
 .templateName{display:block;padding:8px 24px 9px 7px;text-align:center;font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.templateLike{position:absolute;right:5px;bottom:5px;min-width:28px!important;min-height:27px!important;padding:0!important;border-radius:50%!important;background:#252525!important;border-color:#555!important;font-size:16px!important}
-.templateLike.active{color:#ff6c9a!important;border-color:#a33c63!important}
 .auraThumb{background:radial-gradient(circle,#f7edff 0 3%,#9c4cff 12%,#090010 46%,#050505 100%)}
 .romanceThumb{background:radial-gradient(circle,#ffbfd9 0 8%,#8b2f79 26%,#1a061a 68%)}
 .vhsThumb{background:repeating-linear-gradient(0deg,#080808 0 5px,#282828 6px 7px),linear-gradient(90deg,#341c6b,#070707)}
@@ -167,10 +145,6 @@ body{color:#203044!important;background:linear-gradient(145deg,#f8fbff 0%,#edf4f
 .brandGlyph{background:linear-gradient(145deg,#fff 0%,#d7e7ff 42%,#8cb8f6 100%)!important;color:#173f76!important;border:1px solid #a9c8ed!important;box-shadow:inset 0 2px 2px #fff,0 4px 0 #7598c5,0 7px 12px #4773a633!important}
 .brandCopy strong{color:#173b67!important}.brandCopy span{color:#7188a6!important}
 .brandLive{background:linear-gradient(145deg,#f4fff8,#dff8ea)!important;border-color:#b9e5ca!important;color:#28754b!important;box-shadow:inset 0 1px #fff,0 2px 5px #2d87521a!important}
-.toolSearchWrap{background:linear-gradient(180deg,#fff,#f4f8ff)!important;border-color:#cbd9ed!important;box-shadow:inset 0 2px 4px #36577b0b,0 2px 5px #36577b0a!important}
-#toolSearch{color:#203b5b!important}#toolSearch::placeholder{color:#8b9bb0!important}
-.navAction{background:linear-gradient(180deg,#fff,#edf4ff)!important;border-color:#cbd9ed!important;color:#3e5d81!important;box-shadow:0 3px 0 #c9d8eb,0 5px 9px #42628b18!important}
-.navAction.active{background:linear-gradient(180deg,#e4f5ff,#ccecff)!important;border-color:#75b8e8!important;color:#145b8c!important}
 #wrap{background:radial-gradient(ellipse at 50% 40%,#ffffff 0%,#f0f6ff 75%,#eaf3fc 100%)!important;padding:8px 10px 6px!important}
 canvas{aspect-ratio:auto!important;width:auto!important;height:auto!important;max-width:100%!important;max-height:100%!important;border-radius:14px!important;background:#fff!important;box-shadow:0 12px 30px #34577b26,0 0 0 1px #bfd0e5!important}
 #monitorDock{background:linear-gradient(145deg,#ffffffef,#f0f7ffed)!important;border:1px solid #c6d8ec!important;box-shadow:0 5px 16px #315b8520!important;backdrop-filter:blur(12px)}
@@ -211,13 +185,11 @@ body.preview-fullscreen #previewExit{display:block}
 #bar{display:flex;flex-direction:column}
 #bar>.panel{order:1}
 #toolDockNav{order:2}
-#toolEmpty{display:none!important}
 #monitorDock{pointer-events:none}
 #monitorDock .status{pointer-events:auto}
 #toolDockNav button{min-width:66px;min-height:53px;border-radius:13px;background:linear-gradient(160deg,#fff 0%,#edf4ff 55%,#e3f7f1 100%);border:1px solid #cbdbea;color:#365775;box-shadow:0 3px 7px #244c7215,inset 0 1px #fff}
 #toolDockNav button .dockGlyph{font-size:20px;filter:drop-shadow(0 1px 1px #25415a30)}
 #toolDockNav button.active{background:linear-gradient(160deg,#d9f8f2,#c8eaff);border-color:#72c6c0;color:#145b61;box-shadow:0 3px 8px #2a9b9730,inset 0 1px #fff}
-.panel h4 .toolFav,.templateLike,.studioNav,#toolFilters{display:none!important}
 
 
 /* Independent text layers: compact, editable cards inside the Text tool */
@@ -1100,7 +1072,7 @@ function restoreVISOExportState(d){
  setRes();
 }
 function captureProjectState(){return {extraTextLayers:extraTextLayers.map(layer=>({...layer})),nextExtraTextId,elementsLightOn,logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor,turningPoints:turningPoints.map(p=>({...p})),turningTransition,turningDuration,metronomeSoundOn,metronomeVolume,exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,alpha:o.alpha,glow:o.glow,outline:o.outline,outlineColor:o.outlineColor,colorKeyOn:o.colorKeyOn,keyColor:o.keyColor,keyTolerance:o.keyTolerance,blend:o.blend,motion:o.motion,motionSpeed:o.motionSpeed,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
-function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are intentionally ignored when opening older projects. */}
+function restoreVISOAutoState(_d){/* Legacy Auto/Lock project fields are ignored; no such controls are shown in the editor. */}
 function snap(){if(restoringState)return;const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
   if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
   redo.forEach(old=>objectSnapshotCache.delete(old));redo.length=0;}
@@ -2334,9 +2306,9 @@ Object.values(visoGroups).forEach(group=>bar.appendChild(group));
 bar.appendChild(empty);bar.appendChild(dockNav);
 const exportPanel=$('exportPanel');if(exportPanel)exportPanel.classList.remove('dock-active');
 $('topExport').addEventListener('click',()=>activateDockPanel(exportPanel));
-const controlIconMap=[[/audio|mp3|song|music/i,'♫'],[/photo|image|picture|media/i,'▧'],[/video|movie/i,'▶'],[/png|overlay/i,'▣'],[/remove|delete|clear/i,'×'],[/play|pause/i,'▶'],[/center|align/i,'⊙'],[/undo/i,'↶'],[/redo/i,'↷'],[/reset|default/i,'⟲'],[/export|render|save|download/i,'⇧'],[/tiktok/i,'♪'],[/reel|instagram/i,'◎'],[/youtube/i,'▷'],[/square|1:1/i,'□'],[/portrait|story|9:16/i,'▯'],[/landscape|16:9/i,'▭'],[/background|wallpaper/i,'▧'],[/spectrum|visualizer|wave/i,'▥'],[/beat|tempo|bpm/i,'♬'],[/text|font|caption/i,'T'],[/logo|brand/i,'◉'],[/sticker|element/i,'◇'],[/color|tint|hue/i,'◒'],[/opacity|alpha/i,'◐'],[/size|scale|width|height/i,'↔'],[/speed|rate/i,'↗'],[/effect|filter|glow/i,'✧'],[/favorite|like/i,'☆'],[/project|template/i,'▦'],[/lock/i,'◆'],[/quality|resolution|fps/i,'▤']];
+const controlIconMap=[[/audio|mp3|song|music/i,'♫'],[/photo|image|picture|media/i,'▧'],[/video|movie/i,'▶'],[/png|overlay/i,'▣'],[/remove|delete|clear/i,'×'],[/play|pause/i,'▶'],[/center|align/i,'⊙'],[/undo/i,'↶'],[/redo/i,'↷'],[/reset|default/i,'⟲'],[/export|render|save|download/i,'⇧'],[/tiktok/i,'♪'],[/reel|instagram/i,'◎'],[/youtube/i,'▷'],[/square|1:1/i,'□'],[/portrait|story|9:16/i,'▯'],[/landscape|16:9/i,'▭'],[/background|wallpaper/i,'▧'],[/spectrum|visualizer|wave/i,'▥'],[/beat|tempo|bpm/i,'♬'],[/text|font|caption/i,'T'],[/logo|brand/i,'◉'],[/sticker|element/i,'◇'],[/color|tint|hue/i,'◒'],[/opacity|alpha/i,'◐'],[/size|scale|width|height/i,'↔'],[/speed|rate/i,'↗'],[/effect|filter|glow/i,'✧'],[/project|template/i,'▦'],[/lock/i,'◆'],[/quality|resolution|fps/i,'▤']];
 document.querySelectorAll('#bar>.panel button').forEach(button=>{
- if(button.classList.contains('toolFav')||button.querySelector('.controlGlyph'))return;
+ if(button.querySelector('.controlGlyph'))return;
  const label=(button.textContent||'').trim();
  const hit=controlIconMap.find(([re])=>re.test(label))||[null,'◈'];
  if(!label)return;
