@@ -27,6 +27,8 @@ const bandSource=html.slice(bandStart,bandEnd);
 const specBandStart=html.indexOf('function specBands()'),specBandEnd=html.indexOf('\nconst SPEC_MODES',specBandStart);
 const specBandSource=html.slice(specBandStart,specBandEnd);
 assert(!bandSource.includes('getByteFrequencyData(')&&!specBandSource.includes('getByteFrequencyData('),'audio analysers must consume the shared frame snapshot instead of reading it again');
+assert(html.includes('PARTICLE_COUNT=Math.min(1100,Math.max(600,Math.round((window.innerWidth||360)*2)))'), 'particle workload must scale to a mobile-safe budget');
+assert(html.includes('if(mstate[0]?.on)stepP(b,dt);'), 'particle simulation must stop when the Dust visualizer is disabled');
 
 assert(html.includes("dockNav.id='toolDockNav'"), 'editor must expose a horizontal tool dock');
 assert(html.includes('function activateDockPanel(panel)'), 'tool dock must activate one focused control panel at a time');
