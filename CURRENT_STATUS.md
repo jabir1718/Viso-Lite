@@ -13,16 +13,17 @@ Permanent roadmap: `PROJECT_ROADMAP.md`
 - Spectrum shake, wave delay/time, reverse wave, spectrum/rainbow/solid wave gradient.
 - Bounded 4-frame trail history with adjustable strength; fixed-size reusable wave buffer.
 - Spectrum settings are included in advanced project state capture/restore; slider, toggle, colour, select and per-layer controls capture undo snapshots.
-- **Shared response fix:** radial, ring, sphere, tunnel, mirror, dual, wave and dot-style renderers now all apply multiplier, uniform response and layer inversion through the same processed response function.
-- **Layer mode fix:** Web and Combo render finishes are now applied to both flat-family and other shapes; Scale changes processed amplitude consistently across shapes. Stack and Uniform behaviour preserved.
-- Regression tests cover shared response and cross-shape layer modes.
+- **Shared response fix:** radial, ring, sphere, tunnel, mirror, dual, wave and dot-style renderers now apply multiplier, uniform response and layer inversion through one processed response function.
+- **Layer mode fix:** Web and Combo render finishes apply to both flat-family and other shapes; Scale changes processed amplitude across shapes. Stack and Uniform behaviour preserved.
+- **Material finish improvement:** Fire, Chrome, Plastic, Diamond and Liquid Glass now have distinct stroke-width, glow, shadow-colour and/or edge treatments in addition to their existing material colour palettes.
+- Regression tests cover shared response, cross-shape layer modes and material-specific rendering.
 
 ## Latest verified CI and APK
-- Source commit: `fc7f221d41040f5367d1148f8130058a2b043d93`.
-- Regression-test commit: `5ffac539c464bda38b28c13e36c6c301cf18a040`.
-- CI run #547, ID `42854739363`, exact head commit `5ffac539c464bda38b28c13e36c6c301cf18a040`, conclusion **success**.
+- Source commit: `b353c3e657f2ddc91f65de9e713c43bb28c46a62`.
+- Regression-test commit: `6f25783427b4a06dda0918e550be7fa2e0c9ed27`.
+- CI workflow run #318, ID `42855288123`, exact head commit `b353c3e657f2ddc91f65de9e713c43bb28c46a62`, conclusion **success**.
 - HTML/JavaScript validation, project archive regression tests, Android debug APK build, packaged APK verification and artifact upload all passed.
-- Artifact: `VISO-Studio-advanced-debug-apk`, artifact ID `13782935549`, size 32,188,511 bytes, outer artifact ZIP digest `sha256:bcfd522e869a59fa25c2c5aeb0bba53dafc616333f60e1884a388e50993309a8`.
+- Artifact: `VISO-Studio-advanced-debug-apk`, artifact ID `13781604205`, size 32,188,688 bytes, outer artifact ZIP digest `sha256:c56e2abbd0f7536f7493abd7a4b7d821727c01f30b4500b7be76bbf7d4804c3c`.
 - Workflow verified package `com.viso.lite` and packaged HTML/source integrity. Physical-device install/runtime QA is not performed.
 
 ## Dock architecture
