@@ -15,6 +15,17 @@ for (const id of ['bBpm', 'bTap', 'sBeatSens', 'sBeatScale', 'bBeatMarkers', 'bM
 }
 assert(html.includes("const SPEC_MODES=[['radial','Radial'],['ring','Ring'],['sphere','Sphere 3D'],['tunnel','Tunnel'],['mirror','Mirror'],['dual','Dual'],['wave','Wave'],['led','LED']]"), 'all spectrum visual modes must be registered');
 assert(html.includes("const SPEC_RANGES=[['full','Full'],['low','Low'],['balanced','Balanced'],['high','High'],['vocals','Vocals'],['changes','Changes']]"), 'all spectrum frequency focus modes must be registered');
+const paintStart=html.indexOf('function paintLayer('),paintEnd=html.indexOf('\nfunction ',paintStart+20);
+const paintSource=html.slice(paintStart,paintEnd);
+assert(!paintSource.includes('drawSpectrum('), 'spectrum must not be redundantly rendered inside reusable background/media paint layers');
+const frameStart=html.indexOf('function frame(t)'),frameEnd=html.indexOf('\n// VISO advanced studio modules',frameStart);
+const frameSource=html.slice(frameStart,frameEnd);
+assert.equal((frameSource.match(/drawSpectrum\(x,1\)/g)||[]).length,1,'spectrum must render exactly once in the unified frame pipeline');
+assert(html.includes('id="toolDockNav"'), 'editor must expose a horizontal tool dock');
+assert(html.includes('function activateDockPanel(panel)'), 'tool dock must activate one focused control panel at a time');
+assert(html.includes('#bar>.panel.dock-active{display:flex!important}'), 'only the selected tool panel should occupy the editor dock');
+assert(html.includes('#monitorDock>.subhead{display:none!important}'), 'song monitor must be compacted into the preview rather than consuming editor space');
+
 const spectrumStart = html.indexOf('function drawSpectrum(ctx,scale)');
 const spectrumEnd = html.indexOf('\nfunction ', spectrumStart + 20);
 const spectrumSource = html.slice(spectrumStart, spectrumEnd);
