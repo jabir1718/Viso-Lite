@@ -559,7 +559,7 @@ assert(html.includes("$('sTurningTransition').onchange=e=>{snap();turningTransit
 const turningOptionsStart=html.indexOf('turningPanel.innerHTML=');
 const turningOptionsEnd=html.indexOf('bar.appendChild(turningPanel)',turningOptionsStart);
 const turningRendererStart=html.indexOf('function drawTurningPointTransitions(');
-const turningRendererEnd=html.indexOf('\\nfunction ',turningRendererStart);
+const turningRendererEnd=html.indexOf('function ',turningRendererStart+12);
 assert(turningOptionsStart>=0&&turningOptionsEnd>turningOptionsStart&&turningRendererStart>=0&&turningRendererEnd>turningRendererStart,'Turning Point transition UI and renderer must exist');
 const turningOptions=[...html.slice(turningOptionsStart,turningOptionsEnd).matchAll(/<option value="([^"]+)"/g)].map(match=>match[1]);
 const turningCases=[...html.slice(turningRendererStart,turningRendererEnd).matchAll(/case '([^']+)'/g)].map(match=>match[1]);
