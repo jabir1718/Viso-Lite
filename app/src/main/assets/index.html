@@ -14,6 +14,7 @@
     color:#fff;padding:8px;font-size:11px;min-height:34px}
   .ratio-note{font-size:9px;color:#918aa6;padding:0 2px}
   #bar{flex:0 0 auto;max-height:44dvh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:8px 8px 24px}
+  .advanced-tools{display:flex;flex-direction:column;gap:6px;padding:6px 7px;border:1px solid #a78bfa22;border-radius:10px;background:#a78bfa08}
   .sec{background:linear-gradient(180deg,#ffffff0d,#ffffff05);border:1px solid #ffffff14;border-radius:14px;
        padding:8px;display:flex;flex-direction:column;gap:7px;flex:0 0 auto}
   .sec h4{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:#a78bfa;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:22px}\n  .sec h4::after{content:"−";font-size:16px;line-height:1;color:#c4b5fd}\n  .sec.collapsed>*:not(h4){display:none!important}\n  .sec.collapsed h4::after{content:"+"}\n  .sec h4:focus-visible{outline:2px solid #a78bfa;outline-offset:3px;border-radius:4px}
@@ -62,16 +63,13 @@
       <button class="on" data-fit="fill">Fill / Crop</button>
       <button data-fit="fit">Fit</button>
     </div>
-    <div class="ratio-note" id="ratioStatus">Canvas 1080 × 1920 · 9:16 · Fill / Crop</div>
+    <div class="ratio-note" id="ratioStatus">Canvas 1080 × 1920 · 9:16 · Fill / Crop</div><div class="advanced-tools"><div class="row"><button id="advGuides">Safe guides OFF</button></div><label><span>Guide margin</span><input id="advGuideMargin" type="range" min="4" max="20" value="10"></label></div>
   </div>
   <div class="sec"><h4>Media</h4>
     <div class="row">
       <button id="bA">MP3</button><button id="bI">Photo</button><button id="bV">Video</button>
       <button id="bO">+ PNG</button><button id="bDel">× PNG</button>
-      <button id="bP" class="prim">Play</button><button id="bR">Center</button>
-    </div>
-  </div>
-  <div class="sec"><h4>Center logo spectrum</h4>
+      <button id="bP" class="prim">Play</button><button id="bR">Center</button></div><div class="advanced-tools"><label><span>Music volume</span><input id="advVolume" type="range" min="0" max="100" value="100"></label><label><span>Playback speed</span><input id="advRate" type="range" min="50" max="150" value="100"></label><div class="row"><button id="advLoop" class="on">Loop ON</button></div></div></div><div class="sec"><h4>Center logo spectrum</h4>
     <div class="row"><button id="ctViz" class="on">Center spectrum ON</button>
       <button class="chip on" data-ctstyle="bars">Radial bars</button>
       <button class="chip" data-ctstyle="wave">Wave ring</button>
@@ -87,9 +85,7 @@
      <label><span>Shadow strength</span><input id="ctShadow" type="range" min="0" max="100" value="70"></label>
      <label><span>Shadow colour</span><input id="ctShadowColor" type="color" value="#a020f0"></label>
     <label><span>Position X</span><input id="ctX" type="range" min="-30" max="30" value="0"></label>
-    <label><span>Position Y</span><input id="ctY" type="range" min="-30" max="30" value="0"></label>
-  </div>
-  <div class="sec"><h4>Main spectrum / wave studio</h4>
+    <label><span>Position Y</span><input id="ctY" type="range" min="-30" max="30" value="0"></label><div class="advanced-tools"><label><span>Ring radius</span><input id="advCenterRadius" type="range" min="60" max="150" value="100"></label><label><span>Logo opacity</span><input id="advLogoOpacity" type="range" min="10" max="100" value="100"></label></div></div><div class="sec"><h4>Main spectrum / wave studio</h4>
     <div class="row"><button id="spToggle" class="on">Spectrum ON</button>
       <button class="chip" data-spmode="bars">Bars</button><button class="chip" data-spmode="mirror">Mirror</button>
       <button class="chip" data-spmode="wave">Wave</button><button class="chip" data-spmode="circle">Circular</button>
@@ -130,20 +126,12 @@
     <label><span>Low / Bass mix</span><input id="spLow" type="range" min="0" max="200" value="100"></label>
     <label><span>Mid mix</span><input id="spMid" type="range" min="0" max="200" value="100"></label>
     <label><span>High mix</span><input id="spHigh" type="range" min="0" max="200" value="100"></label>
-    <div class="ratio-note">Spectrum layers are independent of the center-logo ring. All spectrum controls are included in the exported video.</div>
-  </div>
-  <div class="sec"><h4>Ready-made templates</h4>
+    <div class="ratio-note">Spectrum layers are independent of the center-logo ring. All spectrum controls are included in the exported video.</div><div class="advanced-tools"><label><span>Spectrum scale</span><input id="advSpScale" type="range" min="50" max="180" value="100"></label><label><span>Horizontal shift</span><input id="advSpX" type="range" min="-30" max="30" value="0"></label><label><span>Rotation</span><input id="advSpAngle" type="range" min="-180" max="180" value="0"></label></div></div><div class="sec"><h4>Ready-made templates</h4>
     <div class="template-grid" id="templateGrid"></div>
-    <div class="ratio-note">Templates change visual style only. Your photo, music, canvas ratio and existing layers stay untouched.</div>
-  </div>
-  <div class="sec"><h4>Export quality</h4>
+    <div class="ratio-note">Templates change visual style only. Your photo, music, canvas ratio and existing layers stay untouched.</div><div class="row"><button id="advShuffleTemplate">Shuffle template</button></div></div><div class="sec"><h4>Export quality</h4>
     <div class="row" id="res"></div>
-    <div class="row" id="fps"></div>
-  </div>
-  <div class="sec"><h4>History</h4>
-    <div class="row"><button id="bUndo">⟲ Undo</button><button id="bRedo">Redo ⟳</button><button id="bReset">Reset all</button></div>
-  </div>
-  <div class="sec"><h4>Background</h4>
+    <div class="row" id="fps"></div><div class="advanced-tools"><label><span>Bitrate power</span><input id="advBitrate" type="range" min="50" max="250" value="100"></label><div class="ratio-note">Higher bitrate improves detail but increases file size and device load.</div></div></div><div class="sec"><h4>History</h4>
+    <div class="row"><button id="bUndo">⟲ Undo</button><button id="bRedo">Redo ⟳</button><button id="bReset">Reset all</button></div><div class="row"><button id="advCheckpoint">Save checkpoint</button><button id="advClearHistory">Clear history</button></div></div><div class="sec"><h4>Background</h4>
     <div class="row"><button id="bBgI">BG image</button><button id="bBgV">BG video</button>
       <button id="bBgX">BG off</button><button id="bBgViz">BG visualizer</button></div>
     <label><span>BG split</span><input id="sSplit" type="range" min="0" max="100" value="100"></label>
@@ -151,26 +139,18 @@
     <label><span>BG blur</span><input id="sBgb" type="range" min="0" max="40" value="0"></label>
     <label><span>BG viz mix</span><input id="sBvo" type="range" min="0" max="100" value="85"></label>
     <label><span>BG viz power</span><input id="sBvp" type="range" min="20" max="300" value="140"></label>
-    <div class="row"><button id="tBvm" class="on">BG viz on BG shape</button></div>
-  </div>
-  <div class="sec"><h4>Auto + Lock</h4>
+    <div class="row"><button id="tBvm" class="on">BG viz on BG shape</button></div><div class="advanced-tools"><label><span>BG zoom</span><input id="advBgZoom" type="range" min="50" max="200" value="100"></label><label><span>BG opacity</span><input id="advBgOpacity" type="range" min="0" max="100" value="100"></label></div></div><div class="sec"><h4>Auto + Lock</h4>
     <div class="row">
       <button id="bAuto" class="prim">AUTO</button>
       <button class="chip lock" id="kCol">Lock colour</button><button class="chip lock" id="kVis">Lock visuals</button>
       <button class="chip lock" id="kShp">Lock shape</button><button class="chip lock" id="kSwy">Lock sway</button>
     </div>
-    <label><span>Every</span><input id="sAuto" type="range" min="1" max="12" value="3"></label>
-  </div>
-  <div class="sec"><h4>Look</h4>
+    <label><span>Every</span><input id="sAuto" type="range" min="1" max="12" value="3"></label><div class="advanced-tools"><label><span>Auto variety</span><input id="advAutoVariety" type="range" min="20" max="100" value="70"></label></div></div><div class="sec"><h4>Look</h4>
     <div class="row" id="presets"></div>
-    <div class="row"><button id="bMix">Auto mix</button><button id="bRand">Random</button></div>
-  </div>
-  <div class="sec"><h4>Visuals</h4><div class="row" id="modes"></div><div id="mixers"></div></div>
+    <div class="row"><button id="bMix">Auto mix</button><button id="bRand">Random</button></div><div class="advanced-tools"><label><span>Bloom power</span><input id="advBloom" type="range" min="0" max="100" value="50"></label><label><span>Colour flow speed</span><input id="advColorFlow" type="range" min="0" max="300" value="100"></label></div></div><div class="sec"><h4>Visuals</h4><div class="row" id="modes"></div><div id="mixers"></div><div class="advanced-tools"><label><span>Master opacity</span><input id="advModeOpacity" type="range" min="0" max="150" value="100"></label><label><span>Master scale</span><input id="advModeScale" type="range" min="50" max="180" value="100"></label></div></div>
   <div class="sec"><h4>Colour</h4>
     <div class="row" id="pals"></div>
-    <div class="row"><button id="addC">+ colour</button><button id="delC">× colour</button></div>
-  </div>
-  <div class="sec"><h4>Mask shape</h4>
+    <div class="row"><button id="addC">+ colour</button><button id="delC">× colour</button></div><div class="advanced-tools"><label><span>Hue offset</span><input id="advHueOffset" type="range" min="-180" max="180" value="0"></label><label><span>Palette drift</span><input id="advPaletteDrift" type="range" min="0" max="300" value="100"></label></div></div><div class="sec"><h4>Mask shape</h4>
     <div class="row" id="shapes"></div>
     <input id="txtMask" type="text" value="VISO" maxlength="14">
     <div class="row">
@@ -178,53 +158,38 @@
       <button class="nudge" id="mU">▲</button><button class="nudge" id="mD">▼</button>
       <button id="mBig">+</button><button id="mSm">−</button><button id="mRot">Rotate</button><button id="mRst">Reset mask</button>
     </div>
-    <label><span>Mask size</span><input id="sMsc" type="range" min="20" max="300" value="100"></label>
-  </div>
-  <div class="sec"><h4>Lights</h4>
+    <label><span>Mask size</span><input id="sMsc" type="range" min="20" max="300" value="100"></label><div class="advanced-tools"><div class="row"><button id="advMaskInvert">Invert mask OFF</button></div><label><span>Mask scale</span><input id="advMaskScale" type="range" min="50" max="180" value="100"></label></div></div><div class="sec"><h4>Lights</h4>
     <div class="row"><button id="bLight" class="prim">+ Light</button><button id="bLightDel">× Light</button>
       <button id="bLightPin">Pin to PNG</button></div>
     <label><span>Intensity</span><input id="sLint" type="range" min="0" max="100" value="60"></label>
-    <label><span>Size</span><input id="sLsz" type="range" min="20" max="300" value="100"></label>
-  </div>
-  <div class="sec"><h4>Layers</h4>
+    <label><span>Size</span><input id="sLsz" type="range" min="20" max="300" value="100"></label><div class="advanced-tools"><label><span>Flicker amount</span><input id="advLightFlicker" type="range" min="0" max="100" value="20"></label><label><span>Light spread</span><input id="advLightSpread" type="range" min="50" max="250" value="100"></label></div></div><div class="sec"><h4>Layers</h4>
     <div class="row">
       <button id="tBg">BG viz</button><button id="tFr">Front viz</button>
       <button id="tPh" class="on">Media</button><button id="tMask" class="on">Mask</button>
     </div>
-    <div class="row"><button id="bZup">Media ⬆ front</button><button id="bZdn">Media ⬇ back</button></div>
-  </div>
-  <div class="sec"><h4>Position</h4>
+    <div class="row"><button id="bZup">Media ⬆ front</button><button id="bZdn">Media ⬇ back</button></div><div class="advanced-tools"><label><span>BG layer opacity</span><input id="advBgLayerOpacity" type="range" min="0" max="100" value="100"></label><label><span>Front layer opacity</span><input id="advFrontOpacity" type="range" min="0" max="100" value="100"></label><label><span>Media opacity</span><input id="advMediaOpacity" type="range" min="0" max="100" value="100"></label></div></div><div class="sec"><h4>Position</h4>
     <div class="row">
       <button class="nudge" id="bL">◀</button><button class="nudge" id="bRt">▶</button>
       <button class="nudge" id="bU">▲</button><button class="nudge" id="bD">▼</button>
       <button id="bBig">+</button><button id="bSm">−</button>
     </div>
     <label><span>Sway L/R</span><input id="sSwy" type="range" min="0" max="100" value="0"></label>
-    <label><span>Sway speed</span><input id="sSpd" type="range" min="2" max="60" value="14"></label>
-  </div>
-  <div class="sec"><h4>Shape</h4>
+    <label><span>Sway speed</span><input id="sSpd" type="range" min="2" max="60" value="14"></label><div class="advanced-tools"><label><span>Media rotation</span><input id="advMediaRotation" type="range" min="-180" max="180" value="0"></label><label><span>Sway phase</span><input id="advSwayPhase" type="range" min="0" max="360" value="0"></label></div></div><div class="sec"><h4>Shape</h4>
     <label><span>Cut</span><input id="sCut" type="range" min="40" max="230" value="140"></label>
     <label><span>Feather</span><input id="sFea" type="range" min="0" max="30" value="12"></label>
-    <label><span>Media</span><input id="sPho" type="range" min="0" max="100" value="14"></label>
-  </div>
-  <div class="sec"><h4>Video grade</h4>
+    <label><span>Media</span><input id="sPho" type="range" min="0" max="100" value="14"></label><div class="advanced-tools"><label><span>Edge softness</span><input id="advEdgeSoftness" type="range" min="0" max="200" value="100"></label><label><span>Mask threshold</span><input id="advMaskThreshold" type="range" min="40" max="230" value="140"></label></div></div><div class="sec"><h4>Video grade</h4>
     <label><span>Bright</span><input id="sBri" type="range" min="20" max="180" value="100"></label>
     <label><span>Contrast</span><input id="sCon" type="range" min="20" max="200" value="100"></label>
     <label><span>Saturate</span><input id="sSat" type="range" min="0" max="260" value="100"></label>
-    <label><span>Hue shift</span><input id="sHue" type="range" min="0" max="360" value="0"></label>
-  </div>
-  <div class="sec"><h4>Motion</h4>
+    <label><span>Hue shift</span><input id="sHue" type="range" min="0" max="360" value="0"></label><div class="advanced-tools"><label><span>Sepia tone</span><input id="advSepia" type="range" min="0" max="100" value="0"></label><label><span>Vignette</span><input id="advVignette" type="range" min="0" max="100" value="0"></label></div></div><div class="sec"><h4>Motion</h4>
     <label><span>Power</span><input id="sPow" type="range" min="10" max="300" value="140"></label>
     <label><span>Depth</span><input id="sDep" type="range" min="0" max="100" value="70"></label>
     <label><span>Trail</span><input id="sTrl" type="range" min="0" max="90" value="28"></label>
     <label><span>Shake</span><input id="sShk" type="range" min="0" max="100" value="45"></label>
     <label><span>Punch</span><input id="sPnc" type="range" min="0" max="100" value="40"></label>
     <label><span>Colour flow</span><input id="sCyc" type="range" min="0" max="100" value="18"></label>
-    <label><span>Gradient</span><input id="sDir" type="range" min="0" max="100" value="0"></label>
-  </div>
-  <div class="sec"><h4>Export</h4>
-    <div class="row"><button id="bShot">Save frame PNG</button><span class="ratio-note">Full song video exports to Movies / Viso</span></div>
-  </div>
+    <label><span>Gradient</span><input id="sDir" type="range" min="0" max="100" value="0"></label><div class="advanced-tools"><label><span>Gravity</span><input id="advGravity" type="range" min="0" max="250" value="100"></label><label><span>Turbulence</span><input id="advTurbulence" type="range" min="0" max="250" value="100"></label></div></div><div class="sec"><h4>Export</h4>
+    <div class="row"><button id="bShot">Save frame PNG</button><span class="ratio-note">Full song video exports to Movies / Viso</span></div><div class="advanced-tools"><div class="row"><button id="advGuidesExport">Export safe guides OFF</button></div><div class="ratio-note">Enable only when guides should appear in the rendered video.</div></div></div>
 </div>
 <input id="fCenterLogo" type="file" accept="image/*"><input id="fA" type="file" accept="audio/*"><input id="fI" type="file" accept="image/*">
 <input id="fV" type="file" accept="video/*"><input id="fO" type="file" accept="image/*" multiple>
@@ -258,7 +223,7 @@ document.querySelectorAll('#bar .sec').forEach((section,index)=>{
 const vid=$('vid'),bvid=$('bvid');
 
 let FPS=30,BIT=8000000;
-function updateBitrate(){BIT=Math.round(W*H*FPS*0.13);}
+function updateBitrate(){BIT=Math.round(W*H*FPS*0.13*advBitrate);}
 let ratioW=9,ratioH=16,qualityScale=1,fitMode='fill',fullPreview=false;
 function resizePreview(){
   const wrap=$('wrap'),ww=Math.max(1,wrap.clientWidth-12),wh=Math.max(1,wrap.clientHeight-12);
@@ -312,6 +277,7 @@ updateBitrate();
     b.classList.add('on');FPS=f;updateBitrate();};
   $('fps').appendChild(b);});
 
+let advGuides=false,advGuideMargin=10,advGuidesExport=false,advVolume=1,advRate=1,advLoop=true,advCenterRadius=1,advLogoOpacity=1,advSpScale=1,advSpX=0,advSpAngle=0,advBitrate=1,advBgZoom=1,advBgOpacity=1,advAutoVariety=.7,advColorFlow=1,advModeOpacity=1,advModeScale=1,advHueOffset=0,advPaletteDrift=1,advMaskInvert=false,advMaskScale=1,advLightFlicker=.2,advLightSpread=1,advBgLayerOpacity=1,advFrontOpacity=1,advMediaOpacity=1,advMediaRotation=0,advSwayPhase=0,advEdgeSoftness=1,advMaskThreshold=140,advSepia=0,advVignette=0,advGravity=1,advTurbulence=1;
 let img=null,bgImg=null,bgUseVid=false,bgViz=false,maskDirty=true;
 let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
@@ -401,7 +367,7 @@ $('bMix').onclick=()=>{snap();colors=[];const n=2+((Math.random()*2)|0);
 $('bRand').onclick=()=>{scatter(500);};
 
 function bind(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);el.onchange=()=>snap();}
-bind('sCut',v=>{cut=v;maskDirty=true;});bind('sFea',v=>{fea=v;maskDirty=true;});
+bind('sCut',v=>{cut=v;advMaskThreshold=v;$('advMaskThreshold').value=v;maskDirty=true;});bind('sFea',v=>{fea=v;maskDirty=true;});
 bind('sPow',v=>pow=v);bind('sPho',v=>pho=v);bind('sDep',v=>dep=v);
 bind('sTrl',v=>trla=v);bind('sShk',v=>shk=v);bind('sPnc',v=>pnc=v);
 bind('sCyc',v=>cyc=v);bind('sDir',v=>dirG=v);bind('sSwy',v=>swy=v);bind('sSpd',v=>spd=v);
@@ -504,7 +470,7 @@ $('bA').onclick=()=>$('fA').click();
 $('fA').onchange=e=>{const f=e.target.files[0];if(!f)return;
   if(!ctxA)ctxA=new(window.AudioContext||window.webkitAudioContext)();
   if(audio)audio.pause();
-  audio=new Audio(URL.createObjectURL(f));audio.loop=true;
+  audio=new Audio(URL.createObjectURL(f));audio.loop=advLoop;audio.volume=advVolume;audio.playbackRate=advRate;
   const s=ctxA.createMediaElementSource(audio);
   an=ctxA.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.7;
   s.connect(an);an.connect(ctxA.destination);
@@ -592,6 +558,17 @@ $('quickExport').onclick=async()=>{
   await startFullSongExport();
 };
 
+
+$('advGuides').onclick=e=>{advGuides=!advGuides;e.currentTarget.textContent='Safe guides '+(advGuides?'ON':'OFF');e.currentTarget.classList.toggle('on',advGuides);};$('advGuidesExport').onclick=e=>{advGuidesExport=!advGuidesExport;e.currentTarget.textContent='Export safe guides '+(advGuidesExport?'ON':'OFF');e.currentTarget.classList.toggle('on',advGuidesExport);};$('advGuideMargin').oninput=e=>advGuideMargin=+e.target.value;
+$('advVolume').oninput=e=>{advVolume=+e.target.value/100;if(audio)audio.volume=advVolume;};$('advRate').oninput=e=>{advRate=+e.target.value/100;if(audio)audio.playbackRate=advRate;};$('advLoop').onclick=e=>{advLoop=!advLoop;if(audio)audio.loop=advLoop;e.currentTarget.textContent='Loop '+(advLoop?'ON':'OFF');e.currentTarget.classList.toggle('on',advLoop);};
+$('advCenterRadius').oninput=e=>advCenterRadius=+e.target.value/100;$('advLogoOpacity').oninput=e=>advLogoOpacity=+e.target.value/100;$('advSpScale').oninput=e=>advSpScale=+e.target.value/100;$('advSpX').oninput=e=>advSpX=+e.target.value;$('advSpAngle').oninput=e=>advSpAngle=+e.target.value;
+$('advBitrate').oninput=e=>{advBitrate=+e.target.value/100;updateBitrate();};$('advBgZoom').oninput=e=>advBgZoom=+e.target.value/100;$('advBgOpacity').oninput=e=>advBgOpacity=+e.target.value/100;$('advAutoVariety').oninput=e=>advAutoVariety=+e.target.value/100;$('advBloom').oninput=e=>bloom=+e.target.value/100;$('advColorFlow').oninput=e=>advColorFlow=+e.target.value/100;
+$('advModeOpacity').oninput=e=>advModeOpacity=+e.target.value/100;$('advModeScale').oninput=e=>advModeScale=+e.target.value/100;$('advHueOffset').oninput=e=>advHueOffset=+e.target.value;$('advPaletteDrift').oninput=e=>advPaletteDrift=+e.target.value/100;
+$('advMaskInvert').onclick=e=>{advMaskInvert=!advMaskInvert;maskDirty=true;e.currentTarget.textContent='Invert mask '+(advMaskInvert?'ON':'OFF');e.currentTarget.classList.toggle('on',advMaskInvert);};$('advMaskScale').oninput=e=>advMaskScale=+e.target.value/100;$('advLightFlicker').oninput=e=>advLightFlicker=+e.target.value/100;$('advLightSpread').oninput=e=>advLightSpread=+e.target.value/100;
+$('advBgLayerOpacity').oninput=e=>advBgLayerOpacity=+e.target.value/100;$('advFrontOpacity').oninput=e=>advFrontOpacity=+e.target.value/100;$('advMediaOpacity').oninput=e=>advMediaOpacity=+e.target.value/100;$('advMediaRotation').oninput=e=>advMediaRotation=+e.target.value;$('advSwayPhase').oninput=e=>advSwayPhase=+e.target.value;
+$('advEdgeSoftness').oninput=e=>{advEdgeSoftness=+e.target.value/100;maskDirty=true;};$('advMaskThreshold').oninput=e=>{advMaskThreshold=+e.target.value;cut=advMaskThreshold;$('sCut').value=cut;maskDirty=true;};$('advSepia').oninput=e=>advSepia=+e.target.value;$('advVignette').oninput=e=>advVignette=+e.target.value;$('advGravity').oninput=e=>advGravity=+e.target.value/100;$('advTurbulence').oninput=e=>advTurbulence=+e.target.value/100;
+$('advShuffleTemplate').onclick=()=>{const a=[...$('templateGrid').querySelectorAll('button')];if(a.length)a[Math.floor(Math.random()*a.length)].click();};$('advCheckpoint').onclick=()=>{snap();alert('Checkpoint saved in this session.');};$('advClearHistory').onclick=()=>{undo.length=0;redo.length=0;};
+
 function snap(){undo.push(JSON.stringify({colors,mstate,shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp}));
   if(undo.length>40)undo.shift();redo.length=0;}
 function apply(s){const d=JSON.parse(s);
@@ -657,7 +634,7 @@ function mediaRect(sw,sh,mode){const k=(mode==='fit'?Math.min:Math.max)(W/sw,H/s
 function drawMediaFrame(ctx,s,sw,sh){
   const r=mediaRect(sw,sh,fitMode);ctx.drawImage(s,r.x-cx,r.y-cy,r.w,r.h);
 }
-function cover(ctx,s,sw,sh,clipH){const r=mediaRect(sw,sh,'fill');
+function cover(ctx,s,sw,sh,clipH){const base=mediaRect(sw,sh,'fill'),z=advBgZoom;const r={x:(W-base.w*z)/2,y:(H-base.h*z)/2,w:base.w*z,h:base.h*z};ctx.globalAlpha*=advBgOpacity;
   if(clipH<H){ctx.save();ctx.beginPath();ctx.rect(0,0,W,clipH);ctx.clip();}
   ctx.drawImage(s,r.x,r.y,r.w,r.h);
   if(clipH<H)ctx.restore();}
@@ -673,8 +650,8 @@ function buildMask(){
     tx.drawImage(s0,0,0,w,h);
     const d=tx.getImageData(0,0,w,h).data,out=tx.createImageData(w,h);
     for(let i=0;i<d.length;i+=4){const l=.299*d[i]+.587*d[i+1]+.114*d[i+2];
-      out.data[i]=255;out.data[i+1]=255;out.data[i+2]=255;out.data[i+3]=l>cut?255:0;}
-    tx.putImageData(out,0,0);mx.filter='blur('+fea+'px)';
+      out.data[i]=255;out.data[i+1]=255;out.data[i+2]=255;out.data[i+3]=l>advMaskThreshold?255:0;}
+    tx.putImageData(out,0,0);mx.filter='blur('+(fea*advEdgeSoftness)+'px)';
     mx.drawImage(t,r.x,r.y,r.w,r.h);mx.filter='none';
   } else {
     mx.save();mx.fillStyle='#fff';mx.filter='blur('+(fea*.6)+'px)';
@@ -691,6 +668,7 @@ function buildMask(){
       mx.closePath();mx.fill();}
     mx.restore();
   }
+  if(advMaskInvert){const pixels=mx.getImageData(0,0,W,H),d=pixels.data;for(let i=3;i<d.length;i+=4)d[i]=255-d[i];mx.putImageData(pixels,0,0);}
 }
 
 function bands(pw){if(!an||!playing)return[0,0,0,0,0,0];an.getByteFrequencyData(buf);
@@ -702,11 +680,11 @@ function bands(pw){if(!an||!playing)return[0,0,0,0,0,0];an.getByteFrequencyData(
 function grad(t){const a=Math.max(0,Math.min(1,t));
   const seg=(colors.length-1)*a,i=Math.min(colors.length-2,Math.floor(seg)),f=seg-i;
   const h1=colors[i],h2=colors[i+1]!==undefined?colors[i+1]:colors[0];
-  const hue=(h1+(h2-h1)*f+hueShift+720)%360;
+  const hue=(h1+(h2-h1)*f+hueShift+advHueOffset+720)%360;
   return 'hsl('+hue+' 100% '+(56+(1-a)*18)+'%)';}
 function gradAt(px,py){const a=dirG/100;return grad((1-a)*py/H+a*px/W);}
-function applyT(ctx){ctx.translate(cx+ix+Math.sin(swayT*spd/100)*swy*2.2,cy+iy);ctx.rotate(irot);ctx.scale(isc,isc);}
-function applyMT(ctx){ctx.translate(cx+mX,cy+mY);ctx.rotate(mRot);ctx.scale(mSc,mSc);}
+function applyT(ctx){ctx.translate(cx+ix+Math.sin(swayT*spd/100+advSwayPhase*Math.PI/180)*swy*2.2,cy+iy);ctx.rotate(irot+advMediaRotation*Math.PI/180);ctx.scale(isc,isc);}
+function applyMT(ctx){ctx.translate(cx+mX,cy+mY);ctx.rotate(mRot);ctx.scale(mSc*advMaskScale,mSc*advMaskScale);}
 
 const P=[];for(let i=0;i<1500;i++)P.push({x:Math.random()*W,y:Math.random()*H,z:Math.random(),vx:0,vy:0,ph:Math.random()*6.28});
 function scatter(n){for(let i=0;i<n;i++){const p=P[(Math.random()*P.length)|0];
@@ -714,7 +692,7 @@ function scatter(n){for(let i=0;i<n;i++){const p=P[(Math.random()*P.length)|0];
   const a=Math.random()*6.28,v=2+Math.random()*12;p.vx=Math.cos(a)*v;p.vy=Math.sin(a)*v;}}
 function stepP(b,dt){const bass=b[0],mid=b[2],hi=b[5],k=dep/100;
   for(const p of P){p.ph+=dt*.0012*(1+hi*6);
-    p.vy-=bass*.35*k;p.vx+=(Math.random()-.5)*hi*3*k;
+    p.vy-=bass*.35*k*advGravity;p.vx+=(Math.random()-.5)*hi*3*k*advTurbulence;
     p.x+=p.vx*(.4+p.z);p.y+=p.vy*(.4+p.z);p.vx*=.965;p.vy*=.965;
     p.x+=Math.sin(p.ph)*(.4+mid*2);
     if(p.y<-20){p.y=H+20;p.vy=0;}
@@ -723,7 +701,7 @@ function stepP(b,dt){const bass=b[0],mid=b[2],hi=b[5],k=dep/100;
 function drawMode(ctx,m,b,scale){
   const bass=b[0],mid=b[2],t0=performance.now();
   ctx.save();ctx.scale(scale,scale);ctx.translate((1/scale-1)*cx,(1/scale-1)*cy);
-  ctx.globalAlpha=m.op;
+  ctx.globalAlpha=m.op*advModeOpacity;
   const N=m.name;
   if(N==='Dust'){
     for(const p of P){const s=(.7+p.z*3.4)*(1+pulse*1.7),a=(.1+p.z*.9)*(.5+pulse*.5);
@@ -1190,7 +1168,7 @@ function drawMainSpectrum(ctx,b,dt){
  if(spMotion==='spin'||spMotion==='orbit')rot=t*(spMotion==='spin'?.18:.08);
  if(spMotion==='pulse')scale=1+spBeatEnv*spBounce/100*.12;
  if(spMotion==='wave')tx=Math.sin(t*1.7)*W*.025;
- ctx.save();ctx.translate(centerX+tx,baseY+ty);ctx.rotate(rot);ctx.scale(scale,scale);
+ ctx.save();ctx.translate(centerX+tx+advSpX*W/100,baseY+ty);ctx.rotate(rot+advSpAngle*Math.PI/180);ctx.scale(scale*advSpScale,scale*advSpScale);
  const half=span,thick=Math.max(1,W/1080*spThickness),amp=maxH*boost;
  const colorAt=(i)=>{
    const p=i/(count-1);
@@ -1271,7 +1249,7 @@ function drawCenterSpectrum(ctx,b,dt){
   if(an&&playing&&buf){an.getByteFrequencyData(buf);bins=buf;const lim=Math.min(42,buf.length);for(let i=2;i<lim;i++)energy+=buf[i];energy/=Math.max(1,lim-2)*255;}
   else energy=.08+b[0]*.3;
   const smooth=Math.min(1,energy*(centerBeatSense/100));centerBeatEnv=centerBeatEnv*.72+smooth*.28;
-  const pulse=1+centerBeatEnv*(centerHeartbeat/100)*.34,logoR=base*.72;
+  const pulse=1+centerBeatEnv*(centerHeartbeat/100)*.34,logoR=base*.72*advCenterRadius;
   const hueA=colors[0]||190,hueB=colors[1]||285,colorAt=v=>'hsl('+((hueA+(hueB-hueA)*v+360)%360)+' 100% 66%)';
   const thick=Math.max(1,H*.00075*centerVizThick),shadowAlpha=centerShadow/100;
   const getK=i=>bins?Math.min(1,bins[Math.floor((i/n)*Math.min(bins.length,256))]/210):Math.min(1,.12+b[(i%6)]*.22);
@@ -1297,7 +1275,7 @@ function drawCenterSpectrum(ctx,b,dt){
     else ctx.arc(0,0,logoR,0,Math.PI*2);
   }
   centerShapePath();ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=1;
-  if(centerLogo){ctx.save();centerShapePath();ctx.clip();const side=logoR*2;ctx.drawImage(centerLogo,-side/2,-side/2,side,side);ctx.restore();}
+  if(centerLogo){ctx.save();ctx.globalAlpha=advLogoOpacity;centerShapePath();ctx.clip();const side=logoR*2;ctx.drawImage(centerLogo,-side/2,-side/2,side,side);ctx.restore();}
   else{ctx.fillStyle='rgba(5,5,12,.78)';ctx.beginPath();ctx.arc(0,0,logoR*.78,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold '+Math.max(18,logoR*.48)+'px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('V',0,0);}
   ctx.restore();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
 }
@@ -1306,7 +1284,7 @@ function drawLights(ctx){
   lights.forEach((l,i)=>{
     const px=l.pin>=0&&objects[l.pin]?objects[l.pin].x:l.x;
     const py=l.pin>=0&&objects[l.pin]?objects[l.pin].y:l.y;
-    const r=H*.09*(lsz/100)*(1+pulse*.35), inten=(lint/100)*(.45+pulse*.9);
+    const flicker=1-advLightFlicker*.35+advLightFlicker*.35*(.5+.5*Math.sin(performance.now()*.018+i*2));const r=H*.09*(lsz/100)*advLightSpread*(1+pulse*.35), inten=(lint/100)*(.45+pulse*.9)*flicker;
     const col=colors[i%colors.length];
     const g=ctx.createRadialGradient(px,py,0,px,py,r*2.4);
     g.addColorStop(0,'hsla('+col+',100%,86%,'+(inten*.95)+')');
@@ -1321,7 +1299,7 @@ function drawLights(ctx){
 }
 
 let curB=[0,0,0,0,0,0],curBbg=[0,0,0,0,0,0],last=0,avg=.1,frameN=0;
-function paintLayer(scale,masked,bb){const cc=bb||curB;
+function paintLayer(scale,masked,bb){const cc=bb||curB;scale*=advModeScale;
   ox.clearRect(0,0,W,H);
   for(const m of mstate)if(m.on)drawMode(ox,m,cc,scale);
   if(masked){ox.globalCompositeOperation='destination-in';ox.save();applyMT(ox);
@@ -1331,7 +1309,7 @@ function paintLayer(scale,masked,bb){const cc=bb||curB;
 function autoStep(){
   if(!lockChip.color){colors=[];const n=2+((Math.random()*3)|0);
     for(let i=0;i<n;i++)colors.push(Math.floor(Math.random()*360));selColor=0;drawPals();}
-  if(!lockChip.vis){mstate.forEach(m=>{m.on=Math.random()<.22;m.op=.4+Math.random()*.6;});
+  if(!lockChip.vis){mstate.forEach(m=>{m.on=Math.random()<(.12+advAutoVariety*.22);m.op=.4+Math.random()*.6;});
     mstate[(Math.random()*MODES.length)|0].on=true;
     document.querySelectorAll('#modes button').forEach((q,j)=>q.classList.toggle('on',mstate[j].on));drawMixers();}
   if(!lockChip.shape){const s=SHAPES[(Math.random()*SHAPES.length)|0][0];shape=s;maskDirty=true;
@@ -1346,7 +1324,7 @@ function frame(t){
   const b=bands();curB=b;curBbg=bands(bvp);
   const bass=b[0];avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
-  pulse=Math.max(pulse*.85,bass);hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
+  pulse=Math.max(pulse*.85,bass);hueShift=(hueShift+cyc*.05*advColorFlow*advPaletteDrift)%360;swayT+=dt;
   if(autoOn){autoT+=dt;if(autoT>autoEvery*1000){autoT=0;autoStep();}}
   if(useVid&&frameN%3===0)maskDirty=true;
   if(maskDirty){buildMask();maskDirty=false;}
@@ -1370,22 +1348,22 @@ function frame(t){
       else if(bgImg)cover(x,bgImg,bgImg.width,bgImg.height,H);
       x.filter='none';
       x.fillStyle='rgba(0,0,0,'+(dim/100*.75)+')';x.fillRect(0,0,W,clipH);
-      if(bgViz){x.globalCompositeOperation='lighter';x.globalAlpha=bvo/100;
+      if(bgViz){x.globalCompositeOperation='lighter';x.globalAlpha=bvo/100*advBgLayerOpacity;
         x.drawImage(paintLayer(1.3,bgVizMask,curBbg),0,0);
         x.globalCompositeOperation='source-over';x.globalAlpha=1;}
     } else if(bgViz){
-      x.globalAlpha=bvo/100;x.drawImage(paintLayer(1.3,bgVizMask,curBbg),0,0);x.globalAlpha=1;
+      x.globalAlpha=bvo/100*advBgLayerOpacity;x.drawImage(paintLayer(1.3,bgVizMask,curBbg),0,0);x.globalAlpha=1;
     }
     x.restore();
   }
   if(clipH>0&&clipH<H){x.fillStyle='#000';x.fillRect(0,clipH,W,H-clipH);}
-  if(bgOn){x.globalAlpha=.4;x.drawImage(paintLayer(1.4,false),0,0);x.globalAlpha=1;}
+  if(bgOn){x.globalAlpha=advBgLayerOpacity*.4;x.drawImage(paintLayer(1.4,false),0,0);x.globalAlpha=1;}
 
   const s0=src();
   const drawMedia=()=>{
     if(!s0||!phOn)return;
-    x.save();applyT(x);x.globalAlpha=pho/100;
-    x.filter='brightness('+bri+'%) contrast('+con+'%) saturate('+sat+'%) hue-rotate('+hueSh+'deg)';
+    x.save();applyT(x);x.globalAlpha=pho/100*advMediaOpacity;
+    x.filter='brightness('+bri+'%) contrast('+con+'%) saturate('+sat+'%) hue-rotate('+hueSh+'deg) sepia('+advSepia+'%)';
     const source=useVid?vid:img,sw=useVid?vid.videoWidth:img.width,sh=useVid?vid.videoHeight:img.height;
     drawMediaFrame(x,source,sw||W,sh||H);
     x.filter='none';x.restore();x.globalAlpha=1;
@@ -1393,13 +1371,13 @@ function frame(t){
 
   if(mediaFront){
     x.globalCompositeOperation='lighter';
-    x.drawImage(paintLayer(1,maskOn),0,0);
+    x.globalAlpha=advFrontOpacity;x.drawImage(paintLayer(1,maskOn),0,0);x.globalAlpha=1;
     x.globalCompositeOperation='source-over';
     drawMedia();
   } else {
     drawMedia();
     x.globalCompositeOperation='lighter';
-    x.drawImage(paintLayer(1,maskOn),0,0);
+    x.globalAlpha=advFrontOpacity;x.drawImage(paintLayer(1,maskOn),0,0);x.globalAlpha=1;
     x.globalCompositeOperation='source-over';
   }
 
@@ -1413,6 +1391,8 @@ function frame(t){
   bx.filter='blur(12px)';bx.drawImage(c,0,0,bl.width,bl.height);bx.filter='none';
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
+  if(advVignette>0){const vg=x.createRadialGradient(cx,cy,Math.min(W,H)*.22,cx,cy,Math.max(W,H)*.72);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,'+(advVignette/100*.85)+')');x.fillStyle=vg;x.fillRect(0,0,W,H);}
+  if(advGuides||advGuidesExport){const m=Math.min(W,H)*advGuideMargin/100;x.save();x.globalAlpha=.55;x.strokeStyle='#ffffff';x.lineWidth=Math.max(1,W/900);x.setLineDash([W/90,W/120]);x.strokeRect(m,m,W-2*m,H-2*m);x.setLineDash([]);x.beginPath();x.moveTo(cx,0);x.lineTo(cx,H);x.moveTo(0,cy);x.lineTo(W,cy);x.stroke();x.restore();}
   x.restore();
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
     x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
