@@ -20,15 +20,16 @@ Permanent roadmap: `PROJECT_ROADMAP.md`
 - **Symmetry:** all shape families now pass through a shared symmetry wrapper: X (left/right mirror), X and Y (four-way), Across (top/bottom mirror), Triple X (three reduced vertical copies), and None (single render). Exact parity with the reference app's naming/semantics remains subject to further reference verification.
 - Regression tests cover shared response, cross-shape layer modes, material-specific rendering, styles and symmetry wrapper.
 
-## Latest verified dock routing and APK
-- Dock source commit: `bbef50bbed9d7cb82bc8a928a2cc9e34c96c8595`.
-- Regression-test commit: `aea52162d0df55c3b42b8ae2a5452485afef1ca3`.
-- Fixed category routing for the explicit `Elements` group and `Overlay FX` group. Previously both titles fell through to the default Visualizer category, leaving their own dock groups empty/hidden.
-- Regression test executes the category mapper against all twelve requested labels and verifies the exact bottom-dock order: Media, Logo, Audio, Text, Visualizer, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video.
-- CI workflow run #337, ID `42856977500`, exact head commit `aea52162d0df55c3b42b8ae2a5452485afef1ca3`, conclusion **success**.
+## Latest verified Audio/Tempo grouping and APK
+- Dock source commits: Audio upload grouping `948723c340aea33dbe2c5e0840658dee95330466`; manual BPM `5e65f03c87a13a3dd59b28d93a147398978ffdaf`; BPM source line-break correction `66b8f11d7123ae6ea3a0b5e1b11382491557acd1`.
+- Regression-test commits: Audio grouping `3961f296f121a871bf92c12035f4c64e94ec901d`; Tempo BPM `ad290ac5a396428cc9640524dd389a531169b49e`.
+- Audio: moved the song upload button from Media into Audio and renamed it Upload / Replace Audio. Loop Song and Bass/Mids/Treble frequency controls remain inside Audio.
+- Tempo: added a manual BPM slider (0 = auto) to the separate Tempo group. Tap/detected BPM updates the slider; manual BPM updates the same beat clock. Project restore reapplies the saved advanced BPM after registry restore to preserve older projects.
+- Regression tests verify Audio upload/loop/EQ grouping and Tempo manual BPM, Sync Bar and metronome sound/volume controls.
+- CI workflow run #346, ID `42858119530`, exact head commit `66b8f11d7123ae6ea3a0b5e1b11382491557acd1`, conclusion **success**.
 - HTML/JavaScript validation, project archive tests, Android debug APK build, packaged APK verification and artifact upload all passed.
-- Artifact: `VISO-Studio-advanced-debug-apk`, ID `13783047449`, size 32,189,078 bytes, outer artifact ZIP digest `sha256:abbe696915c9f42809ca02ebf17f14580891bd75542d0c0f52839e8cdf881fe6`.
-- Automated checks verify dock routing/order, not full physical interaction of every control. Physical-device QA remains pending.
+- Artifact: `VISO-Studio-advanced-debug-apk`, artifact ID `13782504681`, size 32,189,381 bytes, outer artifact ZIP digest `sha256:9df4ea5cc76444510355582f656fe97cbac0b04628647c27336871950896f146`.
+- Automated code/build verification only; physical-device install/runtime QA is not performed.
 
 ## Dock architecture
 12 bottom dock groups: Media, Logo, Audio, Text, Visualizer, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video. Background Video last; panels above dock; Export top-right.
