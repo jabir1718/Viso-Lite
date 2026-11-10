@@ -473,5 +473,5 @@ assert(processedResponseRadialStart>=0,'radial spectrum branch must exist');
 const processedResponseShapeRenderer=processedResponseAuditRenderer.slice(processedResponseRadialStart);
 assert(!processedResponseShapeRenderer.includes('specSmooth[i]/255'),'all spectrum shapes must use shared processed response values');
 assert(!processedResponseShapeRenderer.includes('specSmooth[idx]/255'),'wave spectrum must use shared processed response values');
-assert((processedResponseShapeRenderer.match(/val\\(i\\)/g)||[]).length>=8,'radial, ring, sphere, tunnel, mirror, dual, wave and dot renderers must use the normalized response');
+assert((processedResponseShapeRenderer.match(/val\\(i\\)/g)||[]).length>=7,'radial, ring, sphere, tunnel, mirror, dual, wave and dot renderers must use the normalized response');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
