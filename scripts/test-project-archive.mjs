@@ -137,7 +137,7 @@ const spectrumStart = html.indexOf('function drawSpectrum(ctx,scale)');
 const spectrumLayerStart = html.indexOf('function drawSpectrumLayer(ctx,scale,layer)', spectrumStart);
 const spectrumEnd = html.indexOf('\nfunction ', spectrumLayerStart + 20);
 const spectrumSource = html.slice(spectrumStart, spectrumEnd);
-assert(spectrumSource.includes("if(M==='ring')"), 'Ring spectrum must have its own renderer');
+assert(spectrumSource.includes("else if(M==='ring')"), 'Ring spectrum must have its own renderer');
 assert(spectrumSource.includes('outer=R0+v*amp'), 'Ring spectrum bars must respond to live audio amplitude');
 assert(spectrumSource.includes("else if(M==='sphere')"), 'Sphere spectrum must have its own renderer');
 assert(spectrumSource.includes("else if(M==='tunnel')"), 'Tunnel spectrum must have its own renderer');
