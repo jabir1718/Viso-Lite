@@ -162,6 +162,7 @@ canvas{aspect-ratio:auto!important;width:auto!important;height:auto!important;bo
 .templateFilters button{min-height:32px;padding:0 11px;border-radius:99px;font-size:10px;background:#252525;border-color:#444;color:#ccc}
 .templateFilters button.active{background:#f2f2f2;color:#111;border-color:#fff}
 .templateGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;align-content:start}
+.templateGrid.portraitGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
 .templateCard{position:relative;min-width:0;overflow:hidden;border:1px solid #444;border-radius:12px;background:#202020;box-shadow:0 3px 0 #080808}
 .templateCard[hidden]{display:none!important}
 .templateCard>[data-template]{display:flex;flex-direction:column;width:100%;min-width:0;padding:0;border:0;border-radius:0;background:transparent;color:#fff;white-space:normal;gap:0}
@@ -2189,6 +2190,7 @@ try{visoTemplateLikes=new Set(JSON.parse(localStorage.getItem(VISO_TEMPLATE_LIKE
 try{visoTemplateDownloads=new Set(JSON.parse(localStorage.getItem(VISO_TEMPLATE_DOWNLOADS_KEY)||'[]'));}catch(_){}
 function applyVISOTemplateFilters(){
  const q=($('templateSearch')?.value||'').trim().toLowerCase();let count=0;
+ $('visoTemplates').classList.toggle('portraitGrid',visoTemplateFilter==='portrait');
  document.querySelectorAll('#visoTemplates .templateCard').forEach(card=>{
   const key=card.querySelector('[data-template]')?.dataset.template||'',name=VISO_TEMPLATES[key]?.name||key;
   const layout=card.dataset.layout,showText=!q||name.toLowerCase().includes(q)||key.includes(q);
