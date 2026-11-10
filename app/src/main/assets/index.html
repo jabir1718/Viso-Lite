@@ -693,8 +693,7 @@ let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
-let autoOn=false,autoT=0,autoEvery=3;
-const lockChip={color:false,vis:false,shape:false,sway:false};
+const autoOn=false;const lockChip=Object.freeze({color:false,vis:false,shape:false,sway:false});
 const objects=[];let selObj=-1;
 const lights=[];let selLight=-1;let lint=60,lsz=100;
 const undo=[],redo=[],objectSnapshotCache=new Map();
@@ -740,11 +739,6 @@ PRESETS.forEach(p=>{const b=document.createElement('button');b.textContent=p.n;
     bloom=p.bl;drawMixers();};
   $('presets').appendChild(b);});
 
-$('bAuto').onclick=e=>{autoOn=!autoOn;e.currentTarget.classList.toggle('on',autoOn);};
-[['kCol','color'],['kVis','vis'],['kShp','shape'],['kSwy','sway']].forEach(([id,k])=>{
-  $(id).onclick=e=>{lockChip[k]=!lockChip[k];e.currentTarget.classList.toggle('lock',!lockChip[k]);
-    e.currentTarget.classList.toggle('on',lockChip[k]);};});
-$('sAuto').oninput=e=>{autoEvery=+e.target.value;};
 $('bMix').onclick=()=>{snap();colors=[];const n=2+((Math.random()*2)|0);
   for(let i=0;i<n;i++)colors.push(Math.floor(Math.random()*360));selColor=0;drawPals();
   mstate.forEach(m=>{m.on=Math.random()<.3;m.op=.4+Math.random()*.6;});
@@ -959,16 +953,7 @@ function restoreVISOExportState(d){
  setRes();
 }
 function captureProjectState(){return {autoOn,autoEvery,lockChip:{...lockChip},exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
-function restoreVISOAutoState(d){
- autoOn=d.autoOn===undefined?false:!!d.autoOn;
- autoEvery=Math.round(Math.min(12,Math.max(1,Number.isFinite(Number(d.autoEvery))?Number(d.autoEvery):3)));
- const saved=d.lockChip&&typeof d.lockChip==='object'?d.lockChip:{};
- Object.keys(lockChip).forEach(key=>lockChip[key]=!!saved[key]);
- $('bAuto').classList.toggle('on',autoOn);$('sAuto').value=autoEvery;
- [['kCol','color'],['kVis','vis'],['kShp','shape'],['kSwy','sway']].forEach(([id,key])=>{
-  const el=$(id);el.classList.toggle('lock',!lockChip[key]);el.classList.toggle('on',lockChip[key]);
- });
-}
+function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are intentionally ignored when opening older projects. */}
 function snap(){if(restoringState)return;const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
   if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
   redo.forEach(old=>objectSnapshotCache.delete(old));redo.length=0;}
@@ -1018,7 +1003,7 @@ $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
   $('sTrl').value=28;$('sShk').value=45;$('sPnc').value=40;$('sCyc').value=18;$('sDir').value=0;
   $('sSwy').value=0;$('sSpd').value=14;$('sBri').value=100;$('sCon').value=100;$('sSat').value=100;
   $('sHue').value=0;$('sDim').value=25;$('sSplit').value=100;$('sBgb').value=0;$('txtMask').value=txt;
-  $('sMsc').value=100;autoOn=false;autoEvery=3;Object.keys(lockChip).forEach(key=>lockChip[key]=false);restoreVISOAutoState({autoOn,autoEvery,lockChip});
+  $('sMsc').value=100;restoreVISOAutoState({});
   bassGain=midGain=highGain=100;studioText='VISO';studioTextOn=false;studioTextSize=65;studioTextPos=78;studioTextAlpha=100;studioTextColor='#ffffff';
   studioTextX=50;studioTextRot=0;studioTextStroke=7;studioTextGlow=24;studioTextAnim='none';studioTextFont='system-ui';studioTextAlign='center';studioTextPlate=false;
   studioText2='';studioText2On=false;studioText2Size=32;studioText2Pos=88;studioText2Alpha=85;studioText2Color='#ffffff';studioText2X=50;studioText2Rot=0;studioText2Stroke=2;studioText2Glow=12;studioText2Anim='none';studioText2Align='center';studioText2Plate=false;
@@ -1948,6 +1933,7 @@ function activateDockPanel(panel){
  dockNav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.panel===panel.id));
 }
 visoPanels.forEach(panel=>{
+ if(panel.id==='exportPanel')return;
  const clean=(panel.querySelector('h4 .toolHeading')?.textContent||panel.querySelector('h4')?.textContent||'Tool').replace(/\s+/g,' ').trim();
  const key=Object.keys(dockGlyphs).find(k=>clean.toLowerCase().includes(k.toLowerCase()));
  const btn=document.createElement('button');btn.type='button';btn.dataset.panel=panel.id;
@@ -1956,7 +1942,7 @@ visoPanels.forEach(panel=>{
  btn.append(icon,label);btn.addEventListener('click',()=>activateDockPanel(panel));dockNav.appendChild(btn);
 });
 
-const dockOrder=['Media','Look','Visuals','Spectrum Studio','Symmetry','Shape','Mask shape','Position','Video grade','Colour','Lights','Layers','Text · Logo Studio','Audio Frequency Response','Audio Motion','Beat · BPM Sync','Overlay','Progress Bar Studio','Overlay Effects · Motion FX','Surface Reflection','Film & Vintage','Atmosphere FX','Templates · Editable Projects','Export Studio','Background Drift','Background'];
+const dockOrder=['Media','Look','Visuals','Spectrum Studio','Symmetry','Shape','Mask shape','Position','Video grade','Colour','Lights','Layers','Text · Logo Studio','Audio Frequency Response','Audio Motion','Beat · BPM Sync','Overlay','Progress Bar Studio','Overlay Effects · Motion FX','Surface Reflection','Film & Vintage','Atmosphere FX','Templates · Editable Projects','Background Drift','Background'];
 const dockRank=name=>{const i=dockOrder.findIndex(v=>name.toLowerCase().includes(v.toLowerCase()));return i<0?dockOrder.length:i;};
 [...visoPanels].sort((a,b)=>dockRank(a.querySelector('.toolHeading')?.textContent||'')-dockRank(b.querySelector('.toolHeading')?.textContent||'')).forEach(panel=>{
  const btn=[...dockNav.children].find(b=>b.dataset.panel===panel.id);if(btn)dockNav.appendChild(btn);
@@ -2084,7 +2070,7 @@ function frame(t){
   const beatThreshold=Math.max(.08,.55-beatSensitivity*.0062);beatFlash=Math.max(beatFlash*.9,bass>beatThreshold?1:0);
   if(driftAmt>0&&bpm>0){const ph=performance.now()/1000*(bpm/60);
     driftX=Math.sin(ph*6.2832)*driftAmt*2.4;driftY=Math.cos(ph*3.1416)*driftAmt*1.6;}hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
-  if(autoOn){autoT+=dt;if(autoT>autoEvery*1000){autoT=0;autoStep();}}
+  
   if(useVid&&frameN%3===0)maskDirty=true;
   if(maskDirty){buildMask();maskDirty=false;}
   if(mstate[0]?.on)stepP(b,dt);
