@@ -4,23 +4,22 @@ Read `PROJECT_ROADMAP.md`, `CURRENT_STATUS.md`, and `DO_NOT_BREAK.md` first.
 
 ## Resume point
 Branch: `viso/advanced-studio-ui`
-Latest successful CI: run #358 / `42859376527`
-Successful head commit: `3cafe7b29f034a3e65d39ca097ab1d97f3a3a1e4`
-Export source commit: `30cd181e8fc716e464eb91820354c912d5788687`
-Turning Point source commit: `61d16ce2d13b9d0cd4afc23135229dcbad87ed20`
-APK artifact: `13783603518` (`VISO-Studio-advanced-debug-apk`)
-Artifact ZIP digest: `sha256:202d6fc26f76630ec0960902fd5cc3327b25969d3bdde6be9912cbcc7d3ab8be`
+Latest successful CI: run #393 / `42863166776`
+Successful head commit: `d46e18474e08cfa33feb0e71806168145a84d851`
+Latest UI source commit: `fedb6eb583552ae2b4e5053016b768418466486a`
+APK artifact: `13785702728` (`VISO-Studio-advanced-debug-apk`)
+Artifact ZIP digest: `sha256:948cdf0988f12a7fb7f550b17768eb6ebafb8f3e298dc0ecf9befec6e87d8364`
 
 ## Next implementation and QA batch
-1. Audit Background Video: upload/replace, drift, rotation, travel distance, beat sync, fit/fill/crop, dimensions, asset persistence and export.
-2. Audit Elements: particles, sparkles, light elements and reactive frame; each toggle, independent controls, undo, project persistence and export.
-3. Audit Overlay FX: gallery options, all effect controls, render pipeline, timing, persistence and preview/export parity.
-4. Audit Templates: verify every template applies as editable state, project save/open packages all media, and template download/import round-trip.
-5. Audit all Visualizer settings after renderer changes: shape/style/symmetry/material/layer modes, layer ordering, blend, spin, trail and mobile performance.
-6. Audit Export: selected resolution vs actual render cap, FPS/quality/format, progress, audio capture/sync, background video capture and Android save bridge.
-7. Verify project persistence/undo across all groups and add missing regression tests.
-8. Download and inspect newest APK artifact after final code gates; verify outer ZIP, inner APK, package ID and packaged HTML/source equality.
-9. Provide final APK only after all code/build gates. Owner tests once at final handoff; device QA remains a separate release gate.
+1. Verify Background Video upload/replace, Fit/Fill/Crop, drift/beat sync, asset packaging, import restore and export capture.
+2. Verify Elements and Overlay FX render output for every toggle/slider, Undo/Redo, project persistence and preview/export parity.
+3. Verify Templates: every built-in template applies as editable state; project save/open embeds all assets; download/import round-trip; no missing media.
+4. Verify all 12 tool groups have the correct controls, no duplicates, correct bottom-dock order and mobile layout.
+5. Verify Visualizer render modes after shared renderer changes: all shape families, style/material/symmetry, layer order/blend/spin/trail, performance and memory.
+6. Verify export with actual files: normal 1080p, heavy 720p cap, FPS/quality/format, audio sync, background video and Android MediaStore save path. Confirm playback and actual file dimensions.
+7. Verify undo/redo and persistence across all controls; close any remaining state/handler gaps.
+8. Download and inspect newest APK artifact: outer ZIP, inner APK, package ID, APK signature and packaged HTML/source equality.
+9. Only after all code/build gates and artifact inspection, prepare final APK for owner-side device test. Do not ask for interim APK testing.
 
 ## Resume instruction
 “Continue VISO on `viso/advanced-studio-ui` from the first incomplete item. Do not restart the roadmap, overwrite the baseline, or ask me to repeat requirements. Do not request interim APK testing.”
