@@ -565,4 +565,8 @@ const turningOptions=[...html.slice(turningOptionsStart,turningOptionsEnd).match
 const turningCases=[...html.slice(turningRendererStart,turningRendererEnd).matchAll(/case '([^']+)'/g)].map(match=>match[1]);
 assert.equal(turningOptions.length,20,'Turning Point must expose twenty transitions');
 assert.deepEqual(turningOptions,turningCases,'every Turning Point transition option must have a renderer case');
+
+assert(!html.includes('templateSearch')&&!html.includes('type="search"'),'the clean editor must not show a search bar');
+assert(html.includes('id="templateFilters"')&&html.includes('data-template-filter="landscape"')&&html.includes('data-template-filter="portrait"'),'template gallery layout filters must remain available without a search bar');
+assert(html.includes("function applyVISOTemplateFilters()")&&html.includes("visoTemplateFilter==='downloaded'?visoTemplateDownloads.has(key):layout===visoTemplateFilter"),'template filtering must continue to work by layout and downloaded status');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
