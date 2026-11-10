@@ -232,6 +232,13 @@ body.preview-fullscreen #previewExit{display:block}
 .extraTextCard label span{font-size:12px;color:#4d657d}
 .extraTextCard input[type=range]{width:100%;min-width:0}
 .extraTextCard input[type=text],.extraTextCard select{min-width:0;width:100%;max-width:100%}
+
+.stickerControls{display:flex;flex-direction:column;gap:7px}
+.stickerControls label{display:grid;grid-template-columns:minmax(100px,1fr) minmax(0,1.6fr);align-items:center;gap:9px}
+.stickerControls label span{font-size:12px;color:#4d657d}
+.stickerControls input[type=range],.stickerControls select{width:100%;min-width:0}
+.turningPointItem{display:block;width:100%;text-align:left;margin:4px 0;padding:9px 11px;border:1px solid #c9d8e7;border-radius:10px;background:linear-gradient(145deg,#fff,#eef6ff);color:#365775;font-size:12px}
+.turningPointItem.active{border-color:#58b9b2;background:linear-gradient(145deg,#e6faf5,#e5f1ff);font-weight:800}
 </style>
 <div id="studioHeader">
   <div class="studioBrand">
@@ -1562,7 +1569,7 @@ function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
   if((ob.outline??0)>0){ctx.shadowBlur=0;ctx.strokeStyle=ob.outlineColor||'#ffffff';ctx.lineWidth=ob.outline/s;ctx.strokeRect(-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);}
   if(i===selObj){ctx.shadowBlur=0;ctx.strokeStyle='#4a9cf2';ctx.lineWidth=2/s;ctx.setLineDash([8/s,5/s]);ctx.strokeRect(-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);ctx.setLineDash([]);}
   ctx.restore();});}
-['sStickerX','sStickerY','sStickerScale','sStickerRotation','sStickerAlpha','sStickerGlow','sStickerOutline','stickerOutlineColor','bStickerColorKey','stickerKeyColor','sStickerKeyTolerance','selStickerBlend'].forEach(id=>{const el=$(id);if(!el)return;const map={sStickerX:['x',v=>W*Number(v)/100],sStickerY:['y',v=>H*Number(v)/100],sStickerScale:['sc',v=>Number(v)/100],sStickerRotation:['rot',v=>Number(v)*Math.PI/180],sStickerAlpha:['alpha',Number],sStickerGlow:['glow',Number],sStickerOutline:['outline',Number],stickerOutlineColor:['outlineColor',String],bStickerColorKey:['colorKeyOn',v=>v==='true'],stickerKeyColor:['keyColor',String],sStickerKeyTolerance:['keyTolerance',Number],selStickerBlend:['blend',String]};const [key,convert]=map[id];bindStickerControl(id,key,convert);});
+['sStickerX','sStickerY','sStickerScale','sStickerRotation','sStickerAlpha','sStickerGlow','sStickerOutline','stickerOutlineColor','bStickerColorKey','stickerKeyColor','sStickerKeyTolerance','selStickerBlend'].forEach(id=>{const el=$(id);if(!el)return;const map={sStickerX:['x',v=>W*Number(v)/100],sStickerY:['y',v=>H*Number(v)/100],sStickerScale:['sc',v=>Number(v)/100],sStickerRotation:['rot',v=>Number(v)*Math.PI/180],sStickerAlpha:['alpha',Number],sStickerGlow:['glow',Number],sStickerOutline:['outline',Number],stickerOutlineColor:['outlineColor',String],bStickerColorKey:['colorKeyOn',v=>!!v],stickerKeyColor:['keyColor',String],sStickerKeyTolerance:['keyTolerance',Number],selStickerBlend:['blend',String]};const [key,convert]=map[id];bindStickerControl(id,key,convert);});
 syncStickerControls();
 
 function drawStudioTextLayer(ctx,b,textValue,enabled,sizeValue,posValue,alphaValue,colorValue,xValue,rotationValue,strokeValue,glowValue,animValue,alignValue,plateValue){
@@ -2322,12 +2329,13 @@ function drawTurningPointTransitions(ctx){
  }
 }
 function renderTurningPointList(){
- const list=$('turningPointList');if(!list)return;
+ const list=$('turningPointList');if(!list)return;list.innerHTML='';
  if(!turningPoints.length){list.textContent='No turning points yet. Move the playhead and add one.';return;}
- list.textContent=turningPoints.map((p,i)=>(i+1)+'. '+p.time.toFixed(2)+'s · '+p.type+' · '+(p.duration/1000).toFixed(2)+'s').join('   |   ');
+ turningPoints.forEach((point,index)=>{const button=document.createElement('button');button.type='button';button.className='turningPointItem'+(index===selectedTurningPoint?' active':'');button.textContent=(index+1)+'. '+point.time.toFixed(2)+'s · '+point.type+' · '+(point.duration/1000).toFixed(2)+'s';button.onclick=()=>{selectedTurningPoint=index;turningTransition=point.type;turningDuration=point.duration;$('sTurningTransition').value=turningTransition;$('sTurningDuration').value=turningDuration;renderTurningPointList();};list.appendChild(button);});
 }
-$('sTurningTransition').onchange=e=>{turningTransition=e.target.value;};
-$('sTurningDuration').oninput=e=>{turningDuration=+e.target.value;};
+$('sTurningTransition').onchange=e=>{turningTransition=e.target.value;if(selectedTurningPoint>=0){snap();turningPoints[selectedTurningPoint].type=turningTransition;renderTurningPointList();}};
+$('sTurningDuration').onfocus=()=>snap();
+$('sTurningDuration').oninput=e=>{turningDuration=+e.target.value;if(selectedTurningPoint>=0){turningPoints[selectedTurningPoint].duration=turningDuration;renderTurningPointList();}};
 $('bAddTurningPoint').onclick=()=>{if(!audio){$('turningPointList').textContent='Load audio first, then add a point at the playhead.';return;}const time=audio.currentTime;if(turningPoints.some(p=>Math.abs(p.time-time)<.12)){$('turningPointList').textContent='A turning point already exists at this time.';return;}snap();turningPoints.push({time,type:turningTransition,duration:turningDuration});turningPoints.sort((a,b)=>a.time-b.time);selectedTurningPoint=turningPoints.findIndex(p=>p.time===time);renderTurningPointList();};
 $('bRemoveTurningPoint').onclick=()=>{if(!turningPoints.length)return;snap();const i=selectedTurningPoint>=0?selectedTurningPoint:turningPoints.length-1;turningPoints.splice(i,1);selectedTurningPoint=-1;renderTurningPointList();};
 $('bMetronomeSound').onchange=e=>{metronomeSoundOn=e.target.checked;};
