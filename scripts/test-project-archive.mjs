@@ -31,6 +31,17 @@ for (const key of ['spinEnabled','spinForce','spinMomentum','spinSpeed']) {
 }
 assert(html.includes('const spin=layer.spinEnabled?'), 'per-layer spin must change the rendered layer rotation');
 assert(html.includes("['bSpecLayerSpin','spinEnabled',v=>!!v]"), 'spin toggle must update selected layer');
+for (const id of ['bSpecShake','sSpecShake','bSpecWaveDelay','sSpecWaveDelayTime','bSpecWaveReverse','specWaveGradient']) {
+  assert(html.includes('id="' + id + '"'), 'spectrum wave/motion control must exist: ' + id);
+}
+for (const key of ['specShakeOn','specShake','specWaveDelayOn','specWaveDelayTime','specWaveReverse','specWaveGradient']) {
+  assert(html.includes(key), 'spectrum wave/motion state must be wired: ' + key);
+}
+assert(html.includes('const shake=specShakeOn?'), 'spectrum shake must affect layer position');
+assert(html.includes('const idx=specWaveReverse?n-1-i:i'), 'wave reverse must reverse the sampled spectrum');
+assert(html.includes('const delay=specWaveDelayOn?'), 'wave delay must alter the wave phase');
+assert(html.includes("specWaveGradient==='rainbow'"), 'wave gradient selector must change rendered colour');
+assert(html.includes("['sSpecShake',specShake]") && html.includes("['sSpecWaveDelayTime',specWaveDelayTime]"), 'wave/motion sliders must restore with saved state');
 for (const id of ['bBpm', 'bTap', 'sBeatSens', 'sBeatScale', 'bBeatMarkers', 'bMetronome', 'bDownbeat', 'beatColor']) {
   assert(html.includes('id="' + id + '"'), 'beat control must exist: ' + id);
 }
