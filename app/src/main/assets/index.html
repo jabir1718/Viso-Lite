@@ -155,6 +155,38 @@ canvas{aspect-ratio:auto!important;width:auto!important;height:auto!important;bo
 #bar label{color:#c2c2c2!important}
 #bar .subhead{color:#aaa!important}
 #toolEmpty{background:#1c1c1c!important;color:#bbb!important;border-color:#444!important}
+
+/* Aspectrum-inspired template gallery cards and library filters */
+.templateSearch input{width:100%;height:36px;padding:0 11px;border-radius:9px;border:1px solid #444;background:#222;color:#fff;font-size:11px}
+.templateFilters{display:flex;gap:6px;overflow-x:auto;padding:2px 0 5px}
+.templateFilters button{min-height:32px;padding:0 11px;border-radius:99px;font-size:10px;background:#252525;border-color:#444;color:#ccc}
+.templateFilters button.active{background:#f2f2f2;color:#111;border-color:#fff}
+.templateGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;align-content:start}
+.templateCard{position:relative;min-width:0;overflow:hidden;border:1px solid #444;border-radius:12px;background:#202020;box-shadow:0 3px 0 #080808}
+.templateCard[hidden]{display:none!important}
+.templateCard>[data-template]{display:flex;flex-direction:column;width:100%;min-width:0;padding:0;border:0;border-radius:0;background:transparent;color:#fff;white-space:normal;gap:0}
+.templateThumb{position:relative;display:grid;place-items:center;width:100%;aspect-ratio:16/9;overflow:hidden;background:#111}
+.templateThumb:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,#ffffff24,transparent 38%),repeating-linear-gradient(135deg,transparent 0 13px,#ffffff12 14px 15px)}
+.templateThumb i{position:relative;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#31002f;color:#fff;font-size:23px;font-style:normal;box-shadow:0 0 18px currentColor;border:1px solid #ffffff88}
+.templateName{display:block;padding:8px 24px 9px 7px;text-align:center;font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.templateLike{position:absolute;right:5px;bottom:5px;min-width:28px!important;min-height:27px!important;padding:0!important;border-radius:50%!important;background:#252525!important;border-color:#555!important;font-size:16px!important}
+.templateLike.active{color:#ff6c9a!important;border-color:#a33c63!important}
+.auraThumb{background:radial-gradient(circle,#f7edff 0 3%,#9c4cff 12%,#090010 46%,#050505 100%)}
+.romanceThumb{background:radial-gradient(circle,#ffbfd9 0 8%,#8b2f79 26%,#1a061a 68%)}
+.vhsThumb{background:repeating-linear-gradient(0deg,#080808 0 5px,#282828 6px 7px),linear-gradient(90deg,#341c6b,#070707)}
+.clubThumb{background:radial-gradient(circle,#ffdd4b 0 4%,#ff4b9c 18%,#170023 65%)}
+.minimalThumb{background:linear-gradient(90deg,#030303,#243344,#030303)}
+.phonkThumb{background:radial-gradient(circle,#f00 0 3%,#4a0614 20%,#050505 70%)}
+.neonThumb{background:radial-gradient(circle,#06ffe9 0 4%,#7c21f6 22%,#03091c 70%)}
+.cosmicThumb{background:radial-gradient(circle at 60% 40%,#ff85d1,#351b78 35%,#060014 80%)}
+.cityThumb{background:linear-gradient(150deg,#071d55,#0589b5 42%,#080b1d 70%)}
+.fireThumb{background:radial-gradient(circle,#ffd45c 0 5%,#e63b08 25%,#140300 78%)}
+.snowThumb{aspect-ratio:9/16;background:linear-gradient(160deg,#bceeff,#244d76 60%,#071a32)}
+.prideThumb{aspect-ratio:9/16;background:linear-gradient(0deg,#ed3131,#ff9c2f,#f4ed32,#3cdb6b,#3c8eff,#a34bdb)}
+.roseThumb{aspect-ratio:9/16;background:radial-gradient(circle,#ffb6cb 0 8%,#a52450 30%,#17020d 75%)}
+.stormThumb{aspect-ratio:9/16;background:radial-gradient(circle,#fff 0 2%,#1ae6ff 12%,#082c6b 45%,#03050b 85%)}
+.templateCard[data-layout="portrait"] .templateThumb{aspect-ratio:9/16}
+@media(max-width:370px){.templateGrid{gap:6px}.templateName{font-size:10px}}
 </style>
 <div id="studioHeader">
   <div class="studioBrand">
@@ -365,12 +397,31 @@ canvas{aspect-ratio:auto!important;width:auto!important;height:auto!important;bo
     <label><span>Smoke colour</span><input id="smokeColor" type="color" value="#c5d7d0"></label>
   </div>
   <div class="sec panel"><h4>Templates · Editable Projects</h4>
-    <div class="status">Download a template, then open it in the editor as editable settings. Add or replace your own song, photo, video and logo.</div>
-    <div class="row" id="visoTemplates">
-      <button data-template="aura">Aura Pulse</button><button data-template="romance">Soft Romance</button>
-      <button data-template="vhs">Retro VHS</button><button data-template="club">Club Energy</button>
-      <button data-template="minimal">Minimal Wave</button>
+    <div class="status">Choose a design, then customize the song, photo, video, logo, text and visualizer in your own project.</div>
+    <div class="templateSearch"><input id="templateSearch" type="search" placeholder="Search templates..." autocomplete="off"></div>
+    <div class="templateFilters" id="templateFilters">
+      <button type="button" data-template-filter="landscape" class="active">Landscape</button>
+      <button type="button" data-template-filter="portrait">Portrait</button>
+      <button type="button" data-template-filter="liked">♡ Liked</button>
+      <button type="button" data-template-filter="downloaded">Downloaded</button>
     </div>
+    <div class="templateGrid" id="visoTemplates">
+      <article class="templateCard" data-layout="landscape"><button data-template="aura"><span class="templateThumb auraThumb"><i>◉</i></span><span class="templateName">Aura Pulse</span></button><button class="templateLike" data-like="aura" aria-label="Like Aura Pulse">♡</button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="romance"><span class="templateThumb romanceThumb"><i>♡</i></span><span class="templateName">Soft Romance</span></button><button class="templateLike" data-like="romance" aria-label="Like Soft Romance">♡</button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="vhs"><span class="templateThumb vhsThumb"><i>▥</i></span><span class="templateName">Retro VHS</span></button><button class="templateLike" data-like="vhs" aria-label="Like Retro VHS">♡</button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="club"><span class="templateThumb clubThumb"><i>✦</i></span><span class="templateName">Club Energy</span></button><button class="templateLike" data-like="club" aria-label="Like Club Energy">♡</button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="minimal"><span class="templateThumb minimalThumb"><i>〰</i></span><span class="templateName">Minimal Wave</span></button><button class="templateLike" data-like="minimal" aria-label="Like Minimal Wave">♡</button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="phonk"><span class="templateThumb phonkThumb"><i>◈</i></span><span class="templateName">Phonk Drive</span></button><button class="templateLike" data-like="phonk" aria-label="Like Phonk Drive">♡</button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="neon"><span class="templateThumb neonThumb"><i>✧</i></span><span class="templateName">Neon Tunnel</span></button><button class="templateLike" data-like="neon" aria-label="Like Neon Tunnel">♡</button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="cosmic"><span class="templateThumb cosmicThumb"><i>✺</i></span><span class="templateName">Cosmic Wave</span></button><button class="templateLike" data-like="cosmic" aria-label="Like Cosmic Wave">♡</button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="city"><span class="templateThumb cityThumb"><i>▥</i></span><span class="templateName">City Lights</span></button><button class="templateLike" data-like="city" aria-label="Like City Lights">♡</button></article>
+      <article class="templateCard" data-layout="landscape"><button data-template="fire"><span class="templateThumb fireThumb"><i>✹</i></span><span class="templateName">Blazing Fire</span></button><button class="templateLike" data-like="fire" aria-label="Like Blazing Fire">♡</button></article>
+      <article class="templateCard" data-layout="portrait"><button data-template="snow"><span class="templateThumb snowThumb"><i>❄</i></span><span class="templateName">Snowfall</span></button><button class="templateLike" data-like="snow" aria-label="Like Snowfall">♡</button></article>
+      <article class="templateCard" data-layout="portrait"><button data-template="pride"><span class="templateThumb prideThumb"><i>≋</i></span><span class="templateName">Pride Spectrum</span></button><button class="templateLike" data-like="pride" aria-label="Like Pride Spectrum">♡</button></article>
+      <article class="templateCard" data-layout="portrait"><button data-template="rose"><span class="templateThumb roseThumb"><i>✿</i></span><span class="templateName">Cherry Rose</span></button><button class="templateLike" data-like="rose" aria-label="Like Cherry Rose">♡</button></article>
+      <article class="templateCard" data-layout="portrait"><button data-template="storm"><span class="templateThumb stormThumb"><i>ϟ</i></span><span class="templateName">Neon Storm</span></button><button class="templateLike" data-like="storm" aria-label="Like Neon Storm">♡</button></article>
+    </div>
+    <div class="status" id="templateEmpty">No templates in this section.</div>
     <div class="row"><button id="bProjectSave">Save Project</button><button id="bProjectOpen">Open Project</button></div>
     <input id="fProjectOpen" type="file" accept=".viso,.json,application/json" hidden>
     <div class="status" id="templateInfo">Templates load editable controls, not a flattened preview.</div>
@@ -2094,7 +2145,16 @@ const VISO_TEMPLATES={
  romance:{name:'Soft Romance',vig:true,prog:true,progStyle:'thin',progSz:9,progPos:96,drift:true,speed:14,rot:10,travel:15,flash:8,studio:true,text:'LOVE',anim:'float',glow:30,stroke:2,vhs:false,shock:false,lens:true},
  vhs:{name:'Retro VHS',vig:true,prog:true,progStyle:'segments',progSz:13,progPos:93,drift:true,speed:42,rot:8,travel:18,flash:24,studio:true,text:'RETRO',anim:'pulse',glow:12,stroke:5,vhs:true,shock:false,lens:false},
  club:{name:'Club Energy',vig:false,prog:true,progStyle:'segments',progSz:18,progPos:90,drift:true,speed:70,rot:34,travel:46,flash:85,studio:true,text:'ENERGY',anim:'bounce',glow:55,stroke:12,vhs:false,shock:true,lens:true},
- minimal:{name:'Minimal Wave',vig:false,prog:true,progStyle:'thin',progSz:7,progPos:97,drift:true,speed:10,rot:0,travel:8,flash:0,studio:false,text:'',anim:'none',glow:0,stroke:0,vhs:false,shock:false,lens:false}
+ minimal:{name:'Minimal Wave',vig:false,prog:true,progStyle:'thin',progSz:7,progPos:97,drift:true,speed:10,rot:0,travel:8,flash:0,studio:false,text:'',anim:'none',glow:0,stroke:0,vhs:false,shock:false,lens:false},
+ phonk:{name:'Phonk Drive',vig:true,prog:true,progStyle:'segments',progSz:16,progPos:92,drift:true,speed:68,rot:28,travel:42,flash:76,studio:true,text:'PHONK',anim:'pulse',glow:52,stroke:10,vhs:true,shock:true,lens:false},
+ neon:{name:'Neon Tunnel',vig:true,prog:true,progStyle:'gradient',progSz:13,progPos:94,drift:true,speed:55,rot:44,travel:38,flash:62,studio:true,text:'NEON',anim:'bounce',glow:64,stroke:8,vhs:false,shock:true,lens:true},
+ cosmic:{name:'Cosmic Wave',vig:true,prog:true,progStyle:'thin',progSz:10,progPos:96,drift:true,speed:25,rot:20,travel:30,flash:20,studio:true,text:'COSMIC',anim:'float',glow:46,stroke:4,vhs:false,shock:false,lens:true},
+ city:{name:'City Lights',vig:false,prog:true,progStyle:'gradient',progSz:12,progPos:95,drift:true,speed:22,rot:8,travel:18,flash:32,studio:true,text:'CITY',anim:'pulse',glow:28,stroke:4,vhs:false,shock:false,lens:true},
+ fire:{name:'Blazing Fire',vig:true,prog:true,progStyle:'segments',progSz:17,progPos:91,drift:true,speed:72,rot:32,travel:52,flash:88,studio:true,text:'FIRE',anim:'bounce',glow:70,stroke:13,vhs:false,shock:true,lens:true},
+ snow:{name:'Snowfall',vig:false,prog:true,progStyle:'thin',progSz:8,progPos:97,drift:true,speed:8,rot:0,travel:12,flash:4,studio:true,text:'SNOW',anim:'float',glow:18,stroke:2,vhs:false,shock:false,lens:true},
+ pride:{name:'Pride Spectrum',vig:false,prog:true,progStyle:'gradient',progSz:13,progPos:94,drift:true,speed:30,rot:12,travel:20,flash:26,studio:true,text:'PRIDE',anim:'pulse',glow:42,stroke:5,vhs:false,shock:false,lens:true},
+ rose:{name:'Cherry Rose',vig:true,prog:true,progStyle:'thin',progSz:9,progPos:96,drift:true,speed:12,rot:6,travel:12,flash:10,studio:true,text:'ROSE',anim:'float',glow:36,stroke:3,vhs:false,shock:false,lens:true},
+ storm:{name:'Neon Storm',vig:true,prog:true,progStyle:'segments',progSz:15,progPos:93,drift:true,speed:78,rot:50,travel:58,flash:92,studio:true,text:'STORM',anim:'bounce',glow:60,stroke:11,vhs:false,shock:true,lens:false}
 };
 function applyVisoProject(p){
  if(!p||!['viso-project-v1','viso-project-v2','viso-project-v3'].includes(p.schema))throw new Error('Unsupported VISO project');
@@ -2123,11 +2183,37 @@ function applyVisoProject(p){
  restoreAdvancedState(collectAdvancedState());
  $('templateInfo').textContent='Project loaded: '+(p.name||'Custom project')+' · now edit layers, effects and media';
 }
-document.querySelectorAll('#visoTemplates button').forEach(q=>q.onclick=async()=>{
+const VISO_TEMPLATE_LIKES_KEY='viso.templateLikes.v1',VISO_TEMPLATE_DOWNLOADS_KEY='viso.templateDownloads.v1';
+let visoTemplateFilter='landscape',visoTemplateLikes=new Set(),visoTemplateDownloads=new Set();
+try{visoTemplateLikes=new Set(JSON.parse(localStorage.getItem(VISO_TEMPLATE_LIKES_KEY)||'[]'));}catch(_){}
+try{visoTemplateDownloads=new Set(JSON.parse(localStorage.getItem(VISO_TEMPLATE_DOWNLOADS_KEY)||'[]'));}catch(_){}
+function applyVISOTemplateFilters(){
+ const q=($('templateSearch')?.value||'').trim().toLowerCase();let count=0;
+ document.querySelectorAll('#visoTemplates .templateCard').forEach(card=>{
+  const key=card.querySelector('[data-template]')?.dataset.template||'',name=VISO_TEMPLATES[key]?.name||key;
+  const layout=card.dataset.layout,showText=!q||name.toLowerCase().includes(q)||key.includes(q);
+  const showLayout=visoTemplateFilter==='liked'?visoTemplateLikes.has(key):visoTemplateFilter==='downloaded'?visoTemplateDownloads.has(key):layout===visoTemplateFilter;
+  card.hidden=!(showText&&showLayout);if(!card.hidden)count++;
+  const like=card.querySelector('[data-like]');if(like){const on=visoTemplateLikes.has(key);like.textContent=on?'♥':'♡';like.classList.toggle('active',on);}
+ });
+ $('templateEmpty').style.display=count?'none':'block';
+}
+document.querySelectorAll('[data-template-filter]').forEach(btn=>btn.addEventListener('click',()=>{
+ visoTemplateFilter=btn.dataset.templateFilter;document.querySelectorAll('[data-template-filter]').forEach(b=>b.classList.toggle('active',b===btn));applyVISOTemplateFilters();
+}));
+$('templateSearch').addEventListener('input',applyVISOTemplateFilters);
+document.querySelectorAll('#visoTemplates [data-like]').forEach(btn=>btn.addEventListener('click',ev=>{
+ ev.stopPropagation();const key=btn.dataset.like;
+ if(visoTemplateLikes.has(key))visoTemplateLikes.delete(key);else visoTemplateLikes.add(key);
+ try{localStorage.setItem(VISO_TEMPLATE_LIKES_KEY,JSON.stringify([...visoTemplateLikes]));}catch(_){}
+ applyVISOTemplateFilters();
+}));
+applyVISOTemplateFilters();
+document.querySelectorAll('#visoTemplates [data-template]').forEach(q=>q.onclick=async()=>{
  const key=q.dataset.template,preset=VISO_TEMPLATES[key];
  snap();applyVisoProject({schema:'viso-project-v1',name:preset.name,settings:{template:key}});
  const project=collectVisoProject();project.name=preset.name;project.settings.template=key;
- try{await downloadVISOProject(project,'VISO-'+key+'.viso');$('templateInfo').textContent=preset.name+' editable project package downloaded with imported assets';}
+ try{await downloadVISOProject(project,'VISO-'+key+'.viso');visoTemplateDownloads.add(key);try{localStorage.setItem(VISO_TEMPLATE_DOWNLOADS_KEY,JSON.stringify([...visoTemplateDownloads]));}catch(_){}applyVISOTemplateFilters();$('templateInfo').textContent=preset.name+' editable project package downloaded with imported assets';}
  catch(err){$('templateInfo').textContent='Template package failed: '+err.message;}
 });
 function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specRange,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining,logoGlow,logoBounce,logoShake,logoPulse,logoRotation,logoReflection,logoParticles,surfaceReflectionOn,reflStrength,reflDistance,reflBlur,reflFade,reflRipples,reflPerspective,filmOn,filmGrain,filmDust,filmScratches,filmFlicker,filmSepia,filmWeave,atmosphereOn,hazeStrength,hazeAngle,hazeSpeed,smokeAmount,smokeSize,smokeSpeed,smokeColor};}
