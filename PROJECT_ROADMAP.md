@@ -514,3 +514,16 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Artifact: `VISO-Studio-advanced-debug-apk`, ID `13782762494`; outer ZIP size 32,189,059 bytes; digest `sha256:a4e773be83cbb0db4f46bd2a2645abd5bfa56099550ae375480625742917189b`.
 - This is automated code/build/package verification, not physical-device testing. Exact Aspectrum semantics for the named symmetry modes remain to be confirmed if more reference evidence becomes recoverable.
 - Next: systematically audit all 12 dock groups, then project/template asset round-trip, export/audio sync and remaining Aspectrum feature parity.
+
+
+## 41. Twelve-group dock category routing — 2026-11-10
+
+- Runtime audit of `visoToolCategory(title)` found that the dynamically renamed headings `Elements` and `Overlay FX` did not match the category rules. Both fell through to the default Visualizer category, so their dedicated dock group could be empty and their controls misfiled.
+- Added explicit `Elements` and `Overlay FX` category matching.
+- Added a regression test that executes the category mapper against all twelve requested group labels and checks the exact dock order, including Background Video last.
+- Source commit: `bbef50bbed9d7cb82bc8a928a2cc9e34c96c8595`.
+- Test commit: `aea52162d0df55c3b42b8ae2a5452485afef1ca3`.
+- CI workflow run #337 (ID `42856977500`) passed: HTML/JS validation, project archive tests, Android debug APK build, packaged APK verification and artifact upload.
+- Artifact: `VISO-Studio-advanced-debug-apk`, ID `13783047449`; outer ZIP size 32,189,078 bytes; digest `sha256:abbe696915c9f42809ca02ebf17f14580891bd75542d0c0f52839e8cdf881fe6`.
+- This confirms group category routing and order. It does not yet certify every control's event wiring or device behaviour.
+- Next: audit all tool-group controls for state/render/undo/project/export integration, starting with Logo/Photo and Sticker.
