@@ -141,9 +141,9 @@ assert(html.includes('<h4>Audio Frequency Response</h4>\n    <div class="row"><b
 assert(html.includes('#monitorDock>.subhead{display:none!important}'), 'song monitor must be compacted into the preview rather than consuming editor space');
 assert(html.includes('#monitorDock>.subhead{display:none!important}'), 'song monitor must be compacted into the preview rather than consuming editor space');
 
-const spectrumStart = html.indexOf('function drawSpectrum(ctx,scale)');
-const spectrumLayerStart = html.indexOf('function drawSpectrumLayer(ctx,scale,layer', spectrumStart);
-assert(spectrumStart>=0&&spectrumLayerStart>spectrumStart, 'spectrum renderer entry points must exist');
+const specNormAuditStart = html.indexOf('function drawSpectrum(ctx,scale)');
+const spectrumLayerStart = html.indexOf('function drawSpectrumLayer(ctx,scale,layer', specNormAuditStart);
+assert(specNormAuditStart>=0&&spectrumLayerStart>specNormAuditStart, 'spectrum renderer entry points must exist');
 assert(html.includes("else if(M==='ring')"), 'Ring spectrum must have its own renderer');
 assert(html.includes('outer=R0+v*amp'), 'Ring spectrum bars must respond to live audio amplitude');
 assert(html.includes("else if(M==='sphere')"), 'Sphere spectrum must have its own renderer');
@@ -464,14 +464,14 @@ assert.equal(fontSandbox.visoFontFamily('My Custom Font.ttf',4660),'VISOFont_My_
 assert.notEqual(fontSandbox.visoFontFamily('My Custom Font.ttf',4660),fontSandbox.visoFontFamily('My Custom Font.ttf',4661),'different font contents receive distinct families');
 
 
-const spectrumStart=html.indexOf('function drawSpectrumLayer(');
-const spectrumEnd=html.indexOf('\\nlet curB=',spectrumStart);
-assert(spectrumStart>=0&&spectrumEnd>spectrumStart,'spectrum renderer must exist');
-const spectrumRenderer=html.slice(spectrumStart,spectrumEnd);
-const radialStart=spectrumRenderer.indexOf("if(M==='radial')");
-assert(radialStart>=0,'radial spectrum branch must exist');
-const shapeRenderer=spectrumRenderer.slice(radialStart);
-assert(!shapeRenderer.includes('specSmooth[i]/255'),'all spectrum shapes must use shared processed response values');
-assert(!shapeRenderer.includes('specSmooth[idx]/255'),'wave spectrum must use shared processed response values');
-assert((shapeRenderer.match(/val\\(i\\)/g)||[]).length>=8,'radial, ring, sphere, tunnel, mirror, dual, wave and dot renderers must use the normalized response');
+const specNormAuditStart=html.indexOf('function drawSpectrumLayer(');
+const specNormAuditEnd=html.indexOf('\\nlet curB=',specNormAuditStart);
+assert(specNormAuditStart>=0&&specNormAuditEnd>specNormAuditStart,'spectrum renderer must exist');
+const specNormAuditRenderer=html.slice(specNormAuditStart,specNormAuditEnd);
+const specNormRadialStart=specNormAuditRenderer.indexOf("if(M==='radial')");
+assert(specNormRadialStart>=0,'radial spectrum branch must exist');
+const specNormShapeRenderer=specNormAuditRenderer.slice(specNormRadialStart);
+assert(!specNormShapeRenderer.includes('specSmooth[i]/255'),'all spectrum shapes must use shared processed response values');
+assert(!specNormShapeRenderer.includes('specSmooth[idx]/255'),'wave spectrum must use shared processed response values');
+assert((specNormShapeRenderer.match(/val\\(i\\)/g)||[]).length>=8,'radial, ring, sphere, tunnel, mirror, dual, wave and dot renderers must use the normalized response');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
