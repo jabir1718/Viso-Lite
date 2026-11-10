@@ -158,7 +158,7 @@ assert(html.includes('const SPEC_N=200;')&&html.includes('max="200" value="48"')
 assert(html.includes("if(specMaterial==='fire')")&&html.includes("specLayerBlend==='additive'?'lighter':'source-over'"), 'Visualizer material and blend settings must affect rendering');
 assert(html.includes("if(['flats','square','ncs'].includes(specShape))"), 'Flats, Square and NCS must use dedicated geometry renderers');
 assert(html.includes('specTrailFrames=4')&&html.includes('specTrailBuffers=Array.from({length:specTrailFrames}'), 'spectrum trail history must use a bounded reusable buffer');
-assert(html.includes('drawSpectrumLayer(ctx,scale,layer,true)')&&html.includes('specTrailOn,specTrailAmount'), 'spectrum trails must render as afterimages and persist in project state');
+assert(html.includes('drawSpectrumLayerGeometry(ctx,scale,layer,true)')&&html.includes('specTrailOn,specTrailAmount'), 'spectrum trails must render as afterimages and persist in project state');
 assert(html.includes('const waveY=specWaveY')&&html.includes('waveY[i+1]')&&html.includes('specWaveReverse?n-1-i:i'), 'wave renderer must reuse its buffer and apply reverse direction');
 assert(html.includes("specGlowMode==='neon'")&&html.includes('specGlowIntensitySync?'), 'glow mode and audio intensity sync must affect spectrum rendering');
 assert(html.includes('specTrailBuffers.forEach(frame=>frame.fill(0))'), 'disabling or restoring trail must clear stale frame history');
