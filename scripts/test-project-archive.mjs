@@ -628,4 +628,8 @@ assert(html.includes("const dustIndex=MODES.findIndex(mode=>mode.name==='Dust'),
 
 assert(!html.includes("document.querySelectorAll('#bar button').forEach(button=>"),'tool navigation and no-op buttons must not create redundant undo snapshots');
 assert(html.includes("$('bar').addEventListener('keydown',e=>{if(e.target.matches('input[type=\"range\"],input[type=\"color\"],select')"),'keyboard edits must snapshot range, colour and select controls');
+
+assert(!html.includes('toolSearch')&&!html.includes('studioNav'),'no hidden or visible tool search UI may remain');
+assert(!html.includes('toolFav')&&!html.includes('templateLike')&&!html.includes('favorite|like'),'no favourite controls or star injection may remain');
+assert(!html.includes('id="bAutoLock"')&&!html.includes('class="autoLock"'),'no Auto+Lock controls may be exposed');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
