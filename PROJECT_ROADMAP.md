@@ -422,3 +422,16 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - APK artifact: `VISO-Studio-advanced-debug-apk`, artifact ID `13780247825`, ZIP digest `sha256:6ee4867373601208b83cd319566f3b1308c10b2dd94980f6832079e2b5dfc4de`. Extracted APK: 84,492,335 bytes; SHA-256 `4ef719d615ea4c49e25224749d73e5bad635929c2447f8f1137cd03c2639cf61`. The workflow's APK verification step confirmed package `com.viso.lite` and byte-identical packaged `assets/index.html` against the branch source; the downloaded artifact ZIP and APK ZIP both passed integrity tests.
 - This is automated build/package verification only; physical-device playback, visual appearance, heat, battery and touch QA are still pending.
 - Next: audit shape/style/symmetry/material/layer-mode behaviour and per-layer controls, then proceed through each dock group, project/template asset round-trip, undo/redo and export/audio sync. Do not release yet.
+
+
+## 34. Spectrum shake, wave controls, glow sync and bounded trails — 2026-11-10
+
+- Added spectrum shake enable/amount with deterministic per-layer movement.
+- Added wave delay enable/time, reverse direction and three wave colour modes (Spectrum colours, Rainbow, Solid core colour).
+- Added Glow mode (Soft, Neon, Core) and optional live-audio intensity sync.
+- Added a bounded four-frame spectrum trail history (200 samples per frame), with adjustable trail strength. Trail recursion is guarded by an explicit trail-render flag; history is only sampled while enabled.
+- Wave drawing now reuses a fixed `Float32Array(200)` instead of allocating a new array for each pass/frame, avoiding repeated garbage on mobile.
+- Added regression assertions for shake/wave/glow controls and state restore. CI #278 (ID `42851839470`) passed on exact commit `0f8ad3028a5d5ff09d1f3cb94940cacdca347fd3`, including HTML/JS validation, archive tests, Android APK build, packaged APK verification and artifact upload.
+- Artifact ID: `13779639787`, `VISO-Studio-advanced-debug-apk` (download/ZIP and APK checks still need to be repeated on this latest artifact before final release).
+- Earlier runs #272–#275 had stale regression assertions around the Ring renderer/signature; the checks were corrected and superseded by passing #276–#278. Do not treat those earlier failures as current.
+- Remaining Spectrum items: validate trail visual layering and performance, ensure every new control has undo support, and audit any missing material-specific parameters. Physical device audio/visual QA remains pending.
