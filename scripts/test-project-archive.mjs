@@ -569,4 +569,13 @@ assert.deepEqual(turningOptions,turningCases,'every Turning Point transition opt
 assert(!html.includes('templateSearch')&&!html.includes('type="search"'),'the clean editor must not show a search bar');
 assert(html.includes('id="templateFilters"')&&html.includes('data-template-filter="landscape"')&&html.includes('data-template-filter="portrait"'),'template gallery layout filters must remain available without a search bar');
 assert(html.includes("function applyVISOTemplateFilters()")&&html.includes("visoTemplateFilter==='downloaded'?visoTemplateDownloads.has(key):layout===visoTemplateFilter"),'template filtering must continue to work by layout and downloaded status');
+
+const exportCanvasStart=html.indexOf('function setVideoRenderCanvasSize()');
+const exportCanvasEnd=html.indexOf('function setRes()',exportCanvasStart);
+assert(exportCanvasStart>=0&&exportCanvasEnd>exportCanvasStart,'video render canvas sizing must exist');
+const exportCanvasAudit=html.slice(exportCanvasStart,exportCanvasEnd);
+assert(exportCanvasAudit.includes('recordCanvas.width=W;recordCanvas.height=H;'),'recording canvas must be resized to the actual video render dimensions before capture');
+assert(exportCanvasAudit.includes('maxW=heavy?720:1080,maxH=heavy?1280:1920'),'normal video export must reach 1080p and heavy visualizer export must use the explicit mobile-safe 720p cap');
+assert(exportCanvasAudit.includes('updateBitrate(W,H)'),'export bitrate and displayed dimensions must use actual recording dimensions');
+assert(html.includes('function updateBitrate(renderW=targetW,renderH=targetH)'),'export info must report actual rendered dimensions rather than only the selected target');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
