@@ -632,4 +632,8 @@ assert(html.includes("$('bar').addEventListener('keydown',e=>{if(e.target.matche
 assert(!html.includes('toolSearch')&&!html.includes('studioNav'),'no hidden or visible tool search UI may remain');
 assert(!html.includes('toolFav')&&!html.includes('templateLike')&&!html.includes('favorite|like'),'no favourite controls or star injection may remain');
 assert(!html.includes('id="bAutoLock"')&&!html.includes('class="autoLock"'),'no Auto+Lock controls may be exposed');
+
+assert(!html.includes('toolSearch')&&!html.includes('studioNav'),'no hidden or visible tool search UI may remain');
+assert(!html.includes('toolFav')&&!html.includes('templateLike')&&!html.includes('favorite|like'),'no favourite controls or star injection may remain');
+assert(!html.includes('id="bAutoLock"')&&!html.includes('class="autoLock"'),'no Auto+Lock controls may be exposed');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
