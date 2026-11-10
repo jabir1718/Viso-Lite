@@ -578,4 +578,9 @@ assert(exportCanvasAudit.includes('recordCanvas.width=W;recordCanvas.height=H;')
 assert(exportCanvasAudit.includes('maxW=heavy?720:1080,maxH=heavy?1280:1920'),'normal video export must reach 1080p and heavy visualizer export must use the explicit mobile-safe 720p cap');
 assert(exportCanvasAudit.includes('updateBitrate(W,H)'),'export bitrate and displayed dimensions must use actual recording dimensions');
 assert(html.includes('function updateBitrate(renderW=targetW,renderH=targetH)'),'export info must report actual rendered dimensions rather than only the selected target');
+
+assert(html.includes('id="selBgFit"')&&html.includes('<option value="fit">Fit</option>')&&html.includes('<option value="fill">Fill</option>')&&html.includes('<option value="crop" selected>Crop</option>'),'Background Video group must offer Fit, Fill and Crop modes');
+assert(html.includes("function drawBackgroundMedia(ctx,source,sourceW,sourceH)")&&html.includes("if(bgFitMode==='fill')")&&html.includes("if(bgFitMode==='fit')"),'background media rendering must implement Fill and Fit separately, with Crop using cover');
+assert(html.includes('bgFitMode,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel'),'background fit mode must persist in advanced project state');
+assert(html.includes("if(s.bgFitMode!==undefined)bgFitMode=s.bgFitMode")&&html.includes("$('selBgFit').value=bgFitMode"),'background fit mode must restore into state and UI');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
