@@ -613,4 +613,10 @@ for(const id of ['bBgX','bBgI','bBgV','bI','bV','bA','bLogo','bLogoX','bFont'])a
 
 for(const [id,state] of [['tBg','bgOn'],['tPh','phOn'],['tMask','maskOn'],['tBvm','bgVizMask']])assert(html.includes("$('"+id+"').onclick=e=>{snap();"+state+"=!"+state+";"),id+' must snapshot before toggling the media stage');
 for(const id of ['bL','bRt','bU','bD','bBig','bSm','bMediaClear','mL','mR','mU','mD','mBig','mSm','mRot','mRst','bZup','bZdn'])assert(html.includes("$('"+id+"').onclick=()=>{snap();"),id+' must snapshot before changing media/mask transform state');
+
+assert(html.includes("$('applyCustomSize').onclick=()=>{snap();aspect='custom';"),'custom canvas size must snapshot before applying');
+assert(html.includes("$('bStopAtEnd').onclick=()=>{snap();stopAtSongEnd=!stopAtSongEnd;"),'stop-at-song-end must snapshot before changing export state');
+assert(html.includes("$('b8d').onclick=e=>{snap();eightD=!eightD;")&&html.includes("$('bPreserve').onclick=e=>{snap();pitchLock=!pitchLock;"),'Audio Motion toggles must snapshot before changes');
+assert(html.includes("$('bBpm').onclick=()=>{snap();onsetGaps=[];bpm=0;"),'BPM detection must snapshot before resetting tempo');
+assert(html.includes("$('bSpec').onclick=e=>{snap();specOn=!specOn;"),'Spectrum enable toggle must snapshot before changing state');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
