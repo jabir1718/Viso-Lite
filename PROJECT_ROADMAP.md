@@ -527,3 +527,17 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Artifact: `VISO-Studio-advanced-debug-apk`, ID `13783047449`; outer ZIP size 32,189,078 bytes; digest `sha256:abbe696915c9f42809ca02ebf17f14580891bd75542d0c0f52839e8cdf881fe6`.
 - This confirms group category routing and order. It does not yet certify every control's event wiring or device behaviour.
 - Next: audit all tool-group controls for state/render/undo/project/export integration, starting with Logo/Photo and Sticker.
+
+
+## 42. Audio upload grouping and manual Tempo BPM — 2026-11-10
+
+- Moved the Audio upload button out of Media and into the Audio tool group, with the explicit label “Upload / Replace Audio”. Loop Song and Bass/Mids/Treble frequency response controls remain grouped in Audio.
+- Added a Manual BPM slider to the separate Tempo group. Value 0 means auto/detected BPM; manual values update the same BPM clock used by beat sync/metronome. Tap tempo and detected BPM update the slider display.
+- Project restore reapplies the saved advanced BPM after registry control restoration so older project state is not overwritten by the new slider's default.
+- Added regression checks for Audio upload/replace, loop/EQ grouping, manual BPM, Sync Bar and metronome sound/volume.
+- Source commits: `948723c340aea33dbe2c5e0840658dee95330466`, `5e65f03c87a13a3dd59b28d93a147398978ffdaf`, `66b8f11d7123ae6ea3a0b5e1b11382491557acd1`.
+- Test commits: `3961f296f121a871bf92c12035f4c64e94ec901d`, `ad290ac5a396428cc9640524dd389a531169b49e`.
+- CI workflow run #346 (ID `42858119530`) passed: HTML/JS validation, project archive tests, Android debug APK build, packaged APK verification and artifact upload.
+- Artifact: `VISO-Studio-advanced-debug-apk`, ID `13782504681`; outer ZIP size 32,189,381 bytes; digest `sha256:9df4ea5cc76444510355582f656fe97cbac0b04628647c27336871950896f146`.
+- This is automated code/build/package verification, not physical-device testing.
+- Next: audit Overlay FX, Turning Point, Templates, Background Video and Elements, then end-to-end export/project QA.
