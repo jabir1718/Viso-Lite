@@ -1009,13 +1009,14 @@ function restoreVISOExportState(d){
  fmtButton.textContent=formatChoice==='auto'?'Auto format':'WebM';fmtButton.classList.toggle('on',formatChoice==='auto');
  setRes();
 }
-function captureProjectState(){return {turningPoints:turningPoints.map(p=>({...p})),turningTransition,turningDuration,metronomeSoundOn,metronomeVolume,exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
+function captureProjectState(){return {logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor,turningPoints:turningPoints.map(p=>({...p})),turningTransition,turningDuration,metronomeSoundOn,metronomeVolume,exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
 function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are intentionally ignored when opening older projects. */}
 function snap(){if(restoringState)return;const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
   if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
   redo.forEach(old=>objectSnapshotCache.delete(old));redo.length=0;}
 function apply(s){const d=JSON.parse(s),previousRestoringState=restoringState;restoringState=true;try{
   restoreVISOAutoState(d);
+  logoArtworkShape=d.logoArtworkShape||'original';logoVinyl=!!d.logoVinyl;logoVinylSpeed=Math.max(0,Math.min(100,Number(d.logoVinylSpeed)||28));logoColorKeyOn=!!d.logoColorKeyOn;logoColorKey=d.logoColorKey||'#00ff00';logoColorKeyTolerance=Math.max(0,Math.min(100,Number(d.logoColorKeyTolerance)||24));logoInkOn=!!d.logoInkOn;logoInkAmount=Math.max(0,Math.min(100,Number.isFinite(Number(d.logoInkAmount))?Number(d.logoInkAmount):35));logoInkColor=d.logoInkColor||'#70e7d4';rebuildLogoColorKey();$('logoArtworkShape').value=logoArtworkShape;$('bLogoVinyl').checked=logoVinyl;$('sLogoVinylSpeed').value=logoVinylSpeed;$('bLogoColorKey').checked=logoColorKeyOn;$('logoColorKeyColor').value=logoColorKey;$('sLogoColorKeyTolerance').value=logoColorKeyTolerance;$('bLogoInk').checked=logoInkOn;$('sLogoInkAmount').value=logoInkAmount;$('logoInkColor').value=logoInkColor;
   turningPoints=Array.isArray(d.turningPoints)?d.turningPoints.filter(p=>p&&Number.isFinite(Number(p.time))).map(p=>({time:Math.max(0,Number(p.time)),type:String(p.type||'fade'),duration:Math.max(200,Math.min(3000,Number(p.duration)||800))})):[];turningTransition=d.turningTransition||'fade';turningDuration=Math.max(200,Math.min(3000,Number(d.turningDuration)||800));metronomeSoundOn=!!d.metronomeSoundOn;metronomeVolume=Math.max(0,Math.min(100,Number.isFinite(Number(d.metronomeVolume))?Number(d.metronomeVolume):45));selectedTurningPoint=-1;renderTurningPointList();$('sTurningTransition').value=turningTransition;$('sTurningDuration').value=turningDuration;$('bMetronomeSound').checked=metronomeSoundOn;$('sMetronomeVolume').value=metronomeVolume;$('bTempoSyncBar').checked=beatMarkersOn;
   colors=d.colors;mstate.forEach((m,i)=>{m.on=d.mstate[i].on;m.op=d.mstate[i].op;});
   if(d.bgOn!==undefined)bgOn=!!d.bgOn;if(d.frOn!==undefined)frOn=!!d.frOn;if(d.phOn!==undefined)phOn=!!d.phOn;if(d.maskOn!==undefined)maskOn=!!d.maskOn;if(d.bgViz!==undefined)bgViz=!!d.bgViz;if(d.bgVizMask!==undefined)bgVizMask=!!d.bgVizMask;else bgVizMask=true;if(d.mediaFront!==undefined)mediaFront=!!d.mediaFront;
@@ -1620,8 +1621,12 @@ $('sLogoX').oninput=e=>logoX=+e.target.value;
 $('sLogoY').oninput=e=>logoY=+e.target.value;
 $('sLogoAlpha').oninput=e=>logoAlpha=+e.target.value;
 $('sLogoGlow').oninput=e=>logoGlow=+e.target.value;$('sLogoBounce').oninput=e=>logoBounce=+e.target.value;$('sLogoShake').oninput=e=>logoShake=+e.target.value;$('sLogoPulse').oninput=e=>logoPulse=+e.target.value;$('sLogoRot').oninput=e=>logoRotation=+e.target.value;$('sLogoReflection').oninput=e=>logoReflection=+e.target.value;$('sLogoParticles').oninput=e=>logoParticles=+e.target.value;
-$('fLogo').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{logoImg=im;};im.src=URL.createObjectURL(f);};
-$('bLogoX').onclick=()=>{logoImg=null;};
+$('logoArtworkShape').onchange=e=>logoArtworkShape=e.target.value;
+$('bLogoVinyl').onchange=e=>logoVinyl=e.target.checked;$('sLogoVinylSpeed').oninput=e=>logoVinylSpeed=+e.target.value;
+$('bLogoColorKey').onchange=e=>{logoColorKeyOn=e.target.checked;rebuildLogoColorKey();};$('logoColorKeyColor').oninput=e=>{logoColorKey=e.target.value;rebuildLogoColorKey();};$('sLogoColorKeyTolerance').oninput=e=>{logoColorKeyTolerance=+e.target.value;rebuildLogoColorKey();};
+$('bLogoInk').onchange=e=>logoInkOn=e.target.checked;$('sLogoInkAmount').oninput=e=>logoInkAmount=+e.target.value;$('logoInkColor').oninput=e=>logoInkColor=e.target.value;
+$('fLogo').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{logoImg=im;rebuildLogoColorKey();};im.src=URL.createObjectURL(f);};
+$('bLogoX').onclick=()=>{logoImg=null;logoProcessedCanvas.width=logoProcessedCanvas.height=1;};
 $('bFont').onclick=()=>$('fFont').click();
 function visoFontFamily(fileName,checksum){
  const base=String(fileName||'Custom').replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9_-]+/g,'_').slice(0,24)||'Custom';
@@ -1694,19 +1699,30 @@ function drawBeatIndicator(ctx){
  ctx.save();ctx.globalAlpha=active?1:.28;ctx.fillStyle=beatColor;ctx.shadowColor=beatColor;ctx.shadowBlur=active?18:4;
  ctx.beginPath();ctx.arc(W-22,22,r,0,Math.PI*2);ctx.fill();ctx.restore();
 }
+function rebuildLogoColorKey(){
+ if(!logoImg)return;
+ const iw=logoImg.naturalWidth||logoImg.width,ih=logoImg.naturalHeight||logoImg.height;if(!iw||!ih)return;
+ logoProcessedCanvas.width=iw;logoProcessedCanvas.height=ih;logoProcessedCtx.clearRect(0,0,iw,ih);logoProcessedCtx.drawImage(logoImg,0,0,iw,ih);
+ if(!logoColorKeyOn)return;
+ try{const image=logoProcessedCtx.getImageData(0,0,iw,ih),data=image.data,hex=logoColorKey.replace('#','');
+  const kr=parseInt(hex.slice(0,2),16),kg=parseInt(hex.slice(2,4),16),kb=parseInt(hex.slice(4,6),16),threshold=logoColorKeyTolerance*4.41;
+  for(let i=0;i<data.length;i+=4){const d=Math.hypot(data[i]-kr,data[i+1]-kg,data[i+2]-kb);if(d<=threshold)data[i+3]=0;else if(d<threshold*1.3)data[i+3]=Math.round(data[i+3]*(d-threshold)/(threshold*.3));}
+  logoProcessedCtx.putImageData(image,0,0);
+ }catch(_){}
+}
 function drawCustomLogo(ctx){
   if(!logoImg)return;
+  const source=logoColorKeyOn?logoProcessedCanvas:logoImg;
   const b=pulse||0,pulseScale=1+b*logoPulse/100*.18,lw=W*logoSize/100*pulseScale,lh=logoImg.height/logoImg.width*lw,t=performance.now()*.001;
   const bounce=Math.sin(t*3.2)*H*.012*(logoBounce/100)-b*H*.018*(logoBounce/100);
   const shakeX=Math.sin(t*41.7)*W*.009*(logoShake/100)*(0.25+b),shakeY=Math.cos(t*35.1)*H*.006*(logoShake/100)*(0.25+b);
   const lx=W*logoX/100+shakeX,ly=H*logoY/100+bounce+shakeY;
+  if(logoInkOn&&logoInkAmount>0){ctx.save();ctx.globalAlpha=logoInkAmount/100*.62;const ink=ctx.createRadialGradient(lx,ly,Math.min(lw,lh)*.08,lx,ly,Math.max(lw,lh)*1.15);ink.addColorStop(0,logoInkColor);ink.addColorStop(1,'transparent');ctx.fillStyle=ink;ctx.fillRect(lx-Math.max(lw,lh)*1.2,ly-Math.max(lw,lh)*1.2,Math.max(lw,lh)*2.4,Math.max(lw,lh)*2.4);ctx.restore();}
+  if(logoVinyl){ctx.save();ctx.translate(lx,ly);ctx.rotate(t*logoVinylSpeed*.025);const vr=Math.max(lw,lh)*.66,vg=ctx.createRadialGradient(0,0,vr*.08,0,0,vr);vg.addColorStop(0,'#e7e9ed');vg.addColorStop(.18,'#343b4a');vg.addColorStop(.55,'#111827');vg.addColorStop(.92,'#5a6473');vg.addColorStop(1,'#171b24');ctx.fillStyle=vg;ctx.beginPath();ctx.arc(0,0,vr,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=Math.max(1,vr*.006);for(let r=vr*.3;r<vr*.88;r+=vr*.075){ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.stroke();}ctx.restore();}
   ctx.save();ctx.translate(lx,ly);ctx.rotate(logoRotation*Math.PI/180);ctx.globalAlpha=logoAlpha/100;
-  ctx.shadowColor=grad(.5);ctx.shadowBlur=lw*.32*(logoGlow/100);
-  ctx.drawImage(logoImg,-lw/2,-lh/2,lw,lh);ctx.restore();
-  if(logoReflection>0){
-   ctx.save();ctx.globalAlpha=logoAlpha/100*logoReflection/100*.28;ctx.translate(lx,ly+lh);ctx.scale(1,-1);
-   ctx.drawImage(logoImg,-lw/2,-lh/2,lw,lh);ctx.restore();
-  }
+  if(logoArtworkShape!=='original'){ctx.beginPath();if(logoArtworkShape==='circle')ctx.ellipse(0,0,lw/2,lh/2,0,0,Math.PI*2);else if(logoArtworkShape==='square')ctx.roundRect(-lw/2,-lh/2,lw,lh,Math.min(lw,lh)*.12);else{for(let k=0;k<6;k++){const a=-Math.PI/2+k*Math.PI/3,px=Math.cos(a)*lw*.5,py=Math.sin(a)*lh*.5;k?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.closePath();}ctx.clip();}
+  ctx.shadowColor=grad(.5);ctx.shadowBlur=lw*.32*(logoGlow/100);ctx.drawImage(source,-lw/2,-lh/2,lw,lh);ctx.restore();
+  if(logoReflection>0){ctx.save();ctx.globalAlpha=logoAlpha/100*logoReflection/100*.28;ctx.translate(lx,ly+lh);ctx.scale(1,-1);ctx.drawImage(source,-lw/2,-lh/2,lw,lh);ctx.restore();}
   if(logoParticles>0){
    ctx.save();const count=Math.round(logoParticles/100*18),orbit=Math.max(lw,lh)*.72;
    for(let i=0;i<count;i++){const a=t*(.45+i%4*.12)+i*6.2832/Math.max(1,count),r=orbit*(.62+(i%3)*.17),px=lx+Math.cos(a)*r,py=ly+Math.sin(a*1.13)*r*.72;
