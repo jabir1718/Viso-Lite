@@ -1721,12 +1721,6 @@ let curB=[0,0,0,0,0,0],curBbg=[0,0,0,0,0,0],last=0,avg=.1,frameN=0;
 function paintLayer(scale,masked,bb){const cc=bb||curB;
   ox.clearRect(0,0,W,H);
   for(const m of mstate)if(m.on)drawMode(ox,m,cc,scale);
-  if(specOn){
-    const sw=specCanvas.width,sh=specCanvas.height;
-    specCtx.setTransform(1,0,0,1,0,0);specCtx.clearRect(0,0,sw,sh);
-    specCtx.save();specCtx.scale(sw/W,sh/H);drawSpectrum(specCtx,scale);specCtx.restore();
-    ox.drawImage(specCanvas,0,0,W,H);
-  }
   if(sym!=='off'){symC.width=W;symC.height=H;symX.clearRect(0,0,W,H);symX.drawImage(o,0,0);
     if(sym==='x'||sym==='quad'){ox.save();ox.translate(W,0);ox.scale(-1,1);ox.drawImage(symC,0,0);ox.restore();}
     if(sym==='y'||sym==='quad'){ox.save();ox.translate(0,H);ox.scale(1,-1);ox.drawImage(symC,0,0);ox.restore();}}
@@ -2024,6 +2018,7 @@ function frame(t){
   bx.filter='blur(12px)';bx.drawImage(c,0,0,bl.width,bl.height);bx.filter='none';
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
+  if(specOn){x.save();drawSpectrum(x,1);x.restore();}
   if(flashAmt>0&&beatFlash>0){x.save();x.globalAlpha=beatFlash*flashAmt/100*.22;x.fillStyle=beatColor;x.fillRect(0,0,W,H);x.restore();}
   renderVISOStage('overlay',x,b,dt);
     x.restore();
