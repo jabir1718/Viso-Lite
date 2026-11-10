@@ -465,7 +465,7 @@ assert.notEqual(fontSandbox.visoFontFamily('My Custom Font.ttf',4660),fontSandbo
 
 
 const processedResponseAuditStart=html.indexOf('function drawSpectrumLayer(');
-const processedResponseAuditEnd=html.indexOf('\\nlet curB=',processedResponseAuditStart);
+const processedResponseAuditEnd=html.indexOf('let curB=',processedResponseAuditStart);
 assert(processedResponseAuditStart>=0&&processedResponseAuditEnd>processedResponseAuditStart,'spectrum renderer must exist');
 const processedResponseAuditRenderer=html.slice(processedResponseAuditStart,processedResponseAuditEnd);
 const processedResponseRadialStart=processedResponseAuditRenderer.indexOf("if(M==='radial')");
