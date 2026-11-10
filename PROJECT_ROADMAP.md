@@ -498,3 +498,19 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Artifact: `VISO-Studio-advanced-debug-apk`, ID `13782896586`; outer ZIP size 32,188,860 bytes; digest `sha256:91110f0b9487c1b47108e181df42e11f16bdeb15ebdd4e45d4f654abcdee29e0`.
 - This is automated code/build/package verification, not physical-device testing.
 - Next: complete Symmetry semantics and continue systematic end-to-end audit of all dock groups, project/template and export workflows.
+
+
+## 40. Shared Spectrum symmetry for every shape family — 2026-11-10
+
+- Added a shared symmetry wrapper around the Spectrum geometry renderer so all shape families receive the selected symmetry transform.
+- Modes: None (single render), X (left/right mirror), X and Y (four-way reflection), Across (top/bottom reflection), and Triple X (three reduced vertically stacked copies).
+- Removed the old partial Flats/NCS-only mirror duplication so symmetry is applied consistently once through the wrapper.
+- Trail afterimages now recurse through the geometry function inside the active symmetry transform, preventing nested symmetry multiplication.
+- Updated the CI source assertion to follow the renamed geometry helper and added regression checks for all symmetry modes.
+- Source commit: `f8418100dbb73d68dd54ee82f4ef287f604afdf3`.
+- Workflow regression update: `b2feb9d2d2d87b891ce497aaa6809b706d2dfe73`.
+- Test commit: `75ec34f71b4c3ce30bc7019483945eb9c6305f47`.
+- CI workflow run #330 (ID `42856294617`) passed: HTML/JS validation, project archive tests, Android debug APK build, packaged APK verification and artifact upload.
+- Artifact: `VISO-Studio-advanced-debug-apk`, ID `13782762494`; outer ZIP size 32,189,059 bytes; digest `sha256:a4e773be83cbb0db4f46bd2a2645abd5bfa56099550ae375480625742917189b`.
+- This is automated code/build/package verification, not physical-device testing. Exact Aspectrum semantics for the named symmetry modes remain to be confirmed if more reference evidence becomes recoverable.
+- Next: systematically audit all 12 dock groups, then project/template asset round-trip, export/audio sync and remaining Aspectrum feature parity.
