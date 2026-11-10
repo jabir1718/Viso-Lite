@@ -492,4 +492,12 @@ assert(spectrumMaterialAudit.includes('materialWidth=specMaterial'), 'material m
 assert(spectrumMaterialAudit.includes('materialGlow=specMaterial'), 'material must alter rendered glow response');
 assert(spectrumMaterialAudit.includes('materialShadowColor=specMaterial'), 'materials must have distinct light/shadow character');
 assert(spectrumMaterialAudit.includes("ctx.lineCap=specMaterial==='chrome'?'square':'round'"), 'Chrome material must use a distinct edge treatment');
+
+const spectrumStyleAuditStart=html.indexOf('function drawSpectrumLayer(');
+const spectrumStyleAuditEnd=html.indexOf('let curB=',spectrumStyleAuditStart);
+assert(spectrumStyleAuditStart>=0&&spectrumStyleAuditEnd>spectrumStyleAuditStart,'spectrum style renderer must exist');
+const spectrumStyleAudit=html.slice(spectrumStyleAuditStart,spectrumStyleAuditEnd);
+assert(spectrumStyleAudit.includes("if(specStyle==='point')"),'Point style must draw point markers');
+assert(spectrumStyleAudit.includes("else if(specStyle==='solid')"),'Solid style must draw a filled spectrum region');
+assert(spectrumStyleAudit.split('drawSpectrumStyleFinish(ctx,n,col,val,thick)').length-1>=2,'style finish must apply to both flat and general shape renderers');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
