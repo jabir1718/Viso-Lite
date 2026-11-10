@@ -55,7 +55,10 @@ jobs:
               "sLensAmount", "sProgThickness", "sLogoGlow", "bSurfaceReflection",
               "studioText2", "bText2On", "sText2Size", "sText2Glow",
               "bFilm", "sFilmGrain", "sFilmDust", "sFilmScratches",
-              "bAtmosphere", "sHaze", "sSmoke", "specRangeModes"
+              "bAtmosphere", "sHaze", "sSmoke", "specRangeModes",
+              "bSpecTrail", "sSpecTrailAmount", "specGlowMode", "bSpecGlowIntensitySync",
+              "bSpecShake", "sSpecShake", "bSpecWaveDelay", "sSpecWaveDelayTime",
+              "bSpecWaveReverse", "specWaveGradient"
           )
           for required in required_ids:
               if required not in ids:
@@ -67,7 +70,10 @@ jobs:
               "VISO_TOOL_REGISTRY", "viso-project-v3", "function visoZip",
               "function visoUnzip", "function visoCRC32", "Project asset checksum failed",
               "restoreVISOProjectAssets", "AndroidSave.appendChunk", "drawFilmEffect",
-              "drawAtmosphere", "drawSurfaceReflection", "drawStudioTextLayer"
+              "drawAtmosphere", "drawSurfaceReflection", "drawStudioTextLayer",
+              "specTrailBuffers", "drawSpectrumLayer(ctx,scale,layer,true)",
+              "specTrailOn,specTrailAmount", "specGlowIntensitySync", "specGlowMode",
+              "waveY[i+1]", "specWaveReverse?n-1-i:i"
           ):
               if required_source not in html:
                   raise SystemExit(f"Missing required VISO module: {required_source}")
