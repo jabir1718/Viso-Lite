@@ -621,4 +621,8 @@ assert(html.includes("$('bBpm').onclick=()=>{snap();onsetGaps=[];bpm=0;"),'BPM d
 assert(html.includes("$('bSpec').onclick=e=>{snap();specOn=!specOn;"),'Spectrum enable toggle must snapshot before changing state');
 
 assert(html.includes('function tapTempo(){snap();const n=performance.now();'),'Tap Tempo must snapshot before changing the current BPM');
+
+assert(!html.includes("MODES.indexOf('Dust')")&&!html.includes("MODES.indexOf('Sparkle')")&&!html.includes("MODES.indexOf(name)"),'all Elements mode lookups must resolve object names safely');
+assert(html.includes("mstate[MODES.findIndex(mode=>mode.name==='Dust')]")&&html.includes("mstate[MODES.findIndex(mode=>mode.name==='Sparkle')]"),'Elements checkboxes must restore their actual Dust and Sparkle mode state');
+assert(html.includes("const dustIndex=MODES.findIndex(mode=>mode.name==='Dust'),sparkIndex=MODES.findIndex(mode=>mode.name==='Sparkle');"),'Elements reset must restore Dust and Sparkle modes');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
