@@ -20,14 +20,15 @@ Permanent roadmap: `PROJECT_ROADMAP.md`
 - **Symmetry:** all shape families now pass through a shared symmetry wrapper: X (left/right mirror), X and Y (four-way), Across (top/bottom mirror), Triple X (three reduced vertical copies), and None (single render). Exact parity with the reference app's naming/semantics remains subject to further reference verification.
 - Regression tests cover shared response, cross-shape layer modes, material-specific rendering, styles and symmetry wrapper.
 
-## Latest verified CI and APK
-- Spectrum symmetry source commit: `f8418100dbb73d68dd54ee82f4ef287f604afdf3`.
-- Workflow regression update: `b2feb9d2d2d87b891ce497aaa6809b706d2dfe73`.
-- Regression-test commit: `75ec34f71b4c3ce30bc7019483945eb9c6305f47`.
-- CI workflow run #330, ID `42856294617`, exact head commit `75ec34f71b4c3ce30bc7019483945eb9c6305f47`, conclusion **success**.
-- HTML/JavaScript validation, project archive regression tests, Android debug APK build, packaged APK verification and artifact upload all passed.
-- Artifact: `VISO-Studio-advanced-debug-apk`, artifact ID `13782762494`, size 32,189,059 bytes, outer artifact ZIP digest `sha256:a4e773be83cbb0db4f46bd2a2645abd5bfa56099550ae375480625742917189b`.
-- Workflow verified package `com.viso.lite` and packaged HTML/source integrity. Physical-device install/runtime QA is not performed.
+## Latest verified dock routing and APK
+- Dock source commit: `bbef50bbed9d7cb82bc8a928a2cc9e34c96c8595`.
+- Regression-test commit: `aea52162d0df55c3b42b8ae2a5452485afef1ca3`.
+- Fixed category routing for the explicit `Elements` group and `Overlay FX` group. Previously both titles fell through to the default Visualizer category, leaving their own dock groups empty/hidden.
+- Regression test executes the category mapper against all twelve requested labels and verifies the exact bottom-dock order: Media, Logo, Audio, Text, Visualizer, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video.
+- CI workflow run #337, ID `42856977500`, exact head commit `aea52162d0df55c3b42b8ae2a5452485afef1ca3`, conclusion **success**.
+- HTML/JavaScript validation, project archive tests, Android debug APK build, packaged APK verification and artifact upload all passed.
+- Artifact: `VISO-Studio-advanced-debug-apk`, ID `13783047449`, size 32,189,078 bytes, outer artifact ZIP digest `sha256:abbe696915c9f42809ca02ebf17f14580891bd75542d0c0f52839e8cdf881fe6`.
+- Automated checks verify dock routing/order, not full physical interaction of every control. Physical-device QA remains pending.
 
 ## Dock architecture
 12 bottom dock groups: Media, Logo, Audio, Text, Visualizer, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video. Background Video last; panels above dock; Export top-right.
