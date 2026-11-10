@@ -600,3 +600,14 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Added CI assertions in `.github/workflows/build-advanced.yml` that require exactly one dedicated custom-logo render call and reject reintroduction of the legacy Overlay call. Workflow edit commit: `e2b19e3d1fd620a4485a69c11393419def240329`; source edit commit: `c2e9b197e66dc438275dae133bf6071379c4128a`.
 - Static source assertions passed after the edit. The new commits have not yet had a verified CI result recorded; do not treat run #397 as testing these later commits.
 - Remaining in this workstream: complete media/photo/logo/font load and replacement audit, Text/Logo undo and project round-trip checks, preview/export parity, and device runtime verification.
+
+
+## 48. Latest successful final-candidate APK — 2026-11-10
+
+- Confirmed branch `viso/advanced-studio-ui` latest head: `01e4ea6d98d7d7cc67193678244acb1132eec2c2`.
+- Latest CI run #406, ID `42877677231`, event `push`, completed with conclusion **success** on that exact branch head.
+- All build job steps passed: HTML/JavaScript validation, VISO project archive regression tests, Android 36 setup, Gradle debug build, packaged APK verification and artifact upload.
+- Artifact `VISO-Studio-advanced-debug-apk`, ID `13791414610`, size 32,189,300 bytes; outer artifact ZIP digest `sha256:bb914613b31e45026163c5e574bcce37262fba87728c63048946bd40961965e7`.
+- Downloaded artifact locally, verified outer ZIP and inner APK archives, extracted packaged `assets/index.html`, and ran Node syntax check on both inline script blocks successfully. The packaged source contains the dedicated Logo renderer exactly once (one function definition plus one render call) and no legacy Overlay logo render call.
+- APK SHA-256: `01652419833a1c99031bbd6fabb5cec1bf639dfb51ba9abf2701f8a731c7b50b`. Package ID `com.viso.lite` and byte-identical packaged/source HTML were also verified by the successful CI packaged-APK step.
+- Handoff artifact is a **debug APK**. Physical Android install, device UI/touch, real media import, playback, export, MediaStore save, audio/video sync, performance/thermal behaviour and crash-free runtime have not been independently tested in this environment. Keep these explicitly open; do not label device QA complete.
