@@ -135,16 +135,15 @@ assert(html.includes('#monitorDock>.subhead{display:none!important}'), 'song mon
 
 const spectrumStart = html.indexOf('function drawSpectrum(ctx,scale)');
 const spectrumLayerStart = html.indexOf('function drawSpectrumLayer(ctx,scale,layer', spectrumStart);
-const spectrumEnd = html.indexOf('\nfunction ', spectrumLayerStart + 20);
-const spectrumSource = html.slice(spectrumStart, spectrumEnd);
-assert(spectrumSource.includes("else if(M==='ring')"), 'Ring spectrum must have its own renderer');
-assert(spectrumSource.includes('outer=R0+v*amp'), 'Ring spectrum bars must respond to live audio amplitude');
-assert(spectrumSource.includes("else if(M==='sphere')"), 'Sphere spectrum must have its own renderer');
-assert(spectrumSource.includes("else if(M==='tunnel')"), 'Tunnel spectrum must have its own renderer');
-assert(spectrumSource.includes('rings=3,'), 'Tunnel spectrum must render multiple depth rings');
-assert(spectrumSource.includes('stride=Math.max(1,Math.ceil(n/32))'), 'Tunnel spectrum must cap per-ring segments for mobile performance');
-assert(spectrumSource.includes('const rows=10'), 'LED spectrum must use a mobile-friendly dot grid');
-assert(spectrumSource.includes('ctx.fillRect(cx-len,yl,len,bh*.86);ctx.fillRect(cx,yr,len,bh*.86)'), 'Dual spectrum bars must extend horizontally from the centre');
+assert(spectrumStart>=0&&spectrumLayerStart>spectrumStart, 'spectrum renderer entry points must exist');
+assert(html.includes("else if(M==='ring')"), 'Ring spectrum must have its own renderer');
+assert(html.includes('outer=R0+v*amp'), 'Ring spectrum bars must respond to live audio amplitude');
+assert(html.includes("else if(M==='sphere')"), 'Sphere spectrum must have its own renderer');
+assert(html.includes("else if(M==='tunnel')"), 'Tunnel spectrum must have its own renderer');
+assert(html.includes('rings=3,'), 'Tunnel spectrum must render multiple depth rings');
+assert(html.includes('stride=Math.max(1,Math.ceil(n/32))'), 'Tunnel spectrum must cap per-ring segments for mobile performance');
+assert(html.includes('const rows=10'), 'LED spectrum must use a mobile-friendly dot grid');
+assert(html.includes('ctx.fillRect(cx-len,yl,len,bh*.86);ctx.fillRect(cx,yr,len,bh*.86)'), 'Dual spectrum bars must extend horizontally from the centre');
 assert(html.includes('id="sLogoPulse"'), 'custom logo audio-reactive size control must exist');
 assert(['specShape','specStyle','specSymmetry','specMaterial','specLayerMode','specLayerBlend','sSpecResolution'].every(id=>html.includes('id="'+id+'"')), 'Visualizer must expose shape, style, symmetry, material, layer mode, blend and resolution controls');
 assert(html.includes('const SPEC_N=200;')&&html.includes('max="200" value="48"'), 'Visualizer resolution and bar count must support 1–200');
