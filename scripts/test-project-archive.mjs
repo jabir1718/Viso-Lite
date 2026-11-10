@@ -54,6 +54,9 @@ assert(html.includes('BIT=Math.round(targetW*targetH*FPS*0.13*(quality/100))'), 
 assert(html.includes("setPreviewCanvasSize();if(b)dl(b,exportFileName('png'))"), 'PNG export must restore the mobile preview resolution after capture');
 assert(html.includes('function initRecordGL()'), 'video export must initialize the GPU recording scaler when WebGL is available');
 assert(html.includes('function drawRecordFrame()'), 'video export must composite each preview frame to the selected output canvas');
+assert(html.includes('record2d.drawImage(c,0,0,recordCanvas.width,recordCanvas.height)'), '2D video export fallback must scale the source frame to the bounded recording canvas');
+assert(html.includes('setVideoRenderCanvasSize();drawRecordFrame();'), 'video export must preserve the mobile recording canvas dimensions');
+assert(!html.includes('setVideoRenderCanvasSize();recordCanvas.width=targetW;recordCanvas.height=targetH;'), 'video export must not overwrite the mobile recording canvas cap with full output dimensions');
 assert(html.includes('let exportFailed=false,exportFinalized=false'), 'video export must track failure and finalization state');
 assert(html.includes('if(exportFinalized)return;exportFinalized=true;'), 'video export cleanup must run only once');
 assert(html.includes("else finishRecorder('Export failed: recorder returned no video data')"), 'empty video recordings must not be reported as successful');
