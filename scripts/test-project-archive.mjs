@@ -619,4 +619,6 @@ assert(html.includes("$('bStopAtEnd').onclick=()=>{snap();stopAtSongEnd=!stopAtS
 assert(html.includes("$('b8d').onclick=e=>{snap();eightD=!eightD;")&&html.includes("$('bPreserve').onclick=e=>{snap();pitchLock=!pitchLock;"),'Audio Motion toggles must snapshot before changes');
 assert(html.includes("$('bBpm').onclick=()=>{snap();onsetGaps=[];bpm=0;"),'BPM detection must snapshot before resetting tempo');
 assert(html.includes("$('bSpec').onclick=e=>{snap();specOn=!specOn;"),'Spectrum enable toggle must snapshot before changing state');
+
+assert(html.includes('function tapTempo(){snap();const n=performance.now();'),'Tap Tempo must snapshot before changing the current BPM');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
