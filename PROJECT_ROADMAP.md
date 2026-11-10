@@ -578,3 +578,15 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Added CI assertions for pre-edit snapshot ordering and the absence of search/favourite/Auto+Lock UI.
 - Latest CI run #393 (ID `42863166776`) passed and uploaded APK artifact `13785702728`.
 - Remaining: real device verification of undo feel, exported video dimensions/audio and Android save path.
+
+
+## 46. Project import preflight safety — 2026-11-10
+
+- Audited editable project asset packaging and import: .viso v3 contains project.json, asset manifest, imported audio/image/video/background/logo/font/overlay files, preview PNG and CRC-protected ZIP entries.
+- Import validates manifest paths, duplicate kinds, sizes, supported kinds, 180 MB asset cap, overlay sequence/count, settings and layer manifest before applying.
+- Found a destructive ordering risk: the existing project was cleared before a custom font had been prepared. A corrupt/unsupported font could therefore leave the user without the currently open project.
+- Moved custom-font preparation before clearVISOAssets(). Overlay images were already preloaded/decoded before clearing; regression tests now assert both font preparation and overlay decode happen before destructive replacement.
+- Source commit d7244b358705fd9db414c5d1b3175e5d94932de1; test commit a87dbcb23fcfa7b684f7c8e8fb424404cdc0758e.
+- CI run #397 (ID 42869821850) currently has HTML/JS and project archive checks passed; Gradle/APK build still in progress at the time of this note.
+- Run #396 (ID 42863571143) is the latest fully successful APK build: artifact 13784749862, size 32,189,301 bytes, digest sha256:6907611444aeaf7926f0141f21be6ff0b34a8cf6b154243e0f26264497bda78e.
+- Remaining: project round-trip with actual large media/custom fonts, device save/open/export tests, and remaining Logo/Text/Background/Overlay/Template end-to-end QA.
