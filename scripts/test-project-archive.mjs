@@ -75,6 +75,11 @@ assert(['bElementParticles','bElementSparkles','bElementLight','bElementReactive
 assert(['logoArtworkShape','bLogoVinyl','bLogoColorKey','bLogoInk'].every(id=>html.includes('id="'+id+'"')), 'Logo tool must expose shape, vinyl, colour key and ink controls');
 assert(html.includes('function rebuildLogoColorKey()')&&html.includes('logoProcessedCtx.putImageData'), 'logo colour key must process the uploaded image rather than remain a decorative control');
 assert(html.includes('logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor'), 'logo effects must persist in project state');
+assert(html.includes('id="bAddTextLayer"')&&html.includes('id="extraTextLayers"'), 'Text tool must allow creating additional text boxes');
+assert(html.includes('function drawExtraTextLayers(ctx,b)')&&html.includes('drawExtraTextLayers(ctx,b)'), 'additional text boxes must render in the visualizer output');
+assert(html.includes('function formatStudioTimer()')&&html.includes('layer.timer?formatStudioTimer()'), 'additional text boxes must support the live song timer');
+assert(html.includes('extraTextLayers:extraTextLayers.map(layer=>({...layer}))')&&html.includes('extraTextLayers=Array.isArray(d.extraTextLayers)'), 'additional text boxes must save and restore with editable settings');
+assert(html.includes("'Overlay FX':{stage:'overlay'")&&html.includes("'Logo':{stage:'overlay'")&&html.includes("'Sticker':{stage:'scene'")&&html.includes("'Tempo':{stage:'overlay'"), 'merged tool panels must remain connected to the original render pipeline');
 assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'undo, redo and export must be available in the top toolbar');
 assert(html.includes("$('bar').appendChild(dockNav)"), 'tool dock must sit after the selected control panel at the bottom');
 assert(html.includes("const dockOrder=['Media','Logo','Audio','Text','Visualizer','Elements','Overlay FX','Sticker','Turning Point','Tempo','Templates · Editable Projects','Background']"), 'background tools must be placed at the end of the bottom tool dock');
