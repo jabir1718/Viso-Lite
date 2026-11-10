@@ -87,7 +87,7 @@
      <label><span>Shadow colour</span><input id="ctShadowColor" type="color" value="#a020f0"></label>
     <label><span>Position X</span><input id="ctX" type="range" min="-30" max="30" value="0"></label>
     <label><span>Position Y</span><input id="ctY" type="range" min="-30" max="30" value="0"></label><div class="advanced-tools"><label><span>Ring radius</span><input id="advCenterRadius" type="range" min="60" max="150" value="100"></label><label><span>Logo opacity</span><input id="advLogoOpacity" type="range" min="10" max="100" value="100"></label></div></div><div class="sec"><h4>Main spectrum / wave studio</h4>
-    <div class="row"><button id="spToggle" class="on">Spectrum ON</button>
+    <div class="row"><button id="spToggle">Spectrum OFF</button>
       <button class="chip" data-spmode="bars">Bars</button><button class="chip" data-spmode="mirror">Mirror</button>
       <button class="chip" data-spmode="wave">Wave</button><button class="chip" data-spmode="circle">Circular</button>
       <button class="chip" data-spmode="bass">Bass bars</button></div>
@@ -286,7 +286,7 @@ let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,b
 let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
 let centerVizOn=true,centerVizStyle='bars',centerVizSize=22,centerVizPower=120,centerVizGlow=32,centerVizSpin=24,centerVizAngle=0,centerVizX=0,centerVizY=0;
 let centerLogo=null,centerLogoShape='circle',centerVizThick=8,centerBeatSense=160,centerHeartbeat=65,centerShadow=70,centerShadowColor='#a020f0',centerBeatEnv=0;
-let spectrumOn=true,spMode='bars',spBand='balanced',spShape='line',spStyle='neon',spEffect='none',spMotion='none';
+let spectrumOn=false,spMode='bars',spBand='balanced',spShape='line',spStyle='neon',spEffect='none',spMotion='none';
 let spWaveHeight=38,spBaseHeight=18,spBounce=75,spShake=25,spThickness=5,spWidth=88,spSensitivity=140,spSmooth=65,spDelay=0,spTrail=15,spGlow=35,spLow=100,spMid=100,spHigh=100;
 let spSmoothBins=new Float32Array(160),spBeatEnv=0,spTime=0,spWaveTime=new Uint8Array(2048),spBassBoost=100,spReverse=false,spMirror=false,spBeatWave=true,spExtra='none',spExtra100='none',spExtraBeatCount=0,spExtraWasBeat=false;
 
