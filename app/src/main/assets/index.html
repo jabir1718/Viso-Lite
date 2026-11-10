@@ -287,11 +287,7 @@ const VISUAL_TEMPLATES=[
  {n:'City Glow',c:[185,205,280],style:'wave',size:20,power:120,glow:46,spin:16,m:{Neon:.8,Depth:.8},bl:.65}
 ];
 VISUAL_TEMPLATES.forEach(p=>{const b=document.createElement('button');b.className='chip';b.textContent=p.n;
- b.onclick=()=>{snap();colors=p.c.slice();selColor=0;drawPals();centerVizOn=true;centerVizStyle=p.style;
- centerVizSize=p.size;centerVizPower=p.power;centerVizGlow=p.glow;centerVizSpin=p.spin;centerVizX=0;centerVizY=0;
- $('ctViz').textContent='Center spectrum ON';$('ctViz').classList.add('on');
- $('ctSize').value=p.size;$('ctPower').value=p.power;$('ctGlow').value=p.glow;$('ctSpin').value=p.spin;$('ctX').value=0;$('ctY').value=0;
- document.querySelectorAll('[data-ctstyle]').forEach(q=>q.classList.toggle('on',q.dataset.ctstyle===p.style));
+ b.onclick=()=>{snap();colors=p.c.slice();selColor=0;drawPals();
  mstate.forEach(m=>{const v=p.m[m.name];m.on=!!v;m.op=v||.7;});
  document.querySelectorAll('#modes button').forEach((q,j)=>q.classList.toggle('on',mstate[j].on));
  bloom=p.bl;drawMixers();};
