@@ -292,6 +292,15 @@ body.preview-fullscreen #previewExit{display:block}
   <div class="sec panel"><h4>Spectrum Studio</h4>
     <div class="row"><button id="bSpec">Spectrum: OFF</button><button id="bSpecClr">Clear peaks</button></div>
     <div class="row" id="specModes"></div>
+    <div class="fxSubhead">SHAPE & STYLE</div>
+    <label><span>Shape</span><select id="specShape"><option value="circle">Circle</option><option value="flats">Flats</option><option value="square">Square</option><option value="ncs">NCS</option><option value="ring">Ring</option><option value="sphere">Sphere</option><option value="tunnel">Tunnel</option><option value="mirror">Mirror</option></select></label>
+    <label><span>Style</span><select id="specStyle"><option value="solid">Solid</option><option value="bar" selected>Bar</option><option value="point">Point</option></select></label>
+    <label><span>Symmetry</span><select id="specSymmetry"><option value="none">None</option><option value="x">X</option><option value="xy">X and Y</option><option value="across">Across</option><option value="triple-x">Triple X</option></select></label>
+    <div class="fxSubhead">MATERIAL & LAYERS</div>
+    <label><span>Material</span><select id="specMaterial"><option value="solid">Solid</option><option value="liquid-glass">Liquid Glass</option><option value="fire">Fire</option><option value="chrome">Chrome</option><option value="plastic">Plastic</option><option value="diamond">Diamond</option></select></label>
+    <label><span>Layers mode</span><select id="specLayerMode"><option value="web">Web</option><option value="stack">Stack</option><option value="combo">Combo</option><option value="scale">Scale</option><option value="uniform">Uniform</option></select></label>
+    <label><span>Layers blend</span><select id="specLayerBlend"><option value="stacked">Stacked</option><option value="additive">Additive</option></select></label>
+    <label><span>Resolution</span><input id="sSpecResolution" type="range" min="1" max="200" value="96"></label>
     <div class="fxSubhead">FREQUENCY FOCUS</div>
     <div class="row" id="specRangeModes"></div>
     <label><span>Bars</span><input id="sSpecBars" type="range" min="8" max="96" value="48"></label>
@@ -1738,9 +1747,9 @@ function drawCustomLogo(ctx){
   }
 }
 
-const SPEC_N=96;
+const SPEC_N=200;
 const specRaw=new Uint8Array(SPEC_N),specSmooth=new Float32Array(SPEC_N),specPeak=new Float32Array(SPEC_N),specPeakT=new Uint8Array(SPEC_N);
-let specOn=false,specMode='radial',specRange='full',specBars=48,specRad=42,specThick=100,specGlow=60,specLevel=100,specAtk=.55,specRel=.14,specPeakHold=10,specSpin=.25;
+let specOn=false,specMode='radial',specRange='full',specBars=48,specResolution=96,specShape='circle',specStyle='bar',specSymmetry='none',specMaterial='solid',specLayerMode='web',specLayerBlend='stacked',specRad=42,specThick=100,specGlow=60,specLevel=100,specAtk=.55,specRel=.14,specPeakHold=10,specSpin=.25;
 const specPrev=new Float32Array(SPEC_N);
 function specBands(){
   if(!an||!playing){for(let i=0;i<SPEC_N;i++)specRaw[i]=0;}
@@ -1776,12 +1785,47 @@ function bindSpec(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);}
 bindSpec('sSpecBars',v=>specBars=v);bindSpec('sSpecRad',v=>specRad=v);bindSpec('sSpecThick',v=>specThick=v);
 bindSpec('sSpecGlow',v=>specGlow=v);bindSpec('sSpecLevel',v=>specLevel=v);bindSpec('sSpecAtk',v=>specAtk=v/100);
 bindSpec('sSpecRel',v=>specRel=v/100);bindSpec('sSpecPeak',v=>specPeakHold=v);bindSpec('sSpecSpin',v=>specSpin=v/100);
+$('specShape').onchange=e=>{specShape=e.target.value;if(['ring','sphere','tunnel','mirror'].includes(specShape)){specMode=specShape;document.querySelectorAll('#specModes button').forEach((b,i)=>b.classList.toggle('on',SPEC_MODES[i]?.[0]===specMode));}};
+$('specStyle').onchange=e=>specStyle=e.target.value;$('specSymmetry').onchange=e=>specSymmetry=e.target.value;
+$('specMaterial').onchange=e=>specMaterial=e.target.value;$('specLayerMode').onchange=e=>specLayerMode=e.target.value;$('specLayerBlend').onchange=e=>specLayerBlend=e.target.value;
+$('sSpecResolution').oninput=e=>specResolution=Math.max(1,Math.min(200,+e.target.value));
 function drawSpectrum(ctx,scale){
-  const t=performance.now()/1000,n=Math.min(SPEC_N,Math.max(8,specBars|0));
+  const t=performance.now()/1000,n=Math.min(SPEC_N,Math.max(1,Math.min(specResolution,specBars|0)));
   const thick=Math.max(1,Math.min(W,H)*.011*(specThick/100)),gl=specGlow/100,rot=t*specSpin,M=specMode;
   ctx.save();ctx.scale(scale,scale);ctx.translate((1/scale-1)*cx,(1/scale-1)*cy);
-  ctx.globalCompositeOperation='lighter';ctx.lineCap='round';
-  const col=i=>grad(i/Math.max(1,n-1));
+  ctx.globalCompositeOperation=specLayerBlend==='additive'?'lighter':'source-over';ctx.lineCap='round';
+  const col=i=>{const p=i/Math.max(1,n-1);if(specMaterial==='fire')return 'hsl('+(8+p*42)+',100%,'+(48+p*22)+'%)';if(specMaterial==='chrome')return 'hsl(210,12%,'+(48+Math.sin(p*18)*34)+'%)';if(specMaterial==='plastic')return 'hsl('+(190+p*125)+',92%,58%)';if(specMaterial==='diamond')return 'hsl('+(190+p*45)+',90%,'+(65+p*25)+'%)';if(specMaterial==='liquid-glass')return 'hsla('+(175+p*65)+',90%,78%,.82)';return grad(p);};
+  const val=i=>{const raw=specSmooth[i%SPEC_N]/255;return specLayerMode==='uniform'?Math.max(.18,raw):raw;};
+  if(['flats','square','ncs'].includes(specShape)){
+   const bars=n,amp=Math.min(W,H)*.27*(specLayerMode==='scale'?1.35:1),mirrorY=['xy','across','triple-x'].includes(specSymmetry),mirrorX=['x','xy','across','triple-x'].includes(specSymmetry);
+   for(let i=0;i<bars;i++){const v=val(i),c=col(i),pos=(i+.5)/bars;
+    if(specShape==='flats'){
+     const bw=W/bars*.72,bh=Math.max(1,v*amp),px=pos*W-bw/2,base=cy+H*.28;
+     ctx.fillStyle=c;ctx.shadowColor=c;ctx.shadowBlur=thick*3*gl;
+     if(specStyle==='point'){ctx.beginPath();ctx.arc(px+bw/2,base-bh,Math.max(1,thick*.75),0,Math.PI*2);ctx.fill();}
+     else{ctx.fillRect(px,base-bh,bw,specStyle==='solid'?Math.max(thick,bh):bh);if(mirrorY)ctx.fillRect(px,base,bw,bh);}
+     if(specSymmetry==='triple-x'){ctx.globalAlpha=.55;ctx.fillRect(px,cy-H*.36,bw,bh*.7);ctx.globalAlpha=1;}
+    }else if(specShape==='square'){
+     const side=i%4,idx=Math.floor(i/4),count=Math.max(1,Math.ceil(bars/4)),u=(idx+.5)/count,edge=Math.min(W,H)*.24,len=v*amp;
+     const px=cx-edge+u*edge*2,py=cy-edge+u*edge*2;
+     ctx.fillStyle=c;ctx.shadowColor=c;ctx.shadowBlur=thick*3*gl;
+     if(side===0)ctx.fillRect(px-thick/2,cy-edge-len,Math.max(thick,W/count*.62),len);
+     if(side===1)ctx.fillRect(cx+edge,py-thick/2,len,Math.max(thick,H/count*.62));
+     if(side===2)ctx.fillRect(px-thick/2,cy+edge,Math.max(thick,W/count*.62),len);
+     if(side===3)ctx.fillRect(cx-edge-len,py-thick/2,len,Math.max(thick,H/count*.62));
+    }else{
+     const bw=W/bars*.68,bh=Math.max(1,v*amp),px=pos*W-bw/2,base=cy;
+     ctx.fillStyle=c;ctx.shadowColor=c;ctx.shadowBlur=thick*3*gl;
+     if(specStyle==='point'){ctx.beginPath();ctx.arc(px+bw/2,base-bh,Math.max(1,thick*.75),0,Math.PI*2);ctx.fill();}
+     else{ctx.fillRect(px,base-bh,bw,bh);if(mirrorY)ctx.fillRect(px,base,bw,bh);}
+     if(mirrorX){ctx.globalAlpha=.55;ctx.fillRect(cx-bh/2,cy-(pos-.5)*H*.7,Math.max(1,bh),Math.max(2,thick));ctx.globalAlpha=1;}
+    }
+   }
+   if(specLayerMode==='web'){ctx.save();ctx.globalAlpha=.28;ctx.strokeStyle=col(Math.floor(n/2));ctx.lineWidth=Math.max(1,thick*.3);ctx.beginPath();for(let i=0;i<n;i++){const px=(i+.5)/n*W,py=cy+H*.28-val(i)*amp;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.stroke();ctx.restore();}
+   if(specLayerMode==='combo'){ctx.save();ctx.globalAlpha=.4;ctx.fillStyle=col(0);ctx.fillRect(0,cy+H*.28,W,Math.max(1,thick));ctx.restore();}
+   ctx.restore();return;
+  }
+  if(specShape==='ring')specMode='ring';else if(specShape==='sphere')specMode='sphere';else if(specShape==='tunnel')specMode='tunnel';else if(specShape==='mirror')specMode='mirror';else if(specShape==='circle'&&['ring','sphere','tunnel','mirror'].includes(specMode))specMode='radial';
   if(M==='radial'){
     const R0=Math.min(W,H)*(specRad/100)*.5;
     for(let i=0;i<n;i++){
@@ -2347,7 +2391,7 @@ document.querySelectorAll('#visoTemplates [data-template]').forEach(q=>q.onclick
  try{await downloadVISOProject(project,'VISO-'+key+'.viso');visoTemplateDownloads.add(key);try{localStorage.setItem(VISO_TEMPLATE_DOWNLOADS_KEY,JSON.stringify([...visoTemplateDownloads]));}catch(_){}applyVISOTemplateFilters();$('templateInfo').textContent=preset.name+' editable project package downloaded with imported assets';}
  catch(err){$('templateInfo').textContent='Template package failed: '+err.message;}
 });
-function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specRange,specBars,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining,logoGlow,logoBounce,logoShake,logoPulse,logoRotation,logoReflection,logoParticles,surfaceReflectionOn,reflStrength,reflDistance,reflBlur,reflFade,reflRipples,reflPerspective,filmOn,filmGrain,filmDust,filmScratches,filmFlicker,filmSepia,filmWeave,atmosphereOn,hazeStrength,hazeAngle,hazeSpeed,smokeAmount,smokeSize,smokeSpeed,smokeColor};}
+function collectAdvancedState(){return {speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specRange,specBars,specResolution,specShape,specStyle,specSymmetry,specMaterial,specLayerMode,specLayerBlend,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining,logoGlow,logoBounce,logoShake,logoPulse,logoRotation,logoReflection,logoParticles,surfaceReflectionOn,reflStrength,reflDistance,reflBlur,reflFade,reflRipples,reflPerspective,filmOn,filmGrain,filmDust,filmScratches,filmFlicker,filmSepia,filmWeave,atmosphereOn,hazeStrength,hazeAngle,hazeSpeed,smokeAmount,smokeSize,smokeSpeed,smokeColor};}
 function restoreAdvancedState(s){
  if(!s)return;
  if(s.speed!==undefined)speed=s.speed;if(s.pitchSemis!==undefined)pitchSemis=s.pitchSemis;if(s.pitchLock!==undefined)pitchLock=s.pitchLock;
@@ -2355,7 +2399,7 @@ function restoreAdvancedState(s){
  if(s.bpm!==undefined)bpm=s.bpm;if(s.beatFlash!==undefined)beatFlash=s.beatFlash;if(s.flashAmt!==undefined)flashAmt=s.flashAmt;if(s.driftAmt!==undefined)driftAmt=s.driftAmt;if(s.sym!==undefined)sym=s.sym;
  if(s.vigOn!==undefined)vigOn=s.vigOn;if(s.vigAmt!==undefined)vigAmt=s.vigAmt;if(s.progOn!==undefined)progOn=s.progOn;if(s.progSz!==undefined)progSz=s.progSz;if(s.progPos!==undefined)progPos=s.progPos;
  if(s.logoSize!==undefined)logoSize=s.logoSize;if(s.logoX!==undefined)logoX=s.logoX;if(s.logoY!==undefined)logoY=s.logoY;if(s.logoAlpha!==undefined)logoAlpha=s.logoAlpha;if(s.progStyle!==undefined)progStyle=s.progStyle;
- if(s.specOn!==undefined)specOn=s.specOn;if(s.specMode!==undefined)specMode=s.specMode;if(s.specRange!==undefined)specRange=s.specRange;if(s.specBars!==undefined)specBars=s.specBars;if(s.specRad!==undefined)specRad=s.specRad;if(s.specThick!==undefined)specThick=s.specThick;if(s.specGlow!==undefined)specGlow=s.specGlow;if(s.specLevel!==undefined)specLevel=s.specLevel;if(s.specAtk!==undefined)specAtk=s.specAtk;if(s.specRel!==undefined)specRel=s.specRel;if(s.specPeakHold!==undefined)specPeakHold=s.specPeakHold;if(s.specSpin!==undefined)specSpin=s.specSpin;
+ if(s.specOn!==undefined)specOn=s.specOn;if(s.specMode!==undefined)specMode=s.specMode;if(s.specRange!==undefined)specRange=s.specRange;if(s.specBars!==undefined)specBars=s.specBars;if(s.specResolution!==undefined)specResolution=Math.max(1,Math.min(200,s.specResolution));if(s.specShape!==undefined)specShape=s.specShape;if(s.specStyle!==undefined)specStyle=s.specStyle;if(s.specSymmetry!==undefined)specSymmetry=s.specSymmetry;if(s.specMaterial!==undefined)specMaterial=s.specMaterial;if(s.specLayerMode!==undefined)specLayerMode=s.specLayerMode;if(s.specLayerBlend!==undefined)specLayerBlend=s.specLayerBlend;if(s.specRad!==undefined)specRad=s.specRad;if(s.specThick!==undefined)specThick=s.specThick;if(s.specGlow!==undefined)specGlow=s.specGlow;if(s.specLevel!==undefined)specLevel=s.specLevel;if(s.specAtk!==undefined)specAtk=s.specAtk;if(s.specRel!==undefined)specRel=s.specRel;if(s.specPeakHold!==undefined)specPeakHold=s.specPeakHold;if(s.specSpin!==undefined)specSpin=s.specSpin;
  if(s.bgDriftOn!==undefined)bgDriftOn=s.bgDriftOn;if(s.bgBeatSync!==undefined)bgBeatSync=s.bgBeatSync;if(s.bgDriftSpeed!==undefined)bgDriftSpeed=s.bgDriftSpeed;if(s.bgDriftRot!==undefined)bgDriftRot=s.bgDriftRot;if(s.bgDriftTravel!==undefined)bgDriftTravel=s.bgDriftTravel;
  if(s.vhsOn!==undefined)vhsOn=s.vhsOn;if(s.shockOn!==undefined)shockOn=s.shockOn;if(s.lensOn!==undefined)lensOn=s.lensOn;if(s.motionFx!==undefined)motionFx=s.motionFx;if(s.shockPhase!==undefined)shockPhase=s.shockPhase;
  if(s.vhsScan!==undefined)vhsScan=s.vhsScan;if(s.vhsNoise!==undefined)vhsNoise=s.vhsNoise;if(s.vhsJitter!==undefined)vhsJitter=s.vhsJitter;if(s.vhsBleed!==undefined)vhsBleed=s.vhsBleed;
@@ -2369,6 +2413,7 @@ function restoreAdvancedState(s){
  const sync=(id,val)=>{const el=$(id);if(el&&val!==undefined){el.value=val;el.dispatchEvent(new Event('input'));}};
  [['sSpeed',speed],['sPitch',pitchSemis],['s8w',eightW],['s8s',eightS],['s8r',eightR],['sDrift',driftAmt],['sFlash',flashAmt],['sVig',vigAmt],['sProgSz',progSz],['sProgPos',progPos],['sLogoSize',logoSize],['sLogoX',logoX],['sLogoY',logoY],['sLogoAlpha',logoAlpha],['sSpecBars',specBars],['sSpecRad',specRad],['sSpecThick',specThick],['sSpecGlow',specGlow],['sSpecLevel',specLevel],['sSpecAtk',specAtk*100],['sSpecRel',specRel*100],['sSpecPeak',specPeakHold],['sSpecSpin',specSpin*100],['sBgDriftSpeed',bgDriftSpeed],['sBgDriftRot',bgDriftRot],['sBgDriftTravel',bgDriftTravel],['sMotionFx',motionFx],['sVhsScan',vhsScan],['sVhsNoise',vhsNoise],['sVhsJitter',vhsJitter],['sVhsBleed',vhsBleed],['sShockStrength',shockStrength],['sShockSpeed',shockSpeed],['sShockThickness',shockThickness],['sShockRgb',shockRgb],['sLensAmount',lensAmount],['sLensFocus',lensFocus],['sLensBokeh',lensBokeh],['sLensBlur',lensBlur],['sProgThickness',progThickness],['sProgRound',progRound],['sProgGlow',progGlow],['sProgRot',progRotation],['sProgX',progX]].forEach(([id,val])=>sync(id,val));
  sync('progColor',progColor);sync('progRemaining',progRemaining);
+ sync('sSpecResolution',specResolution);$('specShape').value=specShape;$('specStyle').value=specStyle;$('specSymmetry').value=specSymmetry;$('specMaterial').value=specMaterial;$('specLayerMode').value=specLayerMode;$('specLayerBlend').value=specLayerBlend;
  sync('sLogoGlow',logoGlow);sync('sLogoBounce',logoBounce);sync('sLogoShake',logoShake);sync('sLogoPulse',logoPulse);sync('sLogoRot',logoRotation);sync('sLogoReflection',logoReflection);sync('sLogoParticles',logoParticles);
  sync('sReflStrength',reflStrength);sync('sReflDistance',reflDistance);sync('sReflBlur',reflBlur);sync('sReflFade',reflFade);sync('sReflRipples',reflRipples);sync('sReflPerspective',reflPerspective);
  const btn=(id,on,label)=>{const el=$(id);if(!el)return;el.classList.toggle('on',!!on);if(label)el.textContent=label;};
