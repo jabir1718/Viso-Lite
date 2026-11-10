@@ -1962,7 +1962,15 @@ const VISO_RENDER_MODULES={
  'Atmosphere FX':{stage:'overlay',order:40,render:(ctx,b)=>drawAtmosphere(ctx,b)},
  'Beat · BPM Sync':{stage:'overlay',order:75,render:ctx=>drawBeatIndicator(ctx)},
  'Text · Logo Studio':{stage:'overlay',order:80,render:(ctx,b)=>drawStudioText(ctx,b)},
- 'Surface Reflection':{stage:'post',order:90,render:ctx=>drawSurfaceReflection(ctx)}
+ 'Surface Reflection':{stage:'post',order:90,render:ctx=>drawSurfaceReflection(ctx)},
+ 'Visualizer':{stage:'scene',order:5,render:()=>{}},
+ 'Sticker':{stage:'scene',order:10,render:(ctx,b,dt)=>drawObjects(ctx,b,dt)},
+ 'Elements':{stage:'scene',order:20,render:ctx=>drawLights(ctx)},
+ 'Logo':{stage:'overlay',order:65,render:ctx=>drawCustomLogo(ctx)},
+ 'Audio':{stage:'overlay',order:68,render:()=>{}},
+ 'Text':{stage:'overlay',order:80,render:(ctx,b)=>drawStudioText(ctx,b)},
+ 'Overlay FX':{stage:'overlay',order:20,render:(ctx,b)=>{drawVignette(ctx);drawProgress(ctx);drawMotionFx(ctx,b);drawFilmEffect(ctx,b);drawAtmosphere(ctx,b);}},
+ 'Tempo':{stage:'overlay',order:75,render:ctx=>drawBeatIndicator(ctx)}
 };
 const VISO_TOOL_REGISTRY=Object.create(null);
 const VISO_RENDER_CACHE=Object.create(null);
@@ -2019,10 +2027,11 @@ function visoToolCategory(title){
  if(t.includes('export'))return 'export';
  if(t.includes('template')||t.includes('project'))return 'templates';
  if(t.includes('background'))return 'background';
- if(t.includes('audio')||t.includes('spectrum')||t.includes('bpm'))return 'audio';
+ if(t.includes('audio')||t.includes('spectrum')||t.includes('bpm')||t.includes('tempo'))return 'audio';
  if(t.includes('text')||t.includes('logo'))return 'logo';
- if(t.includes('mask')||t.includes('layer')||t.includes('position')||t.includes('light'))return 'elements';
- if(t.includes('motion')||t.includes('progress')||t.includes('vignette')||t.includes('effect')||t.includes('reflection')||t.includes('film'))return 'overlay';
+ if(t.includes('element')||t.includes('mask')||t.includes('layer')||t.includes('position')||t.includes('light'))return 'elements';
+ if(t.includes('sticker'))return 'elements';
+ if(t.includes('overlay')||t.includes('motion')||t.includes('progress')||t.includes('vignette')||t.includes('effect')||t.includes('reflection')||t.includes('film'))return 'overlay';
  return 'visualizer';
 }
 function visoSlug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
@@ -2053,7 +2062,7 @@ function applyVISOFilters(){
 const empty=document.createElement('div');empty.id='toolEmpty';empty.textContent='No tools available.';
 $('bar').appendChild(empty);
 const dockNav=document.createElement('div');dockNav.id='toolDockNav';dockNav.setAttribute('aria-label','Editor tools');
-const dockGlyphs={'Media':'▧','Export Studio':'⇧','Visualizer':'▥','Spectrum':'◉','Background':'▧','Audio':'♫','Text':'T','Logo':'◉','Elements':'◇','Overlay':'✧','Stickers':'▢','Tempo':'♢','Project':'▣','Template':'▦','Effects':'✧','Camera':'◉','Motion':'↗','Color':'◒','Layer':'▤'};
+const dockGlyphs={'Media':'▧','Export Studio':'⇧','Visualizer':'◉','Background':'▧','Audio':'♫','Text':'T','Logo':'◈','Elements':'✧','Overlay FX':'✦','Sticker':'▣','Turning Point':'◌','Tempo':'♩','Templates':'▦','Project':'▣','Camera':'◉','Motion':'↗','Color':'◒','Layer':'▤'};
 let activeDockPanel=null;
 function activateDockPanel(panel){
  if(!panel||panel.classList.contains('search-hidden'))return;
@@ -2282,6 +2291,7 @@ function frame(t){
   renderVISOStage('overlay',x,b,dt);
     x.restore();
   renderVISOStage('post',x,b,dt);
+  drawSurfaceReflection(x);
   drawTurningPointTransitions(x);
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
     x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
