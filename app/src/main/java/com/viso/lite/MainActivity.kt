@@ -4,7 +4,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -21,12 +20,13 @@ class MainActivity : ComponentActivity() {
         val callback = fileCallback
         fileCallback = null
         if (callback != null) {
-            val uris = if (result.resultCode == RESULT_OK && result.data != null) {
-                WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data)
-                    ?: result.data.clipData?.let { clip ->
+            val data = result.data
+            val uris = if (result.resultCode == RESULT_OK && data != null) {
+                WebChromeClient.FileChooserParams.parseResult(result.resultCode, data)
+                    ?: data.clipData?.let { clip ->
                         Array(clip.itemCount) { index -> clip.getItemAt(index).uri }
                     }
-                    ?: result.data.data?.let { uri -> arrayOf(uri) }
+                    ?: data.data?.let { uri -> arrayOf(uri) }
             } else null
             callback.onReceiveValue(uris)
         }
