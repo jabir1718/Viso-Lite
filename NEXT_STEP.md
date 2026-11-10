@@ -4,19 +4,20 @@ Read `PROJECT_ROADMAP.md`, `CURRENT_STATUS.md`, and `DO_NOT_BREAK.md` first.
 
 ## Resume point
 Branch: `viso/advanced-studio-ui`
-Latest feature commit: `0f6e56c6c432208554d351e66efac5d367c8be24`
-Latest successful CI: run #258 / `42848515717`
+Latest feature/test commits: `bb37ba27411562d38d52061132ab17161ec396f1`
+Latest confirmed feature CI: run #264 / `42849553313`
+Continuity-doc commit after that: `9c980fa13c51d09c59826b6c29b3d1cd816e8399` (verify its workflow before proceeding).
 
 ## Next implementation batch
-1. Fetch latest branch head, source, tests and CI status. Do not assume this checkpoint is still the latest.
-2. Continue Spectrum Studio parity with real rendering/state wiring for layer spin force/momentum/speed/toggle, shake, trail, wave delay/reverse/gradient, glow mode/intensity sync. Check CPU/memory cost on mobile and avoid unbounded offscreen buffers.
-3. Add CI tests that prove each setting changes rendering and survives state capture/restore and project package round-trip.
-4. Verify each of the 12 dock groups has working controls and no hidden nested panels or broken handlers.
-5. Audit Text/Logo/Sticker layers, asset embedding, independent layer transforms, undo/redo and project reopen.
-6. Audit Turning Point gallery/timing and Tempo/metronome/sync behaviour.
-7. Audit all templates and media round-trip; verify output dimensions/FPS/quality, audio capture and preview/export parity.
-8. Fetch latest APK artifact, verify ZIP integrity, package ID and packaged HTML/source equality. Record artifact ID and APK checksum.
-9. Only when all source/build gates are complete, provide the final APK for the owner's single device test. Device test is a separate release gate.
+1. Fetch current branch head, source, tests and latest Actions results.
+2. Implement remaining Spectrum settings with actual renderer behaviour and persistence: shake, trail (use a bounded reusable buffer only if needed), wave delay/reverse/gradient, glow mode and intensity sync.
+3. Add per-setting regression tests, including save/restore and no excessive per-frame allocations.
+4. Audit remaining spectrum shapes, styles, symmetry, material and layer blend/mode behaviour.
+5. Audit each dock group for functional controls, correct grouping, hidden panels, touch/scroll and no handler regressions.
+6. Verify Text/Logo/Sticker independent layers, imported asset packaging, undo/redo and project reopen.
+7. Verify Turning Point transitions/timing, Tempo/metronome/sync, all editable templates and export audio/video sync.
+8. Fetch latest APK artifact and verify ZIP, APK package ID and packaged HTML/source equality; record exact artifact and checksum.
+9. Provide final APK only after all code/build gates; owner tests once at final handoff. Device QA remains a separate release gate.
 
 ## Resume instruction
-“Read the VISO continuity files on branch `viso/advanced-studio-ui`. Verify current GitHub state and latest CI first. Continue from this file's first incomplete action. Do not restart the roadmap, re-create completed work, overwrite the baseline, or ask me to repeat requirements.”
+“Read the VISO continuity files on branch `viso/advanced-studio-ui`. Verify current GitHub state and latest CI first. Continue from the first incomplete item. Do not restart the roadmap, overwrite the baseline, or ask me to repeat requirements.”
