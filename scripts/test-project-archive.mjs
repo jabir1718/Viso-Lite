@@ -23,6 +23,14 @@ assert(html.includes("if(specRainbow)return 'hsl('"), 'rainbow gradient must cha
 assert(html.includes('specShadowOn?specShadowColor'), 'custom shadow colour must reach spectrum rendering');
 assert(html.includes("['sSpecGlowBlur',specGlowBlur]") && html.includes("['sSpecShadowExpand',specShadowExpand]"), 'advanced spectrum sliders must restore from saved project state');
 assert(html.includes("['specGlowCoreColor',specGlowCoreColor]") && html.includes("['specShadowColor',specShadowColor]"), 'advanced spectrum colour pickers must restore from saved project state');
+for (const id of ['bSpecLayerSpin','sSpecLayerSpinForce','sSpecLayerSpinMomentum','sSpecLayerSpinSpeed']) {
+  assert(html.includes('id="' + id + '"'), 'per-layer spin control must exist: ' + id);
+}
+for (const key of ['spinEnabled','spinForce','spinMomentum','spinSpeed']) {
+  assert(html.includes(key), 'per-layer spin state must be stored: ' + key);
+}
+assert(html.includes('const spin=layer.spinEnabled?'), 'per-layer spin must change the rendered layer rotation');
+assert(html.includes("['bSpecLayerSpin','spinEnabled',v=>!!v]"), 'spin toggle must update selected layer');
 for (const id of ['bBpm', 'bTap', 'sBeatSens', 'sBeatScale', 'bBeatMarkers', 'bMetronome', 'bDownbeat', 'beatColor']) {
   assert(html.includes('id="' + id + '"'), 'beat control must exist: ' + id);
 }
