@@ -29,6 +29,8 @@ assert(spectrumSource.includes('ctx.fillRect(cx-len,yl,len,bh*.86);ctx.fillRect(
 assert(html.includes('id="sLogoPulse"'), 'custom logo audio-reactive size control must exist');
 assert(html.includes('autoOn,autoEvery,lockChip:{...lockChip}'), 'auto mode timing and lock toggles must be saved in project and undo state');
 assert(html.includes('restoreVISOAutoState(d)'), 'auto mode and lock controls must restore from saved projects');
+assert(html.includes('autoEvery=Math.round(Math.min(12,Math.max(1,Number.isFinite(Number(d.autoEvery))?Number(d.autoEvery):3)))'), 'auto interval must be clamped to the visible slider range');
+assert(html.includes("$('bLoop').onclick=()=>{snap();loopSong=!loopSong"), 'song loop toggle must participate in undo history');
 assert(html.includes('exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd}'), 'export profile, resolution, FPS, format and playback toggles must be saved');
 assert(html.includes('stopAtSongEnd},bgVizMask,colors'), 'background visualizer mask toggle must be saved');
 assert(html.includes('if(d.bgVizMask!==undefined)bgVizMask=!!d.bgVizMask;else bgVizMask=true'), 'background visualizer mask must restore with legacy default');
@@ -274,6 +276,8 @@ autoSandbox.restoreVISOAutoState({});
 assert.equal(autoSandbox.autoOn, false, 'older projects default auto mode off');
 assert.equal(autoSandbox.autoEvery, 3, 'older projects default auto interval');
 assert.deepEqual({ ...autoSandbox.lockChip }, { color:false, vis:false, shape:false, sway:false }, 'older projects default all auto locks off');
+autoSandbox.restoreVISOAutoState({autoEvery:99});assert.equal(autoSandbox.autoEvery,12,'auto interval clamps to slider maximum');
+autoSandbox.restoreVISOAutoState({autoEvery:0});assert.equal(autoSandbox.autoEvery,1,'auto interval clamps to slider minimum');
 
 
 const exportStart = html.indexOf('function restoreVISOExportState(');
