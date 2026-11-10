@@ -395,3 +395,14 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Workflow runs #255 (ID `42848231743`), #256 (`42848323724`), #257 (`42848384875`) and #258 (`42848515717`) all completed successfully. Latest exact-commit run #258 tested commit `0f6e56c6c432208554d351e66efac5d367c8be24` and passed HTML/JavaScript validation, project archive tests, Android debug APK build, packaged APK verification and artifact upload.
 - This is a code/build verification milestone, not physical-device visual/audio QA. Actual glow appearance, audio response, mobile performance, undo/redo and preview/export parity still require further audit and final device test.
 - Next: extend remaining Aspectrum-derived visualizer controls (layer spin force/momentum/speed/toggle, shake, trail, wave delay/reverse/gradient, glow mode/intensity sync and remaining material/layer behaviour), then verify Logo, Elements, Sticker, Text, Turning Point, Tempo and templates end-to-end.
+
+
+## 33. Independent Visualizer Layer Spin — 2026-11-10
+
+- Added independent per-layer spin toggle, force, momentum and speed controls in the Visualizer Layers panel.
+- Layer state stores `spinEnabled`, `spinForce`, `spinMomentum`, and `spinSpeed`; new layers inherit safe defaults and old projects without these fields fall back to defaults.
+- The spectrum renderer now applies each layer's own animated rotation independently from its static rotation and transform.
+- Added CI assertions for all four controls, serialized layer fields, toggle wiring and actual renderer rotation.
+- Feature source commit `e916b511e5dae3c9cea83cf62c78bd7d6eb3a726` passed workflow #263 (ID `42849520675`). Regression-test commit `bb37ba27411562d38d52061132ab17161ec396f1` passed workflow #264 (ID `42849553313`).
+- This confirms automated source/build checks only. Actual perceived spin motion, touch control, undo/redo and performance remain pending device QA.
+- Next: implement remaining Spectrum controls (shake, trail, wave delay/reverse/gradient, glow mode/intensity sync), then complete tool-by-tool behaviour and export/save QA.
