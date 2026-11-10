@@ -149,6 +149,11 @@ assert(['specShape','specStyle','specSymmetry','specMaterial','specLayerMode','s
 assert(html.includes('const SPEC_N=200;')&&html.includes('max="200" value="48"'), 'Visualizer resolution and bar count must support 1–200');
 assert(html.includes("if(specMaterial==='fire')")&&html.includes("specLayerBlend==='additive'?'lighter':'source-over'"), 'Visualizer material and blend settings must affect rendering');
 assert(html.includes("if(['flats','square','ncs'].includes(specShape))"), 'Flats, Square and NCS must use dedicated geometry renderers');
+assert(html.includes('specTrailFrames=4')&&html.includes('specTrailBuffers=Array.from({length:specTrailFrames}'), 'spectrum trail history must use a bounded reusable buffer');
+assert(html.includes('drawSpectrumLayer(ctx,scale,layer,true)')&&html.includes('specTrailOn,specTrailAmount'), 'spectrum trails must render as afterimages and persist in project state');
+assert(html.includes('const waveY=specWaveY')&&html.includes('waveY[i+1]')&&html.includes('specWaveReverse?n-1-i:i'), 'wave renderer must reuse its buffer and apply reverse direction');
+assert(html.includes("specGlowMode==='neon'")&&html.includes('specGlowIntensitySync?'), 'glow mode and audio intensity sync must affect spectrum rendering');
+assert(html.includes('specTrailBuffers.forEach(frame=>frame.fill(0))'), 'disabling or restoring trail must clear stale frame history');
 assert(!html.includes('return {autoOn,autoEvery,lockChip:'), 'removed Auto + Lock controls must not be saved into new projects');
 assert(html.includes('function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are intentionally ignored when opening older projects. */}'), 'legacy Auto + Lock project data must be safely ignored');
 assert(html.includes("$('bLoop').onclick=()=>{snap();loopSong=!loopSong"), 'song loop toggle must participate in undo history');
