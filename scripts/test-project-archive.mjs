@@ -24,6 +24,9 @@ assert.equal((singlePassFrameSource.match(/drawSpectrum\(x,1\)/g)||[]).length,1,
 assert(html.includes("dockNav.id='toolDockNav'"), 'editor must expose a horizontal tool dock');
 assert(html.includes('function activateDockPanel(panel)'), 'tool dock must activate one focused control panel at a time');
 assert(html.includes('#bar>.panel.dock-active{display:flex!important}'), 'only the selected tool panel should occupy the editor dock');
+assert(html.includes('canvas{aspect-ratio:auto!important;width:auto!important;height:auto!important;'), 'preview must preserve selected landscape, square or portrait aspect ratio');
+assert(html.includes('body{color:#f4f4f4!important;background:#111!important}'), 'editor must use the dark reference workspace theme');
+assert(html.includes('#toolFilters{display:none!important}'), 'duplicate top category filters must not compete with the horizontal tool dock');
 assert(html.includes('#monitorDock>.subhead{display:none!important}'), 'song monitor must be compacted into the preview rather than consuming editor space');
 
 const spectrumStart = html.indexOf('function drawSpectrum(ctx,scale)');
