@@ -4,24 +4,24 @@ Read `PROJECT_ROADMAP.md`, `CURRENT_STATUS.md`, and `DO_NOT_BREAK.md` first.
 
 ## Resume point
 Branch: `viso/advanced-studio-ui`
-Latest confirmed test CI: run #289 / `42853217150`
-Tested commit: `af0164f48ffd0a34ad91d015c893262920531454`
-Verified APK artifact: `13781557416`
-APK SHA-256: `8cafe76ae1ecdb0fb97e45232583d35ff6f51094aadcc81e3bdc044af508287e`
+Latest successful CI: run #542 / `42854308879`
+Successful head commit: `a813bf5ae012261384f7dcaaa77e41d7ff3de02c`
+Source commit: `d7d5a83e6bcdbc79f4d02cf3de49ede4001f173d`
+APK artifact: `13781912155` (`VISO-Studio-advanced-debug-apk`)
+Artifact ZIP digest: `sha256:c9a1a50ceb4aa3abd42bbda555b49334bbb98d94b2a90c9052c5a29360106615`
 
 ## Next implementation and QA batch
-1. Fetch current branch head/source/tests and latest Actions results. Confirm all later continuity-document runs.
-2. Finish Aspectrum visualizer material/layer audit: verify each material has distinct visible behaviour; check outline, offset, invert, layer mode/blend, reflection, reactive frame, and shape-specific options.
-3. Audit all Spectrum controls for undo/redo, state restore, template/project serialization and export. Trail visual layering/performance needs device testing.
-4. Verify each of the 12 dock groups has real controls, correct grouping, no hidden panels and no lost event handlers.
-5. Verify Logo/Photo and Sticker independent layers, upload, colour key, position, size, rotation, opacity, effects, animation and project asset embedding.
-6. Verify Text layers, artist/track-name, font upload/gallery, timer, styling, alignment and per-layer transforms.
-7. Verify Audio upload/replace, frequency response, playback/loop inside Audio and beat analysis.
-8. Verify Turning Point transitions/timing and Tempo/metronome/sync.
-9. Verify templates save/import/download full editable projects with assets; project round-trip and undo/redo.
-10. Verify preview/export parity, selected dimensions/FPS/quality, audio capture/sync and Android save bridge.
-11. Download the newest APK artifact after all code gates; check outer ZIP, inner APK, package ID and packaged HTML/source equality.
-12. Provide final APK only after all code/build gates. Owner tests once at final handoff; device QA is a separate release gate.
+1. Continue Aspectrum visualizer parity audit: make Shape, Style, Symmetry, Material, Layers Mode and Layers Blend behaviour real for every supported shape; do not infer unknown reference defaults.
+2. Verify every Spectrum control's undo/redo, state restore, template/project serialization and export behaviour. Trail layering/performance still needs device QA.
+3. Verify all 12 dock groups have working controls, correct grouping and no missing event handlers.
+4. Verify Logo/Photo and Sticker independent layers, upload, colour key, transforms, effects, animation and embedded assets.
+5. Verify Text layers, artist/track-name, font upload/gallery, timer, styling, alignment and per-layer transforms.
+6. Verify Audio upload/replace, frequency response, playback/loop inside Audio and beat analysis.
+7. Verify Turning Point transitions/timing and Tempo/metronome/sync.
+8. Verify templates save/import/download full editable projects with assets; test project round-trip and undo/redo.
+9. Verify preview/export parity, selected dimensions/FPS/quality, audio capture/sync and Android save bridge.
+10. Download and inspect the newest APK artifact after final code gates; verify outer ZIP, inner APK, package ID and packaged HTML/source equality.
+11. Provide the final APK only after all code/build gates. Owner tests once at final handoff; device QA remains a separate release gate.
 
 ## Resume instruction
-“Read the VISO continuity files on branch `viso/advanced-studio-ui`. Verify current GitHub state and latest CI first. Continue from the first incomplete item. Do not restart the roadmap, overwrite the baseline, or ask me to repeat requirements.”
+“Continue VISO on `viso/advanced-studio-ui` from the first incomplete item. Do not restart the roadmap, overwrite the baseline, or ask me to repeat requirements. Do not request interim APK testing.”
