@@ -8,8 +8,11 @@
        background:radial-gradient(120% 60% at 50% 0%,#1a1030 0%,#0a0812 45%,#050409 100%);
        display:flex;flex-direction:column;height:100dvh;overflow:hidden}
   #wrap{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:6px}
-  canvas{max-height:100%;max-width:100%;aspect-ratio:9/16;border-radius:16px;background:#000;
+  canvas{max-height:100%;max-width:100%;width:auto;height:auto;aspect-ratio:9/16;border-radius:16px;background:#000;
          touch-action:none;display:block;box-shadow:0 0 40px #7c3aed44,0 0 0 1px #ffffff14}
+  .ratio-custom{width:74px;min-width:74px;background:#ffffff10;border:1px solid #ffffff20;border-radius:9px;
+    color:#fff;padding:8px;font-size:11px;min-height:34px}
+  .ratio-note{font-size:9px;color:#918aa6;padding:0 2px}
   #bar{flex:0 0 auto;max-height:44dvh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:8px 8px 24px}
   .sec{background:linear-gradient(180deg,#ffffff0d,#ffffff05);border:1px solid #ffffff14;border-radius:14px;
        padding:8px;display:flex;flex-direction:column;gap:7px;flex:0 0 auto}
@@ -36,6 +39,26 @@
 </style>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
 <div id="bar">
+  <div class="sec"><h4>Social canvas / screen ratio</h4>
+    <div class="row" id="ratios">
+      <button class="on" data-ratio="9:16">TikTok / Reels 9:16</button>
+      <button data-ratio="1:1">Instagram Post 1:1</button>
+      <button data-ratio="4:5">Instagram Portrait 4:5</button>
+      <button data-ratio="16:9">YouTube / Landscape 16:9</button>
+    </div>
+    <div class="row">
+      <input id="customW" class="ratio-custom" type="number" min="128" max="4320" value="1080" aria-label="Custom width">
+      <span class="ratio-note">×</span>
+      <input id="customH" class="ratio-custom" type="number" min="128" max="4320" value="1920" aria-label="Custom height">
+      <button id="applyCustom" class="chip">Apply custom</button>
+      <button id="fullPreview" class="chip">Full preview</button>
+    </div>
+    <div class="row" id="fitModes">
+      <button class="on" data-fit="fill">Fill / Crop</button>
+      <button data-fit="fit">Fit</button>
+    </div>
+    <div class="ratio-note" id="ratioStatus">Canvas 1080 × 1920 · 9:16 · Fill / Crop</div>
+  </div>
   <div class="sec"><h4>Media</h4>
     <div class="row">
       <button id="bA">MP3</button><button id="bI">Photo</button><button id="bV">Video</button>
@@ -152,18 +175,51 @@ const vid=$('vid'),bvid=$('bvid');
 
 let FPS=30,BIT=8000000;
 function updateBitrate(){BIT=Math.round(W*H*FPS*0.13);}
-function setRes(w,h){
-  W=w;H=h;cx=W/2;cy=H/2;
-  c.width=w;c.height=h;
-  mk.width=w;mk.height=h;o.width=w;o.height=h;bl.width=w>>1;bl.height=h>>1;
-  maskDirty=true;updateBitrate();
+let ratioW=9,ratioH=16,qualityScale=1,fitMode='fill',fullPreview=false;
+function resizePreview(){
+  const wrap=$('wrap'),ww=Math.max(1,wrap.clientWidth-12),wh=Math.max(1,wrap.clientHeight-12);
+  const r=W/H;let cw=ww,ch=cw/r;
+  if(ch>wh){ch=wh;cw=ch*r;}
+  c.style.width=Math.max(1,cw)+'px';c.style.height=Math.max(1,ch)+'px';
 }
+function updateRatioStatus(){
+  const ratio=(W/gcd(W,H))+':'+(H/gcd(W,H));
+  $('ratioStatus').textContent='Canvas '+W+' × '+H+' · '+ratio+' · '+(fitMode==='fill'?'Fill / Crop':'Fit');
+  $('customW').value=W;$('customH').value=H;resizePreview();
+}
+function gcd(a,b){return b?gcd(b,a%b):a;}
+function setRes(w,h){
+  W=Math.max(128,Math.min(4320,Math.round(w)));H=Math.max(128,Math.min(4320,Math.round(h)));
+  cx=W/2;cy=H/2;c.width=W;c.height=H;
+  mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=W>>1;bl.height=H>>1;
+  maskDirty=true;updateBitrate();updateRatioStatus();
+}
+function setRatio(rw,rh){
+  ratioW=rw;ratioH=rh;
+  const longSide=Math.round(1920*qualityScale);
+  let w,h;if(rw>=rh){w=longSide;h=Math.round(longSide*rh/rw);}
+  else{h=longSide;w=Math.round(longSide*rw/rh);}
+  setRes(w,h);
+  document.querySelectorAll('#ratios button').forEach(b=>b.classList.toggle('on',b.dataset.ratio===rw+':'+rh));
+}
+$('ratios').querySelectorAll('button').forEach(b=>b.onclick=()=>{const [rw,rh]=b.dataset.ratio.split(':').map(Number);setRatio(rw,rh);});
+$('applyCustom').onclick=()=>{const w=+$('customW').value,h=+$('customH').value;
+  if(w<128||h<128||w>4320||h>4320)return;
+  ratioW=w;ratioH=h;setRes(w,h);document.querySelectorAll('#ratios button').forEach(b=>b.classList.remove('on'));};
+$('fitModes').querySelectorAll('button').forEach(b=>b.onclick=()=>{fitMode=b.dataset.fit;
+  $('fitModes').querySelectorAll('button').forEach(q=>q.classList.toggle('on',q===b));
+  maskDirty=true;updateRatioStatus();});
+$('fullPreview').onclick=()=>{fullPreview=!fullPreview;$('wrap').style.position=fullPreview?'fixed':'relative';
+  $('wrap').style.inset=fullPreview?'0':'auto';$('wrap').style.zIndex=fullPreview?'20':'auto';
+  $('wrap').style.background=fullPreview?'#050409':'transparent';
+  $('bar').style.display=fullPreview?'none':'flex';resizePreview();};
+window.addEventListener('resize',resizePreview);
 updateBitrate();
-[['1080p',1080,1920],['1440p',1440,2560],['4K',2160,3840]].forEach(([l,w,h],i)=>{
+[['1080p',1],['1440p',4/3],['4K',2]].forEach(([l,scale],i)=>{
   const b=document.createElement('button');b.textContent=l;
   if(i===0)b.classList.add('on');
-  b.onclick=()=>{document.querySelectorAll('#res button').forEach(q=>q.classList.remove('on'));
-    b.classList.add('on');setRes(w,h);};
+  b.onclick=()=>{qualityScale=scale;document.querySelectorAll('#res button').forEach(q=>q.classList.remove('on'));
+    b.classList.add('on');setRatio(ratioW,ratioH);};
   $('res').appendChild(b);});
 [30,60].forEach((f,i)=>{const b=document.createElement('button');b.textContent=f+' fps';
   if(i===0)b.classList.add('on');
@@ -385,9 +441,14 @@ c.addEventListener('pointerdown',down);c.addEventListener('pointermove',move);
 c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up);
 
 function src(){return useVid&&vid.readyState>=2?vid:img;}
-function cover(ctx,s,sw,sh,clipH){const k=Math.max(W/sw,H/sh),w=sw*k,h=sh*k;
+function mediaRect(sw,sh,mode){const k=(mode==='fit'?Math.min:Math.max)(W/sw,H/sh);
+  return {w:sw*k,h:sh*k,x:(W-sw*k)/2,y:(H-sh*k)/2};}
+function drawMediaFrame(ctx,s,sw,sh){
+  const r=mediaRect(sw,sh,fitMode);ctx.drawImage(s,r.x,r.y,r.w,r.h);
+}
+function cover(ctx,s,sw,sh,clipH){const r=mediaRect(sw,sh,'fill');
   if(clipH<H){ctx.save();ctx.beginPath();ctx.rect(0,0,W,clipH);ctx.clip();}
-  ctx.drawImage(s,(W-w)/2,(H-h)/2,w,h);
+  ctx.drawImage(s,r.x,r.y,r.w,r.h);
   if(clipH<H)ctx.restore();}
 
 function buildMask(){
@@ -396,14 +457,14 @@ function buildMask(){
     const s0=src();if(!s0)return;
     const sw=useVid?vid.videoWidth:s0.width,sh=useVid?vid.videoHeight:s0.height;
     if(!sw||!sh)return;
-    const s=Math.max(W/sw,H/sh),w=sw*s,h=sh*s;
+    const r=mediaRect(sw,sh,fitMode),w=Math.max(1,Math.ceil(r.w)),h=Math.max(1,Math.ceil(r.h));
     const t=document.createElement('canvas');t.width=w;t.height=h;const tx=t.getContext('2d');
     tx.drawImage(s0,0,0,w,h);
     const d=tx.getImageData(0,0,w,h).data,out=tx.createImageData(w,h);
     for(let i=0;i<d.length;i+=4){const l=.299*d[i]+.587*d[i+1]+.114*d[i+2];
       out.data[i]=255;out.data[i+1]=255;out.data[i+2]=255;out.data[i+3]=l>cut?255:0;}
     tx.putImageData(out,0,0);mx.filter='blur('+fea+'px)';
-    mx.drawImage(t,(W-w)/2,(H-h)/2);mx.filter='none';
+    mx.drawImage(t,r.x,r.y,r.w,r.h);mx.filter='none';
   } else {
     mx.save();mx.fillStyle='#fff';mx.filter='blur('+(fea*.6)+'px)';
     if(shape==='circle'){mx.beginPath();mx.arc(cx,cy,H*.34,0,6.283);mx.fill();}
@@ -792,7 +853,8 @@ function frame(t){
     if(!s0||!phOn)return;
     x.save();applyT(x);x.globalAlpha=pho/100;
     x.filter='brightness('+bri+'%) contrast('+con+'%) saturate('+sat+'%) hue-rotate('+hueSh+'deg)';
-    if(useVid)x.drawImage(vid,-W/2,-H/2,W,H);else x.drawImage(img,-W/2,-H/2,W,H);
+    const source=useVid?vid:img,sw=useVid?vid.videoWidth:img.width,sh=useVid?vid.videoHeight:img.height;
+    drawMediaFrame(x,source,sw||W,sh||H);
     x.filter='none';x.restore();x.globalAlpha=1;
   };
 
