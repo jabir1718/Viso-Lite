@@ -1963,9 +1963,9 @@ $('specStyle').onchange=e=>specStyle=e.target.value;$('specSymmetry').onchange=e
 $('specMaterial').onchange=e=>specMaterial=e.target.value;$('specLayerMode').onchange=e=>specLayerMode=e.target.value;$('specLayerBlend').onchange=e=>specLayerBlend=e.target.value;
 $('sSpecResolution').oninput=e=>specResolution=Math.max(1,Math.min(200,+e.target.value));
 function drawSpectrum(ctx,scale){
- const layers=specLayers.filter(layer=>layer.enabled);
+ const layers=specLayers.filter(layer=>layer.enabled),t=performance.now()/1000;
  if(!layers.length)return;
- layers.forEach(layer=>{ctx.save();const shake=specShakeOn?Math.sin(performance.now()/47+(layer.id||0))*specShake*.08:0;ctx.translate(W*(layer.x||0)/100+shake,H*(layer.y||0)/100+Math.cos(performance.now()/53+(layer.id||0))*shake);const spin=layer.spinEnabled?(t*(layer.spinSpeed??25)*.9*(layer.spinForce??50)/100*(.25+(layer.spinMomentum??50)/100*.75)):0;ctx.rotate(((layer.rotation||0)+spin)*Math.PI/180);const layerScale=Math.max(.1,Math.min(2,Number(layer.scale||100)/100));ctx.scale(layerScale,layerScale);drawSpectrumLayer(ctx,scale,layer);ctx.restore();});
+ layers.forEach((layer,layerIndex)=>{ctx.save();const shake=specShakeOn?Math.sin(performance.now()/47+(layer.id||0))*specShake*.08:0,stackOffset=specLayerMode==='stack'?layerIndex*Math.min(W,H)*.025:0;ctx.translate(W*(layer.x||0)/100+shake,H*(layer.y||0)/100+Math.cos(performance.now()/53+(layer.id||0))*shake+stackOffset);const spin=layer.spinEnabled?(t*(layer.spinSpeed??25)*.9*(layer.spinForce??50)/100*(.25+(layer.spinMomentum??50)/100*.75)):0;ctx.rotate(((layer.rotation||0)+spin)*Math.PI/180);const layerScale=Math.max(.1,Math.min(2,Number(layer.scale||100)/100));ctx.scale(layerScale,layerScale);drawSpectrumLayer(ctx,scale,layer);ctx.restore();});
 }
 function drawSpectrumLayer(ctx,scale,layer,isTrail=false){
   const t=performance.now()/1000,n=Math.min(SPEC_N,Math.max(1,Math.min(specResolution,specBars|0,specPointCount)));
