@@ -35,7 +35,7 @@ assert(html.includes('exportSettings:{aspect,baseRes,FPS,quality,formatChoice,lo
 assert(html.includes('stopAtSongEnd},bgVizMask,colors'), 'background visualizer mask toggle must be saved');
 assert(html.includes('if(d.bgVizMask!==undefined)bgVizMask=!!d.bgVizMask;else bgVizMask=true'), 'background visualizer mask must restore with legacy default');
 assert(html.includes("['tBvm',bgVizMask]"), 'background visualizer mask button must synchronize after restore');
-assert(html.includes('restoreVISOExportState(d.exportSettings||{})'), 'saved export settings must restore with old-project defaults');
+assert(html.includes("restoreVISOExportState(d.exportSettings||{quality:d.tools?Number($('sQuality').value):100})"), 'legacy projects must retain their saved registry quality while new export settings default safely');
 assert(html.includes('restoreVISOExportState({});};'), 'reset must restore default export settings');
 assert(html.includes("bgVizMask=true;$('tBvm').classList.add('on')"), 'reset must restore background visualizer mask default');
 assert(html.includes('autoEvery=3;Object.keys(lockChip).forEach(key=>lockChip[key]=false)'), 'reset must restore auto mode timing and unlocked defaults');
