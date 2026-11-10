@@ -29,11 +29,11 @@ jobs:
           from pathlib import Path
           import re
           html = Path("app/src/main/assets/index.html").read_text(encoding="utf-8")
-          assert len(html.encode("utf-8")) == 47967, "Original Library HTML text changed"
+          assert "Social canvas / screen ratio" in html and "TikTok / Reels 9:16" in html, "Social canvas controls missing"
           scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S)
           assert scripts, "No JavaScript found"
           Path("/tmp/viso-original.js").write_text("\n".join(scripts), encoding="utf-8")
-          print("Original HTML size and script blocks verified")
+          print("Social ratio controls and script blocks verified")
           PY
           node --check /tmp/viso-original.js
       - name: Build APK
