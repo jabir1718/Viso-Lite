@@ -323,3 +323,12 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Artifact ID `13720601471`, archive SHA-256 `31e7c45138c26998f6d887b1c1a14e0533af2daacd51edf51d099734bd4fd4d1`. Downloaded ZIP integrity passed. Extracted APK: 84,463,427 bytes, SHA-256 `a8f37e2d6ec9cfdf4d6253f50f236e1c968424757a3c48189548f113cdbd3fb5`. Packaged `assets/index.html` byte-matches the source HTML (SHA-256 `65cafe0e931a87ff7f7d8ed102c80f99dc8693fb1eb9973faa6b0af5f911ad00`).
 - Video export source review confirms it adds the Web Audio `MediaStreamDestination` audio tracks to the captured canvas stream when available. Real playback/export still needs an Android device test.
 - Remaining: full reference-app parity audit, verify actual audio response and smoothness on Android, verify PNG/video export and audio track, project/template asset round-trip, and general startup/stability. No claim of physical-device testing.
+
+
+## 26. Mobile video-export canvas correction — 2026-11-10
+
+- Source review found the video export setup correctly selected a bounded mobile recording canvas (up to 720×1280 standard / 540×960 heavy modes), but the recorder start handler immediately overwrote its dimensions with the full target resolution. This defeated the mobile cap and could allocate an unnecessarily large recording surface.
+- Removed the redundant full-target resize so the selected mobile recording dimensions are retained.
+- Corrected the 2D recording fallback to scale the preview frame to the actual recording canvas dimensions. Previously it drew at full target dimensions, which could crop the frame when the fallback canvas was smaller.
+- Added regression assertions for both behaviours to `scripts/test-project-archive.mjs`. Android build/CI for these latest commits is pending.
+- This is source-level correction and automated regression coverage; actual recording output, quality and audio playback still require runtime verification.
