@@ -555,3 +555,26 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Artifact: `VISO-Studio-advanced-debug-apk`, ID `13783603518`; outer ZIP size 32,189,625 bytes; digest `sha256:202d6fc26f76630ec0960902fd5cc3327b25969d3bdde6be9912cbcc7d3ab8be`.
 - This confirms static/code/build/package gates. Actual exported video dimensions, audio sync, background-video capture and playback must still be checked on the target Android device.
 - Next: audit Background Video, Elements, Overlay FX, Templates and end-to-end export behaviour.
+
+
+## 44. Background Fit / Fill / Crop and Elements controls — 2026-11-10
+
+- Added Background media fit modes: Fit (preserve full source with contained dimensions), Fill (stretch to canvas), Crop (aspect-preserving cover). Both background image and video use the shared background renderer.
+- `bgFitMode` is captured in advanced project state, restored into the selector, and defaults to Crop to preserve the previous visual result.
+- Elements tool now has independent Particles amount, Sparkles amount and Reactive Frame intensity sliders. Light keeps its own size/intensity controls. The two mode sliders are linked bidirectionally with the legacy Visuals mixer sliders.
+- Reactive Frame intensity now changes the actual rendered alpha and is included in project state. All four element toggles and their values are undoable.
+- Fixed Dust/Sparkle mode lookups to use `findIndex(mode=>mode.name===...)` in binding, sync, restore and reset; `MODES` is an array of objects, so string `indexOf` silently failed.
+- Regression tests cover fit modes and persistence, Elements render controls, state sync and reset.
+- CI workflow run #367 verified the Background fit implementation; run #393 verified the combined latest branch including Elements/undo/UI cleanup and built the APK successfully.
+- Latest artifact from run #393: `13785702728`, size 32,189,302 bytes; digest `sha256:948cdf0988f12a7fb7f550b17768eb6ebafb8f3e298dc0ecf9befec6e87d8364`.
+
+## 45. Undo snapshot correctness and clean editor controls — 2026-11-10
+
+- Added delegated pre-edit undo snapshots for all editor inputs, selects, textareas and dynamically generated controls. Pointer/focus captures before editing; keyboard changes to range/colour/select controls also capture before changing.
+- Removed the generic slider's post-change snapshot, which could make Undo restore the already-changed value.
+- Removed blanket click snapshots for every panel button; no-op navigation clicks were creating redundant history steps. State-mutating controls now snapshot before their action.
+- Corrected pre-action snapshot order for Visuals mode toggles, Elements toggles, Overlay FX toggles, media transforms, background controls, uploads/removals, Audio Motion, BPM detection/tap, canvas custom size and Spectrum enable.
+- Removed dormant search and favourite CSS/JS remnants, including template-like/favourite icon injection. The editor has no search bar, favourites or Auto+Lock controls; legacy Auto/Lock project data remains safely ignored.
+- Added CI assertions for pre-edit snapshot ordering and the absence of search/favourite/Auto+Lock UI.
+- Latest CI run #393 (ID `42863166776`) passed and uploaded APK artifact `13785702728`.
+- Remaining: real device verification of undo feel, exported video dimensions/audio and Android save path.
