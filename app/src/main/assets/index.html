@@ -247,6 +247,14 @@ body.preview-fullscreen #previewExit{display:block}
 .toolGroupBody{display:flex;flex-direction:column;gap:8px;min-height:0}
 .toolGroupBody>.toolSubpanel{display:flex!important;flex:0 0 auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:9px!important;border:1px solid #e0e9e0!important;border-radius:11px!important;background:linear-gradient(150deg,#fff,#f8fbf7)!important;box-shadow:none!important}
 .toolGroupBody>.toolSubpanel>h4{display:none!important}
+
+/* Group legacy controls into the requested bottom-dock tool boxes without replacing their working handlers. */
+#bar>.toolGroupPanel{display:none!important;flex:1 1 auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;flex-direction:column!important;gap:9px!important;margin:0!important;padding:9px!important;background:#fff!important;border:1px solid #d8e7d4!important;border-radius:12px!important;box-shadow:0 3px 12px #183d2510}
+#bar>.toolGroupPanel.dock-active{display:flex!important}
+.toolGroupPanel>h4{position:sticky;top:-9px;z-index:5;margin:-2px -2px 2px;padding:7px 4px;background:#fff;color:#39764b;font-size:14px;font-weight:800}
+.toolGroupBody{display:flex;flex-direction:column;gap:8px;min-height:0}
+.toolGroupBody>.toolSubpanel{display:flex!important;flex:0 0 auto!important;max-height:none!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:9px!important;border:1px solid #e0e9e0!important;border-radius:11px!important;background:linear-gradient(150deg,#fff,#f8fbf7)!important;box-shadow:none!important}
+.toolGroupBody>.toolSubpanel>h4{display:none!important}
 </style>
 <div id="studioHeader">
   <div class="studioBrand">
@@ -2187,8 +2195,7 @@ const visoGroups={};
 Object.keys(groupMeta).forEach(key=>{
  const meta=groupMeta[key],panel=document.createElement('section');panel.className='panel toolGroupPanel';panel.id='group-'+key;panel.dataset.toolCategory=key;
  const h=document.createElement('h4');h.textContent=meta.label;panel.appendChild(h);
- const body=document.createElement('div');body.className='toolGroupBody';panel.appendChild(body);
- visoGroups[key]=panel;
+ const body=document.createElement('div');body.className='toolGroupBody';panel.appendChild(body);visoGroups[key]=panel;
 });
 visoPanels.forEach(panel=>{
  if(panel.id==='exportPanel')return;
@@ -2202,10 +2209,8 @@ const dockNav=document.createElement('div');dockNav.id='toolDockNav';dockNav.set
 const dockOrder=['media','text','audio','visualizer','elements','overlay','sticker','templates','background'];
 let activeDockPanel=null;
 function activateDockPanel(panel){
- if(!panel)return;
- const target=typeof panel==='string'?document.getElementById(panel):panel;
- const isExport=target.id==='exportPanel';
- activeDockPanel=target;
+ if(!panel)return;const target=typeof panel==='string'?document.getElementById(panel):panel;
+ const isExport=target.id==='exportPanel';activeDockPanel=target;
  Object.values(visoGroups).forEach(group=>group.classList.toggle('dock-active',!isExport&&group===target));
  const exportPanel=$('exportPanel');if(exportPanel)exportPanel.classList.toggle('dock-active',isExport);
  dockNav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.panel===target.id));
@@ -2214,8 +2219,7 @@ function applyVISOFilters(){
  const visible=Object.keys(visoGroups).filter(key=>visoGroups[key].querySelector('.toolSubpanel'));
  $('toolEmpty').classList.toggle('show',visible.length===0);
  dockNav.querySelectorAll('button').forEach(btn=>{btn.hidden=!visible.includes(btn.dataset.group);});
- if(activeDockPanel?.classList.contains('search-hidden'))activeDockPanel=null;
- if(!activeDockPanel&&visible.length)activateDockPanel(visoGroups[visible[0]]);
+ if(!activeDockPanel)activateDockPanel(visoGroups[visible[0]]);
 }
 dockOrder.forEach(key=>{
  const group=visoGroups[key];if(!group?.querySelector('.toolSubpanel'))return;
