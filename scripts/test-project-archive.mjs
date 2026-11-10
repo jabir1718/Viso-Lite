@@ -38,6 +38,8 @@ assert(html.includes("if(aspect==='custom')"), 'canvas must support arbitrary cu
 assert(html.includes('id="customWidth"')&&html.includes('id="customHeight"')&&html.includes("aspect='custom'"), 'custom canvas width and height must apply immediately');
 assert(html.includes('id="previewToggle"')&&html.includes('id="previewExit"')&&html.includes('preview-fullscreen'), 'editor must provide an immersive full-screen canvas mode');
 assert(html.includes("className='controlGlyph'"), 'individual tool controls must receive descriptive icons');
+assert(html.includes("document.querySelectorAll('#bar>.panel label')"), 'slider and input labels must also receive control icons');
+assert(html.includes("||[null,'◈']"), 'unmatched control buttons must still receive a consistent fallback icon');
 assert(html.includes('0 3px 0 #c3d3e7'), 'tool dock icons must have layered dimensional button styling');
 
 assert(html.includes('data-template-filter="landscape"')&&html.includes('data-template-filter="portrait"'), 'template library must separate landscape and portrait layouts');
