@@ -1,3 +1,10 @@
+## Latest continuation checkpoint — 2026-11-10
+- Confirmed run #397 / ID 42869821850 completed successfully on commit d7244b358705fd9db414c5d1b3175e5d94932de1. HTML/JS validation, project archive checks, Android debug APK build, packaged APK verification and artifact upload passed.
+- Artifact: VISO-Studio-advanced-debug-apk, ID 13788447789, 32,189,303 bytes; outer ZIP digest sha256:130fbd1455804f1c81cd965f25bb58425215c1d88c3a4e50f7f8f5865666256c.
+- Post-run source cleanup commit c2e9b197e66dc438275dae133bf6071379c4128a removes the stale legacy Overlay logo render hook. CI guard commit e2b19e3d1fd620a4485a69c11393419def240329 checks that only the dedicated Logo render module calls drawCustomLogo.
+- Source HTML blob after the cleanup: b2b4b9e8b950bafa43f677c0ca0bd6e2994b03cd (2,949 lines). Static source assertions pass; CI for the post-run commits is not yet verified.
+- Initial Logo/Text audit confirms project-state coverage for custom logo settings, primary/artist text, and dynamic text layers; .viso v3 embeds logo and font assets. Remaining: actual image/font load failures, project round-trip, undo behavior and preview/export parity.
+
 # VISO — Current Status
 
 Updated: 2026-11-10
