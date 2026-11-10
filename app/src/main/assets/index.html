@@ -1985,6 +1985,19 @@ function drawSpectrumLayer(ctx,scale,layer,isTrail=false){
     target.save();target.globalAlpha=.34;target.strokeStyle=colorAt(Math.floor(count/2));target.lineWidth=Math.max(1,width*.5);target.beginPath();target.moveTo(0,cy+H*.28);target.lineTo(W,cy+H*.28);target.stroke();target.restore();
    }
   };
+  const drawSpectrumStyleFinish=(target,count,colorAt,valueAt,width)=>{
+   if(['flats','ncs'].includes(specShape))return;
+   const baseline=cy+H*.28;
+   if(specStyle==='point'){
+    target.save();target.globalAlpha=.9;target.shadowBlur=width*.8;
+    for(let point=0;point<count;point++){const px=(point+.5)/count*W,py=baseline-valueAt(point)*H*.3;target.fillStyle=colorAt(point);target.shadowColor=target.fillStyle;target.beginPath();target.arc(px,py,Math.max(1,width*.62),0,Math.PI*2);target.fill();}
+    target.restore();
+   }else if(specStyle==='solid'){
+    target.save();target.globalAlpha=.22;target.beginPath();target.moveTo(0,baseline);
+    for(let point=0;point<count;point++){const px=(point+.5)/count*W,py=baseline-valueAt(point)*H*.3;target.lineTo(px,py);}
+    target.lineTo(W,baseline);target.closePath();target.fillStyle=colorAt(Math.floor(count/2));target.fill();target.restore();
+   }
+  };
   const outlineBar=(x1,y1,x2,y2)=>{if((layer.outline??0)<=0)return;ctx.save();ctx.strokeStyle=layer.outlineColor||'#ffffff';ctx.lineWidth=thick+Number(layer.outline);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore();};
   if(['flats','square','ncs'].includes(specShape)){
    const bars=n,amp=Math.min(W,H)*.27,mirrorY=['xy','across','triple-x'].includes(specSymmetry),mirrorX=['x','xy','across','triple-x'].includes(specSymmetry);
@@ -2011,7 +2024,7 @@ function drawSpectrumLayer(ctx,scale,layer,isTrail=false){
      if(mirrorX){ctx.globalAlpha=.55;ctx.fillRect(cx-bh/2,cy-(pos-.5)*H*.7,Math.max(1,bh),Math.max(2,thick));ctx.globalAlpha=1;}
     }
    }
-   drawSpectrumModeFinish(ctx,n,col,val,thick);
+   drawSpectrumStyleFinish(ctx,n,col,val,thick);drawSpectrumModeFinish(ctx,n,col,val,thick);
    ctx.restore();return;
   }
   
@@ -2120,7 +2133,7 @@ function drawSpectrumLayer(ctx,scale,layer,isTrail=false){
       }
     }
   }
-  drawSpectrumModeFinish(ctx,n,col,val,thick);
+  drawSpectrumStyleFinish(ctx,n,col,val,thick);drawSpectrumModeFinish(ctx,n,col,val,thick);
   ctx.restore();ctx.globalAlpha=1;
 }
 let curB=[0,0,0,0,0,0],curBbg=[0,0,0,0,0,0],last=0,avg=.1,frameN=0;
