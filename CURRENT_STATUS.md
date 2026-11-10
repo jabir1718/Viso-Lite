@@ -20,16 +20,17 @@ Permanent roadmap: `PROJECT_ROADMAP.md`
 - **Symmetry:** all shape families now pass through a shared symmetry wrapper: X (left/right mirror), X and Y (four-way), Across (top/bottom mirror), Triple X (three reduced vertical copies), and None (single render). Exact parity with the reference app's naming/semantics remains subject to further reference verification.
 - Regression tests cover shared response, cross-shape layer modes, material-specific rendering, styles and symmetry wrapper.
 
-## Latest verified Audio/Tempo grouping and APK
-- Dock source commits: Audio upload grouping `948723c340aea33dbe2c5e0840658dee95330466`; manual BPM `5e65f03c87a13a3dd59b28d93a147398978ffdaf`; BPM source line-break correction `66b8f11d7123ae6ea3a0b5e1b11382491557acd1`.
-- Regression-test commits: Audio grouping `3961f296f121a871bf92c12035f4c64e94ec901d`; Tempo BPM `ad290ac5a396428cc9640524dd389a531169b49e`.
-- Audio: moved the song upload button from Media into Audio and renamed it Upload / Replace Audio. Loop Song and Bass/Mids/Treble frequency controls remain inside Audio.
-- Tempo: added a manual BPM slider (0 = auto) to the separate Tempo group. Tap/detected BPM updates the slider; manual BPM updates the same beat clock. Project restore reapplies the saved advanced BPM after registry restore to preserve older projects.
-- Regression tests verify Audio upload/loop/EQ grouping and Tempo manual BPM, Sync Bar and metronome sound/volume controls.
-- CI workflow run #346, ID `42858119530`, exact head commit `66b8f11d7123ae6ea3a0b5e1b11382491557acd1`, conclusion **success**.
-- HTML/JavaScript validation, project archive tests, Android debug APK build, packaged APK verification and artifact upload all passed.
-- Artifact: `VISO-Studio-advanced-debug-apk`, artifact ID `13782504681`, size 32,189,381 bytes, outer artifact ZIP digest `sha256:9df4ea5cc76444510355582f656fe97cbac0b04628647c27336871950896f146`.
-- Automated code/build verification only; physical-device install/runtime QA is not performed.
+## Latest verified Turning Point, Templates and Export APK
+- Audio/Tempo source: `66b8f11d7123ae6ea3a0b5e1b11382491557acd1`. Audio upload/replace is in Audio; Loop Song and EQ remain grouped. Tempo has manual BPM (0 = auto), Sync Bar and sound metronome; BPM survives project restore.
+- Turning Point source: `61d16ce2d13b9d0cd4afc23135229dcbad87ed20`. Every transition point now has an editable timeline-position slider; edits sort points chronologically and snapshot undo before changes. Transition selection snapshots before updating the selected point.
+- Transition audit: all 20 UI options have matching renderer cases.
+- Templates: removed the template search bar to respect the clean-editor requirement; Landscape/Portrait/Downloaded filters remain.
+- Export source: `30cd181e8fc716e464eb91820354c912d5788687`. Fixed the recording canvas staying at its default 300×150: video export now resizes the recording canvas to the actual render dimensions before capture. Normal modes render up to 1080p; heavy Tunnel/Mirror/Dual modes use a mobile-safe 720p cap. Export info and bitrate use actual recording dimensions, not only the requested target.
+- Regression-test commit: `3cafe7b29f034a3e65d39ca097ab1d97f3a3a1e4`.
+- CI workflow run #358, ID `42859376527`, exact head commit `3cafe7b29f034a3e65d39ca097ab1d97f3a3a1e4`, conclusion **success**.
+- HTML/JavaScript validation, project archive regression tests, Android debug APK build, packaged APK verification and artifact upload all passed.
+- Artifact: `VISO-Studio-advanced-debug-apk`, ID `13783603518`, size 32,189,625 bytes, outer artifact ZIP digest `sha256:202d6fc26f76630ec0960902fd5cc3327b25969d3bdde6be9912cbcc7d3ab8be`.
+- Automated verification only. Physical-device install/runtime QA and real export playback/dimensions still require final owner-side device QA.
 
 ## Dock architecture
 12 bottom dock groups: Media, Logo, Audio, Text, Visualizer, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video. Background Video last; panels above dock; Export top-right.
