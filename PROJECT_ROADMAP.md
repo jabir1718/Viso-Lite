@@ -435,3 +435,13 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Artifact ID: `13779639787`, `VISO-Studio-advanced-debug-apk` (download/ZIP and APK checks still need to be repeated on this latest artifact before final release).
 - Earlier runs #272–#275 had stale regression assertions around the Ring renderer/signature; the checks were corrected and superseded by passing #276–#278. Do not treat those earlier failures as current.
 - Remaining Spectrum items: validate trail visual layering and performance, ensure every new control has undo support, and audit any missing material-specific parameters. Physical device audio/visual QA remains pending.
+
+
+## 35. Spectrum undo integration and latest artifact verification — 2026-11-10
+
+- Spectrum range controls now call `snap()` before user interaction (pointer/focus), so undo captures the previous state rather than the already-changed value.
+- Spectrum toggles, colour pickers and select controls also capture a pre-change snapshot. Per-layer controls already used the same pattern.
+- Added regression assertions for slider and non-slider Spectrum undo hooks. CI run #288 (ID `42853169247`) passed the source change; run #289 (ID `42853217150`) passed the test commit `af0164f48ffd0a34ad91d015c893262920531454`.
+- Downloaded run #289 artifact ID `13781557416` (`VISO-Studio-advanced-debug-apk`). Outer artifact ZIP and inner APK ZIP integrity both passed. APK size: 84,489,xxx bytes (see local verification); APK SHA-256: `8cafe76ae1ecdb0fb97e45232583d35ff6f51094aadcc81e3bdc044af508287e`. Packaged `assets/index.html` is present (273,301 bytes). Workflow's packaged APK verification step passed.
+- This confirms automated build/package integrity only, not physical-device installation or visual/audio behaviour.
+- Next: complete the remaining visualizer material/layer parity audit, then perform systematic end-to-end QA of each dock group and the project/template/export pipelines.
