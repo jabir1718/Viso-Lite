@@ -2162,8 +2162,11 @@ function visoToolCategory(title){
  if(t.includes('export'))return 'export';
  if(t.includes('template')||t.includes('project'))return 'templates';
  if(t.includes('background'))return 'background';
- if(t.includes('audio')||t.includes('bpm')||t.includes('tempo'))return 'audio';
- if(t.includes('text')||t.includes('logo'))return 'text';
+ if(t.includes('turning'))return 'turning';
+ if(t.includes('beat')||t.includes('bpm')||t.includes('tempo'))return 'tempo';
+ if(t.includes('audio'))return 'audio';
+ if(t.includes('text'))return 'text';
+ if(t==='logo'||t.startsWith('logo '))return 'logo';
  if(t.includes('light')||t.includes('particle')||t.includes('sparkle')||t.includes('reactive frame'))return 'elements';
  if(t.includes('sticker'))return 'sticker';
  if(t.includes('overlay effects')||t.includes('progress bar')||t.includes('surface reflection')||t.includes('film')||t.includes('atmosphere')||t.includes('motion fx'))return 'overlay';
@@ -2187,9 +2190,10 @@ visoPanels.forEach(panel=>{
  registerVISOEffectTool({id,name:title,category,panel,controls});
 });
 const groupMeta={
- media:{label:'Media',glyph:'▧'},text:{label:'Text',glyph:'T'},audio:{label:'Audio',glyph:'♫'},
+ media:{label:'Media',glyph:'▧'},logo:{label:'Logo',glyph:'◈'},audio:{label:'Audio',glyph:'♫'},text:{label:'Text',glyph:'T'},
  visualizer:{label:'Visualizer',glyph:'◉'},elements:{label:'Elements',glyph:'✧'},overlay:{label:'Overlay FX',glyph:'✦'},
- sticker:{label:'Sticker',glyph:'▣'},templates:{label:'Templates',glyph:'▦'},background:{label:'Background Video',glyph:'▶'}
+ sticker:{label:'Sticker',glyph:'▣'},turning:{label:'Turning Point',glyph:'◌'},tempo:{label:'Tempo',glyph:'♩'},
+ templates:{label:'Templates',glyph:'▦'},background:{label:'Background Video',glyph:'▶'}
 };
 const visoGroups={};
 Object.keys(groupMeta).forEach(key=>{
@@ -2206,7 +2210,7 @@ visoPanels.forEach(panel=>{
 const bar=$('bar');
 const empty=document.createElement('div');empty.id='toolEmpty';empty.textContent='No tools available.';
 const dockNav=document.createElement('div');dockNav.id='toolDockNav';dockNav.setAttribute('aria-label','Editor tools');
-const dockOrder=['media','text','audio','visualizer','elements','overlay','sticker','templates','background'];
+const dockOrder=['media','logo','audio','text','visualizer','elements','overlay','sticker','turning','tempo','templates','background'];
 let activeDockPanel=null;
 function activateDockPanel(panel){
  if(!panel)return;const target=typeof panel==='string'?document.getElementById(panel):panel;
