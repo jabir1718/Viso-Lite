@@ -474,4 +474,13 @@ const processedResponseShapeRenderer=processedResponseAuditRenderer.slice(proces
 assert(!processedResponseShapeRenderer.includes('specSmooth[i]/255'),'all spectrum shapes must use shared processed response values');
 assert(!processedResponseShapeRenderer.includes('specSmooth[idx]/255'),'wave spectrum must use shared processed response values');
 assert(processedResponseShapeRenderer.split('val(i)').length-1>=7,'radial, ring, sphere, tunnel, mirror, dual, wave and dot renderers must use the normalized response');
+
+const spectrumModeAuditStart=html.indexOf('function drawSpectrumLayer(');
+const spectrumModeAuditEnd=html.indexOf('let curB=',spectrumModeAuditStart);
+assert(spectrumModeAuditStart>=0&&spectrumModeAuditEnd>spectrumModeAuditStart,'spectrum mode renderer must exist');
+const spectrumModeAudit=html.slice(spectrumModeAuditStart,spectrumModeAuditEnd);
+assert(spectrumModeAudit.includes("specLayerMode==='scale'?Math.min(1,raw*1.35):raw"),'Scale layer mode must affect response across shapes');
+assert(spectrumModeAudit.includes("if(specLayerMode==='web')"),'Web layer mode must render a connecting spectrum line');
+assert(spectrumModeAudit.includes("else if(specLayerMode==='combo')"),'Combo layer mode must render its overlay baseline');
+assert((spectrumModeAudit.match(/drawSpectrumModeFinish\\(ctx,n,col,val,thick\\)/g)||[]).length>=2,'Web and Combo finish must be applied to flat and other spectrum shapes');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
