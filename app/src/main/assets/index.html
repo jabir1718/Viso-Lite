@@ -435,7 +435,7 @@ $('fA').onchange=e=>{const f=e.target.files[0];if(!f)return;
   const s=ctxA.createMediaElementSource(audio);
   an=ctxA.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.7;
   s.connect(an);an.connect(ctxA.destination);
-  buf=new Uint8Array(an.frequencyBinCount);playing=false;$('bP').textContent='Play';
+  streamDest=ctxA.createMediaStreamDestination();an.connect(streamDest);\n  buf=new Uint8Array(an.frequencyBinCount);playing=false;$('bP').textContent='Play';
   audio.onended=()=>{if(exportingFullSong&&rec&&rec.state==='recording')rec.stop();playing=false;if(!exportingFullSong)$('bP').textContent='Play';};};
 $('bP').onclick=async()=>{if(!audio)return;
   if(ctxA.state==='suspended')await ctxA.resume();
