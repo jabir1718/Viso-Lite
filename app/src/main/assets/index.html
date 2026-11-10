@@ -17,7 +17,10 @@
   .advanced-tools{display:flex;flex-direction:column;gap:6px;padding:6px 7px;border:1px solid #a78bfa22;border-radius:10px;background:#a78bfa08}
   .sec{background:linear-gradient(180deg,#ffffff0d,#ffffff05);border:1px solid #ffffff14;border-radius:14px;
        padding:8px;display:flex;flex-direction:column;gap:7px;flex:0 0 auto}
-  .sec h4{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:#a78bfa;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:22px}\n  .sec h4::after{content:"−";font-size:16px;line-height:1;color:#c4b5fd}\n  .sec.collapsed>*:not(h4){display:none!important}\n  .sec.collapsed h4::after{content:"+"}\n  .sec h4:focus-visible{outline:2px solid #a78bfa;outline-offset:3px;border-radius:4px}
+  .sec h4{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:#a78bfa;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:22px}\n  .sec h4::after{content:"−";font-size:16px;line-height:1;color:#c4b5fd}
+  .sec.collapsed>*:not(h4){display:none!important}
+  .sec.collapsed h4::after{content:"+"}
+  .sec h4:focus-visible{outline:2px solid #a78bfa;outline-offset:3px;border-radius:4px}
   .row{display:flex;gap:6px;overflow-x:auto;flex:0 0 auto;align-items:center;padding-bottom:1px}
   select{background:#171225;color:#fff;border:1px solid #ffffff26;border-radius:8px;padding:7px;min-height:32px;font-size:10px;max-width:130px}
   button{background:#ffffff0f;color:#d9d5e6;border:1px solid #ffffff1f;border-radius:11px;min-height:37px;
@@ -40,10 +43,8 @@
   .chip{min-height:32px;font-size:10.5px;padding:0 10px;border-radius:9px}
   .template-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
   .template-grid button{min-width:0;min-height:42px;text-align:left;padding:0 10px}
-  #quickExport{position:fixed;top:8px;right:8px;z-index:50;background:#8b35e8;color:#fff;border:1px solid #ffffff55;border-radius:24px;padding:10px 15px;font-weight:700;box-shadow:0 4px 22px #0009}
 </style>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
-<button id="quickExport">Export full song</button>
 <div id="bar">
   <div class="sec"><h4>Social canvas / screen ratio</h4>
     <div class="row" id="ratios">
@@ -222,6 +223,7 @@ document.querySelectorAll('#bar .sec').forEach((section,index)=>{
 });
 const vid=$('vid'),bvid=$('bvid');
 
+let advGuides=false,advGuideMargin=10,advGuidesExport=false,advVolume=1,advRate=1,advLoop=true,advCenterRadius=1,advLogoOpacity=1,advSpScale=1,advSpX=0,advSpAngle=0,advBitrate=1,advBgZoom=1,advBgOpacity=1,advAutoVariety=.7,advColorFlow=1,advModeOpacity=1,advModeScale=1,advHueOffset=0,advPaletteDrift=1,advMaskInvert=false,advMaskScale=1,advLightFlicker=.2,advLightSpread=1,advBgLayerOpacity=1,advFrontOpacity=1,advMediaOpacity=1,advMediaRotation=0,advSwayPhase=0,advEdgeSoftness=1,advMaskThreshold=140,advSepia=0,advVignette=0,advGravity=1,advTurbulence=1;
 let FPS=30,BIT=8000000;
 function updateBitrate(){BIT=Math.round(W*H*FPS*0.13*advBitrate);}
 let ratioW=9,ratioH=16,qualityScale=1,fitMode='fill',fullPreview=false;
@@ -268,8 +270,8 @@ updateBitrate();
 [['720p · HD',2/3],['1080p · Full HD',1],['1440p · 2K',4/3],['2160p · 4K',2],['4320p · 8K',4.5]].forEach(([l,scale],i)=>{
   const b=document.createElement('button');b.textContent=l;
   if(i===0)b.classList.add('on');
-  b.onclick=()=>{qualityScale=scale;document.querySelectorAll('#res button').forEach(q=>q.classList.remove('on'));
-    b.classList.add('on');setRatio(ratioW,ratioH);};
+  b.onclick=async()=>{if(exportingFullSong)return;qualityScale=scale;document.querySelectorAll('#res button').forEach(q=>q.classList.remove('on'));
+    b.classList.add('on');setRatio(ratioW,ratioH);$('exportStatus').textContent=l+' selected — export starting…';await startFullSongExport();};
   $('res').appendChild(b);});
 [30,60].forEach((f,i)=>{const b=document.createElement('button');b.textContent=f+' fps';
   if(i===0)b.classList.add('on');
@@ -277,7 +279,6 @@ updateBitrate();
     b.classList.add('on');FPS=f;updateBitrate();};
   $('fps').appendChild(b);});
 
-let advGuides=false,advGuideMargin=10,advGuidesExport=false,advVolume=1,advRate=1,advLoop=true,advCenterRadius=1,advLogoOpacity=1,advSpScale=1,advSpX=0,advSpAngle=0,advBitrate=1,advBgZoom=1,advBgOpacity=1,advAutoVariety=.7,advColorFlow=1,advModeOpacity=1,advModeScale=1,advHueOffset=0,advPaletteDrift=1,advMaskInvert=false,advMaskScale=1,advLightFlicker=.2,advLightSpread=1,advBgLayerOpacity=1,advFrontOpacity=1,advMediaOpacity=1,advMediaRotation=0,advSwayPhase=0,advEdgeSoftness=1,advMaskThreshold=140,advSepia=0,advVignette=0,advGravity=1,advTurbulence=1;
 let img=null,bgImg=null,bgUseVid=false,bgViz=false,maskDirty=true;
 let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
@@ -505,8 +506,8 @@ function queueNativeChunk(blob){
 function resetExportUi(){
   if(audio)audio.loop=exportOldLoop;
   exportingFullSong=false;playing=false;
-  $('quickExport').textContent='Export full song';
-  $('quickExport').disabled=false;
+  document.querySelectorAll('#res button').forEach(button=>button.disabled=false);
+  $('exportStatus').textContent='Export complete / ready.';
   $('bP').textContent='Play';
 }
 async function startFullSongExport(){
@@ -528,13 +529,14 @@ async function startFullSongExport(){
     try{
       await exportSaveChain;
       if(exportCancelled){if(nativeSave)AndroidSave.cancelSave();}
-      else if(nativeSave&&!exportSaveFailed){AndroidSave.finishSave();}
-      else if(exportFallbackChunks.length){dl(new Blob(exportFallbackChunks,{type:'video/webm'}),fileName);}
+      else if(nativeSave&&!exportSaveFailed){AndroidSave.finishSave();$('exportStatus').textContent='Saved to Movies/Viso — '+fileName;}
+      else if(exportFallbackChunks.length){dl(new Blob(exportFallbackChunks,{type:'video/webm'}),fileName);$('exportStatus').textContent='Export downloaded — '+fileName;}
       else if(nativeSave){AndroidSave.cancelSave();alert('Export could not be saved. Please try again.');}
     }finally{resetExportUi();rec=null;}
   };
   exportingFullSong=true;
-  $('quickExport').textContent='Cancel export';
+  document.querySelectorAll('#res button').forEach(button=>button.disabled=true);
+  $('exportStatus').textContent='Full song export ho raha hai…';
   $('bP').textContent='Exporting…';
   try{
     rec.start(1000);
@@ -549,14 +551,7 @@ async function startFullSongExport(){
     alert('MP3 start nahi ho saka. File permission ya audio selection check karein.');
   }
 }
-$('quickExport').onclick=async()=>{
-  if(exportingFullSong){
-    exportCancelled=true;
-    if(rec&&rec.state==='recording')rec.stop();
-    return;
-  }
-  await startFullSongExport();
-};
+
 
 
 $('advGuides').onclick=e=>{advGuides=!advGuides;e.currentTarget.textContent='Safe guides '+(advGuides?'ON':'OFF');e.currentTarget.classList.toggle('on',advGuides);};$('advGuidesExport').onclick=e=>{advGuidesExport=!advGuidesExport;e.currentTarget.textContent='Export safe guides '+(advGuidesExport?'ON':'OFF');e.currentTarget.classList.toggle('on',advGuidesExport);};$('advGuideMargin').oninput=e=>advGuideMargin=+e.target.value;
