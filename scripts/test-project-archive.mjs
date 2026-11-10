@@ -555,4 +555,14 @@ const turningListAudit=html.slice(turningListStart,turningListEnd);
 assert(turningListAudit.includes("timeSlider.type='range'")&&turningListAudit.includes("timeSlider.addEventListener('input'"),'each Turning Point must have an editable timeline position');
 assert(turningListAudit.includes("timeSlider.addEventListener('change'")&&turningListAudit.includes("turningPoints.sort"),'timeline edits must reorder points chronologically');
 assert(html.includes("$('sTurningTransition').onchange=e=>{snap();turningTransition=e.target.value;"),'transition edits must snapshot before changing the selected transition');
+
+const turningOptionsStart=html.indexOf('turningPanel.innerHTML=');
+const turningOptionsEnd=html.indexOf('bar.appendChild(turningPanel)',turningOptionsStart);
+const turningRendererStart=html.indexOf('function drawTurningPointTransitions(');
+const turningRendererEnd=html.indexOf('\\nfunction ',turningRendererStart);
+assert(turningOptionsStart>=0&&turningOptionsEnd>turningOptionsStart&&turningRendererStart>=0&&turningRendererEnd>turningRendererStart,'Turning Point transition UI and renderer must exist');
+const turningOptions=[...html.slice(turningOptionsStart,turningOptionsEnd).matchAll(/<option value="([^"]+)"/g)].map(match=>match[1]);
+const turningCases=[...html.slice(turningRendererStart,turningRendererEnd).matchAll(/case '([^']+)'/g)].map(match=>match[1]);
+assert.equal(turningOptions.length,20,'Turning Point must expose twenty transitions');
+assert.deepEqual(turningOptions,turningCases,'every Turning Point transition option must have a renderer case');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
