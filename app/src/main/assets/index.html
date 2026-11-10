@@ -1949,7 +1949,7 @@ function drawSpectrumLayer(ctx,scale,layer){
   ctx.save();ctx.scale(scale,scale);ctx.translate((1/scale-1)*cx,(1/scale-1)*cy);
   ctx.globalCompositeOperation=specLayerBlend==='additive'?'lighter':'source-over';ctx.lineCap='round';
   const col=i=>{const p=i/Math.max(1,n-1);if(specRainbow)return 'hsl('+Math.round(p*360)+',100%,62%)';if(layer.colorMode==='custom')return layer.color||'#8edcf3';if(specMaterial==='fire')return 'hsl('+(8+p*42)+',100%,'+(48+p*22)+'%)';if(specMaterial==='chrome')return 'hsl(210,12%,'+(48+Math.sin(p*18)*34)+'%)';if(specMaterial==='plastic')return 'hsl('+(190+p*125)+',92%,58%)';if(specMaterial==='diamond')return 'hsl('+(190+p*45)+',90%,'+(65+p*25)+'%)';if(specMaterial==='liquid-glass')return 'hsla('+(175+p*65)+',90%,78%,.82)';return grad(p);};
-  const val=i=>{const raw=Math.min(1,(specSmooth[i%SPEC_N]/255)*(specLevel/100)*(specMultiplier/100)),v=specLayerMode==='uniform'?Math.max(.18,raw):raw;return layer.invert?1-v:v;};
+  const val=i=>{const raw=Math.min(1,(specSmooth[i%SPEC_N]/255)*(specMultiplier/100)),v=specLayerMode==='uniform'?Math.max(.18,raw):raw;return layer.invert?1-v:v;};
   const outlineBar=(x1,y1,x2,y2)=>{if((layer.outline??0)<=0)return;ctx.save();ctx.strokeStyle=layer.outlineColor||'#ffffff';ctx.lineWidth=thick+Number(layer.outline);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore();};
   if(['flats','square','ncs'].includes(specShape)){
    const bars=n,amp=Math.min(W,H)*.27*(specLayerMode==='scale'?1.35:1),mirrorY=['xy','across','triple-x'].includes(specSymmetry),mirrorX=['x','xy','across','triple-x'].includes(specSymmetry);
