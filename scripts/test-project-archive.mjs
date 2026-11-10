@@ -50,6 +50,10 @@ assert(html.includes("project.assets=manifest"), 'editable project must include 
 assert(html.includes("if(overlayAssetCount!==objects.length)"), 'every editable overlay layer must be packaged with its source image');
 assert(html.includes("assets.filter(a=>a.kind.startsWith('overlay-')).sort((a,b)=>Number(a.kind.slice(8))-Number(b.kind.slice(8)))"), 'project import must restore overlay images in numeric layer order even if manifest records are shuffled');
 assert(html.includes("restoreVISOProjectAssets(project,entries)"), 'project import must restore embedded media assets');
+assert(html.includes('function visoFontFamily(fileName,checksum)'), 'custom font family must be stable across project reloads');
+assert(html.includes('await prepareVISOFont(fontFile)'), 'embedded custom fonts must load before project settings are applied');
+assert(html.includes('project.settings.state.studioTextFont=restoredAssets.fontFamily'), 'project font selection must remap to its restored font family');
+assert(html.includes('studioTextFont=prepared.family'), 'manual custom font selection must update rendered text state');
 assert(html.includes("downloadVISOProject(project,'VISO-'+key+'.viso')"), 'built-in templates must download as complete editable project packages');
 assert(html.includes("renderVISOStage('overlay'"), 'overlay render stage must remain in the preview frame');
 const frameStart = html.indexOf('function frame(t){');
@@ -324,5 +328,13 @@ const snapSandbox={restoringState:true,captureProjectState:()=>{snapshotCalls++;
 vm.runInNewContext(html.slice(snapStart,snapEnd),snapSandbox,{timeout:2000});
 snapSandbox.snap();assert.equal(snapshotCalls,0,'restoration must not add undo snapshots');assert.equal(snapSandbox.undo.length,0);
 snapSandbox.restoringState=false;snapSandbox.snap();assert.equal(snapshotCalls,1,'normal user changes still create undo snapshots');assert.equal(snapSandbox.undo.length,1);
+
+
+const fontStart=html.indexOf('function visoFontFamily(');
+const fontEnd=html.indexOf('async function prepareVISOFont',fontStart);
+assert(fontStart>=0&&fontEnd>fontStart,'stable font family helper must exist');
+const fontSandbox={};vm.runInNewContext(html.slice(fontStart,fontEnd),fontSandbox,{timeout:2000});
+assert.equal(fontSandbox.visoFontFamily('My Custom Font.ttf',4660),'VISOFont_My_Custom_Font_1234','font family remains stable for same file and checksum');
+assert.notEqual(fontSandbox.visoFontFamily('My Custom Font.ttf',4660),fontSandbox.visoFontFamily('My Custom Font.ttf',4661),'different font contents receive distinct families');
 
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
