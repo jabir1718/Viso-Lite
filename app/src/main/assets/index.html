@@ -504,7 +504,7 @@ body.preview-fullscreen #previewExit{display:block}
     <label><span>Gradient</span><input id="sDir" type="range" min="0" max="100" value="0"></label>
   </div>
   <div class="sec panel"><h4>Text · Logo Studio</h4>
-    <div class="row"><input id="studioText" type="text" maxlength="36" value="VISO" placeholder="Type title or logo"><button id="bTextOn">Text: OFF</button></div>
+    <div class="fxSubhead">TRACK NAME</div><div class="row"><input id="studioText" type="text" maxlength="80" value="VISO" placeholder="Track name"><button id="bTextOn">Text: OFF</button></div>
     <label><span>Text size</span><input id="sTextSize" type="range" min="25" max="110" value="65"></label>
     <label><span>Vertical</span><input id="sTextPos" type="range" min="10" max="90" value="78"></label>
     <label><span>Opacity</span><input id="sTextAlpha" type="range" min="10" max="100" value="100"></label>
@@ -517,8 +517,8 @@ body.preview-fullscreen #previewExit{display:block}
     <label><span>Font</span><select id="sTextFont"><option value="system-ui">Modern</option><option value="Arial">Clean</option><option value="Georgia">Classic</option><option value="monospace">Tech</option><option value="Impact">Heavy</option></select></label>
     <label><span>Alignment</span><select id="sTextAlign"><option value="center">Center</option><option value="left">Left</option><option value="right">Right</option></select></label>
     <div class="row"><button id="bTextPlate">Text plate: OFF</button></div>
-    <div class="fxSubhead">SECOND TEXT LAYER</div>
-    <div class="row"><input id="studioText2" type="text" maxlength="36" value="" placeholder="Artist / subtitle"><button id="bText2On">Text 2: OFF</button></div>
+    <div class="fxSubhead">ARTIST</div>
+    <div class="row"><input id="studioText2" type="text" maxlength="80" value="" placeholder="Artist name"><button id="bText2On">Artist: OFF</button></div>
     <label><span>Text 2 size</span><input id="sText2Size" type="range" min="15" max="80" value="32"></label>
     <label><span>Vertical</span><input id="sText2Pos" type="range" min="5" max="95" value="88"></label>
     <label><span>Opacity</span><input id="sText2Alpha" type="range" min="0" max="100" value="85"></label>
@@ -533,6 +533,9 @@ body.preview-fullscreen #previewExit{display:block}
     <label><span>Preset slot</span><select id="studioPresetSlot"><option value="1">Slot 1</option><option value="2">Slot 2</option><option value="3">Slot 3</option></select></label>
     <div class="row"><button id="bPresetSave">Save slot</button><button id="bPresetLoad">Load slot</button><button id="bPresetClear">Clear slot</button></div>
     <div class="status" id="presetInfo">Save your current visual settings on this device</div>
+    <div class="fxSubhead">ADDITIONAL TEXT BOXES</div>
+    <div class="row"><button id="bAddTextLayer" class="prim" type="button">＋ Add Text</button></div>
+    <div id="extraTextLayers" class="extraTextLayers"></div>
   </div>
   <div class="sec panel"><h4>Audio Frequency Response</h4>
     <div class="row"><button id="bLoop" class="on">Loop song: ON</button></div>
@@ -602,7 +605,7 @@ body.preview-fullscreen #previewExit{display:block}
  mergeGroup('Background',['Background','Background Drift'],'backgroundPanel');
  const tempo=all().find(p=>title(p)==='Beat · BPM Sync');if(tempo){tempo.id='tempoPanel';tempo.querySelector('h4').textContent='Tempo';}
  const elements=all().find(p=>title(p)==='Lights · Tools box');if(elements){elements.id='elementsPanel';elements.querySelector('h4').textContent='Elements';const group=document.createElement('div');group.className='elementToggles';group.innerHTML='<div class="fxSubhead">AUDIO-REACTIVE ELEMENTS</div><label><span>Particles</span><input id="bElementParticles" type="checkbox" checked></label><label><span>Sparkles</span><input id="bElementSparkles" type="checkbox"></label><label><span>Light elements</span><input id="bElementLight" type="checkbox" checked></label><label><span>Reactive frame</span><input id="bElementReactiveFrame" type="checkbox"></label>';elements.appendChild(group);}
- const textPanel=all().find(p=>title(p)==='Text · Logo Studio');if(textPanel){textPanel.id='textPanel';textPanel.querySelector('h4').textContent='Text';}
+ const textPanel=all().find(p=>title(p)==='Text · Logo Studio');if(textPanel){textPanel.id='textPanel';textPanel.querySelector('h4').textContent='Text';const fontButton=document.getElementById('bFont');if(fontButton){const fontRow=fontButton.closest('.row');if(fontRow)textPanel.appendChild(fontRow);const fontInfo=document.getElementById('fontInfo');if(fontInfo)textPanel.appendChild(fontInfo);}}
  const turningPanel=document.createElement('div');turningPanel.className='sec panel';turningPanel.id='turningPointPanel';
  turningPanel.innerHTML='<h4>Turning Point</h4><div class="row"><button id="bAddTurningPoint" class="prim" type="button">＋ Add point at playhead</button><button id="bRemoveTurningPoint" type="button">Remove selected</button></div><label><span>Transition</span><select id="sTurningTransition"><option value="fade">Fade</option><option value="crossfade">Crossfade</option><option value="flash">Flash</option><option value="glitch">Glitch</option><option value="shake">Shake</option><option value="rgb">RGB Split</option><option value="blur">Blur</option><option value="zoom">Zoom</option><option value="spin">Spin</option><option value="wipe-left">Wipe Left</option><option value="wipe-right">Wipe Right</option><option value="wipe-up">Wipe Up</option><option value="wipe-down">Wipe Down</option><option value="circle">Circle</option><option value="diamond">Diamond</option><option value="pixel">Pixelate</option><option value="scanline">Scanline</option><option value="invert">Invert</option><option value="light-leak">Light Leak</option><option value="vhs">VHS</option></select></label><label><span>Duration</span><input id="sTurningDuration" type="range" min="200" max="3000" step="50" value="800"></label><div class="status" id="turningPointList">No turning points yet. Move the playhead and add one.</div>';
  bar.appendChild(turningPanel);
@@ -751,6 +754,7 @@ let bassGain=100,midGain=100,highGain=100;
 let studioText='VISO',studioTextOn=false,studioTextSize=65,studioTextPos=78,studioTextAlpha=100,studioTextColor='#ffffff';
 let studioTextX=50,studioTextRot=0,studioTextStroke=7,studioTextGlow=24,studioTextAnim='none',studioTextFont='system-ui',studioTextAlign='center',studioTextPlate=false;
 let studioText2='',studioText2On=false,studioText2Size=32,studioText2Pos=88,studioText2Alpha=85,studioText2Color='#ffffff',studioText2X=50,studioText2Rot=0,studioText2Stroke=2,studioText2Glow=12,studioText2Anim='none',studioText2Align='center',studioText2Plate=false;
+let extraTextLayers=[],nextExtraTextId=1;
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
 let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,bvp=140;
 let bgColor='#050810',bgTintColor='#ffffff',bgTintAmount=0,bgBrightness=100,bgContrast=100,bgSaturation=100,bgHue=0,bgPosX=0,bgPosY=0;
