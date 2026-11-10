@@ -76,17 +76,15 @@ assert(!bandSource.includes('getByteFrequencyData(')&&!specBandSource.includes('
 assert(html.includes('PARTICLE_COUNT=Math.min(1100,Math.max(600,Math.round((window.innerWidth||360)*2)))'), 'particle workload must scale to a mobile-safe budget');
 assert(html.includes('if(mstate[0]?.on)stepP(b,dt);'), 'particle simulation must stop when the Dust visualizer is disabled');
 
-assert(html.includes("dockNav.id='toolDockNav'"), 'editor must expose a horizontal tool dock');
-assert(html.includes('function activateDockPanel(panel)'), 'tool dock must activate one focused control panel at a time');
+assert(html.includes("panel.classList.remove('collapsed','toolSubpanel','dock-active')"), 'original editor panels must remain individually accessible');
+assert(html.includes('#bar>.panel{display:flex!important;'), 'original editor panels must remain visible in the scrollable tool area');
+assert(html.includes('SONG & EXPORT MONITOR')&&html.includes('id="bAuto"')&&html.includes('id="kCol"'), 'original monitor and AUTO/LOCK controls must be restored');
 assert(html.includes('VISO bright premium workspace refresh')&&html.includes('background:linear-gradient(145deg,#f8fbff'), 'editor must use the requested bright premium workspace theme');
 assert(html.includes("const aspectItems=['9:16','16:9','1:1','4:5','3:4','4:3','3:2','2:3','21:9']"), 'canvas must support common social and custom crop ratios');
 assert(html.includes("if(aspect==='custom')"), 'canvas must support arbitrary custom pixel dimensions');
 assert(html.includes('id="customWidth"')&&html.includes('id="customHeight"')&&html.includes("aspect='custom'"), 'custom canvas width and height must apply immediately');
 assert(html.includes('id="previewToggle"')&&html.includes('id="previewExit"')&&html.includes('preview-fullscreen'), 'editor must provide an immersive full-screen canvas mode');
-assert(html.includes("className='controlGlyph'"), 'individual tool controls must receive descriptive icons');
-assert(html.includes("document.querySelectorAll('#bar>.panel label')"), 'slider and input labels must also receive control icons');
-assert(html.includes("||[null,'◈']"), 'unmatched control buttons must still receive a consistent fallback icon');
-assert(html.includes('0 3px 0 #c3d3e7'), 'tool dock icons must have layered dimensional button styling');
+assert(html.includes("id='bUndo'")&&html.includes("id='bRedo'")&&html.includes('id="topExport"'), 'top-level undo, redo and export actions must remain available');
 
 assert(html.includes('data-template-filter="landscape"')&&html.includes('data-template-filter="portrait"'), 'template library must separate landscape and portrait layouts');
 assert(!html.includes('data-template-filter="liked"')&&!html.includes('data-like='), 'template favourites are intentionally omitted from the clean library');
