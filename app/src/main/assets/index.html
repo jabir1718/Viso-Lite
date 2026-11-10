@@ -205,7 +205,7 @@ let W=c.width,H=c.height,cx=W/2,cy=H/2;
 const mk=document.createElement('canvas'),mx=mk.getContext('2d');
 const o=document.createElement('canvas'),ox=o.getContext('2d');
 const bl=document.createElement('canvas'),bx=bl.getContext('2d');
-mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=W>>1;bl.height=H>>1;
+mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=Math.max(1,Math.ceil(W/3));bl.height=Math.max(1,Math.ceil(H/3));
 const $=id=>document.getElementById(id);
 document.querySelectorAll('#bar .sec').forEach((section,index)=>{
   const heading=section.querySelector('h4');
@@ -242,7 +242,7 @@ function gcd(a,b){return b?gcd(b,a%b):a;}
 function setRes(w,h){
   W=Math.max(128,Math.min(7680,Math.round(w)));H=Math.max(128,Math.min(7680,Math.round(h)));
   cx=W/2;cy=H/2;c.width=W;c.height=H;
-  mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=W>>1;bl.height=H>>1;
+  mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=Math.max(1,Math.ceil(W/3));bl.height=Math.max(1,Math.ceil(H/3));
   maskDirty=true;updateBitrate();updateRatioStatus();
 }
 function setRatio(rw,rh){
@@ -1313,9 +1313,13 @@ function autoStep(){
     $('sSwy').value=swy;$('sSpd').value=spd;}
 }
 
+let lastRenderFrame=0;
 function frame(t){
   requestAnimationFrame(frame);
-  const dt=Math.min(50,t-last||16);last=t;frameN++;
+  // Keep preview rendering light so Android WebView can scroll controls smoothly.
+  if(t-lastRenderFrame<1000/30)return;
+  lastRenderFrame=t;
+  const dt=Math.min(50,t-last||33);last=t;frameN++;
   const b=bands();curB=b;curBbg=bands(bvp);
   const bass=b[0];avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
@@ -1383,7 +1387,7 @@ function frame(t){
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
     x.drawImage(paintLayer(.7,false),0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;}
   bx.clearRect(0,0,bl.width,bl.height);
-  bx.filter='blur(12px)';bx.drawImage(c,0,0,bl.width,bl.height);bx.filter='none';
+  bx.filter='blur(8px)';bx.drawImage(c,0,0,bl.width,bl.height);bx.filter='none';
   x.globalCompositeOperation='lighter';x.globalAlpha=bloom;
   x.drawImage(bl,0,0,W,H);x.globalCompositeOperation='source-over';x.globalAlpha=1;
   if(advVignette>0){const vg=x.createRadialGradient(cx,cy,Math.min(W,H)*.22,cx,cy,Math.max(W,H)*.72);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,'+(advVignette/100*.85)+')');x.fillStyle=vg;x.fillRect(0,0,W,H);}
