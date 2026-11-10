@@ -1083,8 +1083,7 @@ function drawExtraSpectrum(ctx,b,dt,fd,half,amp,thick,colorAt,t){
  }else if(spExtra==='grid'){
   for(let i=0;i<16;i++)for(let j=0;j<8;j++){const v=spSmoothBins[(i*6+j)%96]||0,x=(i-7.5)*thick*3.2,y=(j-3.5)*thick*3.2;
    ctx.globalAlpha=.15+v*.85;ctx.fillStyle=col(i*6+j);ctx.fillRect(x,y,thick*1.6,thick*(.8+v*2.5));}
-
- else if(spExtra100!=='none'){
+ }else if(spExtra100!=='none'){
   const ix=Math.max(0,parseInt(spExtra100.slice(5),10)-1),family=Math.floor(ix/10),v=ix%10;
   const phase=t*(.45+v*.095),k=1+v*.085,base=r*(.72+v*.035);
   const bins=(i)=>spSmoothBins[(i*7+v*9)%96]||0;
@@ -1140,7 +1139,6 @@ function drawExtraSpectrum(ctx,b,dt,fd,half,amp,thick,colorAt,t){
     ctx.strokeStyle=col(i);ctx.globalAlpha=.35+en*.5;ctx.stroke();ctx.restore();}
    ctx.beginPath();ctx.arc(0,0,base*.18*(1+beat*.5),0,Math.PI*2);ctx.strokeStyle=col(v);ctx.stroke();
   }
- }
  }
  ctx.restore();
 }
