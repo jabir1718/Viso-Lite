@@ -485,3 +485,16 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Artifact: `VISO-Studio-advanced-debug-apk`, ID `13781604205`; outer ZIP size 32,188,688 bytes; digest `sha256:c56e2abbd0f7536f7493abd7a4b7d821727c01f30b4500b7be76bbf7d4804c3c`.
 - This is automated code/build/package verification, not physical-device testing.
 - Next: finish Shape/Style/Symmetry parity, then continue every dock group and the full project/template/export workflow audit.
+
+
+## 39. Spectrum Solid and Point styles across shape families — 2026-11-10
+
+- Audited Spectrum Style and found Solid/Point variants were only used by the Flats/NCS renderer; Square, radial, ring, sphere, tunnel, mirror, dual, wave and dot-style shapes did not respond to the Style selector.
+- Added a shared style-finish renderer for general shapes: Point draws audio-responsive markers; Solid draws a filled spectrum region. Flats and NCS keep their native style handling.
+- Added regression checks for Point markers, Solid fill and use of the shared style finish in both renderer paths.
+- Source commit: `dac5fe26a4f8007e3e08ff0caf00ba6266fcbeba`.
+- Test commit: `a9adc746f37f1a9829c0b9794faf16dd9d06d428`.
+- CI workflow run #323 (ID `42855684313`) passed: HTML/JS validation, project archive tests, Android debug APK build, packaged APK verification and artifact upload.
+- Artifact: `VISO-Studio-advanced-debug-apk`, ID `13782896586`; outer ZIP size 32,188,860 bytes; digest `sha256:91110f0b9487c1b47108e181df42e11f16bdeb15ebdd4e45d4f654abcdee29e0`.
+- This is automated code/build/package verification, not physical-device testing.
+- Next: complete Symmetry semantics and continue systematic end-to-end audit of all dock groups, project/template and export workflows.
