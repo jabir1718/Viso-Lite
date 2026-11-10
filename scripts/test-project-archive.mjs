@@ -78,7 +78,7 @@ assert(html.includes('if(mstate[0]?.on)stepP(b,dt);'), 'particle simulation must
 
 assert(html.includes("panel.classList.remove('collapsed','toolSubpanel','dock-active')"), 'original editor panels must remain individually accessible');
 assert(html.includes('#bar>.panel{display:flex!important;'), 'original editor panels must remain visible in the scrollable tool area');
-assert(html.includes('SONG & EXPORT MONITOR')&&html.includes('id="bAuto"')&&html.includes('id="kCol"'), 'original monitor and AUTO/LOCK controls must be restored');
+assert(!html.includes('id="monitorDock"')&&html.includes('class="row audioPlaybackControls"')&&html.includes('id="bAuto"')&&html.includes('id="kCol"'), 'playback controls must live compactly inside Audio, not in a bottom monitor strip; original AUTO/LOCK controls must remain');
 assert(html.includes('VISO bright premium workspace refresh')&&html.includes('background:linear-gradient(145deg,#f8fbff'), 'editor must use the requested bright premium workspace theme');
 assert(html.includes("const aspectItems=['9:16','16:9','1:1','4:5','3:4','4:3','3:2','2:3','21:9']"), 'canvas must support common social and custom crop ratios');
 assert(html.includes("if(aspect==='custom')"), 'canvas must support arbitrary custom pixel dimensions');
@@ -131,8 +131,8 @@ assert(html.includes("'Overlay FX':{stage:'overlay'")&&html.includes("'Logo':{st
 assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'undo, redo and export must be available in the top toolbar');
 assert(html.includes("$('topExport').addEventListener('click',()=>exportPanel?.scrollIntoView"), 'top export action must open the original export settings panel');
 assert(html.includes('<h4>Auto + Lock</h4>')&&html.includes("$('bAuto').onclick")&&html.includes("$('sAuto').oninput"), 'original Auto + Lock controls and handlers must be restored');
-assert(html.includes('SONG & EXPORT MONITOR')&&html.includes('id="bLoop"')&&html.includes('id="bStopAtEnd"'), 'song loop and stop-at-end controls must be restored in the full monitor strip');
-assert(html.includes('#monitorDock{position:static!important;'), 'song and export monitor must remain visible beneath the canvas');
+assert(!html.includes('id="monitorDock"')&&html.includes('id="songInfo"')&&html.includes('id="recInfo"')&&html.includes('id="bLoop"')&&html.includes('id="bStopAtEnd"'), 'song/export status and loop controls must be relocated into Audio Motion without a bottom strip');
+assert(html.includes('openVISOFilePicker')&&html.includes("$('bI').onclick=()=>openVISOFilePicker('fI')"), 'Media Photo must open the native picker directly from the tap handler');
 
 const specNormAuditStart = html.indexOf('function drawSpectrum(ctx,scale)');
 const spectrumLayerStart = html.indexOf('function drawSpectrumLayer(ctx,scale,layer', specNormAuditStart);
@@ -520,7 +520,7 @@ assert(textLayerAudit.includes('class="textTypeButton"')&&textLayerAudit.include
 assert(html.includes('extraTextLayers:extraTextLayers.map(layer=>({...layer}))')&&html.includes('extraTextLayers=Array.isArray(d.extraTextLayers)'),'independent text layers must persist and restore');
 assert(html.includes('logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor'),'Logo shape, vinyl, colour key and ink settings must be captured in project state');
 assert(html.includes("logoArtworkShape=d.logoArtworkShape||'original'")&&html.includes("$('logoArtworkShape').value=logoArtworkShape"),'Logo settings must restore into state and controls');
-assert(html.includes("$('bLogo').onclick=()=>{snap();$('fLogo').click();}")&&html.includes("VISO_ASSET_FILES[key]=e.target.files?.[0]||null"),'Logo upload must retain its original file for editable project packages');
+assert(html.includes("$('bLogo').onclick=()=>openVISOFilePicker('fLogo')")&&html.includes("VISO_ASSET_FILES[key]=e.target.files?.[0]||null"),'Logo upload must open the native picker and retain its original file for editable project packages');
 assert(html.includes("objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,alpha:o.alpha,glow:o.glow,outline:o.outline"),'Sticker transform/effect state must be serialized per independent object layer');
 assert(html.includes("function bindStickerControl(id,key,convert=v=>v)")&&html.includes("el.addEventListener('pointerdown',()=>snap())"),'Sticker edits must participate in undo snapshots');
 assert(html.includes("...(objects.map((o,i)=>['overlay-'+i,o.file||VISO_ASSET_FILES.overlays[i]||null]))")&&html.includes("if(overlayAssetCount!==objects.length)"),'each Sticker source image must be embedded in project packages');
@@ -595,7 +595,10 @@ assert(html.includes("MODES.findIndex(mode=>mode.name==='Dust')")&&html.includes
 for(const [id,state] of [['bVhs','vhsOn'],['bShock','shockOn'],['bLens','lensOn'],['bFilm','filmOn'],['bAtmosphere','atmosphereOn'],['bSurfaceReflection','surfaceReflectionOn'],['bVig','vigOn'],['bProg','progOn']])assert(html.includes("$('"+id+"').onclick=e=>{snap();"+state+"=!"+state+";"),id+' must snapshot before toggling its effect');
 
 for(const [id,state] of [['bBgDrift','bgDriftOn'],['bDriftBeat','bgBeatSync'],['bBgViz','bgViz']])assert(html.includes("$('"+id+"').onclick=e=>{snap();"+state+"=!"+state+";"),id+' must snapshot before changing Background state');
-for(const id of ['bBgX','bBgI','bBgV','bI','bV','bA','bLogo','bLogoX','bFont'])assert(html.includes("$('"+id+"').onclick=()=>{snap();"),id+' must snapshot before clearing or replacing an imported asset');
+for(const [button,input] of [['bBgI','fBgI'],['bBgV','fBgV'],['bI','fI'],['bV','fV'],['bA','fA'],['bLogo','fLogo'],['bFont','fFont']])assert(html.includes("$('"+button+"').onclick=()=>openVISOFilePicker('"+input+"')"),button+' must launch its Android file picker directly from the tap handler');
+assert(html.includes("input[type=file]{position:fixed!important;left:-10000px!important;")&&html.includes("if(typeof input.showPicker==='function'){input.showPicker();return;}"),'file inputs must remain WebView-picker compatible and use showPicker with click fallback');
+for(const id of ['fBgI','fBgV','fI','fV','fA','fLogo'])assert(html.includes("$('"+id+"').onchange=e=>{const f=e.target.files[0];if(!f)return;snap();"),id+' must snapshot after a file is actually selected');
+assert(html.includes("$('bBgX').onclick=()=>{snap();")&&html.includes("$('bLogoX').onclick=()=>{snap();"),'asset removal must remain undoable');
 
 for(const [id,state] of [['tBg','bgOn'],['tPh','phOn'],['tMask','maskOn'],['tBvm','bgVizMask']])assert(html.includes("$('"+id+"').onclick=e=>{snap();"+state+"=!"+state+";"),id+' must snapshot before toggling the media stage');
 for(const id of ['bL','bRt','bU','bD','bBig','bSm','bMediaClear','mL','mR','mU','mD','mBig','mSm','mRot','mRst','bZup','bZdn'])assert(html.includes("$('"+id+"').onclick=()=>{snap();"),id+' must snapshot before changing media/mask transform state');
