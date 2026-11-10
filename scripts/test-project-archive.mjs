@@ -18,9 +18,9 @@ assert(html.includes("const SPEC_RANGES=[['full','Full'],['low','Low'],['balance
 const paintStart=html.indexOf('function paintLayer('),paintEnd=html.indexOf('\nfunction ',paintStart+20);
 const paintSource=html.slice(paintStart,paintEnd);
 assert(!paintSource.includes('drawSpectrum('), 'spectrum must not be redundantly rendered inside reusable background/media paint layers');
-const frameStart=html.indexOf('function frame(t)'),frameEnd=html.indexOf('\n// VISO advanced studio modules',frameStart);
-const frameSource=html.slice(frameStart,frameEnd);
-assert.equal((frameSource.match(/drawSpectrum\(x,1\)/g)||[]).length,1,'spectrum must render exactly once in the unified frame pipeline');
+const singlePassFrameStart=html.indexOf('function frame(t)'),singlePassFrameEnd=html.indexOf('\n// VISO advanced studio modules',singlePassFrameStart);
+const singlePassFrameSource=html.slice(singlePassFrameStart,singlePassFrameEnd);
+assert.equal((singlePassFrameSource.match(/drawSpectrum\(x,1\)/g)||[]).length,1,'spectrum must render exactly once in the unified frame pipeline');
 assert(html.includes('id="toolDockNav"'), 'editor must expose a horizontal tool dock');
 assert(html.includes('function activateDockPanel(panel)'), 'tool dock must activate one focused control panel at a time');
 assert(html.includes('#bar>.panel.dock-active{display:flex!important}'), 'only the selected tool panel should occupy the editor dock');
