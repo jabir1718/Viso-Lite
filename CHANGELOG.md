@@ -11,6 +11,7 @@ Detailed history and status are in `PROJECT_ROADMAP.md`.
 - Added per-layer spin enable/force/momentum/speed.
 - Added shake, wave delay/time, reverse wave, wave colour modes and bounded trail history.
 - Reused fixed-size wave buffer to avoid per-frame allocations.
-- CI #278 passed on `0f8ad3028a5d5ff09d1f3cb94940cacdca347fd3`; artifact ID `13779639787`.
-- Earlier Ring renderer assertion failures were corrected and superseded by successful later CI.
+- Wired Spectrum edits into undo snapshots and advanced project state capture/restore.
+- CI #289 passed on `af0164f48ffd0a34ad91d015c893262920531454`.
+- Verified APK artifact ID `13781557416`; APK SHA-256 `8cafe76ae1ecdb0fb97e45232583d35ff6f51094aadcc81e3bdc044af508287e`.
 - Device QA and full feature parity remain pending.
