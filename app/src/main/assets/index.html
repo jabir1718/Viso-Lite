@@ -894,7 +894,7 @@ $('bMix').onclick=()=>{snap();colors=[];const n=2+((Math.random()*2)|0);
   bloom=.35+Math.random()*.5;drawMixers();};
 $('bRand').onclick=()=>{scatter(500);};
 
-function bind(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);el.onchange=()=>snap();}
+function bind(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);}
 bind('sCut',v=>{cut=v;maskDirty=true;});bind('sFea',v=>{fea=v;maskDirty=true;});
 bind('sPow',v=>pow=v);bind('sPho',v=>pho=v);bind('sDep',v=>dep=v);
 bind('sTrl',v=>trla=v);bind('sShk',v=>shk=v);bind('sPnc',v=>pnc=v);
@@ -1104,6 +1104,8 @@ function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are int
 function snap(){if(restoringState)return;const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
   if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
   redo.forEach(old=>objectSnapshotCache.delete(old));redo.length=0;}
+$('bar').addEventListener('pointerdown',e=>{if(e.target.matches('input,select,textarea'))snap();},true);
+$('bar').addEventListener('focusin',e=>{if(e.target.matches('input,select,textarea'))snap();},true);
 function apply(s){const d=JSON.parse(s),previousRestoringState=restoringState;restoringState=true;try{
   restoreVISOAutoState(d);
   extraTextLayers=Array.isArray(d.extraTextLayers)?d.extraTextLayers.slice(0,100).map(layer=>({...layer})):[];nextExtraTextId=Math.max(1,Number(d.nextExtraTextId)||extraTextLayers.length+1);renderExtraTextLayerControls();
