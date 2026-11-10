@@ -12,17 +12,24 @@ Permanent roadmap: `PROJECT_ROADMAP.md`
 - Per-layer spin enable/force/momentum/speed.
 - Spectrum shake, wave delay/time, reverse wave, spectrum/rainbow/solid wave gradient.
 - Bounded 4-frame trail history with adjustable strength; fixed-size reusable wave buffer.
-- New settings are wired to renderer and advanced state capture/restore; regression tests cover control/state/render integration.
-- Latest verified CI: run #278, ID `42851839470`, exact commit `0f8ad3028a5d5ff09d1f3cb94940cacdca347fd3`, success.
-- Latest APK artifact ID: `13779639787`; must still be downloaded and checked before final release.
-- Older failures #272–#275 were stale Ring-renderer test assertions; corrected checks and later runs #276–#278 passed.
+- All new Spectrum settings are in advanced project state capture/restore. Spectrum sliders, toggles, colour/select controls and per-layer controls capture undo snapshots before edits.
+- Regression tests cover control presence, renderer/state wiring, restore and undo hooks.
+
+## Latest verified CI and APK
+- Latest test commit: `af0164f48ffd0a34ad91d015c893262920531454`.
+- CI run #289, ID `42853217150`, conclusion **success**. Run #288 (feature code) also succeeded.
+- APK artifact ID: `13781557416`, `VISO-Studio-advanced-debug-apk`.
+- Downloaded outer ZIP and inner APK ZIP both passed integrity checks.
+- APK size: 84,492,415 bytes. APK SHA-256: `8cafe76ae1ecdb0fb97e45232583d35ff6f51094aadcc81e3bdc044af508287e`.
+- APK contains `assets/index.html` (273,301 bytes); workflow packaged APK verification passed.
+- Physical-device install/runtime QA is not performed.
 
 ## Dock architecture
 12 bottom dock groups: Media, Logo, Audio, Text, Visualizer, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video. Background Video last; panels above dock; Export top-right.
 
 ## Not complete
-- Validate spectrum trail visually/performance; add undo/redo coverage for all newly added Spectrum settings.
 - Audit remaining material-specific visualizer controls and exact Aspectrum parity.
+- Verify spectrum trail visual quality/performance on device.
 - Full end-to-end audit of Audio, Logo, Text, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video and original VISO features.
 - Project/template asset round-trip, preview/export parity, video/audio sync and full export verification.
 - Physical Android QA: install, media selection, playback, export, touch/layout, heat/battery, startup/stability.
