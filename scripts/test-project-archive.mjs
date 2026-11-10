@@ -96,6 +96,10 @@ assert(spectrumSource.includes('stride=Math.max(1,Math.ceil(n/32))'), 'Tunnel sp
 assert(spectrumSource.includes('const rows=10'), 'LED spectrum must use a mobile-friendly dot grid');
 assert(spectrumSource.includes('ctx.fillRect(cx-len,yl,len,bh*.86);ctx.fillRect(cx,yr,len,bh*.86)'), 'Dual spectrum bars must extend horizontally from the centre');
 assert(html.includes('id="sLogoPulse"'), 'custom logo audio-reactive size control must exist');
+assert(['specShape','specStyle','specSymmetry','specMaterial','specLayerMode','specLayerBlend','sSpecResolution'].every(id=>html.includes('id="'+id+'"')), 'Visualizer must expose shape, style, symmetry, material, layer mode, blend and resolution controls');
+assert(html.includes('const SPEC_N=200;')&&html.includes('max="200" value="48"'), 'Visualizer resolution and bar count must support 1–200');
+assert(html.includes("if(specMaterial==='fire')")&&html.includes("specLayerBlend==='additive'?'lighter':'source-over'"), 'Visualizer material and blend settings must affect rendering');
+assert(html.includes("if(['flats','square','ncs'].includes(specShape))"), 'Flats, Square and NCS must use dedicated geometry renderers');
 assert(!html.includes('return {autoOn,autoEvery,lockChip:'), 'removed Auto + Lock controls must not be saved into new projects');
 assert(html.includes('function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are intentionally ignored when opening older projects. */}'), 'legacy Auto + Lock project data must be safely ignored');
 assert(html.includes("$('bLoop').onclick=()=>{snap();loopSong=!loopSong"), 'song loop toggle must participate in undo history');
