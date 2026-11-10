@@ -41,7 +41,7 @@ Permanent roadmap: `PROJECT_ROADMAP.md`
 - Fixed mode-object lookup to use `MODES.findIndex(mode=>mode.name===...)` in bind, sync, restore and reset paths. Earlier string `indexOf` lookups silently returned -1 because MODES is an array of objects.
 - Undo: delegated pre-edit snapshots now cover dynamically added inputs, selects, textareas, ranges and colour controls. Generic sliders no longer snapshot after the value has changed. Removed the blanket click snapshot on every button because tool navigation/no-op clicks created redundant undo steps.
 - Explicit pre-edit undo snapshots added/fixed for Elements/Visuals, Overlay FX toggles, media/mask transforms, media and background uploads/removal, Logo/font uploads/removal, custom canvas size, Audio 8D/pitch/loop, BPM detection/tap, Stop-at-song-end and Spectrum enable.
-- Hidden search/favourites remnants removed from CSS and icon injection. No search bar, favourites or Auto+Lock controls are exposed; legacy Auto/Lock project fields are ignored for backwards compatibility.
+- Search/favourites clutter remains removed. The original Auto + Lock panel is restored: AUTO is wired to the live autoStep timer; Every controls its interval; colour/visual/shape/sway locks are mutable and functional. Regression tests require these original controls.
 - Export fix from source commit `30cd181e8fc716e464eb91820354c912d5788687`: recording canvas is resized to actual render dimensions before capture; normal visualizer export up to 1080p, heavy Tunnel/Mirror/Dual up to 720p; bitrate and displayed dimensions reflect actual output.
 - Android save bridge source audit: WebView exposes chunked `AndroidSave` methods; Kotlin writes videos/images/other files to MediaStore Movies/Pictures/Downloads under `Viso` on Android 10+, and to app-specific external folders on older versions. File chooser supports document picking. Static source audit only; device save test remains pending.
 - CI workflow run #393, ID `42863166776`, exact head commit `d46e18474e08cfa33feb0e71806168145a84d851`, conclusion **success**.
@@ -57,8 +57,8 @@ Permanent roadmap: `PROJECT_ROADMAP.md`
 - CI run #397, ID 42869821850, exact head d7244b358705fd9db414c5d1b3175e5d94932de1: HTML/JS validation and project archive tests passed; Android Gradle/APK build is currently in progress. Do not call this build successful until the run completes.
 - Template audit: layout filters are Landscape, Portrait and Downloaded; no template search input/identifier remains. Existing CI asserts search absence, filter logic, downloaded persistence, portrait gallery layout and editable project package selection. This is source/automated-test verification, not hands-on UI QA.
 
-## Dock architecture
-12 bottom dock groups: Media, Logo, Audio, Text, Visualizer, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video. Background Video last; panels above dock; Export top-right.
+## Recovered editor layout
+The original independent, vertically scrollable editor panels are restored; the one-panel-at-a-time bottom dock is not used. Original Media/Export/Background/Auto + Lock/Look/Visuals/Colour/Mask/Lights/Layers/Position/Text/Audio panels remain available. Song & Export Monitor sits beneath the canvas with song timer, export status, Loop Song and Stop Export at Song End. Top Undo/Redo/Export actions remain.
 
 ## Not complete
 - Audit remaining material-specific visualizer controls and exact Aspectrum parity.
@@ -73,3 +73,12 @@ Permanent roadmap: `PROJECT_ROADMAP.md`
 - No interim APK testing request; owner tests once at final handoff.
 - CI success is not device QA.
 - Update roadmap/status/next step after milestones.
+
+
+## Full original editor recovery — CI #414
+- Original baseline commit `5b6fa6c269df5332a02bbc463ab8a7067d2fa28f` recovered without overwriting `main`; all 130 original element IDs are present.
+- AUTO + Lock controls, full Song & Export Monitor, original separate panels and original Media PNG controls restored; no watermark.
+- Current recovery branch: `viso/recover-original-full-editor`, head `c98195099541294d11e1fd606472463f00b6ecb0`.
+- CI run #414 `42887881938`: HTML/JS, archive tests, Android build, packaged APK verification and upload all successful.
+- APK SHA-256: `7e881514a7ee7ae7008ec3583d455524d5d4b0a11c0ed6abd27d7444ae56bdf2`; artifact ID `13797372054`.
+- Device QA remains open; this is not a production-signed release.
