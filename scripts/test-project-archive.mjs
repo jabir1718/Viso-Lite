@@ -596,6 +596,8 @@ for(const [id,state] of [['bVhs','vhsOn'],['bShock','shockOn'],['bLens','lensOn'
 
 for(const [id,state] of [['bBgDrift','bgDriftOn'],['bDriftBeat','bgBeatSync'],['bBgViz','bgViz']])assert(html.includes("$('"+id+"').onclick=e=>{snap();"+state+"=!"+state+";"),id+' must snapshot before changing Background state');
 for(const [button,input] of [['bBgI','fBgI'],['bBgV','fBgV'],['bI','fI'],['bV','fV'],['bA','fA'],['bLogo','fLogo'],['bFont','fFont']])assert(html.includes("$('"+button+"').onclick=()=>openVISOFilePicker('"+input+"')"),button+' must launch its Android file picker directly from the tap handler');
+assert(html.includes("$('bO').onclick=()=>openVISOFilePicker('fO')")&&html.includes("$('bProjectOpen').onclick=()=>openVISOFilePicker('fProjectOpen')"),'PNG overlay and .viso project import must use the same native file picker helper');
+assert(html.includes("input.value=''")&&html.includes("input.click();"),'file picker must reset the input to allow selecting the same file again and retain a click fallback');
 assert(html.includes("input[type=file]{position:fixed!important;left:-10000px!important;")&&html.includes("if(typeof input.showPicker==='function'){input.showPicker();return;}"),'file inputs must remain WebView-picker compatible and use showPicker with click fallback');
 for(const id of ['fBgI','fBgV','fI','fV','fA','fLogo'])assert(html.includes("$('"+id+"').onchange=e=>{const f=e.target.files[0];if(!f)return;snap();"),id+' must snapshot after a file is actually selected');
 assert(html.includes("$('bBgX').onclick=()=>{snap();")&&html.includes("$('bLogoX').onclick=()=>{snap();"),'asset removal must remain undoable');
