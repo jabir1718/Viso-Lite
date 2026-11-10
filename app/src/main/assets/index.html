@@ -2814,9 +2814,9 @@ async function restoreVISOProjectAssets(project,entries){
   finally{URL.revokeObjectURL(url);}
   prepared.push({img:im,file,saved:layerState.objects?.[i]||{}});
  }
- clearVISOAssets();
  let preparedFont=null,fontFile=null;
  if(byKind.font){fontFile=makeFile(byKind.font);preparedFont=await prepareVISOFont(fontFile);}
+ clearVISOAssets();
  for(const [kind,id] of [['audio','fA'],['media-image','fI'],['media-video','fV'],['background-image','fBgI'],['background-video','fBgV'],['logo','fLogo']]){
   if(byKind[kind])visoSetInputFile(id,makeFile(byKind[kind]));
  }
