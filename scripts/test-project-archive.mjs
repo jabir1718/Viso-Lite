@@ -500,4 +500,11 @@ const spectrumStyleAudit=html.slice(spectrumStyleAuditStart,spectrumStyleAuditEn
 assert(spectrumStyleAudit.includes("if(specStyle==='point')"),'Point style must draw point markers');
 assert(spectrumStyleAudit.includes("else if(specStyle==='solid')"),'Solid style must draw a filled spectrum region');
 assert(spectrumStyleAudit.split('drawSpectrumStyleFinish(ctx,n,col,val,thick)').length-1>=2,'style finish must apply to both flat and general shape renderers');
+
+const spectrumSymmetryAuditStart=html.indexOf('function drawSpectrumLayer(ctx,scale,layer,isTrail=false)');
+const spectrumSymmetryAuditEnd=html.indexOf('function drawSpectrumLayerGeometry(',spectrumSymmetryAuditStart);
+assert(spectrumSymmetryAuditStart>=0&&spectrumSymmetryAuditEnd>spectrumSymmetryAuditStart,'shared Spectrum symmetry wrapper must exist');
+const spectrumSymmetryAudit=html.slice(spectrumSymmetryAuditStart,spectrumSymmetryAuditEnd);
+for(const mode of ["mode==='x'","mode==='xy'","mode==='across'","mode==='triple-x'"])assert(spectrumSymmetryAudit.includes(mode),'missing symmetry mode '+mode);
+assert(spectrumSymmetryAudit.includes('drawSpectrumLayerGeometry(ctx,scale,layer,isTrail)'),'all Spectrum shapes must pass through shared symmetry rendering');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
