@@ -422,7 +422,8 @@ $('fA').onchange=e=>{const f=e.target.files[0];if(!f)return;
   an=ctxA.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.7;
   s.connect(an);an.connect(ctxA.destination);
   streamDest=ctxA.createMediaStreamDestination();an.connect(streamDest);
-  buf=new Uint8Array(an.frequencyBinCount);playing=false;$('bP').textContent='Play';};
+  buf=new Uint8Array(an.frequencyBinCount);playing=false;$('bP').textContent='Play';
+  audio.onended=()=>{if(exportingFullSong&&rec&&rec.state==='recording')rec.stop();playing=false;$('bP').textContent='Play';};};
 $('bP').onclick=async()=>{if(!audio)return;
   if(ctxA.state==='suspended')await ctxA.resume();
   if(playing){audio.pause();vid.pause();bvid.pause();playing=false;$('bP').textContent='Play';}
@@ -460,7 +461,6 @@ $('bRec').onclick=()=>{
   if(!startRecorder(false))return;
   $('bRec').textContent='Stop';$('bRec').classList.remove('prim');
   if(audio&&!playing)$('bP').click();};
-if(audio)audio.onended=()=>{if(exportingFullSong&&rec&&rec.state==='recording')rec.stop();playing=false;$('bP').textContent='Play';};
 
 function snap(){undo.push(JSON.stringify({colors,mstate,shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp}));
   if(undo.length>40)undo.shift();redo.length=0;}
