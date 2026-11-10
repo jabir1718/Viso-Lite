@@ -38,8 +38,10 @@
   .chip{min-height:32px;font-size:10.5px;padding:0 10px;border-radius:9px}
   .template-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
   .template-grid button{min-width:0;min-height:42px;text-align:left;padding:0 10px}
+  #quickExport{position:fixed;top:8px;right:8px;z-index:50;background:#8b35e8;color:#fff;border:1px solid #ffffff55;border-radius:24px;padding:10px 15px;font-weight:700;box-shadow:0 4px 22px #0009}
 </style>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
+<button id="quickExport">Export full song</button>
 <div id="bar">
   <div class="sec"><h4>Social canvas / screen ratio</h4>
     <div class="row" id="ratios">
@@ -429,18 +431,36 @@ $('bP').onclick=async()=>{if(!audio)return;
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000);}
 $('bShot').onclick=()=>c.toBlob(b=>dl(b,'viso_'+Date.now()+'.png'),'image/png');
-let rec=null;
+let rec=null,exportingFullSong=false,exportOldLoop=true;
+function startRecorder(fullSong){
+  if(!window.MediaRecorder||!c.captureStream){alert('Is device par video export supported nahi hai.');return false;}
+  const st=c.captureStream(FPS);if(streamDest)streamDest.stream.getAudioTracks().forEach(t=>st.addTrack(t));
+  const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')?'video/webm;codecs=vp9,opus':'video/webm';
+  try{rec=new MediaRecorder(st,{mimeType:mime,videoBitsPerSecond:BIT});}catch(e){alert('Selected quality is not supported by this device.');return false;}
+  const chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+  rec.onstop=()=>{if(chunks.length)dl(new Blob(chunks,{type:'video/webm'}),'viso_'+(fullSong?'full-song_':'')+Date.now()+'.webm');
+    if(fullSong){audio.loop=exportOldLoop;exportingFullSong=false;$('quickExport').textContent='Export full song';$('bP').textContent='Play';playing=false;}
+    $('bRec').textContent='Record video';$('bRec').classList.add('prim');};
+  rec.start(250);return true;
+}
+$('quickExport').onclick=async()=>{
+  if(!audio){alert('Pehle MP3 select karein.');return;}
+  if(exportingFullSong){if(rec&&rec.state==='recording')rec.stop();return;}
+  if(ctxA&&ctxA.state==='suspended')await ctxA.resume();
+  if(rec&&rec.state==='recording'){alert('Pehle current recording stop karein.');return;}
+  exportOldLoop=audio.loop;audio.loop=false;audio.pause();audio.currentTime=0;
+  exportingFullSong=true;
+  if(!startRecorder(true)){audio.loop=exportOldLoop;exportingFullSong=false;return;}
+  $('quickExport').textContent='Stop export';$('bP').textContent='Pause';
+  try{await audio.play();if(useVid)vid.play();if(bgUseVid)bvid.play();playing=true;}
+  catch(e){if(rec&&rec.state==='recording')rec.stop();alert('Audio start nahi ho saka. Play permission check karein.');}
+};
 $('bRec').onclick=()=>{
   if(rec&&rec.state==='recording'){rec.stop();return;}
-  const st=c.captureStream(FPS);
-  if(streamDest)streamDest.stream.getAudioTracks().forEach(t=>st.addTrack(t));
-  const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')?'video/webm;codecs=vp9,opus':'video/webm';
-  rec=new MediaRecorder(st,{mimeType:mime,videoBitsPerSecond:BIT});
-  const chunks=[];rec.ondataavailable=e=>chunks.push(e.data);
-  rec.onstop=()=>{dl(new Blob(chunks,{type:'video/webm'}),'viso_'+Date.now()+'.webm');
-    $('bRec').textContent='Record video';$('bRec').classList.add('prim');};
-  rec.start(200);$('bRec').textContent='Stop';$('bRec').classList.remove('prim');
+  if(!startRecorder(false))return;
+  $('bRec').textContent='Stop';$('bRec').classList.remove('prim');
   if(audio&&!playing)$('bP').click();};
+if(audio)audio.onended=()=>{if(exportingFullSong&&rec&&rec.state==='recording')rec.stop();playing=false;$('bP').textContent='Play';};
 
 function snap(){undo.push(JSON.stringify({colors,mstate,shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp}));
   if(undo.length>40)undo.shift();redo.length=0;}
