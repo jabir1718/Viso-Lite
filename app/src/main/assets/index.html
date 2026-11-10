@@ -1464,11 +1464,24 @@ $('sLogoGlow').oninput=e=>logoGlow=+e.target.value;$('sLogoBounce').oninput=e=>l
 $('fLogo').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{logoImg=im;};im.src=URL.createObjectURL(f);};
 $('bLogoX').onclick=()=>{logoImg=null;};
 $('bFont').onclick=()=>$('fFont').click();
-$('fFont').onchange=async e=>{const f=e.target.files[0];if(!f)return;
-  try{const ff=new FontFace('UserFont'+Date.now(),await f.arrayBuffer());await ff.load();document.fonts.add(ff);
-    const op=document.createElement('option');op.value=ff.family;op.textContent=f.name.slice(0,18);
-    $('sTextFont').appendChild(op);$('sTextFont').value=ff.family;$('fontInfo').textContent='Fonts: '+f.name.slice(0,20);}
-  catch(_){$('fontInfo').textContent='Font load failed';}};
+function visoFontFamily(fileName,checksum){
+ const base=String(fileName||'Custom').replace(/\\.[^.]+$/,'').replace(/[^a-zA-Z0-9_-]+/g,'_').slice(0,24)||'Custom';
+ return 'VISOFont_'+base+'_'+(Number(checksum)>>>0).toString(16);
+}
+async function prepareVISOFont(file){
+ const bytes=await file.arrayBuffer(),family=visoFontFamily(file.name,visoCRC32(new Uint8Array(bytes))),face=new FontFace(family,bytes);
+ await face.load();return {family,face};
+}
+function installVISOFont(file,prepared){
+ document.fonts.add(prepared.face);
+ const select=$('sTextFont');let option=Array.from(select.options).find(item=>item.value===prepared.family);
+ if(!option){option=document.createElement('option');option.value=prepared.family;option.textContent=file.name.slice(0,18);select.appendChild(option);}
+ select.value=prepared.family;studioTextFont=prepared.family;VISO_ASSET_FILES.font=file;
+ $('fontInfo').textContent='Fonts: '+file.name.slice(0,20);
+}
+$('fFont').onchange=async e=>{const f=e.target.files[0];if(!f)return;snap();
+ try{const prepared=await prepareVISOFont(f);installVISOFont(f,prepared);}
+ catch(_){VISO_ASSET_FILES.font=null;$('fontInfo').textContent='Font load failed';}};
 function drawVignette(ctx){if(!vigOn)return;
   const g=ctx.createRadialGradient(cx,cy,Math.min(W,H)*.25,cx,cy,Math.max(W,H)*.78);
   g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,'+(vigAmt/100*.92)+')');
@@ -2236,13 +2249,17 @@ async function restoreVISOProjectAssets(project,entries){
   prepared.push({img:im,file,saved:layerState.objects?.[i]||{}});
  }
  clearVISOAssets();
- for(const [kind,id] of [['audio','fA'],['media-image','fI'],['media-video','fV'],['background-image','fBgI'],['background-video','fBgV'],['logo','fLogo'],['font','fFont']]){
+ let preparedFont=null,fontFile=null;
+ if(byKind.font){fontFile=makeFile(byKind.font);preparedFont=await prepareVISOFont(fontFile);}
+ for(const [kind,id] of [['audio','fA'],['media-image','fI'],['media-video','fV'],['background-image','fBgI'],['background-video','fBgV'],['logo','fLogo']]){
   if(byKind[kind])visoSetInputFile(id,makeFile(byKind[kind]));
  }
+ if(fontFile){const transfer=new DataTransfer();transfer.items.add(fontFile);$('fFont').files=transfer.files;installVISOFont(fontFile,preparedFont);}
  prepared.forEach(({img,file,saved})=>objects.push({img,file,x:saved.x??cx,y:saved.y??cy,sc:saved.sc??.32,rot:saved.rot??0,motion:saved.motion||guessMotion(file.name),dir:saved.dir??1,phase:saved.phase??0}));
  (layerState.lights||[]).forEach(l=>lights.push({...l}));
  selObj=objects.length?objects.length-1:-1;maskDirty=true;
  $('templateInfo').textContent='Project restored · '+assets.length+' embedded assets · all imported media and layers are editable';
+ return {fontFamily:preparedFont?.family||null};
 }
 $('bProjectSave').onclick=async()=>{try{await downloadVISOProject(collectVisoProject(),'VISO-project.viso');$('templateInfo').textContent='Complete editable VISO project package saved';}catch(err){$('templateInfo').textContent='Project save failed: '+err.message;}};
 $('bProjectOpen').onclick=()=>$('fProjectOpen').click();
@@ -2254,7 +2271,11 @@ $('fProjectOpen').onchange=async e=>{
   if(bytes[0]===0x50&&bytes[1]===0x4b){entries=visoUnzip(bytes);if(!entries['project.json'])throw new Error('project.json missing');project=JSON.parse(new TextDecoder().decode(entries['project.json']));}
   else project=JSON.parse(new TextDecoder().decode(bytes));
   validateVISOProjectManifest(project,entries);
-  if(project.schema==='viso-project-v3')await restoreVISOProjectAssets(project,entries);
+  if(project.schema==='viso-project-v3'){
+   const restoredAssets=await restoreVISOProjectAssets(project,entries);
+   if(project.settings?.state){if(restoredAssets.fontFamily)project.settings.state.studioTextFont=restoredAssets.fontFamily;
+    else if(/^UserFont|^VISOFont_/.test(project.settings.state.studioTextFont||''))project.settings.state.studioTextFont='system-ui';}
+  }
   applyVisoProject(project);
   undo.length=0;redo.length=0;objectSnapshotCache.clear();
  }catch(err){$('templateInfo').textContent='Could not open project: '+err.message;}
