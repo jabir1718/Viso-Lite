@@ -1026,13 +1026,14 @@ function restoreVISOExportState(d){
  fmtButton.textContent=formatChoice==='auto'?'Auto format':'WebM';fmtButton.classList.toggle('on',formatChoice==='auto');
  setRes();
 }
-function captureProjectState(){return {elementsLightOn,logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor,turningPoints:turningPoints.map(p=>({...p})),turningTransition,turningDuration,metronomeSoundOn,metronomeVolume,exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
+function captureProjectState(){return {extraTextLayers:extraTextLayers.map(layer=>({...layer})),nextExtraTextId,elementsLightOn,logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor,turningPoints:turningPoints.map(p=>({...p})),turningTransition,turningDuration,metronomeSoundOn,metronomeVolume,exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
 function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are intentionally ignored when opening older projects. */}
 function snap(){if(restoringState)return;const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
   if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
   redo.forEach(old=>objectSnapshotCache.delete(old));redo.length=0;}
 function apply(s){const d=JSON.parse(s),previousRestoringState=restoringState;restoringState=true;try{
   restoreVISOAutoState(d);
+  extraTextLayers=Array.isArray(d.extraTextLayers)?d.extraTextLayers.slice(0,100).map(layer=>({...layer})):[];nextExtraTextId=Math.max(1,Number(d.nextExtraTextId)||extraTextLayers.length+1);renderExtraTextLayerControls();
   elementsLightOn=d.elementsLightOn!==undefined?!!d.elementsLightOn:true;$('bElementLight').checked=elementsLightOn;$('bElementParticles').checked=!!mstate[MODES.indexOf('Dust')]?.on;$('bElementSparkles').checked=!!mstate[MODES.indexOf('Sparkle')]?.on;$('bElementReactiveFrame').checked=!!d.frOn;
   logoArtworkShape=d.logoArtworkShape||'original';logoVinyl=!!d.logoVinyl;logoVinylSpeed=Math.max(0,Math.min(100,Number(d.logoVinylSpeed)||28));logoColorKeyOn=!!d.logoColorKeyOn;logoColorKey=d.logoColorKey||'#00ff00';logoColorKeyTolerance=Math.max(0,Math.min(100,Number(d.logoColorKeyTolerance)||24));logoInkOn=!!d.logoInkOn;logoInkAmount=Math.max(0,Math.min(100,Number.isFinite(Number(d.logoInkAmount))?Number(d.logoInkAmount):35));logoInkColor=d.logoInkColor||'#70e7d4';rebuildLogoColorKey();$('logoArtworkShape').value=logoArtworkShape;$('bLogoVinyl').checked=logoVinyl;$('sLogoVinylSpeed').value=logoVinylSpeed;$('bLogoColorKey').checked=logoColorKeyOn;$('logoColorKeyColor').value=logoColorKey;$('sLogoColorKeyTolerance').value=logoColorKeyTolerance;$('bLogoInk').checked=logoInkOn;$('sLogoInkAmount').value=logoInkAmount;$('logoInkColor').value=logoInkColor;
   turningPoints=Array.isArray(d.turningPoints)?d.turningPoints.filter(p=>p&&Number.isFinite(Number(p.time))).map(p=>({time:Math.max(0,Number(p.time)),type:String(p.type||'fade'),duration:Math.max(200,Math.min(3000,Number(p.duration)||800))})):[];turningTransition=d.turningTransition||'fade';turningDuration=Math.max(200,Math.min(3000,Number(d.turningDuration)||800));metronomeSoundOn=!!d.metronomeSoundOn;metronomeVolume=Math.max(0,Math.min(100,Number.isFinite(Number(d.metronomeVolume))?Number(d.metronomeVolume):45));selectedTurningPoint=-1;renderTurningPointList();$('sTurningTransition').value=turningTransition;$('sTurningDuration').value=turningDuration;$('bMetronomeSound').checked=metronomeSoundOn;$('sMetronomeVolume').value=metronomeVolume;$('bTempoSyncBar').checked=beatMarkersOn;
@@ -1110,6 +1111,7 @@ function bindStudio2(id,fn){const el=$(id);el.oninput=e=>fn(e.target.type==='ran
 bindStudio2('sText2Size',v=>studioText2Size=v);bindStudio2('sText2Pos',v=>studioText2Pos=v);bindStudio2('sText2Alpha',v=>studioText2Alpha=v);bindStudio2('studioText2Color',v=>studioText2Color=v);bindStudio2('sText2X',v=>studioText2X=v);bindStudio2('sText2Rot',v=>studioText2Rot=v);bindStudio2('sText2Stroke',v=>studioText2Stroke=v);bindStudio2('sText2Glow',v=>studioText2Glow=v);
 $('sText2Anim').onchange=e=>{snap();studioText2Anim=e.target.value;};$('sText2Align').onchange=e=>{snap();studioText2Align=e.target.value;};
 $('bText2Plate').onclick=e=>{snap();studioText2Plate=!studioText2Plate;e.currentTarget.textContent='Text 2 plate: '+(studioText2Plate?'ON':'OFF');e.currentTarget.classList.toggle('on',studioText2Plate);};
+$('bAddTextLayer').onclick=()=>{snap();createExtraTextLayer();};
 
 const PRESET_KEY='viso_studio_preset_v2';
 function selectedPresetKey(){return PRESET_KEY+'_slot_'+$('studioPresetSlot').value;}
@@ -1548,9 +1550,49 @@ function drawStudioTextLayer(ctx,b,textValue,enabled,sizeValue,posValue,alphaVal
  if(strokeValue>0)ctx.strokeText(label,0,0);
  ctx.fillStyle=colorValue;ctx.fillText(label,0,0);ctx.restore();
 }
+function drawExtraTextLayers(ctx,b){
+ const bass=b[0]||0;
+ extraTextLayers.forEach(layer=>{
+  if(!layer.enabled)return;
+  const value=layer.timer?formatStudioTimer():String(layer.text||'').trim();if(!value)return;
+  const size=Math.max(12,H*(Number(layer.size||48)/1000)),weight=layer.style==='regular'?'500':'800';
+  ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,Number(layer.alpha??100)/100));
+  ctx.translate(W*layer.x/100,H*layer.y/100);ctx.rotate(Number(layer.rotation||0)*Math.PI/180);
+  ctx.font=weight+' '+size+'px "'+(layer.font==='custom'?studioTextFont:layer.font||'system-ui')+'", sans-serif';ctx.textAlign=layer.align||'center';ctx.textBaseline='middle';
+  let fitted=size;while(ctx.measureText(value).width>W*.84&&fitted>12){fitted*=.94;ctx.font=weight+' '+fitted+'px "'+(layer.font==='custom'?studioTextFont:layer.font||'system-ui')+'", sans-serif';}
+  const width=ctx.measureText(value).width;
+  if(layer.style==='plate'){ctx.save();ctx.shadowBlur=0;ctx.fillStyle='rgba(8,18,30,.68)';const left=layer.align==='left'?0:layer.align==='right'?-width:-width/2;ctx.beginPath();ctx.roundRect(left-fitted*.16,-fitted*.62,width+fitted*.32,fitted*1.24,fitted*.14);ctx.fill();ctx.restore();}
+  ctx.lineJoin='round';ctx.shadowColor=layer.color||'#ffffff';ctx.shadowBlur=Math.max(0,Number(layer.shadow||0)+Number(layer.glow||0)+bass*Number(layer.glow||0)*.55);
+  if(layer.style==='outline'||layer.style==='neon'){ctx.lineWidth=Math.max(1,fitted*.045);ctx.strokeStyle=layer.color||'#ffffff';ctx.strokeText(value,0,0);}
+  ctx.fillStyle=layer.color||'#ffffff';ctx.fillText(value,0,0);ctx.restore();
+ });
+}
+function formatStudioTimer(){const seconds=Math.max(0,Math.floor(audio?.currentTime||0));return Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');}
+function renderExtraTextLayerControls(){
+ const root=$('extraTextLayers');if(!root)return;root.innerHTML='';
+ extraTextLayers.forEach(layer=>{
+  const card=document.createElement('div');card.className='extraTextCard';card.dataset.layerId=layer.id;
+  card.innerHTML='<div class="row extraTextTop"><button type="button" class="textTypeButton" data-focus>T</button><input type="text" data-field="text" maxlength="120" placeholder="Type your text"><button type="button" data-remove aria-label="Remove text">×</button></div><label><span>Enabled</span><input type="checkbox" data-field="enabled"></label><label><span>Song timer</span><input type="checkbox" data-field="timer"></label><label><span>Font</span><select data-field="font"><option value="system-ui">Modern</option><option value="Arial">Clean</option><option value="Georgia">Serif</option><option value="monospace">Typewriter</option><option value="Impact">Heavy</option><option value="custom">Custom font</option></select></label><label><span>Font style</span><select data-field="style"><option value="regular">Regular</option><option value="bold">Bold</option><option value="outline">Outline</option><option value="neon">Neon</option><option value="plate">Text plate</option></select></label><label><span>Colour</span><input type="color" data-field="color"></label><label><span>Alignment</span><select data-field="align"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></label><label><span>Position X</span><input type="range" min="0" max="100" data-field="x"></label><label><span>Position Y</span><input type="range" min="0" max="100" data-field="y"></label><label><span>Size</span><input type="range" min="10" max="110" data-field="size"></label><label><span>Rotation</span><input type="range" min="-180" max="180" data-field="rotation"></label><label><span>Opacity</span><input type="range" min="0" max="100" data-field="alpha"></label><label><span>Glow</span><input type="range" min="0" max="80" data-field="glow"></label><label><span>Shadow</span><input type="range" min="0" max="80" data-field="shadow"></label>';
+  root.appendChild(card);
+  card.querySelector('[data-field="text"]').value=layer.text||'';
+  card.querySelectorAll('[data-field]').forEach(control=>{const key=control.dataset.field;if(control.type==='checkbox')control.checked=!!layer[key];else control.value=layer[key]??'';
+   control.addEventListener('input',()=>{layer[key]=control.type==='checkbox'?control.checked:control.type==='range'?Number(control.value):control.value;});
+   control.addEventListener('change',()=>{layer[key]=control.type==='checkbox'?control.checked:control.type==='range'?Number(control.value):control.value;snap();});
+  });
+  card.querySelector('[data-focus]').onclick=()=>card.querySelector('[data-field="text"]').focus();
+  card.querySelector('[data-remove]').onclick=()=>{snap();extraTextLayers=extraTextLayers.filter(item=>item.id!==layer.id);renderExtraTextLayerControls();};
+ });
+}
+function createExtraTextLayer(seed={}){
+ if(extraTextLayers.length>=100){$('presetInfo').textContent='Maximum 100 extra text layers reached.';return;}
+ const id=seed.id||'text-'+(nextExtraTextId++);
+ extraTextLayers.push({id,text:'New text',enabled:true,timer:false,font:'system-ui',style:'bold',color:'#ffffff',align:'center',x:50,y:50,size:48,rotation:0,alpha:100,glow:18,shadow:12,...seed,id});
+ renderExtraTextLayerControls();
+}
 function drawStudioText(ctx,b){
  drawStudioTextLayer(ctx,b,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextAlign,studioTextPlate);
  drawStudioTextLayer(ctx,b,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate);
+ drawExtraTextLayers(ctx,b);
 }
 function drawLights(ctx){
   if(!elementsLightOn)return;
@@ -2446,6 +2488,7 @@ function restoreAdvancedState(s){
  updateBpm();applySpeedPitch();apply8d();
 }
 function resetVISOAdvancedControls(){
+ extraTextLayers=[];nextExtraTextId=1;renderExtraTextLayerControls();
  elementsLightOn=true;$('bElementLight').checked=true;$('bElementParticles').checked=true;$('bElementSparkles').checked=false;$('bElementReactiveFrame').checked=false;
  logoArtworkShape='original';logoVinyl=false;logoVinylSpeed=28;logoColorKeyOn=false;logoColorKey='#00ff00';logoColorKeyTolerance=24;logoInkOn=false;logoInkAmount=35;logoInkColor='#70e7d4';$('logoArtworkShape').value=logoArtworkShape;$('bLogoVinyl').checked=false;$('sLogoVinylSpeed').value=28;$('bLogoColorKey').checked=false;$('logoColorKeyColor').value=logoColorKey;$('sLogoColorKeyTolerance').value=24;$('bLogoInk').checked=false;$('sLogoInkAmount').value=35;$('logoInkColor').value=logoInkColor;rebuildLogoColorKey();
  restoreAdvancedState({speed:100,pitchSemis:0,pitchLock:true,eightD:false,eightW:80,eightS:22,eightR:22,bpm:0,beatFlash:0,flashAmt:0,driftAmt:0,sym:'off',
