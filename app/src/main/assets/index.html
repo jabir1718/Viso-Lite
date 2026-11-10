@@ -66,6 +66,16 @@
       <button id="bP" class="prim">Play</button><button id="bR">Center</button>
     </div>
   </div>
+  <div class="sec"><h4>Center logo spectrum</h4>
+    <div class="row"><button id="ctViz" class="on">Center spectrum ON</button>
+      <button class="chip on" data-ctstyle="bars">Radial bars</button>
+      <button class="chip" data-ctstyle="wave">Wave ring</button>
+      <button class="chip" data-ctstyle="double">Double ring</button></div>
+    <label><span>Logo size</span><input id="ctSize" type="range" min="8" max="42" value="22"></label>
+    <label><span>Beat power</span><input id="ctPower" type="range" min="20" max="260" value="120"></label>
+    <label><span>Glow</span><input id="ctGlow" type="range" min="0" max="80" value="32"></label>
+    <label><span>Spin speed</span><input id="ctSpin" type="range" min="0" max="100" value="24"></label>
+  </div>
   <div class="sec"><h4>Export quality</h4>
     <div class="row" id="res"></div>
     <div class="row" id="fps"></div>
@@ -233,6 +243,7 @@ let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
 let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,bvp=140;
 let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
+let centerVizOn=true,centerVizStyle='bars',centerVizSize=22,centerVizPower=120,centerVizGlow=32,centerVizSpin=24,centerVizAngle=0;
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
@@ -770,6 +781,51 @@ function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
     ctx.strokeRect(-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);}
   ctx.restore();});}
 
+function drawCenterSpectrum(ctx,b,dt){
+  if(!centerVizOn)return;
+  const base=H*(centerVizSize/100),power=centerVizPower/100;
+  const n=96,step=Math.PI*2/n,spin=centerVizSpin/100;
+  centerVizAngle+=dt*.00045*spin;
+  let bins=null;
+  if(an&&playing&&buf){an.getByteFrequencyData(buf);bins=buf;}
+  const hueA=colors[0]||190,hueB=colors[1]||285;
+  const colorAt=(v)=>'hsl('+((hueA+(hueB-hueA)*v+360)%360)+' 100% 66%)';
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(centerVizAngle);
+  ctx.globalCompositeOperation='lighter';
+  ctx.lineCap='round';
+  if(centerVizStyle==='bars'){
+    for(let i=0;i<n;i++){
+      const k=bins?Math.min(1,bins[Math.floor(i/n*bins.length)]/190):(.08+b[0]*.28);
+      const len=(8+k*H*.075*power);
+      const a=i*step,inner=base,outer=base+len;
+      ctx.strokeStyle=colorAt(i/n);ctx.globalAlpha=.55+k*.45;
+      ctx.lineWidth=Math.max(2,H*.0024);
+      ctx.beginPath();ctx.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);
+      ctx.lineTo(Math.cos(a)*outer,Math.sin(a)*outer);ctx.stroke();
+    }
+  }else{
+    const rings=centerVizStyle==='double'?2:1;
+    for(let ring=0;ring<rings;ring++){
+      const radius=base*(ring?1.28:1),direction=ring?-1:1;
+      ctx.beginPath();
+      for(let i=0;i<=n;i++){
+        const k=bins?Math.min(1,bins[Math.floor((i%n)/n*bins.length)]/180):(.08+b[(i%6)]*.25);
+        const a=i*step,amp=centerVizStyle==='wave'?k*H*.045*power:k*H*.028*power;
+        const rr=radius+amp;
+        const px=Math.cos(a)*rr,py=Math.sin(a)*rr;
+        if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+      }
+      ctx.closePath();ctx.strokeStyle=colorAt(ring/(rings||1));ctx.lineWidth=Math.max(3,H*.0035);
+      ctx.globalAlpha=.82;ctx.stroke();
+    }
+  }
+  ctx.globalAlpha=1;ctx.shadowColor=colorAt(.35);ctx.shadowBlur=centerVizGlow;
+  ctx.strokeStyle=colorAt(.35);ctx.lineWidth=Math.max(2,H*.002);
+  ctx.beginPath();ctx.arc(0,0,base*.82,0,Math.PI*2);ctx.stroke();
+  ctx.shadowBlur=0;ctx.fillStyle='rgba(4,3,12,.34)';ctx.beginPath();ctx.arc(0,0,base*.77,0,Math.PI*2);ctx.fill();
+  ctx.restore();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+}
+
 function drawLights(ctx){
   lights.forEach((l,i)=>{
     const px=l.pin>=0&&objects[l.pin]?objects[l.pin].x:l.x;
@@ -871,6 +927,7 @@ function frame(t){
     x.globalCompositeOperation='source-over';
   }
 
+  drawCenterSpectrum(x,b,dt);
   drawObjects(x,b,dt);
   drawLights(x);
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
