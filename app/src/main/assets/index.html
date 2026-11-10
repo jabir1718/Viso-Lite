@@ -693,7 +693,7 @@ let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
-const autoOn=false;const lockChip=Object.freeze({color:false,vis:false,shape:false,sway:false});
+const autoOn=false,autoEvery=3;const lockChip=Object.freeze({color:false,vis:false,shape:false,sway:false});
 const objects=[];let selObj=-1;
 const lights=[];let selLight=-1;let lint=60,lsz=100;
 const undo=[],redo=[],objectSnapshotCache=new Map();
@@ -952,7 +952,7 @@ function restoreVISOExportState(d){
  fmtButton.textContent=formatChoice==='auto'?'Auto format':'WebM';fmtButton.classList.toggle('on',formatChoice==='auto');
  setRes();
 }
-function captureProjectState(){return {autoOn,autoEvery,lockChip:{...lockChip},exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
+function captureProjectState(){return {exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
 function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are intentionally ignored when opening older projects. */}
 function snap(){if(restoringState)return;const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
   if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
