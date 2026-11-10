@@ -72,8 +72,8 @@ assert(html.includes('autoOn,autoEvery,lockChip:{...lockChip}'), 'auto mode timi
 assert(html.includes('restoreVISOAutoState(d)'), 'auto mode and lock controls must restore from saved projects');
 assert(html.includes('autoEvery=Math.round(Math.min(12,Math.max(1,Number.isFinite(Number(d.autoEvery))?Number(d.autoEvery):3)))'), 'auto interval must be clamped to the visible slider range');
 assert(html.includes("$('bLoop').onclick=()=>{snap();loopSong=!loopSong"), 'song loop toggle must participate in undo history');
-assert(html.includes('exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd}'), 'export profile, resolution, FPS, format and playback toggles must be saved');
-assert(html.includes('stopAtSongEnd},bgVizMask,colors'), 'background visualizer mask toggle must be saved');
+assert(html.includes('exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH}'), 'export profile, resolution, FPS, format and playback toggles must be saved');
+assert(html.includes('customW,customH},bgVizMask,colors'), 'custom canvas dimensions and background visualizer mask toggle must be saved');
 assert(html.includes('if(d.bgVizMask!==undefined)bgVizMask=!!d.bgVizMask;else bgVizMask=true'), 'background visualizer mask must restore with legacy default');
 assert(html.includes("['tBvm',bgVizMask]"), 'background visualizer mask button must synchronize after restore');
 assert(html.includes("restoreVISOExportState(d.exportSettings||{quality:d.tools?Number($('sQuality').value):100})"), 'legacy projects must retain their saved registry quality while new export settings default safely');
