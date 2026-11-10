@@ -20,17 +20,19 @@ Permanent roadmap: `PROJECT_ROADMAP.md`
 - **Symmetry:** all shape families now pass through a shared symmetry wrapper: X (left/right mirror), X and Y (four-way), Across (top/bottom mirror), Triple X (three reduced vertical copies), and None (single render). Exact parity with the reference app's naming/semantics remains subject to further reference verification.
 - Regression tests cover shared response, cross-shape layer modes, material-specific rendering, styles and symmetry wrapper.
 
-## Latest verified Turning Point, Templates and Export APK
-- Audio/Tempo source: `66b8f11d7123ae6ea3a0b5e1b11382491557acd1`. Audio upload/replace is in Audio; Loop Song and EQ remain grouped. Tempo has manual BPM (0 = auto), Sync Bar and sound metronome; BPM survives project restore.
-- Turning Point source: `61d16ce2d13b9d0cd4afc23135229dcbad87ed20`. Every transition point now has an editable timeline-position slider; edits sort points chronologically and snapshot undo before changes. Transition selection snapshots before updating the selected point.
-- Transition audit: all 20 UI options have matching renderer cases.
-- Templates: removed the template search bar to respect the clean-editor requirement; Landscape/Portrait/Downloaded filters remain.
-- Export source: `30cd181e8fc716e464eb91820354c912d5788687`. Fixed the recording canvas staying at its default 300×150: video export now resizes the recording canvas to the actual render dimensions before capture. Normal modes render up to 1080p; heavy Tunnel/Mirror/Dual modes use a mobile-safe 720p cap. Export info and bitrate use actual recording dimensions, not only the requested target.
-- Regression-test commit: `3cafe7b29f034a3e65d39ca097ab1d97f3a3a1e4`.
-- CI workflow run #358, ID `42859376527`, exact head commit `3cafe7b29f034a3e65d39ca097ab1d97f3a3a1e4`, conclusion **success**.
+## Latest verified Elements, Background, Undo and APK
+- Background Video: Fit / Fill / Crop modes added; Fit contains the full source, Fill stretches to canvas, Crop uses aspect-preserving cover. The chosen mode is part of advanced project state and restores to the selector. Background drift/rotation/travel/beat-sync remain in the same group.
+- Elements: Particles and Sparkles have independent amount sliders; Light retains its size/intensity controls; Reactive Frame has its own intensity slider. The controls update the actual mode/render state and are serialized/restored.
+- Fixed mode-object lookup to use `MODES.findIndex(mode=>mode.name===...)` in bind, sync, restore and reset paths. Earlier string `indexOf` lookups silently returned -1 because MODES is an array of objects.
+- Undo: delegated pre-edit snapshots now cover dynamically added inputs, selects, textareas, ranges and colour controls. Generic sliders no longer snapshot after the value has changed. Removed the blanket click snapshot on every button because tool navigation/no-op clicks created redundant undo steps.
+- Explicit pre-edit undo snapshots added/fixed for Elements/Visuals, Overlay FX toggles, media/mask transforms, media and background uploads/removal, Logo/font uploads/removal, custom canvas size, Audio 8D/pitch/loop, BPM detection/tap, Stop-at-song-end and Spectrum enable.
+- Hidden search/favourites remnants removed from CSS and icon injection. No search bar, favourites or Auto+Lock controls are exposed; legacy Auto/Lock project fields are ignored for backwards compatibility.
+- Export fix from source commit `30cd181e8fc716e464eb91820354c912d5788687`: recording canvas is resized to actual render dimensions before capture; normal visualizer export up to 1080p, heavy Tunnel/Mirror/Dual up to 720p; bitrate and displayed dimensions reflect actual output.
+- Android save bridge source audit: WebView exposes chunked `AndroidSave` methods; Kotlin writes videos/images/other files to MediaStore Movies/Pictures/Downloads under `Viso` on Android 10+, and to app-specific external folders on older versions. File chooser supports document picking. Static source audit only; device save test remains pending.
+- CI workflow run #393, ID `42863166776`, exact head commit `d46e18474e08cfa33feb0e71806168145a84d851`, conclusion **success**.
 - HTML/JavaScript validation, project archive regression tests, Android debug APK build, packaged APK verification and artifact upload all passed.
-- Artifact: `VISO-Studio-advanced-debug-apk`, ID `13783603518`, size 32,189,625 bytes, outer artifact ZIP digest `sha256:202d6fc26f76630ec0960902fd5cc3327b25969d3bdde6be9912cbcc7d3ab8be`.
-- Automated verification only. Physical-device install/runtime QA and real export playback/dimensions still require final owner-side device QA.
+- Artifact: `VISO-Studio-advanced-debug-apk`, ID `13785702728`, size 32,189,302 bytes, outer artifact ZIP digest `sha256:948cdf0988f12a7fb7f550b17768eb6ebafb8f3e298dc0ecf9befec6e87d8364`.
+- Automated verification only. Physical-device install/runtime QA, actual saved file playback, export dimensions/audio sync and background-video capture remain unverified.
 
 ## Dock architecture
 12 bottom dock groups: Media, Logo, Audio, Text, Visualizer, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video. Background Video last; panels above dock; Export top-right.
