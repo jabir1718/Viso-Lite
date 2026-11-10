@@ -368,3 +368,19 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Added an immersive full-screen preview mode with an exit control; preview uses the currently selected canvas dimensions.
 - Added automated assertions for theme, icon treatment, custom dimensions, aspect presets and full-screen mode.
 - Device-level visual and performance validation remains pending on the target Android handset.
+
+
+## 31. Continuity checkpoint and grouped tool dock — 2026-11-10
+
+**This section supersedes older “latest build” statements above for the current branch state.** Older entries are historical records of earlier milestones, not the current status.
+
+- Current working branch: `viso/advanced-studio-ui`; latest confirmed workflow run #249, ID `42845199558`, completed with `success` on exact commit `d3552dc0ba39e2629a83359ba7160303275d08e4`.
+- The immediately preceding workflow #248 (ID `42845165456`) also succeeded. #247 (ID `42844514050`) succeeded. Earlier #244–#246 failures were superseded by the later successful runs; do not treat those old failures as current.
+- Latest source file fetched from the branch: `app/src/main/assets/index.html`, blob SHA `4196a4907d32714de41bd65d08827d812876fee5`, 262,405 characters / 2,872 lines. Always refetch before editing.
+- Recent changes created 12 bottom-dock tool groups in this order: Media, Logo, Audio, Text, Visualizer, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video. Background Video is last. Each group opens its own panel above the dock; top Export remains separate.
+- A critical visibility fix removes the legacy `collapsed` class from child panels before nesting them as `toolSubpanel`, preventing inherited hidden state. Regression tests now assert grouped controls are exposed. Run #249 passed.
+- Current run #249 is a successful CI/build checkpoint only. Fetch its artifact record before claiming or sharing an APK. Physical-device installation, touch/layout, audio playback, export, heat and battery QA are not confirmed.
+- Next: fetch run #249 artifact metadata and verify APK ZIP/package/source integrity; inspect the actual grouped dock source and panel visibility/activation; then continue Aspectrum parity and render/save/undo/export behaviour audits. Do not stop at UI grouping.
+- The Aspectrum reference APK supplied earlier is malformed/truncated: metadata file was recovered, but the Unity data archive was incomplete. Metadata identifiers are search anchors, not proof of exact UI labels or complete feature behaviour.
+- Latest known Aspectrum metadata feature identifiers include glow blur/core colour/intensity sync/mode/scale/toggle; layer spin force/momentum/speed/toggle; multiplier; point count/width; rainbow gradient; shadow colour/expand/toggle; shake; trail; UI; wave delay reverse/time/toggle/gradient; drift follow/rotation/speed/timing/toggle/travel; invert; layer blend/spin; reflection; reactive frame; spectrum mode; visualizer shape/style/material/layers and X/Y.
+- Never mark a control complete until it changes rendered output or documented project behaviour and survives save/restore/undo/export checks as applicable.
