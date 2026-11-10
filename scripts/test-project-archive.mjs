@@ -43,8 +43,8 @@ assert(html.includes("||[null,'◈']"), 'unmatched control buttons must still re
 assert(html.includes('0 3px 0 #c3d3e7'), 'tool dock icons must have layered dimensional button styling');
 
 assert(html.includes('data-template-filter="landscape"')&&html.includes('data-template-filter="portrait"'), 'template library must separate landscape and portrait layouts');
-assert(html.includes('data-template-filter="liked"')&&html.includes('data-template-filter="downloaded"'), 'template library must expose liked and downloaded collections');
-assert(html.includes("const VISO_TEMPLATE_LIKES_KEY='viso.templateLikes.v1'"), 'template likes must persist locally');
+assert(!html.includes('data-template-filter="liked"')&&!html.includes('data-like='), 'template favourites are intentionally omitted from the clean library');
+assert(html.includes('data-template-filter="downloaded"'), 'template library must retain downloaded collection');
 assert(html.includes("VISO_TEMPLATE_DOWNLOADS_KEY='viso.templateDownloads.v1'"), 'downloaded templates must persist locally');
 assert(html.includes("visoTemplateDownloads.add(key)"), 'successful editable template downloads must populate the downloaded collection');
 assert(html.includes("aspect=layout==='portrait'?'9:16':'16:9'"), 'selecting a template must apply its portrait or landscape canvas orientation');
@@ -54,8 +54,15 @@ for (const key of ['aura','romance','vhs','club','minimal','phonk','neon','cosmi
 
 assert(html.includes('#bar>.panel.dock-active{display:flex!important}'), 'only the selected tool panel should occupy the editor dock');
 assert(html.includes('canvas{aspect-ratio:auto!important;width:auto!important;height:auto!important;'), 'preview must preserve selected landscape, square or portrait aspect ratio');
-assert(html.includes('body{color:#f4f4f4!important;background:#111!important}'), 'editor must use the dark reference workspace theme');
-assert(html.includes('#toolFilters{display:none!important}'), 'duplicate top category filters must not compete with the horizontal tool dock');
+assert(html.includes('VISO clean mobile editor chrome: top actions, lower tool dock'), 'editor must use clean mobile editor chrome');
+assert(!html.includes('id="toolSearch"')&&!html.includes('id="toolFavorites"')&&!html.includes('id="toolFilters"'), 'unneeded top search and favorites controls must be removed');
+assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'undo, redo and export must be available in the top toolbar');
+assert(html.includes("$('bar').appendChild(dockNav)"), 'tool dock must sit after the selected control panel at the bottom');
+assert(html.includes("const dockOrder=['Media','Look','Visuals'")&&html.includes("'Background Drift','Background']"), 'background tools must be placed at the end of the bottom tool dock');
+assert(html.includes("$('topExport').addEventListener('click',()=>activateDockPanel($('exportPanel')))"), 'top export action must open the export settings panel');
+assert(!html.includes('<h4>Auto + Lock</h4>')&&!html.includes("$('bAuto').onclick"), 'legacy Auto + Lock panel and actions must be removed');
+assert(html.includes('<h4>Audio Frequency Response</h4>\n    <div class="row"><button id="bLoop"'), 'song loop control must live inside the Audio tool');
+assert(html.includes('#monitorDock>.subhead{display:none!important}'), 'song monitor must be compacted into the preview rather than consuming editor space');
 assert(html.includes('#monitorDock>.subhead{display:none!important}'), 'song monitor must be compacted into the preview rather than consuming editor space');
 
 const spectrumStart = html.indexOf('function drawSpectrum(ctx,scale)');
@@ -70,9 +77,8 @@ assert(spectrumSource.includes('stride=Math.max(1,Math.ceil(n/32))'), 'Tunnel sp
 assert(spectrumSource.includes('const rows=10'), 'LED spectrum must use a mobile-friendly dot grid');
 assert(spectrumSource.includes('ctx.fillRect(cx-len,yl,len,bh*.86);ctx.fillRect(cx,yr,len,bh*.86)'), 'Dual spectrum bars must extend horizontally from the centre');
 assert(html.includes('id="sLogoPulse"'), 'custom logo audio-reactive size control must exist');
-assert(html.includes('autoOn,autoEvery,lockChip:{...lockChip}'), 'auto mode timing and lock toggles must be saved in project and undo state');
-assert(html.includes('restoreVISOAutoState(d)'), 'auto mode and lock controls must restore from saved projects');
-assert(html.includes('autoEvery=Math.round(Math.min(12,Math.max(1,Number.isFinite(Number(d.autoEvery))?Number(d.autoEvery):3)))'), 'auto interval must be clamped to the visible slider range');
+assert(!html.includes('return {autoOn,autoEvery,lockChip:'), 'removed Auto + Lock controls must not be saved into new projects');
+assert(html.includes('function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are intentionally ignored when opening older projects. */}'), 'legacy Auto + Lock project data must be safely ignored');
 assert(html.includes("$('bLoop').onclick=()=>{snap();loopSong=!loopSong"), 'song loop toggle must participate in undo history');
 assert(html.includes('exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH}'), 'export profile, resolution, FPS, format and playback toggles must be saved');
 assert(html.includes('customW,customH},bgVizMask,colors'), 'custom canvas dimensions and background visualizer mask toggle must be saved');
@@ -81,7 +87,7 @@ assert(html.includes("['tBvm',bgVizMask]"), 'background visualizer mask button m
 assert(html.includes("restoreVISOExportState(d.exportSettings||{quality:d.tools?Number($('sQuality').value):100})"), 'legacy projects must retain their saved registry quality while new export settings default safely');
 assert(html.includes('restoreVISOExportState({});};'), 'reset must restore default export settings');
 assert(html.includes("bgVizMask=true;$('tBvm').classList.add('on')"), 'reset must restore background visualizer mask default');
-assert(html.includes('autoEvery=3;Object.keys(lockChip).forEach(key=>lockChip[key]=false)'), 'reset must restore auto mode timing and unlocked defaults');
+assert(!html.includes('autoEvery=3;Object.keys(lockChip).forEach(key=>lockChip[key]=false)'), 'removed Auto + Lock UI must not be reset or re-enabled');
 assert(html.includes('logoPulse,logoRotation'), 'logo pulse must be included in saved advanced state');
 assert(html.includes('sync(\'sLogoPulse\',logoPulse)'), 'logo pulse must restore its UI value');
 assert(html.includes('pulseScale=1+b*logoPulse/100*.18'), 'logo pulse must react to audio level in the renderer');
