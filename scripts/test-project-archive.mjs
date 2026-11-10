@@ -52,17 +52,18 @@ assert(html.indexOf('snap();',html.indexOf("#visoTemplates [data-template]"))<ht
 assert(html.includes('templateGrid.portraitGrid{grid-template-columns:repeat(3,minmax(0,1fr))}'), 'portrait templates must use a compact three-column gallery');
 for (const key of ['aura','romance','vhs','club','minimal','phonk','neon','cosmic','city','fire','snow','pride','rose','storm']) assert(html.includes('data-template="'+key+'"'), 'template card must exist: '+key);
 
-assert(html.includes('#bar>.panel.dock-active{display:flex!important}'), 'only the selected tool panel should occupy the editor dock');
+assert(html.includes('#bar>.toolGroupPanel.dock-active{display:flex!important}'), 'only the selected grouped tool panel should occupy the editor dock');
 assert(html.includes('canvas{aspect-ratio:auto!important;width:auto!important;height:auto!important;'), 'preview must preserve selected landscape, square or portrait aspect ratio');
 assert(html.includes('VISO clean mobile editor chrome: top actions, lower tool dock'), 'editor must use clean mobile editor chrome');
 assert(!html.includes('id="toolSearch"')&&!html.includes('id="toolFavorites"')&&!html.includes('id="toolFilters"'), 'unneeded top search and favorites controls must be removed');
 assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'top toolbar must include undo redo and export');
-assert(html.includes("$('bar').appendChild(dockNav)"), 'tool navigation must appear after control panels at the bottom');
-assert(html.includes("if(panel.id==='exportPanel')return;"), 'export panel must be opened from the top-right action instead of duplicated in bottom dock');
-assert(html.includes("const dockOrder=['Media','Logo','Audio','Text','Visualizer','Elements','Overlay FX','Sticker','Turning Point','Tempo','Templates · Editable Projects','Background']"), 'tool dock must follow the separated Aspectrum tool order and keep Background last');
-assert(html.includes("mergeGroup('Audio',['Audio Motion','Audio Frequency Response'],'audioPanel')"), 'audio settings must be consolidated into one Audio tool');
-assert(html.includes("mergeGroup('Visualizer',['Look','Visuals','Spectrum Studio'"), 'visualizer settings must be consolidated into one Visualizer tool');
-assert(html.includes("mergeGroup('Overlay FX',['Overlay','Overlay Effects · Motion FX'"), 'overlay effects must be consolidated into one Overlay FX tool');
+assert(html.includes("bar.appendChild(dockNav)"), 'tool navigation must appear after grouped control panels at the bottom');
+assert(html.includes("const dockOrder=['media','text','audio','visualizer','elements','overlay','sticker','templates','background']"), 'tool dock must follow the grouped editor order and keep Background Video last');
+assert(html.includes("const visoGroups={}"), 'legacy controls must be consolidated into grouped tool boxes');
+assert(html.includes("groupMeta={"), 'each grouped tool must have its own clear label and icon');
+assert(html.includes("toolGroupBody>.toolSubpanel"), 'existing working controls must be preserved inside their grouped tool box');
+assert(html.includes("if(t.includes('audio')||t.includes('bpm')||t.includes('tempo'))return 'audio'"), 'audio settings must be categorized together');
+assert(html.includes("if(t.includes('overlay effects')||t.includes('progress bar')"), 'overlay effects must be categorized together');
 assert(html.includes("logoPanel.id='logoPanel'")&&html.includes("stickerPanel.id='stickerPanel'"), 'Logo and Sticker must have independent tools');
 assert(html.includes("tempo.id='tempoPanel'")&&html.includes("elements.id='elementsPanel'"), 'Tempo and Elements must have independent tools');
 assert(html.includes("turningPanel.id='turningPointPanel'")&&html.includes('id="bAddTurningPoint"')&&html.includes('id="bRemoveTurningPoint"'), 'Turning Point must provide add and remove controls');
