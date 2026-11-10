@@ -93,6 +93,8 @@
       <button class="chip" data-spmode="bars">Bars</button><button class="chip" data-spmode="mirror">Mirror</button>
       <button class="chip" data-spmode="wave">Wave</button><button class="chip" data-spmode="circle">Circular</button>
       <button class="chip" data-spmode="bass">Bass bars</button></div>
+    <div class="row"><button id="spReverse">Reverse wave</button><button id="spMirror">Mirror wave</button>
+      <button id="spBeatWave" class="on">Beat wave ON</button><button id="spGradient">Wave gradient</button><button id="spRainbow">Rainbow wave</button></div>
     <div class="row"><label>Frequency <select id="spBand"><option value="balanced">Balanced</option><option value="full">Full</option><option value="low">Low / Bass</option><option value="high">High</option><option value="changes">Changes</option><option value="vocals">Vocals</option></select></label>
       <label>Shape <select id="spShape"><option value="line">Line</option><option value="circle">Circle</option><option value="mirror">Mirror</option><option value="diamond">Diamond</option><option value="capsule">Capsule</option><option value="sharp">Sharp</option></select></label></div>
     <div class="row"><label>Style <select id="spStyle"><option value="neon">Neon</option><option value="gradient">Gradient</option><option value="rainbow">Rainbow</option><option value="solid">Solid</option><option value="fire">Fire</option><option value="ice">Ice</option></select></label>
@@ -109,6 +111,7 @@
     <label><span>Wave delay</span><input id="spDelay" type="range" min="0" max="100" value="0"></label>
     <label><span>Wave trail</span><input id="spTrail" type="range" min="0" max="90" value="15"></label>
     <label><span>Glow strength</span><input id="spGlow" type="range" min="0" max="100" value="35"></label>
+    <label><span>Bass boost</span><input id="spBassBoost" type="range" min="0" max="250" value="100"></label>
     <label><span>Low / Bass mix</span><input id="spLow" type="range" min="0" max="200" value="100"></label>
     <label><span>Mid mix</span><input id="spMid" type="range" min="0" max="200" value="100"></label>
     <label><span>High mix</span><input id="spHigh" type="range" min="0" max="200" value="100"></label>
@@ -303,7 +306,7 @@ let centerVizOn=true,centerVizStyle='bars',centerVizSize=22,centerVizPower=120,c
 let centerLogo=null,centerLogoShape='circle',centerVizThick=8,centerBeatSense=160,centerHeartbeat=65,centerShadow=70,centerShadowColor='#a020f0',centerBeatEnv=0;
 let spectrumOn=true,spMode='bars',spBand='balanced',spShape='line',spStyle='neon',spEffect='none',spMotion='none';
 let spWaveHeight=38,spBaseHeight=18,spBounce=75,spShake=25,spThickness=5,spWidth=88,spSensitivity=140,spSmooth=65,spDelay=0,spTrail=15,spGlow=35,spLow=100,spMid=100,spHigh=100;
-let spSmoothBins=new Float32Array(160),spBeatEnv=0,spTime=0,spWaveTime=new Uint8Array(2048);
+let spSmoothBins=new Float32Array(160),spBeatEnv=0,spTime=0,spWaveTime=new Uint8Array(2048),spBassBoost=100,spReverse=false,spMirror=false,spBeatWave=true;
 
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
@@ -421,6 +424,12 @@ $('spToggle').onclick=()=>{spectrumOn=!spectrumOn;$('spToggle').classList.toggle
 document.querySelectorAll('[data-spmode]').forEach(q=>q.onclick=()=>{spMode=q.dataset.spmode;document.querySelectorAll('[data-spmode]').forEach(z=>z.classList.toggle('on',z===q));});
 $('spBand').onchange=e=>spBand=e.target.value;$('spShape').onchange=e=>spShape=e.target.value;
 $('spStyle').onchange=e=>spStyle=e.target.value;$('spEffect').onchange=e=>spEffect=e.target.value;$('spMotion').onchange=e=>spMotion=e.target.value;
+$('spBassBoost').oninput=e=>spBassBoost=+e.target.value;
+$('spReverse').onclick=()=>{spReverse=!spReverse;$('spReverse').classList.toggle('on',spReverse);};
+$('spMirror').onclick=()=>{spMirror=!spMirror;$('spMirror').classList.toggle('on',spMirror);};
+$('spBeatWave').onclick=()=>{spBeatWave=!spBeatWave;$('spBeatWave').classList.toggle('on',spBeatWave);$('spBeatWave').textContent='Beat wave '+(spBeatWave?'ON':'OFF');};
+$('spGradient').onclick=()=>{$('spStyle').value='gradient';spStyle='gradient';};
+$('spRainbow').onclick=()=>{$('spMode').value='wave';spMode='wave';spStyle='rainbow';$('spStyle').value='rainbow';document.querySelectorAll('[data-spmode]').forEach(z=>z.classList.toggle('on',z.dataset.spmode==='wave'));};
 
 function drawPals(){$('pals').innerHTML='';colors.forEach((h,i)=>{
   const b=document.createElement('div');b.className='pal'+(i===selColor?' on':'');
@@ -980,18 +989,19 @@ function drawMainSpectrum(ctx,b,dt){
      else if(spBand==='changes'){start=Math.floor(fd.length*.015);end=Math.floor(fd.length*.78);}
      else if(spBand==='full'){start=1;end=fd.length;}
      else{start=Math.floor(fd.length*.018);end=Math.floor(fd.length*.7);}
-     const p=Math.min(1,(i+delay)/count),idx=Math.floor(start+Math.pow(p,1.65)*(end-start-1));
+     const sampleIndex=spReverse?(count-1-i):i;
+     const p=Math.min(1,(sampleIndex+delay)/count),idx=Math.floor(start+Math.pow(p,1.65)*(end-start-1));
      const lo=Math.max(start,idx-2),hi=Math.min(end,idx+3);
      for(let k=lo;k<hi;k++)v+=fd[k]/255;
      v/=Math.max(1,hi-lo);
    }else v=Math.min(1,(b[i%6]||0)*(.38+(i%5)*.12));
    const lowBand=spBand==='low'||spMode==='bass';
-   if(lowBand)v*=spLow/100;else if(i<count*.33)v*=spLow/100;else if(i<count*.72)v*=spMid/100;else v*=spHigh/100;
+   if(lowBand)v*=spLow/100*spBassBoost/100;else if(i<count*.33)v*=spLow/100*spBassBoost/100;else if(i<count*.72)v*=spMid/100;else v*=spHigh/100;
    vals[i]=v;
    spSmoothBins[i]=spSmoothBins[i]*smooth+v*(1-smooth);
  }
  const centerX=cx,baseY=H*(1-spBaseHeight/100),span=W*spWidth/200;
- const maxH=H*spWaveHeight/100,boost=1+spBeatEnv*spBounce/100;
+ const maxH=H*spWaveHeight/100,boost=1+(spBeatWave?spBeatEnv:0)*spBounce/100;
  const t=spTime/1000;
  let shake=spShake/100*(spMotion==='shake'?1.8:1)*spBeatEnv*18;
  let tx=0,ty=0,rot=0,scale=1;
@@ -1021,7 +1031,7 @@ function drawMainSpectrum(ctx,b,dt){
      ctx.strokeStyle=colorAt(i);ctx.globalAlpha=.35+v*.65;ctx.lineWidth=thick;
      ctx.beginPath();ctx.moveTo(Math.cos(a)*radius,Math.sin(a)*radius);ctx.lineTo(Math.cos(a)*(radius+len),Math.sin(a)*(radius+len));ctx.stroke();}
  }else if(mode==='wave'){
-   for(let layer=0;layer<(spShape==='mirror'?2:1);layer++){
+   for(let layer=0;layer<((spShape==='mirror'||spMirror)?2:1);layer++){
      ctx.beginPath();
      for(let i=0;i<count;i++){const x0=-half+i/(count-1)*span*2;
        let y0=(spWaveTime.length?((spWaveTime[Math.floor(i/(count-1)*(spWaveTime.length-1))]-128)/128):0)*amp*.75;
@@ -1037,7 +1047,7 @@ function drawMainSpectrum(ctx,b,dt){
      const idx=Math.floor(i/bars*count),v=spSmoothBins[idx],x0=-half+i/bars*span*2;
      let height=Math.max(2,v*amp);
      if(spShape==='diamond')height*=.72;
-     if(mode==='mirror'||spShape==='mirror'){
+     if(mode==='mirror'||spShape==='mirror'||spMirror){
        ctx.strokeStyle=colorAt(idx);ctx.globalAlpha=.4+v*.6;ctx.lineWidth=thick;
        ctx.beginPath();ctx.moveTo(x0,-height/2);ctx.lineTo(x0,height/2);ctx.stroke();
      }else{
