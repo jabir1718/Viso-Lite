@@ -571,6 +571,9 @@ body.preview-fullscreen #previewExit{display:block}
    const block=el.closest('label')||el.closest('.row')||el;
    if(moved.has(block))return;moved.add(block);logoPanel.appendChild(block);
   });
+  const logoExtras=document.createElement('div');logoExtras.className='logoAdvancedControls';
+  logoExtras.innerHTML='<div class="fxSubhead">ASPECTRUM LOGO CONTROLS</div><label><span>Logo shape</span><select id="logoArtworkShape"><option value="original">Original</option><option value="circle">Circle</option><option value="square">Square</option><option value="hexagon">Hexagon</option></select></label><label><span>Vinyl record</span><input id="bLogoVinyl" type="checkbox"></label><label><span>Vinyl spin speed</span><input id="sLogoVinylSpeed" type="range" min="0" max="100" value="28"></label><label><span>Logo colour key</span><input id="bLogoColorKey" type="checkbox"></label><label><span>Key colour</span><input id="logoColorKeyColor" type="color" value="#00ff00"></label><label><span>Key tolerance</span><input id="sLogoColorKeyTolerance" type="range" min="0" max="100" value="24"></label><label><span>Logo ink glow</span><input id="bLogoInk" type="checkbox"></label><label><span>Ink amount</span><input id="sLogoInkAmount" type="range" min="0" max="100" value="35"></label><label><span>Ink colour</span><input id="logoInkColor" type="color" value="#70e7d4"></label>';
+  logoPanel.appendChild(logoExtras);
   const textPanel=all().find(p=>title(p)==='Text · Logo Studio');
   if(textPanel)bar.insertBefore(logoPanel,textPanel);
  }
@@ -1556,6 +1559,8 @@ let metronomeSoundOn=false,metronomeVolume=45,lastMetronomeTick=-1;
 let turningPoints=[],turningTransition='fade',turningDuration=800,selectedTurningPoint=-1;
 let sym='off',vigOn=false,vigAmt=45,progOn=false,progSz=12,progPos=96,logoImg=null,logoSize=16,logoX=92,logoY=92,logoAlpha=90,progStyle='gradient';
 let logoGlow=42,logoBounce=18,logoShake=8,logoPulse=35,logoRotation=0,logoReflection=0,logoParticles=0;
+let logoArtworkShape='original',logoVinyl=false,logoVinylSpeed=28,logoColorKeyOn=false,logoColorKey='#00ff00',logoColorKeyTolerance=24,logoInkOn=false,logoInkAmount=35,logoInkColor='#70e7d4';
+let logoProcessedCanvas=document.createElement('canvas'),logoProcessedCtx=logoProcessedCanvas.getContext('2d');
 let surfaceReflectionOn=false,reflStrength=35,reflDistance=12,reflBlur=18,reflFade=78,reflRipples=24,reflPerspective=18;
 let filmOn=false,filmGrain=24,filmDust=12,filmScratches=8,filmFlicker=10,filmSepia=0,filmWeave=6;
 let atmosphereOn=false,hazeStrength=24,hazeAngle=25,hazeSpeed=30,smokeAmount=18,smokeSize=48,smokeSpeed=24,smokeColor='#c5d7d0';
