@@ -636,4 +636,11 @@ assert(!html.includes('id="bAutoLock"')&&!html.includes('class="autoLock"'),'no 
 assert(!html.includes('toolSearch')&&!html.includes('studioNav'),'no hidden or visible tool search UI may remain');
 assert(!html.includes('toolFav')&&!html.includes('templateLike')&&!html.includes('favorite|like'),'no favourite controls or star injection may remain');
 assert(!html.includes('id="bAutoLock"')&&!html.includes('class="autoLock"'),'no Auto+Lock controls may be exposed');
+
+const assetRestoreStart=html.indexOf('async function restoreVISOProjectAssets');
+const assetRestoreEnd=html.indexOf("$('bProjectSave').onclick",assetRestoreStart);
+assert(assetRestoreStart>=0&&assetRestoreEnd>assetRestoreStart,'project asset restore routine must exist');
+const assetRestore=html.slice(assetRestoreStart,assetRestoreEnd);
+assert(assetRestore.indexOf('await prepareVISOFont(fontFile)')<assetRestore.indexOf('clearVISOAssets();'),'custom font must be prepared before clearing the currently open project');
+assert(assetRestore.indexOf('await new Promise((resolve,reject)')<assetRestore.indexOf('clearVISOAssets();'),'overlay images must be decoded before clearing the currently open project');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
