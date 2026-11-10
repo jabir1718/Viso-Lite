@@ -21,7 +21,7 @@ assert(!paintSource.includes('drawSpectrum('), 'spectrum must not be redundantly
 const singlePassFrameStart=html.indexOf('function frame(t)'),singlePassFrameEnd=html.indexOf('\n// VISO advanced studio modules',singlePassFrameStart);
 const singlePassFrameSource=html.slice(singlePassFrameStart,singlePassFrameEnd);
 assert.equal((singlePassFrameSource.match(/drawSpectrum\(x,1\)/g)||[]).length,1,'spectrum must render exactly once in the unified frame pipeline');
-assert(html.includes('id="toolDockNav"'), 'editor must expose a horizontal tool dock');
+assert(html.includes("dockNav.id='toolDockNav'"), 'editor must expose a horizontal tool dock');
 assert(html.includes('function activateDockPanel(panel)'), 'tool dock must activate one focused control panel at a time');
 assert(html.includes('#bar>.panel.dock-active{display:flex!important}'), 'only the selected tool panel should occupy the editor dock');
 assert(html.includes('#monitorDock>.subhead{display:none!important}'), 'song monitor must be compacted into the preview rather than consuming editor space');
