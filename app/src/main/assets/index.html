@@ -1774,8 +1774,8 @@ SYMS.forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;
   b.onclick=()=>{sym=k;document.querySelectorAll('#symModes button').forEach(q=>q.classList.remove('on'));b.classList.add('on');};
   $('symModes').appendChild(b);});
 const symC=document.createElement('canvas'),symX=symC.getContext('2d');
-$('bVig').onclick=e=>{vigOn=!vigOn;e.currentTarget.classList.toggle('on',vigOn);};
-$('bProg').onclick=e=>{progOn=!progOn;e.currentTarget.classList.toggle('on',progOn);};
+$('bVig').onclick=e=>{snap();vigOn=!vigOn;e.currentTarget.classList.toggle('on',vigOn);};
+$('bProg').onclick=e=>{snap();progOn=!progOn;e.currentTarget.classList.toggle('on',progOn);};
 $('bLogo').onclick=()=>$('fLogo').click();
 $('sLogoSize').oninput=e=>logoSize=+e.target.value;
 $('sLogoX').oninput=e=>logoX=+e.target.value;
@@ -2575,9 +2575,9 @@ $('bDriftBeat').onclick=e=>{bgBeatSync=!bgBeatSync;e.currentTarget.textContent='
 $('sBgDriftSpeed').oninput=e=>bgDriftSpeed=+e.target.value;
 $('sBgDriftRot').oninput=e=>bgDriftRot=+e.target.value;
 $('sBgDriftTravel').oninput=e=>bgDriftTravel=+e.target.value;
-$('bVhs').onclick=e=>{vhsOn=!vhsOn;e.currentTarget.textContent='VHS: '+(vhsOn?'ON':'OFF');e.currentTarget.classList.toggle('on',vhsOn);};
-$('bShock').onclick=e=>{shockOn=!shockOn;e.currentTarget.textContent='Shockwave: '+(shockOn?'ON':'OFF');e.currentTarget.classList.toggle('on',shockOn);};
-$('bLens').onclick=e=>{lensOn=!lensOn;e.currentTarget.textContent='Lens glow: '+(lensOn?'ON':'OFF');e.currentTarget.classList.toggle('on',lensOn);};
+$('bVhs').onclick=e=>{snap();vhsOn=!vhsOn;e.currentTarget.textContent='VHS: '+(vhsOn?'ON':'OFF');e.currentTarget.classList.toggle('on',vhsOn);};
+$('bShock').onclick=e=>{snap();shockOn=!shockOn;e.currentTarget.textContent='Shockwave: '+(shockOn?'ON':'OFF');e.currentTarget.classList.toggle('on',shockOn);};
+$('bLens').onclick=e=>{snap();lensOn=!lensOn;e.currentTarget.textContent='Lens glow: '+(lensOn?'ON':'OFF');e.currentTarget.classList.toggle('on',lensOn);};
 $('sMotionFx').oninput=e=>motionFx=+e.target.value;
 const VISO_FX_SETTERS={vhsScan:v=>vhsScan=v,vhsNoise:v=>vhsNoise=v,vhsJitter:v=>vhsJitter=v,vhsBleed:v=>vhsBleed=v,shockStrength:v=>shockStrength=v,shockSpeed:v=>shockSpeed=v,shockThickness:v=>shockThickness=v,shockRgb:v=>shockRgb=v,lensAmount:v=>lensAmount=v,lensFocus:v=>lensFocus=v,lensBokeh:v=>lensBokeh=v,lensBlur:v=>lensBlur=v};
 [['sVhsScan','vhsScan'],['sVhsNoise','vhsNoise'],['sVhsJitter','vhsJitter'],['sVhsBleed','vhsBleed'],
@@ -2587,11 +2587,11 @@ const VISO_FX_SETTERS={vhsScan:v=>vhsScan=v,vhsNoise:v=>vhsNoise=v,vhsJitter:v=>
 document.querySelectorAll('#progressStyles button').forEach(q=>q.onclick=()=>{progStyle=q.dataset.prog;document.querySelectorAll('#progressStyles button').forEach(b=>b.classList.toggle('on',b===q));$('progressInfo').textContent='Progress style: '+progStyle;});
 $('sProgThickness').oninput=e=>progThickness=+e.target.value;$('sProgRound').oninput=e=>progRound=+e.target.value;$('sProgGlow').oninput=e=>progGlow=+e.target.value;$('sProgRot').oninput=e=>progRotation=+e.target.value;$('sProgX').oninput=e=>progX=+e.target.value;
 $('progColor').oninput=e=>progColor=e.target.value;$('progRemaining').oninput=e=>progRemaining=e.target.value;
-$('bSurfaceReflection').onclick=e=>{surfaceReflectionOn=!surfaceReflectionOn;e.currentTarget.textContent='Reflection: '+(surfaceReflectionOn?'ON':'OFF');e.currentTarget.classList.toggle('on',surfaceReflectionOn);};
+$('bSurfaceReflection').onclick=e=>{snap();surfaceReflectionOn=!surfaceReflectionOn;e.currentTarget.textContent='Reflection: '+(surfaceReflectionOn?'ON':'OFF');e.currentTarget.classList.toggle('on',surfaceReflectionOn);};
 [['sReflStrength','reflStrength'],['sReflDistance','reflDistance'],['sReflBlur','reflBlur'],['sReflFade','reflFade'],['sReflRipples','reflRipples'],['sReflPerspective','reflPerspective']].forEach(([id,key])=>$(id).oninput=e=>{const v=+e.target.value;if(key==='reflStrength')reflStrength=v;else if(key==='reflDistance')reflDistance=v;else if(key==='reflBlur')reflBlur=v;else if(key==='reflFade')reflFade=v;else if(key==='reflRipples')reflRipples=v;else reflPerspective=v;});
-$('bFilm').onclick=e=>{filmOn=!filmOn;e.currentTarget.textContent='Film look: '+(filmOn?'ON':'OFF');e.currentTarget.classList.toggle('on',filmOn);};
+$('bFilm').onclick=e=>{snap();filmOn=!filmOn;e.currentTarget.textContent='Film look: '+(filmOn?'ON':'OFF');e.currentTarget.classList.toggle('on',filmOn);};
 [['sFilmGrain','filmGrain'],['sFilmDust','filmDust'],['sFilmScratches','filmScratches'],['sFilmFlicker','filmFlicker'],['sFilmSepia','filmSepia'],['sFilmWeave','filmWeave']].forEach(([id,key])=>$(id).oninput=e=>{const v=+e.target.value;if(key==='filmGrain')filmGrain=v;else if(key==='filmDust')filmDust=v;else if(key==='filmScratches')filmScratches=v;else if(key==='filmFlicker')filmFlicker=v;else if(key==='filmSepia')filmSepia=v;else filmWeave=v;});
-$('bAtmosphere').onclick=e=>{atmosphereOn=!atmosphereOn;e.currentTarget.textContent='Atmosphere: '+(atmosphereOn?'ON':'OFF');e.currentTarget.classList.toggle('on',atmosphereOn);};
+$('bAtmosphere').onclick=e=>{snap();atmosphereOn=!atmosphereOn;e.currentTarget.textContent='Atmosphere: '+(atmosphereOn?'ON':'OFF');e.currentTarget.classList.toggle('on',atmosphereOn);};
 [['sHaze','hazeStrength'],['sHazeAngle','hazeAngle'],['sHazeSpeed','hazeSpeed'],['sSmoke','smokeAmount'],['sSmokeSize','smokeSize'],['sSmokeSpeed','smokeSpeed']].forEach(([id,key])=>$(id).oninput=e=>{const v=+e.target.value;if(key==='hazeStrength')hazeStrength=v;else if(key==='hazeAngle')hazeAngle=v;else if(key==='hazeSpeed')hazeSpeed=v;else if(key==='smokeAmount')smokeAmount=v;else if(key==='smokeSize')smokeSize=v;else smokeSpeed=v;});
 $('smokeColor').oninput=e=>smokeColor=e.target.value;
 const VISO_TEMPLATES={
