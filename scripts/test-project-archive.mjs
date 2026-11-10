@@ -10,6 +10,19 @@ for (const id of ['bgColor', 'bgTintColor', 'sBgTint', 'sBgBright', 'sBgContrast
 for (const id of ['bSpec', 'sSpecBars', 'sSpecRad', 'sSpecThick', 'sSpecGlow', 'sSpecLevel', 'sSpecAtk', 'sSpecRel', 'sSpecPeak', 'sSpecSpin']) {
   assert(html.includes('id="' + id + '"'), 'spectrum control must exist: ' + id);
 }
+for (const id of ['bSpecGlow','sSpecGlowBlur','sSpecGlowScale','specGlowCoreColor','sSpecPointCount','sSpecPointWidth','sSpecMultiplier','bSpecRainbow','bSpecShadow','specShadowColor','sSpecShadowExpand']) {
+  assert(html.includes('id="' + id + '"'), 'advanced spectrum control must exist: ' + id);
+}
+for (const token of ['specGlowOn','specGlowBlur','specGlowScale','specGlowCoreColor','specPointCount','specPointWidth','specMultiplier','specRainbow','specShadowOn','specShadowColor','specShadowExpand']) {
+  assert(html.includes(token), 'advanced spectrum state/render wiring must exist: ' + token);
+}
+assert(html.includes('Math.min(specResolution,specBars|0,specPointCount)'), 'point count must cap the rendered spectrum samples');
+assert(html.includes('(specPointWidth/100)'), 'point width must affect spectrum stroke width');
+assert(html.includes('(specMultiplier/100)'), 'audio multiplier must affect live spectrum amplitude');
+assert(html.includes("if(specRainbow)return 'hsl('"), 'rainbow gradient must change spectrum colours');
+assert(html.includes('specShadowOn?specShadowColor'), 'custom shadow colour must reach spectrum rendering');
+assert(html.includes("['sSpecGlowBlur',specGlowBlur]") && html.includes("['sSpecShadowExpand',specShadowExpand]"), 'advanced spectrum sliders must restore from saved project state');
+assert(html.includes("['specGlowCoreColor',specGlowCoreColor]") && html.includes("['specShadowColor',specShadowColor]"), 'advanced spectrum colour pickers must restore from saved project state');
 for (const id of ['bBpm', 'bTap', 'sBeatSens', 'sBeatScale', 'bBeatMarkers', 'bMetronome', 'bDownbeat', 'beatColor']) {
   assert(html.includes('id="' + id + '"'), 'beat control must exist: ' + id);
 }
