@@ -2205,7 +2205,7 @@ visoPanels.forEach(panel=>{
  if(panel.id==='exportPanel')return;
  const category=panel.dataset.toolCategory||'visualizer',group=visoGroups[category]||visoGroups.visualizer;
  const heading=panel.querySelector('h4');if(heading)heading.hidden=true;
- panel.classList.add('toolSubpanel');group.querySelector('.toolGroupBody').appendChild(panel);
+ panel.classList.remove('collapsed');panel.classList.add('toolSubpanel');group.querySelector('.toolGroupBody').appendChild(panel);
 });
 const bar=$('bar');
 const empty=document.createElement('div');empty.id='toolEmpty';empty.textContent='No tools available.';
