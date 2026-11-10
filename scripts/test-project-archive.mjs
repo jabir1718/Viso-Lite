@@ -39,6 +39,7 @@ for (const kind of ['audio', 'media-image', 'media-video', 'background-image', '
 assert(html.includes("function downloadVISOProject(project,fileName)"), 'editable project/template package writer must exist');
 assert(html.includes("project.assets=manifest"), 'editable project must include its embedded asset manifest');
 assert(html.includes("if(overlayAssetCount!==objects.length)"), 'every editable overlay layer must be packaged with its source image');
+assert(html.includes("assets.filter(a=>a.kind.startsWith('overlay-')).sort((a,b)=>Number(a.kind.slice(8))-Number(b.kind.slice(8)))"), 'project import must restore overlay images in numeric layer order even if manifest records are shuffled');
 assert(html.includes("restoreVISOProjectAssets(project,entries)"), 'project import must restore embedded media assets');
 assert(html.includes("downloadVISOProject(project,'VISO-'+key+'.viso')"), 'built-in templates must download as complete editable project packages');
 assert(html.includes("renderVISOStage('overlay'"), 'overlay render stage must remain in the preview frame');
