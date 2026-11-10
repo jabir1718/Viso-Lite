@@ -251,18 +251,18 @@ assert.deepEqual(JSON.parse(JSON.stringify(registry.cache.overlay.map(tool => to
 
 
 const autoStart = html.indexOf('function restoreVISOAutoState(');
-const autoEnd = html.indexOf('function captureProjectState', autoStart);
+const autoEnd = html.indexOf('function snap()', autoStart);
 assert(autoStart >= 0 && autoEnd > autoStart, 'auto state restore helper must exist');
 const autoControls = Object.fromEntries(['bAuto','sAuto','kCol','kVis','kShp','kSwy'].map(id => [id, { value: '', classList: { values: new Set(), toggle(name, on) { if (on) this.values.add(name); else this.values.delete(name); } } }]));
 const autoSandbox = { autoOn:false, autoEvery:3, lockChip:{color:false,vis:false,shape:false,sway:false}, $: id => autoControls[id] };
-vm.runInNewContext(html.slice(autoStart, autoEnd) + '\\nglobalThis.__restoreAuto = restoreVISOAutoState;', autoSandbox, { timeout: 2000 });
-autoSandbox.__restoreAuto({ autoOn:true, autoEvery:7, lockChip:{color:true,vis:false,shape:true,sway:false} });
+vm.runInNewContext(html.slice(autoStart, autoEnd), autoSandbox, { timeout: 2000 });
+autoSandbox.restoreVISOAutoState({ autoOn:true, autoEvery:7, lockChip:{color:true,vis:false,shape:true,sway:false} });
 assert.equal(autoSandbox.autoOn, true, 'auto mode restores as enabled');
 assert.equal(autoSandbox.autoEvery, 7, 'auto interval restores');
 assert.deepEqual({ ...autoSandbox.lockChip }, { color:true, vis:false, shape:true, sway:false }, 'individual auto locks restore');
 assert.equal(autoControls.sAuto.value, 7, 'auto interval slider synchronizes');
 assert(autoControls.kCol.classList.values.has('on') && !autoControls.kCol.classList.values.has('lock'), 'locked control UI synchronizes');
-autoSandbox.__restoreAuto({});
+autoSandbox.restoreVISOAutoState({});
 assert.equal(autoSandbox.autoOn, false, 'older projects default auto mode off');
 assert.equal(autoSandbox.autoEvery, 3, 'older projects default auto interval');
 assert.deepEqual({ ...autoSandbox.lockChip }, { color:false, vis:false, shape:false, sway:false }, 'older projects default all auto locks off');
