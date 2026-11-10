@@ -608,6 +608,9 @@ body.preview-fullscreen #previewExit{display:block}
   const row=document.createElement('div');row.className='row';
   ['bO','bDel'].forEach(id=>{const el=document.getElementById(id);if(el)row.appendChild(el);});
   stickerPanel.appendChild(row);
+  const stickerControls=document.createElement('div');stickerControls.className='stickerControls';
+  stickerControls.innerHTML='<div class="status" id="stickerSelectionInfo">Select a sticker on the canvas to edit its appearance.</div><div class="fxSubhead">TRANSFORM</div><label><span>Position X</span><input id="sStickerX" type="range" min="0" max="100" value="50"></label><label><span>Position Y</span><input id="sStickerY" type="range" min="0" max="100" value="50"></label><label><span>Size</span><input id="sStickerScale" type="range" min="5" max="200" value="32"></label><label><span>Rotation</span><input id="sStickerRotation" type="range" min="-180" max="180" value="0"></label><label><span>Opacity</span><input id="sStickerAlpha" type="range" min="0" max="100" value="100"></label><div class="fxSubhead">OVERLAY EFFECTS</div><label><span>Glow</span><input id="sStickerGlow" type="range" min="0" max="100" value="35"></label><label><span>Outline thickness</span><input id="sStickerOutline" type="range" min="0" max="20" value="0"></label><label><span>Outline colour</span><input id="stickerOutlineColor" type="color" value="#ffffff"></label><label><span>Colour key</span><input id="bStickerColorKey" type="checkbox"></label><label><span>Key colour</span><input id="stickerKeyColor" type="color" value="#00ff00"></label><label><span>Key tolerance</span><input id="sStickerKeyTolerance" type="range" min="0" max="100" value="24"></label><label><span>Blend mode</span><select id="selStickerBlend"><option value="stacked">Stacked</option><option value="additive">Additive</option></select></label>';
+  stickerPanel.appendChild(stickerControls);
   const note=document.createElement('div');note.className='status';note.textContent='Add a transparent PNG or image sticker, then drag it on the canvas to position and resize it.';stickerPanel.appendChild(note);
   bar.appendChild(stickerPanel);
  }
@@ -776,7 +779,7 @@ let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=fa
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
 const autoOn=false,autoEvery=3;const lockChip=Object.freeze({color:false,vis:false,shape:false,sway:false});
-const objects=[];let selObj=-1;
+const objects=[];let selObj=-1;const stickerKeyCache=new WeakMap();
 const lights=[];let selLight=-1;let lint=60,lsz=100,elementsLightOn=true;
 const undo=[],redo=[],objectSnapshotCache=new Map();
 let restoringState=false;
@@ -862,7 +865,7 @@ $('bR').onclick=()=>{snap();ix=0;iy=0;isc=1;irot=0;};
 $('bL').onclick=()=>{ix-=70;};$('bRt').onclick=()=>{ix+=70;};
 $('bU').onclick=()=>{iy-=70;};$('bD').onclick=()=>{iy+=70;};
 $('bBig').onclick=()=>{isc=Math.min(5,isc*1.12);};$('bSm').onclick=()=>{isc=Math.max(.15,isc/1.12);};
-$('bDel').onclick=()=>{if(selObj>=0){snap();objects.splice(selObj,1);selObj=-1;}};
+$('bDel').onclick=()=>{if(selObj>=0){snap();objects.splice(selObj,1);selObj=-1;syncStickerControls();}};
 $('bMediaClear').onclick=()=>{img=null;useVid=false;vid.pause();vid.removeAttribute('src');vid.load();ix=0;iy=0;isc=1;irot=0;maskDirty=true;};
 $('mL').onclick=()=>{mX-=60;};$('mR').onclick=()=>{mX+=60;};
 $('mU').onclick=()=>{mY-=60;};$('mD').onclick=()=>{mY+=60;};
@@ -892,8 +895,8 @@ $('fV').onchange=e=>{const f=e.target.files[0];if(!f)return;
   vid.src=URL.createObjectURL(f);vid.play();useVid=true;img=null;maskDirty=true;};
 $('bO').onclick=()=>$('fO').click();
 $('fO').onchange=e=>{if(e.target.files?.length)snap();[...e.target.files].forEach(f=>{const im=new Image();
-  im.onload=()=>{objects.push({img:im,file:f,x:Math.random()*W,y:Math.random()*H,sc:.32,rot:0,
-    motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28});selObj=objects.length-1;};
+  im.onload=()=>{objects.push({img:im,file:f,x:Math.random()*W,y:Math.random()*H,sc:.32,rot:0,alpha:100,glow:35,outline:0,outlineColor:'#ffffff',colorKeyOn:false,keyColor:'#00ff00',keyTolerance:24,blend:'stacked',
+    motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28});selObj=objects.length-1;syncStickerControls();};
   im.src=URL.createObjectURL(f);});};
 function guessMotion(n){n=(n||'').toLowerCase();
   if(/car|truck|bike|bus|taxi|train|plane|rocket/.test(n))return'Drive';
@@ -1038,7 +1041,7 @@ function restoreVISOExportState(d){
  fmtButton.textContent=formatChoice==='auto'?'Auto format':'WebM';fmtButton.classList.toggle('on',formatChoice==='auto');
  setRes();
 }
-function captureProjectState(){return {extraTextLayers:extraTextLayers.map(layer=>({...layer})),nextExtraTextId,elementsLightOn,logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor,turningPoints:turningPoints.map(p=>({...p})),turningTransition,turningDuration,metronomeSoundOn,metronomeVolume,exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
+function captureProjectState(){return {extraTextLayers:extraTextLayers.map(layer=>({...layer})),nextExtraTextId,elementsLightOn,logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor,turningPoints:turningPoints.map(p=>({...p})),turningTransition,turningDuration,metronomeSoundOn,metronomeVolume,exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,alpha:o.alpha,glow:o.glow,outline:o.outline,outlineColor:o.outlineColor,colorKeyOn:o.colorKeyOn,keyColor:o.keyColor,keyTolerance:o.keyTolerance,blend:o.blend,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
 function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are intentionally ignored when opening older projects. */}
 function snap(){if(restoringState)return;const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
   if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
@@ -1142,7 +1145,7 @@ function down(e){e.preventDefault();c.setPointerCapture(e.pointerId);const p=pos
   if(ptr.size===1){const li=hitLight(p);
     if(li>=0){selLight=li;const l=lights[li];start={m:'l',x:p.x,y:p.y,lx:l.x,ly:l.y};}
     else{selObj=hitObj(p);
-      if(selObj>=0){const b=objects[selObj];start={m:'o',x:p.x,y:p.y,ox:b.x,oy:b.y};}
+      if(selObj>=0){const b=objects[selObj];syncStickerControls();start={m:'o',x:p.x,y:p.y,ox:b.x,oy:b.y};}else syncStickerControls();
       else start={m:'p',x:p.x,y:p.y,ix,iy};}}
   if(ptr.size===2){const a=[...ptr.values()];const b=selObj>=0?objects[selObj]:null;
     start={m:b?'o2':'p2',d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),
@@ -1532,13 +1535,35 @@ function stepObject(ob,b,dt){const bass=b[0],hi=b[5];ob.phase+=dt*(.002+hi*.02);
   else{ob.x+=Math.cos(ob.phase)*(1+b[2]*8);ob.y+=Math.sin(ob.phase*1.4)*(1+b[2]*8);
     ob.rot=Math.sin(ob.phase)*.12;if(ob.x<-w)ob.x=W;if(ob.x>W)ob.x=-w;
     if(ob.y<-h)ob.y=H;if(ob.y>H)ob.y=-h;}}
+function getStickerRenderSource(ob){
+ if(!ob.colorKeyOn)return ob.img;
+ const signature=(ob.keyColor||'#00ff00')+':'+(ob.keyTolerance||0),cached=stickerKeyCache.get(ob);if(cached?.signature===signature)return cached.canvas;
+ const canvas=document.createElement('canvas'),w=Math.max(1,Math.min(1024,ob.img.naturalWidth||ob.img.width)),h=Math.max(1,Math.round((ob.img.height/ob.img.width)*w)),cx=canvas.getContext('2d');
+ canvas.width=w;canvas.height=h;cx.drawImage(ob.img,0,0,w,h);
+ try{const frame=cx.getImageData(0,0,w,h),d=frame.data,hex=signature.split(':')[0].replace('#',''),kr=parseInt(hex.slice(0,2),16),kg=parseInt(hex.slice(2,4),16),kb=parseInt(hex.slice(4,6),16),limit=Number(ob.keyTolerance||0)*4.41;
+  for(let p=0;p<d.length;p+=4){const dist=Math.hypot(d[p]-kr,d[p+1]-kg,d[p+2]-kb);if(dist<=limit)d[p+3]=0;else if(dist<limit*1.25&&limit>0)d[p+3]=Math.round(d[p+3]*(dist-limit)/(limit*.25));}
+  cx.putImageData(frame,0,0);
+ }catch(_){}
+ stickerKeyCache.set(ob,{signature,canvas});return canvas;
+}
+function syncStickerControls(){
+ const ob=selObj>=0?objects[selObj]:null,ids=['sStickerX','sStickerY','sStickerScale','sStickerRotation','sStickerAlpha','sStickerGlow','sStickerOutline','stickerOutlineColor','bStickerColorKey','stickerKeyColor','sStickerKeyTolerance','selStickerBlend'];
+ $('stickerSelectionInfo').textContent=ob?'Editing sticker '+(selObj+1)+' of '+objects.length:'Select a sticker on the canvas to edit its appearance.';
+ ids.forEach(id=>{const el=$(id);if(!el)return;el.disabled=!ob;if(!ob)return;
+  if(id==='sStickerX')el.value=Math.round(ob.x/W*100);else if(id==='sStickerY')el.value=Math.round(ob.y/H*100);else if(id==='sStickerScale')el.value=Math.round(ob.sc*100);else if(id==='sStickerRotation')el.value=Math.round(ob.rot*180/Math.PI);else if(id==='sStickerAlpha')el.value=ob.alpha??100;else if(id==='sStickerGlow')el.value=ob.glow??35;else if(id==='sStickerOutline')el.value=ob.outline??0;else if(id==='stickerOutlineColor')el.value=ob.outlineColor||'#ffffff';else if(id==='bStickerColorKey')el.checked=!!ob.colorKeyOn;else if(id==='stickerKeyColor')el.value=ob.keyColor||'#00ff00';else if(id==='sStickerKeyTolerance')el.value=ob.keyTolerance??24;else if(id==='selStickerBlend')el.value=ob.blend||'stacked';
+ });
+}
+function bindStickerControl(id,key,convert=v=>v){const el=$(id);el.addEventListener('focus',()=>snap());el.addEventListener('pointerdown',()=>snap());el.addEventListener('input',()=>{const ob=selObj>=0?objects[selObj]:null;if(!ob)return;ob[key]=convert(el.type==='checkbox'?el.checked:el.value);if(key==='colorKeyOn')stickerKeyCache.delete(ob);});el.addEventListener('change',()=>{const ob=selObj>=0?objects[selObj]:null;if(!ob)return;ob[key]=convert(el.type==='checkbox'?el.checked:el.value);if(key==='colorKeyOn')stickerKeyCache.delete(ob);});}
 function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
-  ctx.save();ctx.translate(ob.x,ob.y);ctx.rotate(ob.rot);const s=ob.sc*(1+pulse*.12);ctx.scale(s,s);
-  ctx.shadowColor=gradAt(ob.x,ob.y);ctx.shadowBlur=16+pulse*55;
-  ctx.drawImage(ob.img,-ob.img.width/2,-ob.img.height/2);
-  if(i===selObj){ctx.shadowBlur=0;ctx.strokeStyle='#b054f0';ctx.lineWidth=3/s;
-    ctx.strokeRect(-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);}
+  const source=getStickerRenderSource(ob);
+  ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,(ob.alpha??100)/100));ctx.globalCompositeOperation=ob.blend==='additive'?'lighter':'source-over';ctx.translate(ob.x,ob.y);ctx.rotate(ob.rot);const s=ob.sc*(1+pulse*.12);ctx.scale(s,s);
+  ctx.shadowColor=ob.glowColor||gradAt(ob.x,ob.y);ctx.shadowBlur=(ob.glow??35)*.65+pulse*35;
+  ctx.drawImage(source,-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);
+  if((ob.outline??0)>0){ctx.shadowBlur=0;ctx.strokeStyle=ob.outlineColor||'#ffffff';ctx.lineWidth=ob.outline/s;ctx.strokeRect(-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);}
+  if(i===selObj){ctx.shadowBlur=0;ctx.strokeStyle='#4a9cf2';ctx.lineWidth=2/s;ctx.setLineDash([8/s,5/s]);ctx.strokeRect(-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);ctx.setLineDash([]);}
   ctx.restore();});}
+['sStickerX','sStickerY','sStickerScale','sStickerRotation','sStickerAlpha','sStickerGlow','sStickerOutline','stickerOutlineColor','bStickerColorKey','stickerKeyColor','sStickerKeyTolerance','selStickerBlend'].forEach(id=>{const el=$(id);if(!el)return;const map={sStickerX:['x',v=>W*Number(v)/100],sStickerY:['y',v=>H*Number(v)/100],sStickerScale:['sc',v=>Number(v)/100],sStickerRotation:['rot',v=>Number(v)*Math.PI/180],sStickerAlpha:['alpha',Number],sStickerGlow:['glow',Number],sStickerOutline:['outline',Number],stickerOutlineColor:['outlineColor',String],bStickerColorKey:['colorKeyOn',v=>v==='true'],stickerKeyColor:['keyColor',String],sStickerKeyTolerance:['keyTolerance',Number],selStickerBlend:['blend',String]};const [key,convert]=map[id];bindStickerControl(id,key,convert);});
+syncStickerControls();
 
 function drawStudioTextLayer(ctx,b,textValue,enabled,sizeValue,posValue,alphaValue,colorValue,xValue,rotationValue,strokeValue,glowValue,animValue,alignValue,plateValue){
  if(!enabled||!textValue.trim())return;
@@ -2650,9 +2675,9 @@ async function restoreVISOProjectAssets(project,entries){
   if(byKind[kind])visoSetInputFile(id,makeFile(byKind[kind]));
  }
  if(fontFile){const transfer=new DataTransfer();transfer.items.add(fontFile);$('fFont').files=transfer.files;installVISOFont(fontFile,preparedFont);}
- prepared.forEach(({img,file,saved})=>objects.push({img,file,x:saved.x??cx,y:saved.y??cy,sc:saved.sc??.32,rot:saved.rot??0,motion:saved.motion||guessMotion(file.name),dir:saved.dir??1,phase:saved.phase??0}));
+ prepared.forEach(({img,file,saved})=>objects.push({img,file,x:saved.x??cx,y:saved.y??cy,sc:saved.sc??.32,rot:saved.rot??0,alpha:saved.alpha??100,glow:saved.glow??35,outline:saved.outline??0,outlineColor:saved.outlineColor||'#ffffff',colorKeyOn:!!saved.colorKeyOn,keyColor:saved.keyColor||'#00ff00',keyTolerance:saved.keyTolerance??24,blend:saved.blend||'stacked',motion:saved.motion||guessMotion(file.name),dir:saved.dir??1,phase:saved.phase??0}));
  (layerState.lights||[]).forEach(l=>lights.push({...l}));
- selObj=objects.length?objects.length-1:-1;maskDirty=true;
+ selObj=objects.length?objects.length-1:-1;syncStickerControls();maskDirty=true;
  $('templateInfo').textContent='Project restored · '+assets.length+' embedded assets · all imported media and layers are editable';
  return {fontFamily:preparedFont?.family||null};
 }
