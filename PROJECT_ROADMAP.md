@@ -445,3 +445,16 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Downloaded run #289 artifact ID `13781557416` (`VISO-Studio-advanced-debug-apk`). Outer artifact ZIP and inner APK ZIP integrity both passed. APK size: 84,489,xxx bytes (see local verification); APK SHA-256: `8cafe76ae1ecdb0fb97e45232583d35ff6f51094aadcc81e3bdc044af508287e`. Packaged `assets/index.html` is present (273,301 bytes). Workflow's packaged APK verification step passed.
 - This confirms automated build/package integrity only, not physical-device installation or visual/audio behaviour.
 - Next: complete the remaining visualizer material/layer parity audit, then perform systematic end-to-end QA of each dock group and the project/template/export pipelines.
+
+
+## 36. Shared Spectrum response across all render shapes — 2026-11-10
+
+- Audited the Spectrum renderer and found that several shape branches read raw `specSmooth` values directly, bypassing the common response function. This meant Invert, audio Multiplier and Uniform response could work in the Flats/Square/NCS branch but be ignored by radial, ring, sphere, tunnel, mirror, dual, wave and dot-style rendering.
+- Updated each renderer branch to use the shared `val(index)` response function, applying multiplier, uniform response floor and layer inversion consistently.
+- Added regression assertions that all renderer branches use the processed response and no raw `specSmooth[index]/255` reads remain in the shape-rendering section.
+- Source commit: `d7d5a83e6bcdbc79f4d02cf3de49ede4001f173d`.
+- Test commit: `a813bf5ae012261384f7dcaaa77e41d7ff3de02c`.
+- CI run #542 (ID `42854308879`) passed: HTML/JS validation, project archive tests, Android debug APK build, packaged APK verification and artifact upload.
+- Artifact: `VISO-Studio-advanced-debug-apk`, ID `13781912155`; outer ZIP size 32,188,351 bytes; digest `sha256:c9a1a50ceb4aa3abd42bbda555b49334bbb98d94b2a90c9052c5a29360106615`.
+- This is automated code/build/package verification, not physical-device testing.
+- Next: audit and implement missing Shape/Style/Symmetry/Material/Layers Mode behaviour across all shapes, then proceed through each dock group and project/template/export workflows.
