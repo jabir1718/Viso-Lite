@@ -2251,9 +2251,10 @@ function visoToolCategory(title){
  if(t.includes('audio'))return 'audio';
  if(t.includes('text'))return 'text';
  if(t==='logo'||t.startsWith('logo '))return 'logo';
+ if(t==='elements'||t.startsWith('elements '))return 'elements';
  if(t.includes('light')||t.includes('particle')||t.includes('sparkle')||t.includes('reactive frame'))return 'elements';
  if(t.includes('sticker'))return 'sticker';
- if(t.includes('overlay effects')||t.includes('progress bar')||t.includes('surface reflection')||t.includes('film')||t.includes('atmosphere')||t.includes('motion fx'))return 'overlay';
+ if(t.includes('overlay fx')||t.includes('overlay effects')||t.includes('progress bar')||t.includes('surface reflection')||t.includes('film')||t.includes('atmosphere')||t.includes('motion fx'))return 'overlay';
  return 'visualizer';
 }
 function visoSlug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
