@@ -134,7 +134,7 @@ assert(html.includes('#monitorDock>.subhead{display:none!important}'), 'song mon
 assert(html.includes('#monitorDock>.subhead{display:none!important}'), 'song monitor must be compacted into the preview rather than consuming editor space');
 
 const spectrumStart = html.indexOf('function drawSpectrum(ctx,scale)');
-const spectrumLayerStart = html.indexOf('function drawSpectrumLayer(ctx,scale,layer)', spectrumStart);
+const spectrumLayerStart = html.indexOf('function drawSpectrumLayer(ctx,scale,layer', spectrumStart);
 const spectrumEnd = html.indexOf('\nfunction ', spectrumLayerStart + 20);
 const spectrumSource = html.slice(spectrumStart, spectrumEnd);
 assert(spectrumSource.includes("else if(M==='ring')"), 'Ring spectrum must have its own renderer');
