@@ -762,7 +762,7 @@ $('bShot').onclick=()=>{
 };
 let rec=null,recStarted=0,recClock=null,stopAtSongEnd=false;
 let loopSong=true;
-$('bLoop').onclick=()=>{loopSong=!loopSong;if(audio)audio.loop=loopSong;
+$('bLoop').onclick=()=>{snap();loopSong=!loopSong;if(audio)audio.loop=loopSong;
   $('bLoop').textContent='Loop song: '+(loopSong?'ON':'OFF');$('bLoop').classList.toggle('on',loopSong);};
 $('bStopAtEnd').onclick=()=>{stopAtSongEnd=!stopAtSongEnd;
   $('bStopAtEnd').textContent='Stop export at song end: '+(stopAtSongEnd?'ON':'OFF');
@@ -848,7 +848,7 @@ function restoreVISOExportState(d){
 function captureProjectState(){return {autoOn,autoEvery,lockChip:{...lockChip},exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
 function restoreVISOAutoState(d){
  autoOn=d.autoOn===undefined?false:!!d.autoOn;
- autoEvery=Number.isFinite(Number(d.autoEvery))?Number(d.autoEvery):3;
+ autoEvery=Math.round(Math.min(12,Math.max(1,Number.isFinite(Number(d.autoEvery))?Number(d.autoEvery):3)));
  const saved=d.lockChip&&typeof d.lockChip==='object'?d.lockChip:{};
  Object.keys(lockChip).forEach(key=>lockChip[key]=!!saved[key]);
  $('bAuto').classList.toggle('on',autoOn);$('sAuto').value=autoEvery;
