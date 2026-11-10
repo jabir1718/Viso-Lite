@@ -591,6 +591,11 @@ body.preview-fullscreen #previewExit{display:block}
  const tempo=all().find(p=>title(p)==='Beat · BPM Sync');if(tempo){tempo.id='tempoPanel';tempo.querySelector('h4').textContent='Tempo';}
  const elements=all().find(p=>title(p)==='Lights · Tools box');if(elements){elements.id='elementsPanel';elements.querySelector('h4').textContent='Elements';}
  const textPanel=all().find(p=>title(p)==='Text · Logo Studio');if(textPanel){textPanel.id='textPanel';textPanel.querySelector('h4').textContent='Text';}
+ const turningPanel=document.createElement('div');turningPanel.className='sec panel';turningPanel.id='turningPointPanel';
+ turningPanel.innerHTML='<h4>Turning Point</h4><div class="row"><button id="bAddTurningPoint" class="prim" type="button">＋ Add point at playhead</button><button id="bRemoveTurningPoint" type="button">Remove selected</button></div><label><span>Transition</span><select id="sTurningTransition"><option value="fade">Fade</option><option value="crossfade">Crossfade</option><option value="flash">Flash</option><option value="glitch">Glitch</option><option value="shake">Shake</option><option value="rgb">RGB Split</option><option value="blur">Blur</option><option value="zoom">Zoom</option><option value="spin">Spin</option><option value="wipe-left">Wipe Left</option><option value="wipe-right">Wipe Right</option><option value="wipe-up">Wipe Up</option><option value="wipe-down">Wipe Down</option><option value="circle">Circle</option><option value="diamond">Diamond</option><option value="pixel">Pixelate</option><option value="scanline">Scanline</option><option value="invert">Invert</option><option value="light-leak">Light Leak</option><option value="vhs">VHS</option></select></label><label><span>Duration</span><input id="sTurningDuration" type="range" min="200" max="3000" step="50" value="800"></label><div class="status" id="turningPointList">No turning points yet. Move the playhead and add one.</div>';
+ bar.appendChild(turningPanel);
+ const tempoPanel=all().find(p=>title(p)==='Tempo');
+ if(tempoPanel){const sub=document.createElement('div');sub.className='fxSubhead';sub.textContent='METRONOME SOUND';tempoPanel.appendChild(sub);const sound=document.createElement('label');sound.innerHTML='<span>Metronome sound</span><input id="bMetronomeSound" type="checkbox">';tempoPanel.appendChild(sound);const volume=document.createElement('label');volume.innerHTML='<span>Sound volume</span><input id="sMetronomeVolume" type="range" min="0" max="100" value="45">';tempoPanel.appendChild(volume);}
  all().forEach(p=>{if(p.id!=='mediaPanel'&&p.id!=='exportPanel')p.classList.add('collapsed');const h=p.querySelector('h4');if(h){h.setAttribute('role','button');h.setAttribute('tabindex','0');h.addEventListener('click',()=>p.classList.toggle('collapsed'));h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();p.classList.toggle('collapsed');}});}});
 })();
 </script>
@@ -1001,13 +1006,14 @@ function restoreVISOExportState(d){
  fmtButton.textContent=formatChoice==='auto'?'Auto format':'WebM';fmtButton.classList.toggle('on',formatChoice==='auto');
  setRes();
 }
-function captureProjectState(){return {exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
+function captureProjectState(){return {turningPoints:turningPoints.map(p=>({...p})),turningTransition,turningDuration,metronomeSoundOn,metronomeVolume,exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
 function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are intentionally ignored when opening older projects. */}
 function snap(){if(restoringState)return;const state=JSON.stringify(captureProjectState());if(undo[undo.length-1]===state)return;undo.push(state);objectSnapshotCache.set(state,objects.map(o=>({...o})));
   if(undo.length>40){const old=undo.shift();objectSnapshotCache.delete(old);}
   redo.forEach(old=>objectSnapshotCache.delete(old));redo.length=0;}
 function apply(s){const d=JSON.parse(s),previousRestoringState=restoringState;restoringState=true;try{
   restoreVISOAutoState(d);
+  turningPoints=Array.isArray(d.turningPoints)?d.turningPoints.filter(p=>p&&Number.isFinite(Number(p.time))).map(p=>({time:Math.max(0,Number(p.time)),type:String(p.type||'fade'),duration:Math.max(200,Math.min(3000,Number(p.duration)||800))})):[];turningTransition=d.turningTransition||'fade';turningDuration=Math.max(200,Math.min(3000,Number(d.turningDuration)||800));metronomeSoundOn=!!d.metronomeSoundOn;metronomeVolume=Math.max(0,Math.min(100,Number(d.metronomeVolume)||45));selectedTurningPoint=-1;renderTurningPointList();$('sTurningTransition').value=turningTransition;$('sTurningDuration').value=turningDuration;$('bMetronomeSound').checked=metronomeSoundOn;$('sMetronomeVolume').value=metronomeVolume;
   colors=d.colors;mstate.forEach((m,i)=>{m.on=d.mstate[i].on;m.op=d.mstate[i].op;});
   if(d.bgOn!==undefined)bgOn=!!d.bgOn;if(d.frOn!==undefined)frOn=!!d.frOn;if(d.phOn!==undefined)phOn=!!d.phOn;if(d.maskOn!==undefined)maskOn=!!d.maskOn;if(d.bgViz!==undefined)bgViz=!!d.bgViz;if(d.bgVizMask!==undefined)bgVizMask=!!d.bgVizMask;else bgVizMask=true;if(d.mediaFront!==undefined)mediaFront=!!d.mediaFront;
   const cachedObjects=objectSnapshotCache.get(s);
@@ -1546,6 +1552,8 @@ let panner=null,conv=null,dryG=null,wetG=null,lfo=null,lfoG=null,td=null;
 let speed=100,pitchSemis=0,pitchLock=true,eightD=false,eightW=80,eightS=22,eightR=22;
 let bpm=0,beatFlash=0,flashAmt=0,driftAmt=0,driftX=0,driftY=0,lastOnset=0,onsetGaps=[];
 let beatSensitivity=34,beatScale=0,beatMarkersOn=false,metronomeOn=false,downbeatOn=true,beatColor='#ffffff';
+let metronomeSoundOn=false,metronomeVolume=45,lastMetronomeTick=-1;
+let turningPoints=[],turningTransition='fade',turningDuration=800,selectedTurningPoint=-1;
 let sym='off',vigOn=false,vigAmt=45,progOn=false,progSz=12,progPos=96,logoImg=null,logoSize=16,logoX=92,logoY=92,logoAlpha=90,progStyle='gradient';
 let logoGlow=42,logoBounce=18,logoShake=8,logoPulse=35,logoRotation=0,logoReflection=0,logoParticles=0;
 let surfaceReflectionOn=false,reflStrength=35,reflDistance=12,reflBlur=18,reflFade=78,reflRipples=24,reflPerspective=18;
@@ -2107,6 +2115,58 @@ function drawVISOMedia(ctx,b,dt){
 
 }
 
+function playMetronomeTick(accent=false){
+ if(!ctxA||ctxA.state!=='running'||metronomeVolume<=0)return;
+ const now=ctxA.currentTime,osc=ctxA.createOscillator(),gain=ctxA.createGain();
+ osc.type='sine';osc.frequency.value=accent?1320:880;
+ gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(Math.max(.0001,metronomeVolume/100*.07),now+.004);
+ gain.gain.exponentialRampToValueAtTime(.0001,now+.055);osc.connect(gain);gain.connect(ctxA.destination);osc.start(now);osc.stop(now+.06);
+}
+function drawTurningPointTransitions(ctx){
+ if(!audio||!playing||!turningPoints.length)return;
+ const now=audio.currentTime;
+ for(const point of turningPoints){
+  const duration=Math.max(.2,point.duration/1000),q=(now-(point.time-duration/2))/duration;
+  if(q<0||q>1)continue;
+  const edge=Math.sin(q*Math.PI),strength=Math.max(0,Math.min(1,edge));
+  ctx.save();ctx.globalAlpha=1;
+  const fill=(color,alpha)=>{ctx.globalAlpha=alpha;ctx.fillStyle=color;ctx.fillRect(0,0,W,H);};
+  switch(point.type){
+   case 'fade':fill('#000000',strength*.88);break;
+   case 'crossfade':fill('#000000',strength*.58);break;
+   case 'flash':fill('#ffffff',strength*.72);break;
+   case 'glitch':for(let i=0;i<7;i++){ctx.globalAlpha=strength*.5;ctx.fillStyle=i%2?'#16d9ff':'#ff2e92';ctx.fillRect(0,(i*137+frameN*11)%H,W,Math.max(3,H*.012));}break;
+   case 'shake':ctx.globalAlpha=strength*.18;ctx.fillStyle='#ffffff';for(let i=0;i<12;i++)ctx.fillRect((Math.random()*W)|0,(Math.random()*H)|0,Math.max(3,W*.025),Math.max(3,H*.008));break;
+   case 'rgb':for(let i=0;i<3;i++){ctx.globalAlpha=strength*.14;ctx.fillStyle=['#ff3355','#35eaff','#ffffff'][i];ctx.fillRect(i*W/3,0,W/3,H);}break;
+   case 'blur':{const g=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*.72);g.addColorStop(0,'transparent');g.addColorStop(1,'rgba(255,255,255,'+(strength*.34)+')');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);break;}
+   case 'zoom':ctx.globalAlpha=strength*.2;ctx.strokeStyle='#ffffff';ctx.lineWidth=Math.max(2,W*.012);for(let r=1;r<7;r++){ctx.beginPath();ctx.arc(cx,cy,r*Math.min(W,H)*.11,0,Math.PI*2);ctx.stroke();}break;
+   case 'spin':ctx.globalAlpha=strength*.22;ctx.strokeStyle='#ffffff';ctx.lineWidth=Math.max(2,W*.008);ctx.beginPath();ctx.arc(cx,cy,Math.min(W,H)*.36,q*Math.PI*2,(q+.65)*Math.PI*2);ctx.stroke();break;
+   case 'wipe-left':fill('#000000',strength*.55);ctx.clearRect(0,0,W*q,H);break;
+   case 'wipe-right':fill('#000000',strength*.55);ctx.clearRect(W*(1-q),0,W*q,H);break;
+   case 'wipe-up':fill('#000000',strength*.55);ctx.clearRect(0,0,W,H*q);break;
+   case 'wipe-down':fill('#000000',strength*.55);ctx.clearRect(0,H*(1-q),W,H*q);break;
+   case 'circle':fill('#000000',strength*.45);ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(cx,cy,Math.max(W,H)*q*.72,0,Math.PI*2);ctx.fill();break;
+   case 'diamond':fill('#000000',strength*.48);ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.moveTo(cx,cy-H*q);ctx.lineTo(cx+W*q,cy);ctx.lineTo(cx,cy+H*q);ctx.lineTo(cx-W*q,cy);ctx.closePath();ctx.fill();break;
+   case 'pixel':ctx.globalAlpha=strength*.18;ctx.fillStyle='#ffffff';for(let y=0;y<H;y+=Math.max(8,Math.round(H/24)))for(let x0=0;x0<W;x0+=Math.max(8,Math.round(W/18)))if(Math.random()<.12)ctx.fillRect(x0,y,W/18,H/24);break;
+   case 'scanline':ctx.globalAlpha=strength*.35;ctx.fillStyle='#ffffff';for(let y=0;y<H;y+=Math.max(3,Math.round(H/80)))ctx.fillRect(0,y,W,1);break;
+   case 'invert':ctx.globalCompositeOperation='difference';fill('#ffffff',strength*.55);break;
+   case 'light-leak':{const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'rgba(255,80,20,0)');g.addColorStop(.5,'rgba(255,210,90,'+(strength*.48)+')');g.addColorStop(1,'rgba(255,40,120,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);break;}
+   case 'vhs':ctx.globalAlpha=strength*.3;ctx.fillStyle='#e5f6ff';for(let y=0;y<H;y+=Math.max(2,H/90))if(Math.random()<.18)ctx.fillRect(0,y,W,1);break;
+  }
+  ctx.restore();
+ }
+}
+function renderTurningPointList(){
+ const list=$('turningPointList');if(!list)return;
+ if(!turningPoints.length){list.textContent='No turning points yet. Move the playhead and add one.';return;}
+ list.textContent=turningPoints.map((p,i)=>(i+1)+'. '+p.time.toFixed(2)+'s · '+p.type+' · '+(p.duration/1000).toFixed(2)+'s').join('   |   ');
+}
+$('sTurningTransition').onchange=e=>{turningTransition=e.target.value;};
+$('sTurningDuration').oninput=e=>{turningDuration=+e.target.value;};
+$('bAddTurningPoint').onclick=()=>{if(!audio){$('turningPointList').textContent='Load audio first, then add a point at the playhead.';return;}const time=audio.currentTime;if(turningPoints.some(p=>Math.abs(p.time-time)<.12)){$('turningPointList').textContent='A turning point already exists at this time.';return;}snap();turningPoints.push({time,type:turningTransition,duration:turningDuration});turningPoints.sort((a,b)=>a.time-b.time);selectedTurningPoint=turningPoints.findIndex(p=>p.time===time);renderTurningPointList();};
+$('bRemoveTurningPoint').onclick=()=>{if(!turningPoints.length)return;snap();const i=selectedTurningPoint>=0?selectedTurningPoint:turningPoints.length-1;turningPoints.splice(i,1);selectedTurningPoint=-1;renderTurningPointList();};
+$('bMetronomeSound').onchange=e=>{metronomeSoundOn=e.target.checked;};
+$('sMetronomeVolume').oninput=e=>{metronomeVolume=+e.target.value;};
 function frame(t){
   
   const dt=Math.min(50,t-last||16);last=t;frameN++;
@@ -2117,6 +2177,7 @@ function frame(t){
   if(bass>avg*1.4&&bass>.32)scatter(170);
   pulse=Math.max(pulse*.85,bass*(1+beatScale/100*.35));
   const beatThreshold=Math.max(.08,.55-beatSensitivity*.0062);beatFlash=Math.max(beatFlash*.9,bass>beatThreshold?1:0);
+  if(playing&&audio&&bpm>0&&metronomeSoundOn){const beatIndex=Math.floor(audio.currentTime/(60/bpm));if(beatIndex!==lastMetronomeTick){lastMetronomeTick=beatIndex;playMetronomeTick(downbeatOn&&beatIndex%4===0);}}
   if(driftAmt>0&&bpm>0){const ph=performance.now()/1000*(bpm/60);
     driftX=Math.sin(ph*6.2832)*driftAmt*2.4;driftY=Math.cos(ph*3.1416)*driftAmt*1.6;}hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
   
@@ -2148,6 +2209,7 @@ function frame(t){
   renderVISOStage('overlay',x,b,dt);
     x.restore();
   renderVISOStage('post',x,b,dt);
+  drawTurningPointTransitions(x);
   if(!img&&!useVid&&!objects.length&&!bgImg&&!bgUseVid&&!bgViz){
     x.fillStyle='#888';x.font=Math.round(H*.022)+'px system-ui';x.textAlign='center';
     x.fillText('Photo / Video / PNG chuno',cx,cy);}
