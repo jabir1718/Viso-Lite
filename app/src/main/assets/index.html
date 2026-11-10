@@ -1078,7 +1078,7 @@ function gradAt(px,py){const a=dirG/100;return grad((1-a)*py/H+a*px/W);}
 function applyT(ctx){ctx.translate(cx+ix+Math.sin(swayT*spd/100)*swy*2.2,cy+iy);ctx.rotate(irot);ctx.scale(isc,isc);}
 function applyMT(ctx){ctx.translate(cx+mX,cy+mY);ctx.rotate(mRot);ctx.scale(mSc,mSc);}
 
-const P=[];for(let i=0;i<1500;i++)P.push({x:Math.random()*W,y:Math.random()*H,z:Math.random(),vx:0,vy:0,ph:Math.random()*6.28});
+const PARTICLE_COUNT=Math.min(1100,Math.max(600,Math.round((window.innerWidth||360)*2)));const P=[];for(let i=0;i<PARTICLE_COUNT;i++)P.push({x:Math.random()*W,y:Math.random()*H,z:Math.random(),vx:0,vy:0,ph:Math.random()*6.28});
 function scatter(n){for(let i=0;i<n;i++){const p=P[(Math.random()*P.length)|0];
   p.x=Math.random()*W;p.y=Math.random()*H;p.z=Math.random();
   const a=Math.random()*6.28,v=2+Math.random()*12;p.vx=Math.cos(a)*v;p.vy=Math.sin(a)*v;}}
@@ -2026,7 +2026,7 @@ function frame(t){
   if(autoOn){autoT+=dt;if(autoT>autoEvery*1000){autoT=0;autoStep();}}
   if(useVid&&frameN%3===0)maskDirty=true;
   if(maskDirty){buildMask();maskDirty=false;}
-  stepP(b,dt);
+  if(mstate[0]?.on)stepP(b,dt);
 
   x.save();
   const amp=pulse*(shk/100)*26;
