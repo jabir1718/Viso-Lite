@@ -607,4 +607,7 @@ assert(html.includes("MODES.findIndex(mode=>mode.name===name)"),'Elements contro
 assert(html.includes("MODES.findIndex(mode=>mode.name==='Dust')")&&html.includes("MODES.findIndex(mode=>mode.name==='Sparkle')"),'particle and sparkle amount controls must sync against the actual mode objects');
 
 for(const [id,state] of [['bVhs','vhsOn'],['bShock','shockOn'],['bLens','lensOn'],['bFilm','filmOn'],['bAtmosphere','atmosphereOn'],['bSurfaceReflection','surfaceReflectionOn'],['bVig','vigOn'],['bProg','progOn']])assert(html.includes("$('"+id+"').onclick=e=>{snap();"+state+"=!"+state+";"),id+' must snapshot before toggling its effect');
+
+for(const [id,state] of [['bBgDrift','bgDriftOn'],['bDriftBeat','bgBeatSync'],['bBgViz','bgViz']])assert(html.includes("$('"+id+"').onclick=e=>{snap();"+state+"=!"+state+";"),id+' must snapshot before changing Background state');
+for(const id of ['bBgX','bBgI','bBgV','bI','bV','bA','bLogo','bLogoX','bFont'])assert(html.includes("$('"+id+"').onclick=()=>{snap();"),id+' must snapshot before clearing or replacing an imported asset');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
