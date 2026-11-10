@@ -129,7 +129,6 @@ input[type=color]{width:42px;height:30px;padding:2px;border:1px solid #cbdcc7;bo
 @media(max-height:740px){#bar{max-height:36dvh!important}#toolDockNav button{min-height:40px;min-width:56px}#wrap{padding:3px 6px!important}}
 
 /* Aspectrum-inspired template gallery cards and library filters */
-.templateSearch input{width:100%;height:36px;padding:0 11px;border-radius:9px;border:1px solid #444;background:#222;color:#fff;font-size:11px}
 .templateFilters{display:flex;gap:6px;overflow-x:auto;padding:2px 0 5px}
 .templateFilters button{min-height:32px;padding:0 11px;border-radius:99px;font-size:10px;background:#252525;border-color:#444;color:#ccc}
 .templateFilters button.active{background:#f2f2f2;color:#111;border-color:#fff}
@@ -477,7 +476,6 @@ body.preview-fullscreen #previewExit{display:block}
   </div>
   <div class="sec panel"><h4>Templates · Editable Projects</h4>
     <div class="status">Choose a design, then customize the song, photo, video, logo, text and visualizer in your own project.</div>
-    <div class="templateSearch"><input id="templateSearch" type="search" placeholder="Search templates..." autocomplete="off"></div>
     <div class="templateFilters" id="templateFilters">
       <button type="button" data-template-filter="landscape" class="active">Landscape</button>
       <button type="button" data-template-filter="portrait">Portrait</button>
@@ -2625,20 +2623,18 @@ const VISO_TEMPLATE_DOWNLOADS_KEY='viso.templateDownloads.v1';
 let visoTemplateFilter='landscape',visoTemplateDownloads=new Set();
 try{visoTemplateDownloads=new Set(JSON.parse(localStorage.getItem(VISO_TEMPLATE_DOWNLOADS_KEY)||'[]'));}catch(_){}
 function applyVISOTemplateFilters(){
- const q=($('templateSearch')?.value||'').trim().toLowerCase();let count=0;
+ let count=0;
  $('visoTemplates').classList.toggle('portraitGrid',visoTemplateFilter==='portrait');
  document.querySelectorAll('#visoTemplates .templateCard').forEach(card=>{
-  const key=card.querySelector('[data-template]')?.dataset.template||'',name=VISO_TEMPLATES[key]?.name||key;
-  const layout=card.dataset.layout,showText=!q||name.toLowerCase().includes(q)||key.includes(q);
-  const showLayout=visoTemplateFilter==='downloaded'?visoTemplateDownloads.has(key):layout===visoTemplateFilter;
-  card.hidden=!(showText&&showLayout);if(!card.hidden)count++;
+  const key=card.querySelector('[data-template]')?.dataset.template||'';
+  const layout=card.dataset.layout,showLayout=visoTemplateFilter==='downloaded'?visoTemplateDownloads.has(key):layout===visoTemplateFilter;
+  card.hidden=!showLayout;if(!card.hidden)count++;
  });
  $('templateEmpty').style.display=count?'none':'block';
 }
 document.querySelectorAll('[data-template-filter]').forEach(btn=>btn.addEventListener('click',()=>{
  visoTemplateFilter=btn.dataset.templateFilter;document.querySelectorAll('[data-template-filter]').forEach(b=>b.classList.toggle('active',b===btn));applyVISOTemplateFilters();
 }));
-$('templateSearch').addEventListener('input',applyVISOTemplateFilters);
 applyVISOTemplateFilters();
 document.querySelectorAll('#visoTemplates [data-template]').forEach(q=>q.onclick=async()=>{
  const key=q.dataset.template,preset=VISO_TEMPLATES[key],layout=q.closest('.templateCard')?.dataset.layout;
