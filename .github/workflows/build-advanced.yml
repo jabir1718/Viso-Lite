@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - viso/advanced-studio-ui
+      - viso/recover-original-full-editor
   workflow_dispatch:
 
 permissions:
@@ -49,7 +50,7 @@ jobs:
           if len(ids) != len(set(ids)):
               raise SystemExit("Duplicate HTML id detected")
           required_ids = (
-              "songInfo", "recInfo", "bLoop", "bStopAtEnd",
+              "songInfo", "recInfo", "bLoop", "bStopAtEnd", "bAuto", "kCol", "kVis", "kShp", "kSwy", "sAuto",
               "studioHeader", "topExport", "bUndo", "bRedo",
               "bProjectSave", "bProjectOpen", "sVhsScan", "sShockStrength",
               "sLensAmount", "sProgThickness", "sLogoGlow", "bSurfaceReflection",
@@ -63,7 +64,7 @@ jobs:
           for required in required_ids:
               if required not in ids:
                   raise SystemExit(f"Missing required UI element: {required}")
-          for removed in ("toolSearch", "toolFavorites", "toolFilters", "bAuto", "kCol", "kVis", "kShp", "kSwy"):
+          for removed in ("toolSearch", "toolFavorites", "toolFilters"):
               if f'id="{removed}"' in html:
                   raise SystemExit(f"Removed clutter control is still present: {removed}")
           # Custom logo must render once through the dedicated Logo tool, never again in the legacy Overlay stage.
