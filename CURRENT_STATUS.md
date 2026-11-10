@@ -34,6 +34,14 @@ Permanent roadmap: `PROJECT_ROADMAP.md`
 - Artifact: `VISO-Studio-advanced-debug-apk`, ID `13785702728`, size 32,189,302 bytes, outer artifact ZIP digest `sha256:948cdf0988f12a7fb7f550b17768eb6ebafb8f3e298dc0ecf9befec6e87d8364`.
 - Automated verification only. Physical-device install/runtime QA, actual saved file playback, export dimensions/audio sync and background-video capture remain unverified.
 
+## Latest verified CI and project-import hardening
+- Latest successful CI before current change: run #396, ID 42863571143, head 7e7fc9ffb4a5d1fbfd540834dc25c3da605a6caf; HTML/JS, archive tests, Android debug build, packaged APK verification and upload all passed.
+- Run #396 APK artifact: 13784749862, VISO-Studio-advanced-debug-apk, size 32,189,301 bytes, outer ZIP digest sha256:6907611444aeaf7926f0141f21be6ff0b34a8cf6b154243e0f26264497bda78e.
+- Project import hardening source commit: d7244b358705fd9db414c5d1b3175e5d94932de1. Overlay images are decoded and the optional custom font is prepared before clearing the currently open project. A broken overlay/font therefore fails during preflight rather than first deleting the existing working project.
+- Regression test commit: a87dbcb23fcfa7b684f7c8e8fb424404cdc0758e; asserts both image decode and font preparation occur before clearVISOAssets().
+- CI run #397, ID 42869821850, exact head d7244b358705fd9db414c5d1b3175e5d94932de1: HTML/JS validation and project archive tests passed; Android Gradle/APK build is currently in progress. Do not call this build successful until the run completes.
+- Template audit: layout filters are Landscape, Portrait and Downloaded; no template search input/identifier remains. Existing CI asserts search absence, filter logic, downloaded persistence, portrait gallery layout and editable project package selection. This is source/automated-test verification, not hands-on UI QA.
+
 ## Dock architecture
 12 bottom dock groups: Media, Logo, Audio, Text, Visualizer, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video. Background Video last; panels above dock; Export top-right.
 
