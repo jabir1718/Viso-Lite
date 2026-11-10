@@ -50,7 +50,7 @@ jobs:
               raise SystemExit("Duplicate HTML id detected")
           required_ids = (
               "songInfo", "recInfo", "bLoop", "bStopAtEnd",
-              "studioHeader", "toolSearch", "toolFavorites", "toolFilters",
+              "studioHeader", "topExport", "bUndo", "bRedo",
               "bProjectSave", "bProjectOpen", "sVhsScan", "sShockStrength",
               "sLensAmount", "sProgThickness", "sLogoGlow", "bSurfaceReflection",
               "studioText2", "bText2On", "sText2Size", "sText2Glow",
@@ -60,6 +60,9 @@ jobs:
           for required in required_ids:
               if required not in ids:
                   raise SystemExit(f"Missing required UI element: {required}")
+          for removed in ("toolSearch", "toolFavorites", "toolFilters", "bAuto", "kCol", "kVis", "kShp", "kSwy"):
+              if f'id="{removed}"' in html:
+                  raise SystemExit(f"Removed clutter control is still present: {removed}")
           for required_source in (
               "VISO_TOOL_REGISTRY", "viso-project-v3", "function visoZip",
               "function visoUnzip", "function visoCRC32", "Project asset checksum failed",
