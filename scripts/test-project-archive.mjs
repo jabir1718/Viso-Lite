@@ -84,7 +84,7 @@ assert(html.includes("const aspectItems=['9:16','16:9','1:1','4:5','3:4','4:3','
 assert(html.includes("if(aspect==='custom')"), 'canvas must support arbitrary custom pixel dimensions');
 assert(html.includes('id="customWidth"')&&html.includes('id="customHeight"')&&html.includes("aspect='custom'"), 'custom canvas width and height must apply immediately');
 assert(html.includes('id="previewToggle"')&&html.includes('id="previewExit"')&&html.includes('preview-fullscreen'), 'editor must provide an immersive full-screen canvas mode');
-assert(html.includes("id='bUndo'")&&html.includes("id='bRedo'")&&html.includes('id="topExport"'), 'top-level undo, redo and export actions must remain available');
+assert(html.includes('id="bUndo"')&&html.includes('id="bRedo"')&&html.includes('id="topExport"'), 'top-level undo, redo and export actions must remain available');
 
 assert(html.includes('data-template-filter="landscape"')&&html.includes('data-template-filter="portrait"'), 'template library must separate landscape and portrait layouts');
 assert(!html.includes('data-template-filter="liked"')&&!html.includes('data-like='), 'template favourites are intentionally omitted from the clean library');
