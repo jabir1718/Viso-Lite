@@ -547,4 +547,12 @@ assert(html.includes('id="sTempoBpm"')&&html.includes('Manual BPM (0 = auto)'),'
 assert(html.includes("$('sTempoBpm').oninput=e=>{bpm=Math.max(0,Math.min(240,Math.round(Number(e.target.value)||0)));updateBpm();}"),'manual BPM adjustment must update the live beat clock');
 assert(html.includes("if(d.advanced&&d.advanced.bpm!==undefined)bpm=Math.max(0,Math.min(240,Number(d.advanced.bpm)||0));updateBpm();"),'manual/detected BPM must survive project restore and update the control');
 assert(html.includes("id=\"bTempoSyncBar\"")&&html.includes("id=\"bMetronomeSound\"")&&html.includes("id=\"sMetronomeVolume\""),'Tempo tool must retain Sync Bar and sound metronome controls');
+
+const turningListStart=html.indexOf('function renderTurningPointList()');
+const turningListEnd=html.indexOf("$('sTurningTransition').onchange",turningListStart);
+assert(turningListStart>=0&&turningListEnd>turningListStart,'Turning Point list renderer must exist');
+const turningListAudit=html.slice(turningListStart,turningListEnd);
+assert(turningListAudit.includes("timeSlider.type='range'")&&turningListAudit.includes("timeSlider.addEventListener('input'"),'each Turning Point must have an editable timeline position');
+assert(turningListAudit.includes("timeSlider.addEventListener('change'")&&turningListAudit.includes("turningPoints.sort"),'timeline edits must reorder points chronologically');
+assert(html.includes("$('sTurningTransition').onchange=e=>{snap();turningTransition=e.target.value;"),'transition edits must snapshot before changing the selected transition');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
