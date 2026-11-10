@@ -1061,7 +1061,7 @@ function buildMask(){
   }
 }
 
-function bands(pw){if(!an||!playing)return[0,0,0,0,0,0];an.getByteFrequencyData(buf);
+function bands(pw){if(!an||!playing)return[0,0,0,0,0,0];
   const n=buf.length,out=[];
   for(let b=0;b<6;b++){let s=0,c0=Math.floor(n*Math.pow(b/6,1.7)),c1=Math.floor(n*Math.pow((b+1)/6,1.7));
     for(let i=c0;i<c1;i++)s+=buf[i];
@@ -1605,7 +1605,7 @@ let specOn=false,specMode='radial',specRange='full',specBars=48,specRad=42,specT
 const specPrev=new Float32Array(SPEC_N);
 function specBands(){
   if(!an||!playing){for(let i=0;i<SPEC_N;i++)specRaw[i]=0;}
-  else{an.getByteFrequencyData(buf);const n=buf.length;
+  else{const n=buf.length;
     for(let i=0;i<SPEC_N;i++){
       let lo=0,hi=1;
       if(specRange==='low'){lo=0;hi=.28;}else if(specRange==='balanced'){lo=.08;hi=.92;}else if(specRange==='high'){lo=.62;hi=1;}else if(specRange==='vocals'){lo=.22;hi=.68;}
@@ -2014,6 +2014,7 @@ function drawVISOMedia(ctx,b,dt){
 function frame(t){
   
   const dt=Math.min(50,t-last||16);last=t;frameN++;
+  if(an&&playing)an.getByteFrequencyData(buf);
   const b=bands();curB=b;curBbg=bands(bvp);
   if(specOn)specBands();
   const bass=b[0];avg=avg*.92+bass*.08;
