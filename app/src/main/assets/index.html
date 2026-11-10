@@ -764,7 +764,7 @@ function setRes(){
   setPreviewCanvasSize();updateBitrate();
 }
 const aspectItems=['9:16','16:9','1:1','4:5','3:4','4:3','3:2','2:3','21:9'];
-$('applyCustomSize').onclick=()=>{aspect='custom';document.querySelectorAll('#aspect button').forEach(q=>q.classList.remove('on'));$('applyCustomSize').classList.add('on');setRes();};
+$('applyCustomSize').onclick=()=>{snap();aspect='custom';document.querySelectorAll('#aspect button').forEach(q=>q.classList.remove('on'));$('applyCustomSize').classList.add('on');setRes();};
 $('customWidth').addEventListener('change',()=>{customW=+$('customWidth').value||1080;if(aspect==='custom')setRes();});$('customHeight').addEventListener('change',()=>{customH=+$('customHeight').value||1920;if(aspect==='custom')setRes();});
 aspectItems.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a+(a==='9:16'?' TikTok':a==='16:9'?' YouTube':'');
   if(i===0)b.classList.add('on');
@@ -1016,7 +1016,7 @@ let rec=null,recStarted=0,recClock=null,stopAtSongEnd=false;
 let loopSong=true;
 $('bLoop').onclick=()=>{snap();loopSong=!loopSong;if(audio)audio.loop=loopSong;
   $('bLoop').textContent='Loop song: '+(loopSong?'ON':'OFF');$('bLoop').classList.toggle('on',loopSong);};
-$('bStopAtEnd').onclick=()=>{stopAtSongEnd=!stopAtSongEnd;
+$('bStopAtEnd').onclick=()=>{snap();stopAtSongEnd=!stopAtSongEnd;
   $('bStopAtEnd').textContent='Stop export at song end: '+(stopAtSongEnd?'ON':'OFF');
   $('bStopAtEnd').classList.toggle('on',stopAtSongEnd);};
 function clockText(v){if(!Number.isFinite(v)||v<0)v=0;const n=Math.floor(v);
@@ -1747,8 +1747,8 @@ function apply8d(){if(!lfoG)return;lfoG.gain.value=eightD?eightW/100:0;
   lfo.frequency.value=eightS/10;if(wetG)wetG.gain.value=(eightD?eightR:eightR*.4)/100*.9;}
 bind('sSpeed',v=>{speed=v;applySpeedPitch();});bind('sPitch',v=>{pitchSemis=v;applySpeedPitch();});
 bind('s8w',v=>{eightW=v;apply8d();});bind('s8s',v=>{eightS=v;apply8d();});bind('s8r',v=>{eightR=v;apply8d();});
-$('b8d').onclick=e=>{eightD=!eightD;e.currentTarget.textContent='8D audio: '+(eightD?'ON':'OFF');e.currentTarget.classList.toggle('on',eightD);apply8d();};
-$('bPreserve').onclick=e=>{pitchLock=!pitchLock;e.currentTarget.textContent='Pitch lock: '+(pitchLock?'ON':'OFF');e.currentTarget.classList.toggle('on',pitchLock);applySpeedPitch();};
+$('b8d').onclick=e=>{snap();eightD=!eightD;e.currentTarget.textContent='8D audio: '+(eightD?'ON':'OFF');e.currentTarget.classList.toggle('on',eightD);apply8d();};
+$('bPreserve').onclick=e=>{snap();pitchLock=!pitchLock;e.currentTarget.textContent='Pitch lock: '+(pitchLock?'ON':'OFF');e.currentTarget.classList.toggle('on',pitchLock);applySpeedPitch();};
 function updateBpm(){$('bpmInfo').textContent='BPM: '+(bpm||'—')+' · '+(bpm?'synced':'tap or detect');const slider=$('sTempoBpm');if(slider)slider.value=Math.max(0,Math.min(240,Math.round(bpm||0)));}
 $('sTempoBpm').oninput=e=>{bpm=Math.max(0,Math.min(240,Math.round(Number(e.target.value)||0)));updateBpm();};
 function tapTempo(){const n=performance.now();
@@ -1757,7 +1757,7 @@ function tapTempo(){const n=performance.now();
   if(onsetGaps.length>=2)bpm=Math.round(60000/(onsetGaps.reduce((a,b)=>a+b,0)/onsetGaps.length));
   updateBpm();}
 $('bTap').onclick=tapTempo;
-$('bBpm').onclick=()=>{onsetGaps=[];bpm=0;updateBpm();
+$('bBpm').onclick=()=>{snap();onsetGaps=[];bpm=0;updateBpm();
   const st=performance.now();let lh=0;
   const iv=setInterval(()=>{if(performance.now()-st>12000||!playing){clearInterval(iv);return;}
     if(curB[0]>.34){const n=performance.now();if(n-lh>200){if(lh)onsetGaps.push(n-lh);lh=n;
@@ -1946,7 +1946,7 @@ SPEC_MODES.forEach(([k,l])=>{const b=document.createElement('button');b.textCont
   $('specModes').appendChild(b);});
 const SPEC_RANGES=[['full','Full'],['low','Low'],['balanced','Balanced'],['high','High'],['vocals','Vocals'],['changes','Changes']];
 SPEC_RANGES.forEach(([k,label])=>{const b=document.createElement('button');b.textContent=label;if(k===specRange)b.classList.add('on');b.onclick=()=>{snap();specRange=k;specPrev.fill(0);document.querySelectorAll('#specRangeModes button').forEach(q=>q.classList.toggle('on',q===b));};$('specRangeModes').appendChild(b);});
-$('bSpec').onclick=e=>{specOn=!specOn;e.currentTarget.textContent='Spectrum: '+(specOn?'ON':'OFF');e.currentTarget.classList.toggle('on',specOn);};
+$('bSpec').onclick=e=>{snap();specOn=!specOn;e.currentTarget.textContent='Spectrum: '+(specOn?'ON':'OFF');e.currentTarget.classList.toggle('on',specOn);};
 $('bSpecClr').onclick=()=>{for(let i=0;i<SPEC_N;i++){specPeak[i]=0;specPeakT[i]=99;}};
 function bindSpec(id,fn){const el=$(id);el.addEventListener('focus',()=>snap());el.addEventListener('pointerdown',()=>snap());el.oninput=e=>fn(+e.target.value);}
 bindSpec('sSpecBars',v=>specBars=v);bindSpec('sSpecRad',v=>specRad=v);bindSpec('sSpecThick',v=>specThick=v);
