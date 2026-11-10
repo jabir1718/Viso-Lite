@@ -199,11 +199,11 @@ const stageOrder = [...frameSource.matchAll(/renderVISOStage\('(background|media
 assert.deepEqual(stageOrder, ['background', 'media', 'scene', 'overlay', 'post'], 'preview render stages must execute in deterministic compositing order');
 assert(html.includes('const PREVIEW_MAX_W=360,PREVIEW_MAX_H=640'), 'live preview must use a bounded mobile render resolution');
 assert(html.includes('function setPreviewCanvasSize()'), 'preview resolution must be independently managed');
-assert(html.includes("maxW=heavy?540:720,maxH=heavy?960:1280"), 'video export must render at up to 720p on mobile');
+assert(html.includes("maxW=heavy?720:1080,maxH=heavy?1280:1920"), 'video export must render at 1080p normally and use a 720p mobile-safe cap for heavy spectrum modes');
 assert(html.includes("if(rec&&rec.state==='recording')drawRecordFrame()"), 'video export canvas must be refreshed on every animation frame');
 assert(html.includes("if(streamDest)streamDest.stream.getAudioTracks().forEach(t=>st.addTrack(t))"), 'video export must include available audio destination tracks');
 assert(html.includes('function setExportCanvasSize(){setCanvasSize(targetW,targetH,Math.min(1080,targetW),Math.min(1920,targetH));}'), 'still exports must use the selected full output resolution');
-assert(html.includes('BIT=Math.round(targetW*targetH*FPS*0.13*(quality/100))'), 'export bitrate must use the selected output resolution');
+assert(html.includes('BIT=Math.round(renderW*renderH*FPS*0.13*(quality/100))'), 'export bitrate must use the actual recording dimensions');
 assert(html.includes("setPreviewCanvasSize();if(b)dl(b,exportFileName('png'))"), 'PNG export must restore the mobile preview resolution after capture');
 assert(html.includes('function initRecordGL()'), 'video export must initialize the GPU recording scaler when WebGL is available');
 assert(html.includes('function drawRecordFrame()'), 'video export must composite each preview frame to the selected output canvas');
