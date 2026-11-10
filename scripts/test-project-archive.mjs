@@ -67,7 +67,7 @@ assert(html.includes("logoPanel.id='logoPanel'")&&html.includes("stickerPanel.id
 assert(html.includes("tempo.id='tempoPanel'")&&html.includes("elements.id='elementsPanel'"), 'Tempo and Elements must have independent tools');
 assert(html.includes('id="topExport"')&&html.includes('id="bUndo"')&&html.includes('id="bRedo"'), 'undo, redo and export must be available in the top toolbar');
 assert(html.includes("$('bar').appendChild(dockNav)"), 'tool dock must sit after the selected control panel at the bottom');
-assert(html.includes("const dockOrder=['Media','Look','Visuals'")&&html.includes("'Background Drift','Background']"), 'background tools must be placed at the end of the bottom tool dock');
+assert(html.includes("const dockOrder=['Media','Logo','Audio','Text','Visualizer','Elements','Overlay FX','Sticker','Turning Point','Tempo','Templates · Editable Projects','Background']"), 'background tools must be placed at the end of the bottom tool dock');
 assert(html.includes("$('topExport').addEventListener('click',()=>activateDockPanel($('exportPanel')))"), 'top export action must open the export settings panel');
 assert(!html.includes('<h4>Auto + Lock</h4>')&&!html.includes("$('bAuto').onclick"), 'legacy Auto + Lock panel and actions must be removed');
 assert(html.includes('<h4>Audio Frequency Response</h4>\n    <div class="row"><button id="bLoop"'), 'song loop control must live inside the Audio tool');
