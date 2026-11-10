@@ -32,6 +32,14 @@ assert(html.includes('if(mstate[0]?.on)stepP(b,dt);'), 'particle simulation must
 
 assert(html.includes("dockNav.id='toolDockNav'"), 'editor must expose a horizontal tool dock');
 assert(html.includes('function activateDockPanel(panel)'), 'tool dock must activate one focused control panel at a time');
+assert(html.includes('VISO bright premium workspace refresh')&&html.includes('background:linear-gradient(145deg,#f8fbff'), 'editor must use the requested bright premium workspace theme');
+assert(html.includes("const aspectItems=['9:16','16:9','1:1','4:5','3:4','4:3','3:2','2:3','21:9']"), 'canvas must support common social and custom crop ratios');
+assert(html.includes("if(aspect==='custom')"), 'canvas must support arbitrary custom pixel dimensions');
+assert(html.includes('id="customWidth"')&&html.includes('id="customHeight"')&&html.includes("aspect='custom'"), 'custom canvas width and height must apply immediately');
+assert(html.includes('id="previewToggle"')&&html.includes('id="previewExit"')&&html.includes('preview-fullscreen'), 'editor must provide an immersive full-screen canvas mode');
+assert(html.includes('className='controlGlyph''), 'individual tool controls must receive descriptive icons');
+assert(html.includes('0 3px 0 #c3d3e7'), 'tool dock icons must have layered dimensional button styling');
+
 assert(html.includes('data-template-filter="landscape"')&&html.includes('data-template-filter="portrait"'), 'template library must separate landscape and portrait layouts');
 assert(html.includes('data-template-filter="liked"')&&html.includes('data-template-filter="downloaded"'), 'template library must expose liked and downloaded collections');
 assert(html.includes("const VISO_TEMPLATE_LIKES_KEY='viso.templateLikes.v1'"), 'template likes must persist locally');
