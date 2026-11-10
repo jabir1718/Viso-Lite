@@ -34,6 +34,8 @@ for (const key of ['spinEnabled','spinForce','spinMomentum','spinSpeed']) {
   assert(html.includes(key), 'per-layer spin state must be stored: ' + key);
 }
 assert(html.includes('const spin=layer.spinEnabled?'), 'per-layer spin must change the rendered layer rotation');
+assert(html.includes('const layers=specLayers.filter(layer=>layer.enabled),t=performance.now()/1000'), 'layer spin renderer must define its animation clock');
+assert(html.includes("stackOffset=specLayerMode==='stack'?layerIndex*Math.min(W,H)*.025:0"), 'Stack layer mode must visibly offset each enabled layer');
 assert(html.includes("['bSpecLayerSpin','spinEnabled',v=>!!v]"), 'spin toggle must update selected layer');
 for (const id of ['bSpecShake','sSpecShake','bSpecWaveDelay','sSpecWaveDelayTime','bSpecWaveReverse','specWaveGradient']) {
   assert(html.includes('id="' + id + '"'), 'spectrum wave/motion control must exist: ' + id);
