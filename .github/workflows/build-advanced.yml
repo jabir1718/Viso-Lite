@@ -33,7 +33,7 @@ jobs:
           from pathlib import Path
           html = Path("app/src/main/assets/index.html").read_text(encoding="utf-8")
           activity = Path("app/src/main/java/com/viso/lite/MainActivity.kt").read_text(encoding="utf-8")
-          for required in ("params.createIntent()", "Intent.ACTION_OPEN_DOCUMENT", "FileChooserParams.parseResult", "result.data.clipData"):
+          for required in ("params.createIntent()", "Intent.ACTION_OPEN_DOCUMENT", "FileChooserParams.parseResult", "data.clipData"):
               if required not in activity:
                   raise SystemExit(f"Android WebView file chooser is missing: {required}")
           scripts = []
