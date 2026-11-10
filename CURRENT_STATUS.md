@@ -7,21 +7,30 @@ Main source: `app/src/main/assets/index.html`
 Permanent roadmap: `PROJECT_ROADMAP.md`
 
 ## Latest verified implementation
-- Advanced Spectrum Studio controls: glow enable/blur/scale/core colour, point count/width, audio multiplier, rainbow gradient, shadow enable/colour/expansion.
-- Visualizer Layers: independent spin enable, force, momentum and speed. Each layer has its own saved spin state and animated rotation.
-- All above settings are in project state capture/restore; regression assertions cover control presence and renderer wiring.
-- Feature commit for layer spin: `e916b511e5dae3c9cea83cf62c78bd7d6eb3a726`, CI run #263 passed.
-- Regression tests: commit `bb37ba27411562d38d52061132ab17161ec396f1`, CI run #264 passed.
-- Latest continuity-doc update commit: `9c980fa13c51d09c59826b6c29b3d1cd816e8399`; its CI result must be checked before claiming current latest success.
+- Advanced Spectrum response: glow enable/blur/scale/core colour, Soft/Neon/Core glow modes, audio intensity sync, point count/width, multiplier, rainbow gradient, shadow enable/colour/expansion.
+- Spectrum motion: audio-responsive shake, wave delay/time, reverse direction and spectrum/rainbow/solid wave gradient.
+- Spectrum trail: adjustable afterimages using a bounded four-frame reusable history buffer; clears stale history when disabled/restored.
+- Wave rendering uses a reusable 200-point typed array rather than allocating a new array per frame.
+- Visualizer Layers: independent spin enable, force, momentum and speed; per-layer state is preserved and animated rotation is applied independently.
+- New spectrum controls are connected to project state capture/restore and restore-time UI synchronization; regression tests cover renderer wiring and persistence.
+
+## Latest verified CI and APK
+- Run #277 / ID `42851394517`: success on commit `6cdd37944da0670adebc1976d4bcf832c80d9e4b`.
+- Run #276 / ID `42851369268`: success.
+- Latest source blob SHA: `56b89329258e620d40d13d101631297f45dce853`.
+- APK artifact ID: `13780247825`; artifact ZIP digest: `sha256:6ee4867373601208b83cd319566f3b1308c10b2dd94980f6832079e2b5dfc4de`.
+- Extracted APK: 84,492,335 bytes; SHA-256 `4ef719d615ea4c49e25224749d73e5bad635929c2447f8f1137cd03c2639cf61`.
+- Workflow verified package ID `com.viso.lite` and exact equality between packaged `assets/index.html` and branch source. Downloaded artifact ZIP and APK ZIP integrity tests passed.
 
 ## Dock architecture
 12 bottom dock groups: Media, Logo, Audio, Text, Visualizer, Elements, Overlay FX, Sticker, Turning Point, Tempo, Templates, Background Video. Background Video last; panels above dock; Export top-right.
 
 ## Not complete
-- Remaining Aspectrum Spectrum controls: shake, trail, wave delay/reverse/gradient, glow mode/intensity sync and remaining layer/material options.
+- Audit all spectrum shapes, styles, symmetry, materials, layer modes/blends and per-layer behaviour beyond static assertions.
 - Full behaviour audit for all 12 groups and original VISO features.
 - Undo/redo, project/template asset round-trip, preview/export parity and output/audio verification.
 - Physical Android device QA: install, media selection, playback, export, layout/touch, heat/battery, startup and stability.
+- Aspectrum reference APK was malformed/truncated; only recoverable metadata is available, so exact UI parity is not yet proven.
 
 ## Safety rules
 - Preserve `main` and uploaded baseline.
