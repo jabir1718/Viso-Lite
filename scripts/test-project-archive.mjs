@@ -110,7 +110,7 @@ assert(html.includes("groupMeta={"), 'each grouped tool must have its own clear 
 assert(html.includes("toolGroupBody>.toolSubpanel"), 'existing working controls must be preserved inside their grouped tool box');
 assert(html.includes("panel.classList.remove('collapsed');panel.classList.add('toolSubpanel')"), 'grouped controls must not inherit collapsed hidden state');
 assert(html.includes("if(t.includes('audio'))return 'audio'")&&html.includes("if(t.includes('beat')||t.includes('bpm')||t.includes('tempo'))return 'tempo'"), 'audio and tempo settings must be categorized into their own tool boxes');
-assert(html.includes("if(t.includes('overlay effects')||t.includes('progress bar')"), 'overlay effects must be categorized together');
+assert(html.includes("if(t.includes('overlay fx')||t.includes('overlay effects')||t.includes('progress bar')"), 'overlay effects must be categorized together');
 assert(html.includes("logoPanel.id='logoPanel'")&&html.includes("stickerPanel.id='stickerPanel'"), 'Logo and Sticker must have independent tools');
 assert(html.includes("tempo.id='tempoPanel'")&&html.includes("elements.id='elementsPanel'"), 'Tempo and Elements must have independent tools');
 assert(html.includes("turningPanel.id='turningPointPanel'")&&html.includes('id="bAddTurningPoint"')&&html.includes('id="bRemoveTurningPoint"'), 'Turning Point must provide add and remove controls');
