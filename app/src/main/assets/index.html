@@ -845,7 +845,7 @@ function restoreVISOExportState(d){
  fmtButton.textContent=formatChoice==='auto'?'Auto format':'WebM';fmtButton.classList.toggle('on',formatChoice==='auto');
  setRes();
 }
-function captureProjectState(){return {autoOn,autoEvery,lockChip:{...lockChip},exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd},colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
+function captureProjectState(){return {autoOn,autoEvery,lockChip:{...lockChip},exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd},bgVizMask,colors,mstate:mstate.map(m=>({...m})),shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp,bassGain,midGain,highGain,studioText,studioTextOn,studioTextSize,studioTextPos,studioTextAlpha,studioTextColor,studioTextX,studioTextRot,studioTextStroke,studioTextGlow,studioTextAnim,studioTextFont,studioTextAlign,studioTextPlate,studioText2,studioText2On,studioText2Size,studioText2Pos,studioText2Alpha,studioText2Color,studioText2X,studioText2Rot,studioText2Stroke,studioText2Glow,studioText2Anim,studioText2Align,studioText2Plate,bgOn,frOn,phOn,maskOn,bgViz,mediaFront,objects:objects.map(o=>({x:o.x,y:o.y,sc:o.sc,rot:o.rot,motion:o.motion,dir:o.dir,phase:o.phase})),lights:lights.map(l=>({x:l.x,y:l.y,r:l.r,on:l.on,pin:l.pin})),advanced:collectAdvancedState(),tools:collectVISORegistryState()};}
 function restoreVISOAutoState(d){
  autoOn=d.autoOn===undefined?false:!!d.autoOn;
  autoEvery=Number.isFinite(Number(d.autoEvery))?Number(d.autoEvery):3;
@@ -862,12 +862,12 @@ function snap(){const state=JSON.stringify(captureProjectState());if(undo[undo.l
 function apply(s){const d=JSON.parse(s);
   restoreVISOAutoState(d);
   colors=d.colors;mstate.forEach((m,i)=>{m.on=d.mstate[i].on;m.op=d.mstate[i].op;});
-  if(d.bgOn!==undefined)bgOn=!!d.bgOn;if(d.frOn!==undefined)frOn=!!d.frOn;if(d.phOn!==undefined)phOn=!!d.phOn;if(d.maskOn!==undefined)maskOn=!!d.maskOn;if(d.bgViz!==undefined)bgViz=!!d.bgViz;if(d.mediaFront!==undefined)mediaFront=!!d.mediaFront;
+  if(d.bgOn!==undefined)bgOn=!!d.bgOn;if(d.frOn!==undefined)frOn=!!d.frOn;if(d.phOn!==undefined)phOn=!!d.phOn;if(d.maskOn!==undefined)maskOn=!!d.maskOn;if(d.bgViz!==undefined)bgViz=!!d.bgViz;if(d.bgVizMask!==undefined)bgVizMask=!!d.bgVizMask;else bgVizMask=true;if(d.mediaFront!==undefined)mediaFront=!!d.mediaFront;
   const cachedObjects=objectSnapshotCache.get(s);
   if(cachedObjects)objects.splice(0,objects.length,...cachedObjects.map(o=>({...o})));
   else if(Array.isArray(d.objects)&&d.objects.length===objects.length)d.objects.forEach((o,i)=>Object.assign(objects[i],o));
   if(Array.isArray(d.lights)){lights.splice(0,lights.length,...d.lights.map(l=>({...l})));selLight=-1;}
-  [['tBg',bgOn],['tFr',frOn],['tPh',phOn],['tMask',maskOn],['bBgViz',bgViz]].forEach(([id,on])=>$(id)?.classList.toggle('on',!!on));
+  [['tBg',bgOn],['tFr',frOn],['tPh',phOn],['tMask',maskOn],['tBvm',bgVizMask],['bBgViz',bgViz]].forEach(([id,on])=>$(id)?.classList.toggle('on',!!on));
   document.querySelectorAll('#modes button').forEach((q,j)=>q.classList.toggle('on',mstate[j].on));
   shape=d.shape;maskDirty=true;
   document.querySelectorAll('#shapes button').forEach((q,j)=>q.classList.toggle('on',SHAPES[j][0]===shape));
@@ -898,7 +898,7 @@ $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
   mstate.forEach((m,i)=>{m.on=i===0;m.op=i===0?.95:.7;});
   specOn=false;$('bSpec').textContent='Spectrum: OFF';$('bSpec').classList.remove('on');
   document.querySelectorAll('#modes button').forEach((q,j)=>q.classList.toggle('on',mstate[j].on));
-  shape='media';maskDirty=true;ix=0;iy=0;isc=1;irot=0;mX=0;mY=0;mSc=1;mRot=0;
+  shape='media';maskDirty=true;bgVizMask=true;$('tBvm').classList.add('on');ix=0;iy=0;isc=1;irot=0;mX=0;mY=0;mSc=1;mRot=0;
   pow=140;cut=140;fea=12;pho=14;dep=70;trla=28;shk=45;pnc=40;cyc=18;dirG=0;swy=0;spd=14;
   bri=100;con=100;sat=100;hueSh=0;bloom=.5;dim=25;split=100;bgb=0;txt='VISO';
   $('sPow').value=140;$('sCut').value=140;$('sFea').value=12;$('sPho').value=14;$('sDep').value=70;
