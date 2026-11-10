@@ -303,7 +303,7 @@ body.preview-fullscreen #previewExit{display:block}
     <label><span>Resolution</span><input id="sSpecResolution" type="range" min="1" max="200" value="96"></label>
     <div class="fxSubhead">FREQUENCY FOCUS</div>
     <div class="row" id="specRangeModes"></div>
-    <label><span>Bars</span><input id="sSpecBars" type="range" min="8" max="96" value="48"></label>
+    <label><span>Bars</span><input id="sSpecBars" type="range" min="1" max="200" value="48"></label>
     <label><span>Radius</span><input id="sSpecRad" type="range" min="5" max="120" value="42"></label>
     <label><span>Thickness</span><input id="sSpecThick" type="range" min="20" max="400" value="100"></label>
     <label><span>Glow</span><input id="sSpecGlow" type="range" min="0" max="100" value="60"></label>
@@ -1775,7 +1775,7 @@ function specBands(){
 const SPEC_MODES=[['radial','Radial'],['ring','Ring'],['sphere','Sphere 3D'],['tunnel','Tunnel'],['mirror','Mirror'],['dual','Dual'],['wave','Wave'],['led','LED']];
 SPEC_MODES.forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;
   if(k==='radial')b.classList.add('on');
-  b.onclick=()=>{specMode=k;document.querySelectorAll('#specModes button').forEach(q=>q.classList.remove('on'));b.classList.add('on');};
+  b.onclick=()=>{specMode=k;specShape=['ring','sphere','tunnel','mirror'].includes(k)?k:'circle';$('specShape').value=specShape;document.querySelectorAll('#specModes button').forEach(q=>q.classList.remove('on'));b.classList.add('on');};
   $('specModes').appendChild(b);});
 const SPEC_RANGES=[['full','Full'],['low','Low'],['balanced','Balanced'],['high','High'],['vocals','Vocals'],['changes','Changes']];
 SPEC_RANGES.forEach(([k,label])=>{const b=document.createElement('button');b.textContent=label;if(k===specRange)b.classList.add('on');b.onclick=()=>{specRange=k;specPrev.fill(0);document.querySelectorAll('#specRangeModes button').forEach(q=>q.classList.toggle('on',q===b));};$('specRangeModes').appendChild(b);});
@@ -1785,7 +1785,7 @@ function bindSpec(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);}
 bindSpec('sSpecBars',v=>specBars=v);bindSpec('sSpecRad',v=>specRad=v);bindSpec('sSpecThick',v=>specThick=v);
 bindSpec('sSpecGlow',v=>specGlow=v);bindSpec('sSpecLevel',v=>specLevel=v);bindSpec('sSpecAtk',v=>specAtk=v/100);
 bindSpec('sSpecRel',v=>specRel=v/100);bindSpec('sSpecPeak',v=>specPeakHold=v);bindSpec('sSpecSpin',v=>specSpin=v/100);
-$('specShape').onchange=e=>{specShape=e.target.value;if(['ring','sphere','tunnel','mirror'].includes(specShape)){specMode=specShape;document.querySelectorAll('#specModes button').forEach((b,i)=>b.classList.toggle('on',SPEC_MODES[i]?.[0]===specMode));}};
+$('specShape').onchange=e=>{specShape=e.target.value;specMode=['ring','sphere','tunnel','mirror'].includes(specShape)?specShape:'radial';document.querySelectorAll('#specModes button').forEach((b,i)=>b.classList.toggle('on',SPEC_MODES[i]?.[0]===specMode));};
 $('specStyle').onchange=e=>specStyle=e.target.value;$('specSymmetry').onchange=e=>specSymmetry=e.target.value;
 $('specMaterial').onchange=e=>specMaterial=e.target.value;$('specLayerMode').onchange=e=>specLayerMode=e.target.value;$('specLayerBlend').onchange=e=>specLayerBlend=e.target.value;
 $('sSpecResolution').oninput=e=>specResolution=Math.max(1,Math.min(200,+e.target.value));
@@ -1825,7 +1825,7 @@ function drawSpectrum(ctx,scale){
    if(specLayerMode==='combo'){ctx.save();ctx.globalAlpha=.4;ctx.fillStyle=col(0);ctx.fillRect(0,cy+H*.28,W,Math.max(1,thick));ctx.restore();}
    ctx.restore();return;
   }
-  if(specShape==='ring')specMode='ring';else if(specShape==='sphere')specMode='sphere';else if(specShape==='tunnel')specMode='tunnel';else if(specShape==='mirror')specMode='mirror';else if(specShape==='circle'&&['ring','sphere','tunnel','mirror'].includes(specMode))specMode='radial';
+  
   if(M==='radial'){
     const R0=Math.min(W,H)*(specRad/100)*.5;
     for(let i=0;i<n;i++){
@@ -2436,7 +2436,7 @@ function resetVISOAdvancedControls(){
  logoArtworkShape='original';logoVinyl=false;logoVinylSpeed=28;logoColorKeyOn=false;logoColorKey='#00ff00';logoColorKeyTolerance=24;logoInkOn=false;logoInkAmount=35;logoInkColor='#70e7d4';$('logoArtworkShape').value=logoArtworkShape;$('bLogoVinyl').checked=false;$('sLogoVinylSpeed').value=28;$('bLogoColorKey').checked=false;$('logoColorKeyColor').value=logoColorKey;$('sLogoColorKeyTolerance').value=24;$('bLogoInk').checked=false;$('sLogoInkAmount').value=35;$('logoInkColor').value=logoInkColor;rebuildLogoColorKey();
  restoreAdvancedState({speed:100,pitchSemis:0,pitchLock:true,eightD:false,eightW:80,eightS:22,eightR:22,bpm:0,beatFlash:0,flashAmt:0,driftAmt:0,sym:'off',
   vigOn:false,vigAmt:45,progOn:false,progSz:12,progPos:96,logoSize:16,logoX:92,logoY:92,logoAlpha:90,progStyle:'gradient',
-  specOn:false,specMode:'radial',specRange:'full',specBars:48,specRad:42,specThick:100,specGlow:60,specLevel:100,specAtk:.55,specRel:.14,specPeakHold:10,specSpin:.25,
+  specOn:false,specMode:'radial',specRange:'full',specBars:48,specResolution:96,specShape:'circle',specStyle:'bar',specSymmetry:'none',specMaterial:'solid',specLayerMode:'web',specLayerBlend:'stacked',specRad:42,specThick:100,specGlow:60,specLevel:100,specAtk:.55,specRel:.14,specPeakHold:10,specSpin:.25,
   bgDriftOn:false,bgBeatSync:true,bgDriftSpeed:24,bgDriftRot:18,bgDriftTravel:22,vhsOn:false,shockOn:false,lensOn:false,motionFx:45,shockPhase:0,
   vhsScan:32,vhsNoise:24,vhsJitter:18,vhsBleed:22,shockStrength:58,shockSpeed:52,shockThickness:5,shockRgb:16,
   lensAmount:42,lensFocus:58,lensBokeh:22,lensBlur:28,progThickness:100,progRound:70,progGlow:48,progRotation:0,progX:0,progColor:'#8b5cf6',progRemaining:'#dfe8dc',
