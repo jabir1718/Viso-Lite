@@ -972,7 +972,7 @@ function restoreVISOExportState(d){
  const aspects=['9:16','16:9','1:1','4:5','3:4','4:3','3:2','2:3','21:9','custom'];
  aspect=aspects.includes(d.aspect)?d.aspect:'9:16';
  customW=Math.max(64,Math.min(4320,Number(d.customW)||1080));customH=Math.max(64,Math.min(4320,Number(d.customH)||1920));
- $('customWidth').value=customW;$('customHeight').value=customH;$('applyCustomSize').classList.toggle('on',aspect==='custom');
+ if($('customWidth'))$('customWidth').value=customW;if($('customHeight'))$('customHeight').value=customH;if($('applyCustomSize'))$('applyCustomSize').classList.toggle('on',aspect==='custom');
  const resolutions=[1080,1440,2160];
  baseRes=resolutions.includes(Number(d.baseRes))?Number(d.baseRes):1080;
  FPS=[30,60].includes(Number(d.FPS))?Number(d.FPS):30;
