@@ -357,6 +357,7 @@ assert(exportLists['#aspect button'][1].classList.values.has('on'),'aspect butto
 assert(exportLists['#res button'][2].classList.values.has('on'),'resolution button sync');
 assert(exportLists['#fps button'][1].classList.values.has('on'),'FPS button sync');
 assert.equal(exportControls.sQuality.value,130);assert.equal(exportSandbox.fmtButton.textContent,'WebM');
+assert.equal(exportSandbox.customW,1080,'custom canvas width uses a safe default when older projects omit it');assert.equal(exportSandbox.customH,1920,'custom canvas height uses a safe default when older projects omit it');
 exportSandbox.restoreVISOExportState({});
 assert.equal(exportSandbox.aspect,'9:16');assert.equal(exportSandbox.baseRes,1080);assert.equal(exportSandbox.FPS,30);
 assert.equal(exportSandbox.quality,100);assert.equal(exportSandbox.formatChoice,'auto');
