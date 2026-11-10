@@ -320,7 +320,7 @@ const snapStart=html.indexOf('function snap(){');
 const snapEnd=html.indexOf('function apply(s)',snapStart);
 assert(snapStart>=0&&snapEnd>snapStart,'guarded undo snapshot function must exist');
 let snapshotCalls=0;
-const snapSandbox={restoringState:true,captureProjectState:()=>{snapshotCalls++;return {state:1};},undo:[],redo:[],objectSnapshotCache:{set(){},delete(){}}};
+const snapSandbox={restoringState:true,captureProjectState:()=>{snapshotCalls++;return {state:1};},undo:[],redo:[],objects:[],objectSnapshotCache:{set(){},delete(){}}};
 vm.runInNewContext(html.slice(snapStart,snapEnd),snapSandbox,{timeout:2000});
 snapSandbox.snap();assert.equal(snapshotCalls,0,'restoration must not add undo snapshots');assert.equal(snapSandbox.undo.length,0);
 snapSandbox.restoringState=false;snapSandbox.snap();assert.equal(snapshotCalls,1,'normal user changes still create undo snapshots');assert.equal(snapSandbox.undo.length,1);
