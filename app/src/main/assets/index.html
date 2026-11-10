@@ -16,7 +16,7 @@
   #bar{flex:0 0 auto;max-height:44dvh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:8px 8px 24px}
   .sec{background:linear-gradient(180deg,#ffffff0d,#ffffff05);border:1px solid #ffffff14;border-radius:14px;
        padding:8px;display:flex;flex-direction:column;gap:7px;flex:0 0 auto}
-  .sec h4{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:#a78bfa;font-weight:700}
+  .sec h4{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:#a78bfa;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:22px}\n  .sec h4::after{content:"−";font-size:16px;line-height:1;color:#c4b5fd}\n  .sec.collapsed>*:not(h4){display:none!important}\n  .sec.collapsed h4::after{content:"+"}\n  .sec h4:focus-visible{outline:2px solid #a78bfa;outline-offset:3px;border-radius:4px}
   .row{display:flex;gap:6px;overflow-x:auto;flex:0 0 auto;align-items:center;padding-bottom:1px}
   button{background:#ffffff0f;color:#d9d5e6;border:1px solid #ffffff1f;border-radius:11px;min-height:37px;
          padding:0 13px;font-size:11.5px;white-space:nowrap;flex:0 0 auto;font-weight:500}
@@ -179,7 +179,7 @@
     <label><span>Gradient</span><input id="sDir" type="range" min="0" max="100" value="0"></label>
   </div>
   <div class="sec"><h4>Export</h4>
-    <div class="row"><button id="bShot">Save frame PNG</button><button id="bRec" class="prim">Record video</button></div>
+    <div class="row"><button id="bShot">Save frame PNG</button><span class="ratio-note">Full song video exports to Movies / Viso</span></div>
   </div>
 </div>
 <input id="fCenterLogo" type="file" accept="image/*"><input id="fA" type="file" accept="audio/*"><input id="fI" type="file" accept="image/*">
@@ -197,6 +197,20 @@ const o=document.createElement('canvas'),ox=o.getContext('2d');
 const bl=document.createElement('canvas'),bx=bl.getContext('2d');
 mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=W>>1;bl.height=H>>1;
 const $=id=>document.getElementById(id);
+document.querySelectorAll('#bar .sec').forEach((section,index)=>{
+  const heading=section.querySelector('h4');
+  if(!heading)return;
+  heading.tabIndex=0;heading.setAttribute('role','button');
+  heading.setAttribute('aria-expanded','true');
+  const toggle=()=>{
+    const collapsed=section.classList.toggle('collapsed');
+    heading.setAttribute('aria-expanded',String(!collapsed));
+  };
+  heading.addEventListener('click',toggle);
+  heading.addEventListener('keydown',event=>{
+    if(event.key==='Enter'||event.key===' '){event.preventDefault();toggle();}
+  });
+});
 const vid=$('vid'),bvid=$('bvid');
 
 let FPS=30,BIT=8000000;
@@ -421,9 +435,8 @@ $('fA').onchange=e=>{const f=e.target.files[0];if(!f)return;
   const s=ctxA.createMediaElementSource(audio);
   an=ctxA.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.7;
   s.connect(an);an.connect(ctxA.destination);
-  streamDest=ctxA.createMediaStreamDestination();an.connect(streamDest);
   buf=new Uint8Array(an.frequencyBinCount);playing=false;$('bP').textContent='Play';
-  audio.onended=()=>{if(exportingFullSong&&rec&&rec.state==='recording')rec.stop();playing=false;$('bP').textContent='Play';};};
+  audio.onended=()=>{if(exportingFullSong&&rec&&rec.state==='recording')rec.stop();playing=false;if(!exportingFullSong)$('bP').textContent='Play';};};
 $('bP').onclick=async()=>{if(!audio)return;
   if(ctxA.state==='suspended')await ctxA.resume();
   if(playing){audio.pause();vid.pause();bvid.pause();playing=false;$('bP').textContent='Play';}
@@ -432,35 +445,78 @@ $('bP').onclick=async()=>{if(!audio)return;
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000);}
 $('bShot').onclick=()=>c.toBlob(b=>dl(b,'viso_'+Date.now()+'.png'),'image/png');
-let rec=null,exportingFullSong=false,exportOldLoop=true;
-function startRecorder(fullSong){
-  if(!window.MediaRecorder||!c.captureStream){alert('Is device par video export supported nahi hai.');return false;}
-  const st=c.captureStream(FPS);if(streamDest)streamDest.stream.getAudioTracks().forEach(t=>st.addTrack(t));
+
+// Full-song export: render the exact live canvas settings and save the finished file
+// through the Android MediaStore bridge (Movies/Viso), not a user-facing recorder.
+let rec=null,exportingFullSong=false,exportOldLoop=true,exportCancelled=false;
+let exportSaveChain=Promise.resolve(),exportSaveFailed=false,exportFallbackChunks=[];
+function bytesToBase64(bytes){
+  let binary='';
+  for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));
+  return btoa(binary);
+}
+function queueNativeChunk(blob){
+  exportSaveChain=exportSaveChain.then(async()=>{
+    const bytes=new Uint8Array(await blob.arrayBuffer());
+    if(window.AndroidSave&&AndroidSave.appendChunk(bytesToBase64(bytes)))return;
+    exportSaveFailed=true;exportFallbackChunks.push(blob);
+  });
+}
+function resetExportUi(){
+  if(audio)audio.loop=exportOldLoop;
+  exportingFullSong=false;playing=false;
+  $('quickExport').textContent='Export full song';
+  $('quickExport').disabled=false;
+  $('bP').textContent='Play';
+}
+async function startFullSongExport(){
+  if(!window.MediaRecorder||!c.captureStream){alert('Is device par export engine supported nahi hai.');return;}
+  if(!audio){alert('Pehle MP3 select karein.');return;}
+  if(ctxA&&ctxA.state==='suspended')await ctxA.resume();
+  exportOldLoop=audio.loop;audio.loop=false;audio.pause();audio.currentTime=0;
+  exportCancelled=false;exportSaveFailed=false;exportFallbackChunks=[];exportSaveChain=Promise.resolve();
+  const fileName='VISO_full-song_'+Date.now()+'.webm';
+  const nativeSave=!!(window.AndroidSave&&AndroidSave.beginSave(fileName,'video/webm'));
+  if(window.AndroidSave&&!nativeSave){alert('Storage mein export file create nahi ho saki.');return;}
+  const stream=c.captureStream(FPS);
+  if(streamDest)streamDest.stream.getAudioTracks().forEach(track=>stream.addTrack(track));
   const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')?'video/webm;codecs=vp9,opus':'video/webm';
-  try{rec=new MediaRecorder(st,{mimeType:mime,videoBitsPerSecond:BIT});}catch(e){alert('Selected quality is not supported by this device.');return false;}
-  const chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
-  rec.onstop=()=>{if(chunks.length)dl(new Blob(chunks,{type:'video/webm'}),'viso_'+(fullSong?'full-song_':'')+Date.now()+'.webm');
-    if(fullSong){audio.loop=exportOldLoop;exportingFullSong=false;$('quickExport').textContent='Export full song';$('bP').textContent='Play';playing=false;}
-    $('bRec').textContent='Record video';$('bRec').classList.add('prim');};
-  rec.start(250);return true;
+  try{rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:BIT});}
+  catch(e){if(nativeSave)AndroidSave.cancelSave();alert('Selected export quality is not supported on this device.');return;}
+  rec.ondataavailable=e=>{if(e.data&&e.data.size){if(nativeSave)queueNativeChunk(e.data);else exportFallbackChunks.push(e.data);}};
+  rec.onstop=async()=>{
+    try{
+      await exportSaveChain;
+      if(exportCancelled){if(nativeSave)AndroidSave.cancelSave();}
+      else if(nativeSave&&!exportSaveFailed){AndroidSave.finishSave();}
+      else if(exportFallbackChunks.length){dl(new Blob(exportFallbackChunks,{type:'video/webm'}),fileName);}
+      else if(nativeSave){AndroidSave.cancelSave();alert('Export could not be saved. Please try again.');}
+    }finally{resetExportUi();rec=null;}
+  };
+  exportingFullSong=true;
+  $('quickExport').textContent='Cancel export';
+  $('bP').textContent='Exporting…';
+  try{
+    rec.start(1000);
+    await audio.play();
+    if(useVid)await vid.play().catch(()=>{});
+    if(bgUseVid)await bvid.play().catch(()=>{});
+    playing=true;
+  }catch(e){
+    exportCancelled=true;
+    if(rec&&rec.state==='recording')rec.stop();
+    else resetExportUi();
+    alert('MP3 start nahi ho saka. File permission ya audio selection check karein.');
+  }
 }
 $('quickExport').onclick=async()=>{
-  if(!audio){alert('Pehle MP3 select karein.');return;}
-  if(exportingFullSong){if(rec&&rec.state==='recording')rec.stop();return;}
-  if(ctxA&&ctxA.state==='suspended')await ctxA.resume();
-  if(rec&&rec.state==='recording'){alert('Pehle current recording stop karein.');return;}
-  exportOldLoop=audio.loop;audio.loop=false;audio.pause();audio.currentTime=0;
-  exportingFullSong=true;
-  if(!startRecorder(true)){audio.loop=exportOldLoop;exportingFullSong=false;return;}
-  $('quickExport').textContent='Stop export';$('bP').textContent='Pause';
-  try{await audio.play();if(useVid)vid.play();if(bgUseVid)bvid.play();playing=true;}
-  catch(e){if(rec&&rec.state==='recording')rec.stop();alert('Audio start nahi ho saka. Play permission check karein.');}
+  if(exportingFullSong){
+    exportCancelled=true;
+    if(rec&&rec.state==='recording')rec.stop();
+    return;
+  }
+  await startFullSongExport();
 };
-$('bRec').onclick=()=>{
-  if(rec&&rec.state==='recording'){rec.stop();return;}
-  if(!startRecorder(false))return;
-  $('bRec').textContent='Stop';$('bRec').classList.remove('prim');
-  if(audio&&!playing)$('bP').click();};
 
 function snap(){undo.push(JSON.stringify({colors,mstate,shape,ix,iy,isc,irot,pow,cut,fea,pho,dep,trla,shk,pnc,cyc,dirG,swy,spd,bri,con,sat,hueSh,bloom,dim,split,bgb,txt,mX,mY,mSc,mRot,bvo,bvp}));
   if(undo.length>40)undo.shift();redo.length=0;}
