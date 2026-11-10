@@ -37,7 +37,7 @@ assert(html.includes("const aspectItems=['9:16','16:9','1:1','4:5','3:4','4:3','
 assert(html.includes("if(aspect==='custom')"), 'canvas must support arbitrary custom pixel dimensions');
 assert(html.includes('id="customWidth"')&&html.includes('id="customHeight"')&&html.includes("aspect='custom'"), 'custom canvas width and height must apply immediately');
 assert(html.includes('id="previewToggle"')&&html.includes('id="previewExit"')&&html.includes('preview-fullscreen'), 'editor must provide an immersive full-screen canvas mode');
-assert(html.includes('className='controlGlyph''), 'individual tool controls must receive descriptive icons');
+assert(html.includes("className='controlGlyph'"), 'individual tool controls must receive descriptive icons');
 assert(html.includes('0 3px 0 #c3d3e7'), 'tool dock icons must have layered dimensional button styling');
 
 assert(html.includes('data-template-filter="landscape"')&&html.includes('data-template-filter="portrait"'), 'template library must separate landscape and portrait layouts');
