@@ -37,6 +37,7 @@ assert(html.includes('data-template-filter="liked"')&&html.includes('data-templa
 assert(html.includes("const VISO_TEMPLATE_LIKES_KEY='viso.templateLikes.v1'"), 'template likes must persist locally');
 assert(html.includes("VISO_TEMPLATE_DOWNLOADS_KEY='viso.templateDownloads.v1'"), 'downloaded templates must persist locally');
 assert(html.includes("visoTemplateDownloads.add(key)"), 'successful editable template downloads must populate the downloaded collection');
+assert(html.includes("aspect=layout==='portrait'?'9:16':'16:9'"), 'selecting a template must apply its portrait or landscape canvas orientation');
 assert(html.includes('templateGrid.portraitGrid{grid-template-columns:repeat(3,minmax(0,1fr))}'), 'portrait templates must use a compact three-column gallery');
 for (const key of ['aura','romance','vhs','club','minimal','phonk','neon','cosmic','city','fire','snow','pride','rose','storm']) assert(html.includes('data-template="'+key+'"'), 'template card must exist: '+key);
 
