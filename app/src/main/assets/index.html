@@ -2536,7 +2536,9 @@ function restoreAdvancedState(s){
 }
 function resetVISOAdvancedControls(){
  extraTextLayers=[];nextExtraTextId=1;renderExtraTextLayerControls();
- elementsLightOn=true;$('bElementLight').checked=true;$('bElementParticles').checked=true;$('bElementSparkles').checked=false;$('bElementReactiveFrame').checked=false;
+ turningPoints=[];turningTransition='fade';turningDuration=800;selectedTurningPoint=-1;renderTurningPointList();$('sTurningTransition').value='fade';$('sTurningDuration').value=800;
+ metronomeSoundOn=false;metronomeVolume=45;lastMetronomeTick=-1;$('bMetronomeSound').checked=false;$('sMetronomeVolume').value=45;$('bTempoSyncBar').checked=false;
+ elementsLightOn=true;$('bElementLight').checked=true;const dustIndex=MODES.indexOf('Dust'),sparkIndex=MODES.indexOf('Sparkle');if(dustIndex>=0)mstate[dustIndex].on=true;if(sparkIndex>=0)mstate[sparkIndex].on=false;document.querySelectorAll('#modes button').forEach((button,index)=>button.classList.toggle('on',!!mstate[index]?.on));drawMixers();$('bElementParticles').checked=true;$('bElementSparkles').checked=false;$('bElementReactiveFrame').checked=false;frOn=false;$('tFr').classList.remove('on');
  logoArtworkShape='original';logoVinyl=false;logoVinylSpeed=28;logoColorKeyOn=false;logoColorKey='#00ff00';logoColorKeyTolerance=24;logoInkOn=false;logoInkAmount=35;logoInkColor='#70e7d4';$('logoArtworkShape').value=logoArtworkShape;$('bLogoVinyl').checked=false;$('sLogoVinylSpeed').value=28;$('bLogoColorKey').checked=false;$('logoColorKeyColor').value=logoColorKey;$('sLogoColorKeyTolerance').value=24;$('bLogoInk').checked=false;$('sLogoInkAmount').value=35;$('logoInkColor').value=logoInkColor;rebuildLogoColorKey();
  restoreAdvancedState({speed:100,pitchSemis:0,pitchLock:true,eightD:false,eightW:80,eightS:22,eightR:22,bpm:0,beatFlash:0,flashAmt:0,driftAmt:0,sym:'off',
   vigOn:false,vigAmt:45,progOn:false,progSz:12,progPos:96,logoSize:16,logoX:92,logoY:92,logoAlpha:90,progStyle:'gradient',
