@@ -1701,7 +1701,8 @@ function drawBeatIndicator(ctx){
 }
 function rebuildLogoColorKey(){
  if(!logoImg)return;
- const iw=logoImg.naturalWidth||logoImg.width,ih=logoImg.naturalHeight||logoImg.height;if(!iw||!ih)return;
+ let iw=logoImg.naturalWidth||logoImg.width,ih=logoImg.naturalHeight||logoImg.height;if(!iw||!ih)return;
+ const scale=Math.min(1,1024/Math.max(iw,ih));iw=Math.max(1,Math.round(iw*scale));ih=Math.max(1,Math.round(ih*scale));
  logoProcessedCanvas.width=iw;logoProcessedCanvas.height=ih;logoProcessedCtx.clearRect(0,0,iw,ih);logoProcessedCtx.drawImage(logoImg,0,0,iw,ih);
  if(!logoColorKeyOn)return;
  try{const image=logoProcessedCtx.getImageData(0,0,iw,ih),data=image.data,hex=logoColorKey.replace('#','');
@@ -2380,6 +2381,7 @@ function restoreAdvancedState(s){
  updateBpm();applySpeedPitch();apply8d();
 }
 function resetVISOAdvancedControls(){
+ logoArtworkShape='original';logoVinyl=false;logoVinylSpeed=28;logoColorKeyOn=false;logoColorKey='#00ff00';logoColorKeyTolerance=24;logoInkOn=false;logoInkAmount=35;logoInkColor='#70e7d4';$('logoArtworkShape').value=logoArtworkShape;$('bLogoVinyl').checked=false;$('sLogoVinylSpeed').value=28;$('bLogoColorKey').checked=false;$('logoColorKeyColor').value=logoColorKey;$('sLogoColorKeyTolerance').value=24;$('bLogoInk').checked=false;$('sLogoInkAmount').value=35;$('logoInkColor').value=logoInkColor;rebuildLogoColorKey();
  restoreAdvancedState({speed:100,pitchSemis:0,pitchLock:true,eightD:false,eightW:80,eightS:22,eightR:22,bpm:0,beatFlash:0,flashAmt:0,driftAmt:0,sym:'off',
   vigOn:false,vigAmt:45,progOn:false,progSz:12,progPos:96,logoSize:16,logoX:92,logoY:92,logoAlpha:90,progStyle:'gradient',
   specOn:false,specMode:'radial',specRange:'full',specBars:48,specRad:42,specThick:100,specGlow:60,specLevel:100,specAtk:.55,specRel:.14,specPeakHold:10,specSpin:.25,
