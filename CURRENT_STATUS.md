@@ -1,3 +1,11 @@
+## Latest final-candidate APK — verified 2026-11-10
+- Branch: viso/advanced-studio-ui; exact head: 01e4ea6d98d7d7cc67193678244acb1132eec2c2.
+- Latest CI run #406 / 42877677231: **success**. HTML/JS validation, VISO project archive tests, Gradle debug build, packaged APK verification and upload all passed.
+- Artifact ID 13791414610; artifact name VISO-Studio-advanced-debug-apk; size 32,189,300 bytes; outer ZIP SHA-256 bb914613b31e45026163c5e574bcce37262fba87728c63048946bd40961965e7.
+- Downloaded and independently checked outer ZIP and inner APK integrity. Extracted packaged HTML: 2,949 lines, 2 inline script blocks; Node syntax check passed. Logo renderer single-path assertion passed.
+- APK SHA-256 01652419833a1c99031bbd6fabb5cec1bf639dfb51ba9abf2701f8a731c7b50b. CI verified package ID com.viso.lite and byte-identical source/packaged HTML.
+- APK is a debug build. Physical Android device QA remains open: install/launch, mobile layout/touch, actual media import/replacement, .viso save/open with real media and custom fonts, playback, export dimensions/audio sync, MediaStore save/playback, long-run performance and crash checks.
+
 ## Latest continuation checkpoint — 2026-11-10
 - Confirmed run #397 / ID 42869821850 completed successfully on commit d7244b358705fd9db414c5d1b3175e5d94932de1. HTML/JS validation, project archive checks, Android debug APK build, packaged APK verification and artifact upload passed.
 - Artifact: VISO-Studio-advanced-debug-apk, ID 13788447789, 32,189,303 bytes; outer ZIP digest sha256:130fbd1455804f1c81cd965f25bb58425215c1d88c3a4e50f7f8f5865666256c.
