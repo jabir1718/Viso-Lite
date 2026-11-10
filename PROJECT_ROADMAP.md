@@ -587,6 +587,16 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Found a destructive ordering risk: the existing project was cleared before a custom font had been prepared. A corrupt/unsupported font could therefore leave the user without the currently open project.
 - Moved custom-font preparation before clearVISOAssets(). Overlay images were already preloaded/decoded before clearing; regression tests now assert both font preparation and overlay decode happen before destructive replacement.
 - Source commit d7244b358705fd9db414c5d1b3175e5d94932de1; test commit a87dbcb23fcfa7b684f7c8e8fb424404cdc0758e.
-- CI run #397 (ID 42869821850) currently has HTML/JS and project archive checks passed; Gradle/APK build still in progress at the time of this note.
-- Run #396 (ID 42863571143) is the latest fully successful APK build: artifact 13784749862, size 32,189,301 bytes, digest sha256:6907611444aeaf7926f0141f21be6ff0b34a8cf6b154243e0f26264497bda78e.
+- CI run #397 (ID 42869821850), exact head d7244b358705fd9db414c5d1b3175e5d94932de1, completed successfully: HTML/JS validation, project archive tests, Android debug APK build, packaged APK verification and artifact upload all passed.
+- Run #397 artifact 13788447789, size 32,189,303 bytes; outer ZIP digest sha256:130fbd1455804f1c81cd965f25bb58425215c1d88c3a4e50f7f8f5865666256c. Device install/runtime QA remains unverified.
 - Remaining: project round-trip with actual large media/custom fonts, device save/open/export tests, and remaining Logo/Text/Background/Overlay/Template end-to-end QA.
+
+
+## 47. Logo/Text render-path audit and CI guard — 2026-11-10
+
+- Read the current branch source rather than relying on older chat snapshots. Latest HTML after the source change has blob SHA `b2b4b9e8b950bafa43f677c0ca0bd6e2994b03cd`, 2,949 lines.
+- Confirmed the dedicated Logo tool is the active owner of `drawCustomLogo`; the Text tool renders the two primary text layers and dynamic additional text layers. `captureProjectState()` includes logo advanced settings, primary/artist text settings, and extra text layers; v3 project packaging includes logo/font assets.
+- Removed the obsolete custom-logo call from the legacy `Overlay` render-module mapping. The panel organizer currently renames that panel to `Overlay FX`, so this was a stale fallback path rather than a confirmed visible double-render in the current layout.
+- Added CI assertions in `.github/workflows/build-advanced.yml` that require exactly one dedicated custom-logo render call and reject reintroduction of the legacy Overlay call. Workflow edit commit: `e2b19e3d1fd620a4485a69c11393419def240329`; source edit commit: `c2e9b197e66dc438275dae133bf6071379c4128a`.
+- Static source assertions passed after the edit. The new commits have not yet had a verified CI result recorded; do not treat run #397 as testing these later commits.
+- Remaining in this workstream: complete media/photo/logo/font load and replacement audit, Text/Logo undo and project round-trip checks, preview/export parity, and device runtime verification.
