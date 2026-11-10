@@ -1883,7 +1883,7 @@ function drawCustomLogo(ctx){
 const SPEC_N=200;
 const specRaw=new Uint8Array(SPEC_N),specSmooth=new Float32Array(SPEC_N),specPeak=new Float32Array(SPEC_N),specPeakT=new Uint8Array(SPEC_N);
 let specOn=false,specMode='radial',specRange='full',specBars=48,specResolution=96,specShape='circle',specStyle='bar',specSymmetry='none',specMaterial='solid',specLayerMode='web',specLayerBlend='stacked',specLayers=[{id:1,enabled:true,color:'#8edcf3',outlineColor:'#ffffff',outline:0,thickness:100,offset:0,invert:false,x:0,y:0,rotation:0,scale:100,spinEnabled:false,spinForce:50,spinMomentum:50,spinSpeed:25}],selectedSpecLayerId=1,nextSpecLayerId=2,specRad=42,specThick=100,specGlow=60,specLevel=100,specAtk=.55,specRel=.14,specPeakHold=10,specSpin=.25,specGlowOn=true,specGlowBlur=100,specGlowScale=100,specGlowCoreColor='#ffffff',specGlowMode='soft',specGlowIntensitySync=false,specPointCount=96,specPointWidth=100,specMultiplier=100,specRainbow=false,specShadowOn=false,specShadowColor='#8edcf3',specShadowExpand=30,specShakeOn=false,specShake=0,specWaveDelayOn=false,specWaveDelayTime=20,specWaveReverse=false,specWaveGradient='spectrum';
-const specPrev=new Float32Array(SPEC_N),specTrailFrames=4,specTrailBuffers=Array.from({length:specTrailFrames},()=>new Float32Array(SPEC_N)),specTrailCurrent=new Float32Array(SPEC_N);
+const specPrev=new Float32Array(SPEC_N),specWaveY=new Float32Array(SPEC_N),specTrailFrames=4,specTrailBuffers=Array.from({length:specTrailFrames},()=>new Float32Array(SPEC_N)),specTrailCurrent=new Float32Array(SPEC_N);
 let specTrailOn=false,specTrailAmount=45,specTrailHead=0,specTrailCount=0;
 function selectedSpecLayer(){return specLayers.find(layer=>layer.id===selectedSpecLayerId)||specLayers[0]||null;}
 function renderSpecLayerControls(){
@@ -2082,7 +2082,7 @@ function drawSpectrumLayer(ctx,scale,layer,isTrail=false){
     }
   } else if(M==='wave'){
     for(let pass=0;pass<3;pass++){
-      const waveY=new Float32Array(n);
+      const waveY=specWaveY;
       for(let i=0;i<n;i++){
         const idx=specWaveReverse?n-1-i:i,v=specSmooth[idx]/255;
         const delay=specWaveDelayOn?(specWaveDelayTime/100)*pass*1.8:0;
