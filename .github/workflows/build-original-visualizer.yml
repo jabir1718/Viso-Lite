@@ -1,0 +1,57 @@
+name: Build original Good Working Visualizer APK
+on:
+  push:
+    branches:
+      - viso/good-working-visualizer
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '8.11.1'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-36"
+      - name: Validate original HTML
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("app/src/main/assets/index.html").read_text(encoding="utf-8")
+          assert len(html.encode("utf-8")) == 47967, "Original Library HTML size changed"
+          scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S)
+          assert scripts, "No JavaScript found"
+          Path("/tmp/viso-original.js").write_text("\n".join(scripts), encoding="utf-8")
+          print("Original HTML size and script blocks verified")
+          PY
+          node --check /tmp/viso-original.js
+      - name: Build APK
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --stacktrace
+      - name: Verify APK and embedded original HTML
+        run: |
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          unzip -t "$APK" >/dev/null
+          unzip -p "$APK" assets/index.html > /tmp/apk-index.html
+          cmp app/src/main/assets/index.html /tmp/apk-index.html
+          AAPT="$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -n 1)"
+          "$AAPT" dump badging "$APK" | grep -q "package: name='com.viso.lite'"
+          echo "APK package and exact embedded HTML verified"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VISO-Good-Working-Visualizer-APK
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
