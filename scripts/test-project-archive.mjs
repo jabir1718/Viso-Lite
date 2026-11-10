@@ -32,6 +32,14 @@ assert(html.includes('if(mstate[0]?.on)stepP(b,dt);'), 'particle simulation must
 
 assert(html.includes("dockNav.id='toolDockNav'"), 'editor must expose a horizontal tool dock');
 assert(html.includes('function activateDockPanel(panel)'), 'tool dock must activate one focused control panel at a time');
+assert(html.includes('data-template-filter="landscape"')&&html.includes('data-template-filter="portrait"'), 'template library must separate landscape and portrait layouts');
+assert(html.includes('data-template-filter="liked"')&&html.includes('data-template-filter="downloaded"'), 'template library must expose liked and downloaded collections');
+assert(html.includes("const VISO_TEMPLATE_LIKES_KEY='viso.templateLikes.v1'"), 'template likes must persist locally');
+assert(html.includes("const VISO_TEMPLATE_DOWNLOADS_KEY='viso.templateDownloads.v1'"), 'downloaded templates must persist locally');
+assert(html.includes("visoTemplateDownloads.add(key)"), 'successful editable template downloads must populate the downloaded collection');
+assert(html.includes('templateGrid.portraitGrid{grid-template-columns:repeat(3,minmax(0,1fr))}'), 'portrait templates must use a compact three-column gallery');
+for (const key of ['aura','romance','vhs','club','minimal','phonk','neon','cosmic','city','fire','snow','pride','rose','storm']) assert(html.includes('data-template="'+key+'"'), 'template card must exist: '+key);
+
 assert(html.includes('#bar>.panel.dock-active{display:flex!important}'), 'only the selected tool panel should occupy the editor dock');
 assert(html.includes('canvas{aspect-ratio:auto!important;width:auto!important;height:auto!important;'), 'preview must preserve selected landscape, square or portrait aspect ratio');
 assert(html.includes('body{color:#f4f4f4!important;background:#111!important}'), 'editor must use the dark reference workspace theme');
