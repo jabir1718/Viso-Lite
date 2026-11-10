@@ -65,7 +65,7 @@ assert(html.includes("mergeGroup('Visualizer',['Look','Visuals','Spectrum Studio
 assert(html.includes("mergeGroup('Overlay FX',['Overlay','Overlay Effects · Motion FX'"), 'overlay effects must be consolidated into one Overlay FX tool');
 assert(html.includes("logoPanel.id='logoPanel'")&&html.includes("stickerPanel.id='stickerPanel'"), 'Logo and Sticker must have independent tools');
 assert(html.includes("tempo.id='tempoPanel'")&&html.includes("elements.id='elementsPanel'"), 'Tempo and Elements must have independent tools');
-assert(t.includes('id="turningPointPanel"')&&t.includes('id="bAddTurningPoint"')&&t.includes('id="bRemoveTurningPoint"'), 'Turning Point must provide add and remove controls');
+assert(html.includes('id="turningPointPanel"')&&html.includes('id="bAddTurningPoint"')&&html.includes('id="bRemoveTurningPoint"'), 'Turning Point must provide add and remove controls');
 assert((t.match(/<option value="(?:fade|crossfade|flash|glitch|shake|rgb|blur|zoom|spin|wipe-left|wipe-right|wipe-up|wipe-down|circle|diamond|pixel|scanline|invert|light-leak|vhs)">/g)||[]).length>=20, 'Turning Point must provide twenty transition types');
 assert(t.includes('function drawTurningPointTransitions(ctx)')&&t.includes('drawTurningPointTransitions(x)'), 'turning point transitions must render in the shared preview and export frame');
 assert(t.includes('turningPoints:turningPoints.map')&&t.includes('turningPoints=Array.isArray(d.turningPoints)'), 'turning points must save and restore with the project');
