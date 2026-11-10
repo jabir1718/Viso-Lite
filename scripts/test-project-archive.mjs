@@ -280,6 +280,10 @@ autoSandbox.restoreVISOAutoState({autoEvery:99});assert.equal(autoSandbox.autoEv
 autoSandbox.restoreVISOAutoState({autoEvery:0});assert.equal(autoSandbox.autoEvery,1,'auto interval clamps to slider minimum');
 
 
+assert(html.includes('let restoringState=false;'), 'state restoration guard must exist');
+assert(html.includes('function snap(){if(restoringState)return;'), 'undo snapshots must be suppressed during restore');
+assert(html.includes('previousRestoringState=restoringState;restoringState=true;try{'), 'apply must guard registry change events from polluting undo');
+assert(html.includes('finally{restoringState=previousRestoringState;}'), 'restore guard must always be released');
 const exportStart = html.indexOf('function restoreVISOExportState(');
 const exportEnd = html.indexOf('function captureProjectState', exportStart);
 assert(exportStart >= 0 && exportEnd > exportStart, 'export state restore helper must exist');
@@ -310,5 +314,15 @@ exportSandbox.restoreVISOExportState({});
 assert.equal(exportSandbox.aspect,'9:16');assert.equal(exportSandbox.baseRes,1080);assert.equal(exportSandbox.FPS,30);
 assert.equal(exportSandbox.quality,100);assert.equal(exportSandbox.formatChoice,'auto');
 assert.equal(exportSandbox.loopSong,true);assert.equal(exportSandbox.stopAtSongEnd,false);assert.equal(exportSandbox.audio.loop,true);
+
+
+const snapStart=html.indexOf('function snap(){');
+const snapEnd=html.indexOf('function apply(s)',snapStart);
+assert(snapStart>=0&&snapEnd>snapStart,'guarded undo snapshot function must exist');
+let snapshotCalls=0;
+const snapSandbox={restoringState:true,captureProjectState:()=>{snapshotCalls++;return {state:1};},undo:[],redo:[],objectSnapshotCache:{set(){},delete(){}}};
+vm.runInNewContext(html.slice(snapStart,snapEnd),snapSandbox,{timeout:2000});
+snapSandbox.snap();assert.equal(snapshotCalls,0,'restoration must not add undo snapshots');assert.equal(snapSandbox.undo.length,0);
+snapSandbox.restoringState=false;snapSandbox.snap();assert.equal(snapshotCalls,1,'normal user changes still create undo snapshots');assert.equal(snapSandbox.undo.length,1);
 
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
