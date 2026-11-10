@@ -2190,7 +2190,6 @@ function applyVISOTemplateFilters(){
   const layout=card.dataset.layout,showText=!q||name.toLowerCase().includes(q)||key.includes(q);
   const showLayout=visoTemplateFilter==='downloaded'?visoTemplateDownloads.has(key):layout===visoTemplateFilter;
   card.hidden=!(showText&&showLayout);if(!card.hidden)count++;
-  const like=card.querySelector('[data-like]');if(like){const on=visoTemplateLikes.has(key);like.textContent=on?'♥':'♡';like.classList.toggle('active',on);}
  });
  $('templateEmpty').style.display=count?'none':'block';
 }
@@ -2198,8 +2197,6 @@ document.querySelectorAll('[data-template-filter]').forEach(btn=>btn.addEventLis
  visoTemplateFilter=btn.dataset.templateFilter;document.querySelectorAll('[data-template-filter]').forEach(b=>b.classList.toggle('active',b===btn));applyVISOTemplateFilters();
 }));
 $('templateSearch').addEventListener('input',applyVISOTemplateFilters);
-applyVISOTemplateFilters();
-}));
 applyVISOTemplateFilters();
 document.querySelectorAll('#visoTemplates [data-template]').forEach(q=>q.onclick=async()=>{
  const key=q.dataset.template,preset=VISO_TEMPLATES[key],layout=q.closest('.templateCard')?.dataset.layout;
