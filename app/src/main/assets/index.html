@@ -212,6 +212,7 @@ $('fitModes').querySelectorAll('button').forEach(b=>b.onclick=()=>{fitMode=b.dat
 $('fullPreview').onclick=()=>{fullPreview=!fullPreview;$('wrap').style.position=fullPreview?'fixed':'relative';
   $('wrap').style.inset=fullPreview?'0':'auto';$('wrap').style.zIndex=fullPreview?'20':'auto';
   $('wrap').style.background=fullPreview?'#050409':'transparent';
+  $('wrap').style.width=fullPreview?'100vw':'';$('wrap').style.height=fullPreview?'100dvh':'';
   $('bar').style.display=fullPreview?'none':'flex';resizePreview();};
 window.addEventListener('resize',resizePreview);
 updateBitrate();
@@ -444,7 +445,7 @@ function src(){return useVid&&vid.readyState>=2?vid:img;}
 function mediaRect(sw,sh,mode){const k=(mode==='fit'?Math.min:Math.max)(W/sw,H/sh);
   return {w:sw*k,h:sh*k,x:(W-sw*k)/2,y:(H-sh*k)/2};}
 function drawMediaFrame(ctx,s,sw,sh){
-  const r=mediaRect(sw,sh,fitMode);ctx.drawImage(s,r.x,r.y,r.w,r.h);
+  const r=mediaRect(sw,sh,fitMode);ctx.drawImage(s,r.x-cx,r.y-cy,r.w,r.h);
 }
 function cover(ctx,s,sw,sh,clipH){const r=mediaRect(sw,sh,'fill');
   if(clipH<H){ctx.save();ctx.beginPath();ctx.rect(0,0,W,clipH);ctx.clip();}
