@@ -507,4 +507,15 @@ assert(spectrumSymmetryAuditStart>=0&&spectrumSymmetryAuditEnd>spectrumSymmetryA
 const spectrumSymmetryAudit=html.slice(spectrumSymmetryAuditStart,spectrumSymmetryAuditEnd);
 for(const mode of ["mode==='x'","mode==='xy'","mode==='across'","mode==='triple-x'"])assert(spectrumSymmetryAudit.includes(mode),'missing symmetry mode '+mode);
 assert(spectrumSymmetryAudit.includes('drawSpectrumLayerGeometry(ctx,scale,layer,isTrail)'),'all Spectrum shapes must pass through shared symmetry rendering');
+
+const dockCategoryStart=html.indexOf('function visoToolCategory(');
+const dockCategoryEnd=html.indexOf('function visoSlug',dockCategoryStart);
+assert(dockCategoryStart>=0&&dockCategoryEnd>dockCategoryStart,'dock category mapper must exist');
+const dockCategorySandbox={};
+vm.runInNewContext(html.slice(dockCategoryStart,dockCategoryEnd),dockCategorySandbox,{timeout:2000});
+const expectedDockCategories=[['Media','media'],['Logo','logo'],['Audio','audio'],['Text','text'],['Visualizer','visualizer'],['Elements','elements'],['Overlay FX','overlay'],['Sticker','sticker'],['Turning Point','turning'],['Tempo','tempo'],['Templates · Editable Projects','templates'],['Background','background']];
+expectedDockCategories.forEach(([title,category])=>assert.equal(dockCategorySandbox.visoToolCategory(title),category,'dock group '+title+' must map to '+category));
+const dockOrderMatch=html.match(/const dockOrder=\\[([^\\]]+)\\];/);
+assert(dockOrderMatch,'12-group dock order must exist');
+assert.deepEqual([...dockOrderMatch[1].matchAll(/'([^']+)'/g)].map(match=>match[1]),expectedDockCategories.map(entry=>entry[1].toLowerCase().replace(/[^a-z]+/g,'' )==='backgroundvideo'?'background':entry[1]==='Turning Point'?'turning':entry[1]==='Overlay FX'?'overlay':entry[1]==='Templates · Editable Projects'?'templates':entry[1].toLowerCase()),'dock order must preserve the 12 requested tool groups');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
