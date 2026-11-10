@@ -53,6 +53,8 @@ assert(html.includes("restoreVISOProjectAssets(project,entries)"), 'project impo
 assert(html.includes('function visoFontFamily(fileName,checksum)'), 'custom font family must be stable across project reloads');
 assert(html.includes('await prepareVISOFont(fontFile)'), 'embedded custom fonts must load before project settings are applied');
 assert(html.includes('project.settings.state.studioTextFont=restoredAssets.fontFamily'), 'project font selection must remap to its restored font family');
+assert(html.includes("toolState.sTextFont=fontValue"), 'saved font selection must also remap inside the effect registry');
+assert(html.includes("if(d.studioTextFont!==undefined){studioTextFont=d.studioTextFont;$('sTextFont').value=studioTextFont;}"), 'font selector must reapply after registry controls restore');
 assert(html.includes('studioTextFont=prepared.family'), 'manual custom font selection must update rendered text state');
 assert(html.includes("downloadVISOProject(project,'VISO-'+key+'.viso')"), 'built-in templates must download as complete editable project packages');
 assert(html.includes("renderVISOStage('overlay'"), 'overlay render stage must remain in the preview frame');
