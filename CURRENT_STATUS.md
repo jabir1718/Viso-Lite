@@ -13,18 +13,20 @@ Permanent roadmap: `PROJECT_ROADMAP.md`
 - Spectrum shake, wave delay/time, reverse wave, spectrum/rainbow/solid wave gradient.
 - Bounded 4-frame trail history with adjustable strength; fixed-size reusable wave buffer.
 - Spectrum settings are included in advanced project state capture/restore; slider, toggle, colour, select and per-layer controls capture undo snapshots.
-- Shared response fix: radial, ring, sphere, tunnel, mirror, dual, wave and dot-style renderers apply multiplier, uniform response and layer inversion consistently.
-- Layer mode fix: Web and Combo render finishes apply to flat-family and other shapes; Scale changes processed amplitude across shapes. Stack and Uniform behaviour preserved.
-- Material finish improvement: Fire, Chrome, Plastic, Diamond and Liquid Glass have distinct stroke-width, glow, shadow-colour and/or edge treatments beyond their colour palettes.
-- **Style improvement:** Solid and Point styles now add their corresponding filled-spectrum / point-marker rendering across shape families that previously ignored those styles; Flats and NCS retain their native style rendering.
-- Regression tests cover shared response, cross-shape layer modes, material-specific rendering and Solid/Point style behaviour.
+- Shared response: radial, ring, sphere, tunnel, mirror, dual, wave and dot-style renderers apply multiplier, uniform response and layer inversion consistently.
+- Layer modes: Web and Combo render finishes apply across shape families; Scale affects processed amplitude across shapes; Stack and Uniform remain functional.
+- Materials: Fire, Chrome, Plastic, Diamond and Liquid Glass have distinct stroke-width, glow, shadow-colour and/or edge treatments.
+- Styles: Solid and Point now add filled-spectrum / point-marker rendering across shape families that previously ignored those styles; Flats and NCS retain native style rendering.
+- **Symmetry:** all shape families now pass through a shared symmetry wrapper: X (left/right mirror), X and Y (four-way), Across (top/bottom mirror), Triple X (three reduced vertical copies), and None (single render). Exact parity with the reference app's naming/semantics remains subject to further reference verification.
+- Regression tests cover shared response, cross-shape layer modes, material-specific rendering, styles and symmetry wrapper.
 
 ## Latest verified CI and APK
-- Spectrum style source commit: `dac5fe26a4f8007e3e08ff0caf00ba6266fcbeba`.
-- Regression-test commit: `a9adc746f37f1a9829c0b9794faf16dd9d06d428`.
-- CI workflow run #323, ID `42855684313`, exact head commit `a9adc746f37f1a9829c0b9794faf16dd9d06d428`, conclusion **success**.
+- Spectrum symmetry source commit: `f8418100dbb73d68dd54ee82f4ef287f604afdf3`.
+- Workflow regression update: `b2feb9d2d2d87b891ce497aaa6809b706d2dfe73`.
+- Regression-test commit: `75ec34f71b4c3ce30bc7019483945eb9c6305f47`.
+- CI workflow run #330, ID `42856294617`, exact head commit `75ec34f71b4c3ce30bc7019483945eb9c6305f47`, conclusion **success**.
 - HTML/JavaScript validation, project archive regression tests, Android debug APK build, packaged APK verification and artifact upload all passed.
-- Artifact: `VISO-Studio-advanced-debug-apk`, artifact ID `13782896586`, size 32,188,860 bytes, outer artifact ZIP digest `sha256:91110f0b9487c1b47108e181df42e11f16bdeb15ebdd4e45d4f654abcdee29e0`.
+- Artifact: `VISO-Studio-advanced-debug-apk`, artifact ID `13782762494`, size 32,189,059 bytes, outer artifact ZIP digest `sha256:a4e773be83cbb0db4f46bd2a2645abd5bfa56099550ae375480625742917189b`.
 - Workflow verified package `com.viso.lite` and packaged HTML/source integrity. Physical-device install/runtime QA is not performed.
 
 ## Dock architecture
