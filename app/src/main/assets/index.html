@@ -477,7 +477,7 @@ function drawRecordFrame(){
   recordGl.pixelStorei(recordGl.UNPACK_FLIP_Y_WEBGL,true);
   recordGl.texImage2D(recordGl.TEXTURE_2D,0,recordGl.RGBA,recordGl.RGBA,recordGl.UNSIGNED_BYTE,c);
   recordGl.drawArrays(recordGl.TRIANGLE_STRIP,0,4);
- }else if(record2d){record2d.clearRect(0,0,recordCanvas.width,recordCanvas.height);record2d.drawImage(c,0,0,targetW,targetH);}
+ }else if(record2d){record2d.clearRect(0,0,recordCanvas.width,recordCanvas.height);record2d.drawImage(c,0,0,recordCanvas.width,recordCanvas.height);}
 }
 mk.width=W;mk.height=H;o.width=W;o.height=H;bl.width=W>>1;bl.height=H>>1;reflectionCanvas.width=W;reflectionCanvas.height=H;
 const $=id=>document.getElementById(id);
@@ -780,7 +780,7 @@ setInterval(()=>{
 $('bRec').onclick=()=>{
   if(!window.MediaRecorder||!recordCanvas.captureStream){$('recInfo').textContent='Video export unavailable in this WebView';return;}
   if(rec&&rec.state==='recording'){rec.stop();return;}
-  setVideoRenderCanvasSize();recordCanvas.width=targetW;recordCanvas.height=targetH;drawRecordFrame();
+  setVideoRenderCanvasSize();drawRecordFrame();
   const st=recordCanvas.captureStream(FPS);
   if(streamDest)streamDest.stream.getAudioTracks().forEach(t=>st.addTrack(t));
   const candidates=formatChoice==='webm'
