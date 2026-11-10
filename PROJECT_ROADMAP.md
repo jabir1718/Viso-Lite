@@ -458,3 +458,17 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Artifact: `VISO-Studio-advanced-debug-apk`, ID `13781912155`; outer ZIP size 32,188,351 bytes; digest `sha256:c9a1a50ceb4aa3abd42bbda555b49334bbb98d94b2a90c9052c5a29360106615`.
 - This is automated code/build/package verification, not physical-device testing.
 - Next: audit and implement missing Shape/Style/Symmetry/Material/Layers Mode behaviour across all shapes, then proceed through each dock group and project/template/export workflows.
+
+
+## 37. Spectrum layer modes across shape families — 2026-11-10
+
+- Audited Layers Mode and found Web, Combo and Scale effects were only active in the Flats/Square/NCS branch. Other spectrum shapes therefore appeared unchanged when those modes were selected.
+- Added a shared mode-finish renderer for Web (connecting spectrum line) and Combo (overlay baseline), called by both the flat-family branch and the general shape renderer.
+- Moved Scale behaviour into the shared response function so it affects all shapes consistently, while preserving the existing Stack per-layer offset and Uniform response-floor behaviour.
+- Added regression assertions for cross-shape Scale/Web/Combo behaviour.
+- Source commit: `fc7f221d41040f5367d1148f8130058a2b043d93`.
+- Test commit: `5ffac539c464bda38b28c13e36c6c301cf18a040`.
+- CI run #547 (ID `42854739363`) passed: HTML/JS validation, project archive tests, Android debug APK build, packaged APK verification and artifact upload.
+- Artifact: `VISO-Studio-advanced-debug-apk`, ID `13782935549`; outer ZIP size 32,188,511 bytes; digest `sha256:bcfd522e869a59fa25c2c5aeb0bba53dafc616333f60e1884a388e50993309a8`.
+- This is automated code/build/package verification, not physical-device testing.
+- Next: audit shape-specific Style and Symmetry behaviour and implement verified material-specific visual differences; then continue all dock groups and project/template/export workflows.
