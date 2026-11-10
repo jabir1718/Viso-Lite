@@ -892,7 +892,7 @@ function apply(s){const d=JSON.parse(s),previousRestoringState=restoringState;re
   $('sTextSize').value=studioTextSize;$('sTextPos').value=studioTextPos;$('sTextAlpha').value=studioTextAlpha;$('studioTextColor').value=studioTextColor;
   $('sTextX').value=studioTextX;$('sTextRot').value=studioTextRot;$('sTextStroke').value=studioTextStroke;$('sTextGlow').value=studioTextGlow;$('sTextAnim').value=studioTextAnim;$('sTextFont').value=studioTextFont;$('sTextAlign').value=studioTextAlign;$('bTextPlate').textContent='Text plate: '+(studioTextPlate?'ON':'OFF');$('bTextPlate').classList.toggle('on',studioTextPlate);
   $('sText2Size').value=studioText2Size;$('sText2Pos').value=studioText2Pos;$('sText2Alpha').value=studioText2Alpha;$('studioText2Color').value=studioText2Color;$('sText2X').value=studioText2X;$('sText2Rot').value=studioText2Rot;$('sText2Stroke').value=studioText2Stroke;$('sText2Glow').value=studioText2Glow;$('sText2Anim').value=studioText2Anim;$('sText2Align').value=studioText2Align;$('bText2Plate').textContent='Text 2 plate: '+(studioText2Plate?'ON':'OFF');$('bText2Plate').classList.toggle('on',studioText2Plate);
-  drawPals();drawMixers();if(d.advanced)restoreAdvancedState(d.advanced);if(d.tools)restoreVISORegistryState(d.tools);else{resetVISOBackgroundGrade();resetVISOBPMControls();}restoreVISOExportState(d.exportSettings||{quality:d.tools?Number($('sQuality').value):100});}finally{restoringState=previousRestoringState;}}
+  drawPals();drawMixers();if(d.advanced)restoreAdvancedState(d.advanced);if(d.tools)restoreVISORegistryState(d.tools);else{resetVISOBackgroundGrade();resetVISOBPMControls();}if(d.studioTextFont!==undefined){studioTextFont=d.studioTextFont;$('sTextFont').value=studioTextFont;}restoreVISOExportState(d.exportSettings||{quality:d.tools?Number($('sQuality').value):100});}finally{restoringState=previousRestoringState;}}
 $('bUndo').onclick=()=>{if(!undo.length)return;const current=JSON.stringify(captureProjectState()),previous=undo.pop();objectSnapshotCache.set(current,objects.map(o=>({...o})));redo.push(current);apply(previous);};
 $('bRedo').onclick=()=>{if(!redo.length)return;const current=JSON.stringify(captureProjectState()),next=redo.pop();objectSnapshotCache.set(current,objects.map(o=>({...o})));undo.push(current);apply(next);};
 $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
@@ -2274,7 +2274,8 @@ $('fProjectOpen').onchange=async e=>{
   if(project.schema==='viso-project-v3'){
    const restoredAssets=await restoreVISOProjectAssets(project,entries);
    if(project.settings?.state){if(restoredAssets.fontFamily)project.settings.state.studioTextFont=restoredAssets.fontFamily;
-    else if(/^UserFont|^VISOFont_/.test(project.settings.state.studioTextFont||''))project.settings.state.studioTextFont='system-ui';}
+    else if(/^UserFont|^VISOFont_/.test(project.settings.state.studioTextFont||''))project.settings.state.studioTextFont='system-ui';
+    const fontValue=project.settings.state.studioTextFont;Object.values(project.settings.state.tools||{}).forEach(toolState=>{if(toolState&&Object.prototype.hasOwnProperty.call(toolState,'sTextFont'))toolState.sTextFont=fontValue;});}
   }
   applyVisoProject(project);
   undo.length=0;redo.length=0;objectSnapshotCache.clear();
