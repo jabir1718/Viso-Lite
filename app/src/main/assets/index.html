@@ -299,6 +299,7 @@ body.preview-fullscreen #previewExit{display:block}
   <div class="sec panel"><h4>Background</h4>
     <div class="row"><button id="bBgI">BG image</button><button id="bBgV">BG video</button>
       <button id="bBgX">BG off</button><button id="bBgViz">BG visualizer</button></div>
+    <label><span>Background fit</span><select id="selBgFit"><option value="fit">Fit</option><option value="fill">Fill</option><option value="crop" selected>Crop</option></select></label>
     <label><span>BG split</span><input id="sSplit" type="range" min="0" max="100" value="100"></label>
     <label><span>BG dim</span><input id="sDim" type="range" min="0" max="100" value="25"></label>
     <label><span>BG blur</span><input id="sBgb" type="range" min="0" max="40" value="0"></label>
@@ -2362,6 +2363,12 @@ document.querySelectorAll('#bar input[type="range"],#bar input[type="color"],#ba
 });
 document.querySelectorAll('#bar input[type="text"]').forEach(control=>control.addEventListener('focus',()=>snap()));
 
+function drawBackgroundMedia(ctx,source,sourceW,sourceH){
+ if(!source||!sourceW||!sourceH)return;
+ if(bgFitMode==='fill'){ctx.drawImage(source,0,0,W,H);return;}
+ if(bgFitMode==='fit'){const scale=Math.min(W/sourceW,H/sourceH),drawW=sourceW*scale,drawH=sourceH*scale;ctx.drawImage(source,(W-drawW)/2,(H-drawH)/2,drawW,drawH);return;}
+ cover(ctx,source,sourceW,sourceH,H);
+}
 function drawVISOBackground(ctx,b,dt){
   const clipH=Math.max(0,split/100*H);
   if(clipH>0){
@@ -2380,8 +2387,8 @@ function drawVISOBackground(ctx,b,dt){
         ctx.translate(cx+dx,cy+dy);ctx.rotate(rot);ctx.scale(zoom,zoom);ctx.translate(-cx,-cy);
       }
       ctx.filter='brightness('+bgBrightness+'%) contrast('+bgContrast+'%) saturate('+bgSaturation+'%) hue-rotate('+bgHue+'deg)'+(bgb>0?' blur('+bgb+'px)':'');
-      if(bgUseVid&&bvid.readyState>=2)cover(ctx,bvid,bvid.videoWidth||W,bvid.videoHeight||H,H);
-      else if(bgImg)cover(ctx,bgImg,bgImg.width,bgImg.height,H);
+      if(bgUseVid&&bvid.readyState>=2)drawBackgroundMedia(ctx,bvid,bvid.videoWidth||W,bvid.videoHeight||H);
+      else if(bgImg)drawBackgroundMedia(ctx,bgImg,bgImg.width,bgImg.height);
       ctx.filter='none';ctx.restore();
       ctx.fillStyle='rgba(0,0,0,'+(dim/100*.75)+')';ctx.fillRect(0,0,W,clipH);
       if(bgViz){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=bvo/100;
@@ -2550,11 +2557,12 @@ function frame(t){
 }
 
 // VISO advanced studio modules: editable templates, motion, and project files.
-let bgDriftOn=false,bgBeatSync=true,bgDriftSpeed=24,bgDriftRot=18,bgDriftTravel=22;
+let bgFitMode='crop',bgDriftOn=false,bgBeatSync=true,bgDriftSpeed=24,bgDriftRot=18,bgDriftTravel=22;
 let vhsOn=false,shockOn=false,lensOn=false,motionFx=45,shockPhase=0;
 let vhsScan=32,vhsNoise=24,vhsJitter=18,vhsBleed=22;
 let shockStrength=58,shockSpeed=52,shockThickness=5,shockRgb=16;
 let lensAmount=42,lensFocus=58,lensBokeh=22,lensBlur=28;
+$('selBgFit').onchange=e=>{snap();bgFitMode=e.target.value;maskDirty=true;};
 $('bBgDrift').onclick=e=>{bgDriftOn=!bgDriftOn;e.currentTarget.textContent='Background drift: '+(bgDriftOn?'ON':'OFF');e.currentTarget.classList.toggle('on',bgDriftOn);};
 $('bDriftBeat').onclick=e=>{bgBeatSync=!bgBeatSync;e.currentTarget.textContent='Beat sync: '+(bgBeatSync?'ON':'OFF');e.currentTarget.classList.toggle('on',bgBeatSync);};
 $('sBgDriftSpeed').oninput=e=>bgDriftSpeed=+e.target.value;
@@ -2648,7 +2656,7 @@ document.querySelectorAll('#visoTemplates [data-template]').forEach(q=>q.onclick
  try{await downloadVISOProject(project,'VISO-'+key+'.viso');visoTemplateDownloads.add(key);try{localStorage.setItem(VISO_TEMPLATE_DOWNLOADS_KEY,JSON.stringify([...visoTemplateDownloads]));}catch(_){}applyVISOTemplateFilters();$('templateInfo').textContent=preset.name+' editable project package downloaded with imported assets';}
  catch(err){$('templateInfo').textContent='Template package failed: '+err.message;}
 });
-function collectAdvancedState(){return {specLayers:specLayers.map(layer=>({...layer})),selectedSpecLayerId,speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specRange,specBars,specResolution,specShape,specStyle,specSymmetry,specMaterial,specLayerMode,specLayerBlend,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,specGlowOn,specGlowBlur,specGlowScale,specGlowCoreColor,specGlowMode,specGlowIntensitySync,specPointCount,specPointWidth,specMultiplier,specRainbow,specShadowOn,specShadowColor,specShadowExpand,specShakeOn,specShake,specWaveDelayOn,specWaveDelayTime,specWaveReverse,specWaveGradient,specTrailOn,specTrailAmount,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining,logoGlow,logoBounce,logoShake,logoPulse,logoRotation,logoReflection,logoParticles,surfaceReflectionOn,reflStrength,reflDistance,reflBlur,reflFade,reflRipples,reflPerspective,filmOn,filmGrain,filmDust,filmScratches,filmFlicker,filmSepia,filmWeave,atmosphereOn,hazeStrength,hazeAngle,hazeSpeed,smokeAmount,smokeSize,smokeSpeed,smokeColor};}
+function collectAdvancedState(){return {specLayers:specLayers.map(layer=>({...layer})),selectedSpecLayerId,speed,pitchSemis,pitchLock,eightD,eightW,eightS,eightR,bpm,beatFlash,flashAmt,driftAmt,sym,vigOn,vigAmt,progOn,progSz,progPos,logoSize,logoX,logoY,logoAlpha,progStyle,specOn,specMode,specRange,specBars,specResolution,specShape,specStyle,specSymmetry,specMaterial,specLayerMode,specLayerBlend,specRad,specThick,specGlow,specLevel,specAtk,specRel,specPeakHold,specSpin,specGlowOn,specGlowBlur,specGlowScale,specGlowCoreColor,specGlowMode,specGlowIntensitySync,specPointCount,specPointWidth,specMultiplier,specRainbow,specShadowOn,specShadowColor,specShadowExpand,specShakeOn,specShake,specWaveDelayOn,specWaveDelayTime,specWaveReverse,specWaveGradient,specTrailOn,specTrailAmount,bgFitMode,bgDriftOn,bgBeatSync,bgDriftSpeed,bgDriftRot,bgDriftTravel,vhsOn,shockOn,lensOn,motionFx,shockPhase,vhsScan,vhsNoise,vhsJitter,vhsBleed,shockStrength,shockSpeed,shockThickness,shockRgb,lensAmount,lensFocus,lensBokeh,lensBlur,progThickness,progRound,progGlow,progRotation,progX,progColor,progRemaining,logoGlow,logoBounce,logoShake,logoPulse,logoRotation,logoReflection,logoParticles,surfaceReflectionOn,reflStrength,reflDistance,reflBlur,reflFade,reflRipples,reflPerspective,filmOn,filmGrain,filmDust,filmScratches,filmFlicker,filmSepia,filmWeave,atmosphereOn,hazeStrength,hazeAngle,hazeSpeed,smokeAmount,smokeSize,smokeSpeed,smokeColor};}
 function restoreAdvancedState(s){
  if(!s)return;
  if(s.speed!==undefined)speed=s.speed;if(s.pitchSemis!==undefined)pitchSemis=s.pitchSemis;if(s.pitchLock!==undefined)pitchLock=s.pitchLock;
@@ -2658,7 +2666,7 @@ function restoreAdvancedState(s){
  if(s.logoSize!==undefined)logoSize=s.logoSize;if(s.logoX!==undefined)logoX=s.logoX;if(s.logoY!==undefined)logoY=s.logoY;if(s.logoAlpha!==undefined)logoAlpha=s.logoAlpha;if(s.progStyle!==undefined)progStyle=s.progStyle;
  if(Array.isArray(s.specLayers)){specLayers=s.specLayers.slice(0,8).map(layer=>({...layer}));selectedSpecLayerId=s.selectedSpecLayerId||specLayers[0]?.id||1;nextSpecLayerId=Math.max(1,...specLayers.map(layer=>Number(layer.id)||0))+1;renderSpecLayerControls();}
  if(s.specOn!==undefined)specOn=s.specOn;if(s.specMode!==undefined)specMode=s.specMode;if(s.specRange!==undefined)specRange=s.specRange;if(s.specBars!==undefined)specBars=s.specBars;if(s.specResolution!==undefined)specResolution=Math.max(1,Math.min(200,s.specResolution));if(s.specShape!==undefined)specShape=s.specShape;if(s.specStyle!==undefined)specStyle=s.specStyle;if(s.specSymmetry!==undefined)specSymmetry=s.specSymmetry;if(s.specMaterial!==undefined)specMaterial=s.specMaterial;if(s.specLayerMode!==undefined)specLayerMode=s.specLayerMode;if(s.specLayerBlend!==undefined)specLayerBlend=s.specLayerBlend;if(s.specRad!==undefined)specRad=s.specRad;if(s.specThick!==undefined)specThick=s.specThick;if(s.specGlow!==undefined)specGlow=s.specGlow;if(s.specLevel!==undefined)specLevel=s.specLevel;if(s.specAtk!==undefined)specAtk=s.specAtk;if(s.specRel!==undefined)specRel=s.specRel;if(s.specPeakHold!==undefined)specPeakHold=s.specPeakHold;if(s.specSpin!==undefined)specSpin=s.specSpin;if(s.specGlowOn!==undefined)specGlowOn=s.specGlowOn;if(s.specGlowBlur!==undefined)specGlowBlur=s.specGlowBlur;if(s.specGlowScale!==undefined)specGlowScale=s.specGlowScale;if(s.specGlowCoreColor!==undefined)specGlowCoreColor=s.specGlowCoreColor;if(s.specGlowMode!==undefined)specGlowMode=s.specGlowMode;if(s.specGlowIntensitySync!==undefined)specGlowIntensitySync=s.specGlowIntensitySync;if(s.specPointCount!==undefined)specPointCount=s.specPointCount;if(s.specPointWidth!==undefined)specPointWidth=s.specPointWidth;if(s.specMultiplier!==undefined)specMultiplier=s.specMultiplier;if(s.specRainbow!==undefined)specRainbow=s.specRainbow;if(s.specShadowOn!==undefined)specShadowOn=s.specShadowOn;if(s.specShadowColor!==undefined)specShadowColor=s.specShadowColor;if(s.specShadowExpand!==undefined)specShadowExpand=s.specShadowExpand;if(s.specShakeOn!==undefined)specShakeOn=s.specShakeOn;if(s.specShake!==undefined)specShake=s.specShake;if(s.specWaveDelayOn!==undefined)specWaveDelayOn=s.specWaveDelayOn;if(s.specWaveDelayTime!==undefined)specWaveDelayTime=s.specWaveDelayTime;if(s.specWaveReverse!==undefined)specWaveReverse=s.specWaveReverse;if(s.specWaveGradient!==undefined)specWaveGradient=s.specWaveGradient;if(s.specTrailOn!==undefined)specTrailOn=s.specTrailOn;if(s.specTrailAmount!==undefined)specTrailAmount=s.specTrailAmount;if(!specTrailOn){specTrailHead=0;specTrailCount=0;specTrailBuffers.forEach(frame=>frame.fill(0));}
- if(s.bgDriftOn!==undefined)bgDriftOn=s.bgDriftOn;if(s.bgBeatSync!==undefined)bgBeatSync=s.bgBeatSync;if(s.bgDriftSpeed!==undefined)bgDriftSpeed=s.bgDriftSpeed;if(s.bgDriftRot!==undefined)bgDriftRot=s.bgDriftRot;if(s.bgDriftTravel!==undefined)bgDriftTravel=s.bgDriftTravel;
+ if(s.bgFitMode!==undefined)bgFitMode=s.bgFitMode;if(s.bgDriftOn!==undefined)bgDriftOn=s.bgDriftOn;if(s.bgBeatSync!==undefined)bgBeatSync=s.bgBeatSync;if(s.bgDriftSpeed!==undefined)bgDriftSpeed=s.bgDriftSpeed;if(s.bgDriftRot!==undefined)bgDriftRot=s.bgDriftRot;if(s.bgDriftTravel!==undefined)bgDriftTravel=s.bgDriftTravel;
  if(s.vhsOn!==undefined)vhsOn=s.vhsOn;if(s.shockOn!==undefined)shockOn=s.shockOn;if(s.lensOn!==undefined)lensOn=s.lensOn;if(s.motionFx!==undefined)motionFx=s.motionFx;if(s.shockPhase!==undefined)shockPhase=s.shockPhase;
  if(s.vhsScan!==undefined)vhsScan=s.vhsScan;if(s.vhsNoise!==undefined)vhsNoise=s.vhsNoise;if(s.vhsJitter!==undefined)vhsJitter=s.vhsJitter;if(s.vhsBleed!==undefined)vhsBleed=s.vhsBleed;
  if(s.shockStrength!==undefined)shockStrength=s.shockStrength;if(s.shockSpeed!==undefined)shockSpeed=s.shockSpeed;if(s.shockThickness!==undefined)shockThickness=s.shockThickness;if(s.shockRgb!==undefined)shockRgb=s.shockRgb;
@@ -2683,7 +2691,7 @@ function restoreAdvancedState(s){
  btn('bAtmosphere',atmosphereOn,'Atmosphere: '+(atmosphereOn?'ON':'OFF'));
  btn('b8d',eightD,'8D audio: '+(eightD?'ON':'OFF'));btn('bPreserve',pitchLock,'Pitch lock: '+(pitchLock?'ON':'OFF'));
  btn('bVig',vigOn);btn('bProg',progOn);btn('bSpec',specOn,'Spectrum: '+(specOn?'ON':'OFF'));
- btn('bBgDrift',bgDriftOn,'Background drift: '+(bgDriftOn?'ON':'OFF'));btn('bDriftBeat',bgBeatSync,'Beat sync: '+(bgBeatSync?'ON':'OFF'));
+ $('selBgFit').value=bgFitMode;btn('bBgDrift',bgDriftOn,'Background drift: '+(bgDriftOn?'ON':'OFF'));btn('bDriftBeat',bgBeatSync,'Beat sync: '+(bgBeatSync?'ON':'OFF'));
  btn('bVhs',vhsOn,'VHS: '+(vhsOn?'ON':'OFF'));btn('bShock',shockOn,'Shockwave: '+(shockOn?'ON':'OFF'));btn('bLens',lensOn,'Lens glow: '+(lensOn?'ON':'OFF'));
  document.querySelectorAll('#progressStyles button').forEach(q=>q.classList.toggle('on',q.dataset.prog===progStyle));
  document.querySelectorAll('#specModes button').forEach((q,i)=>q.classList.toggle('on',SPEC_MODES[i]?.[0]===specMode));
@@ -2699,7 +2707,7 @@ function resetVISOAdvancedControls(){
  restoreAdvancedState({speed:100,pitchSemis:0,pitchLock:true,eightD:false,eightW:80,eightS:22,eightR:22,bpm:0,beatFlash:0,flashAmt:0,driftAmt:0,sym:'off',
   vigOn:false,vigAmt:45,progOn:false,progSz:12,progPos:96,logoSize:16,logoX:92,logoY:92,logoAlpha:90,progStyle:'gradient',
   specLayers:[{id:1,enabled:true,color:'#8edcf3',colorMode:'material',outlineColor:'#ffffff',outline:0,thickness:100,offset:0,invert:false,x:0,y:0,rotation:0,scale:100,spinEnabled:false,spinForce:50,spinMomentum:50,spinSpeed:25}],selectedSpecLayerId:1,specOn:false,specMode:'radial',specRange:'full',specBars:48,specResolution:96,specShape:'circle',specStyle:'bar',specSymmetry:'none',specMaterial:'solid',specLayerMode:'web',specLayerBlend:'stacked',specRad:42,specThick:100,specGlow:60,specLevel:100,specAtk:.55,specRel:.14,specPeakHold:10,specSpin:.25,
-  bgDriftOn:false,bgBeatSync:true,bgDriftSpeed:24,bgDriftRot:18,bgDriftTravel:22,vhsOn:false,shockOn:false,lensOn:false,motionFx:45,shockPhase:0,
+  bgFitMode:'crop',bgDriftOn:false,bgBeatSync:true,bgDriftSpeed:24,bgDriftRot:18,bgDriftTravel:22,vhsOn:false,shockOn:false,lensOn:false,motionFx:45,shockPhase:0,
   vhsScan:32,vhsNoise:24,vhsJitter:18,vhsBleed:22,shockStrength:58,shockSpeed:52,shockThickness:5,shockRgb:16,
   lensAmount:42,lensFocus:58,lensBokeh:22,lensBlur:28,progThickness:100,progRound:70,progGlow:48,progRotation:0,progX:0,progColor:'#8b5cf6',progRemaining:'#dfe8dc',
   logoGlow:42,logoBounce:18,logoShake:8,logoPulse:35,logoRotation:0,logoReflection:0,logoParticles:0,surfaceReflectionOn:false,reflStrength:35,reflDistance:12,reflBlur:18,reflFade:78,reflRipples:24,reflPerspective:18,filmOn:false,filmGrain:24,filmDust:12,filmScratches:8,filmFlicker:10,filmSepia:0,filmWeave:6,atmosphereOn:false,hazeStrength:24,hazeAngle:25,hazeSpeed:30,smokeAmount:18,smokeSize:48,smokeSpeed:24,smokeColor:'#c5d7d0'});
