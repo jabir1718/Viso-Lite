@@ -76,6 +76,10 @@ assert(['logoArtworkShape','bLogoVinyl','bLogoColorKey','bLogoInk'].every(id=>ht
 assert(html.includes('function rebuildLogoColorKey()')&&html.includes('logoProcessedCtx.putImageData'), 'logo colour key must process the uploaded image rather than remain a decorative control');
 assert(html.includes('logoArtworkShape,logoVinyl,logoVinylSpeed,logoColorKeyOn,logoColorKey,logoColorKeyTolerance,logoInkOn,logoInkAmount,logoInkColor'), 'logo effects must persist in project state');
 assert(html.includes('id="bAddTextLayer"')&&html.includes('id="extraTextLayers"'), 'Text tool must allow creating additional text boxes');
+assert(['sStickerX','sStickerY','sStickerScale','sStickerRotation','sStickerAlpha','sStickerGlow','sStickerOutline','bStickerColorKey','selStickerBlend','selStickerMotion','sStickerMotionSpeed'].every(id=>html.includes('id="'+id+'"')), 'Sticker tool must expose transform, colour key, overlay effects and motion controls');
+assert(html.includes('function getStickerRenderSource(ob)')&&html.includes('stickerKeyCache.set(ob'), 'sticker colour key must process and cache its source image');
+assert(html.includes("if(ob.motion==='None')return;")&&html.includes('motionSpeed:o.motionSpeed'), 'Sticker motion and speed must be editable and persisted');
+assert(html.includes('syncStickerControls();start={m:\'o\''), 'sticker selection must update the control panel');
 assert(html.includes('function drawExtraTextLayers(ctx,b)')&&html.includes('drawExtraTextLayers(ctx,b)'), 'additional text boxes must render in the visualizer output');
 assert(html.includes('function formatStudioTimer()')&&html.includes('layer.timer?formatStudioTimer()'), 'additional text boxes must support the live song timer');
 assert(html.includes('extraTextLayers:extraTextLayers.map(layer=>({...layer}))')&&html.includes('extraTextLayers=Array.isArray(d.extraTextLayers)'), 'additional text boxes must save and restore with editable settings');
