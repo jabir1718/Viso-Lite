@@ -220,6 +220,18 @@ body.preview-fullscreen #previewExit{display:block}
 #toolDockNav button.active{background:linear-gradient(160deg,#d9f8f2,#c8eaff);border-color:#72c6c0;color:#145b61;box-shadow:0 3px 8px #2a9b9730,inset 0 1px #fff}
 .panel h4 .toolFav,.templateLike,.studioNav,#toolFilters{display:none!important}
 
+
+/* Independent text layers: compact, editable cards inside the Text tool */
+.extraTextLayers{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.extraTextCard{display:flex;flex-direction:column;gap:7px;padding:11px;border:1px solid #c9d8e7;border-radius:15px;background:linear-gradient(145deg,#ffffff,#f0f7ff 62%,#edf9f4);box-shadow:0 3px 9px #284b7014,inset 0 1px #fff}
+.extraTextCard .extraTextTop{display:flex;gap:7px;align-items:center}
+.extraTextCard .extraTextTop input{flex:1;min-width:0}
+.extraTextCard .textTypeButton{min-width:38px;min-height:36px;border-radius:11px;background:linear-gradient(160deg,#fff,#dceaff);border:1px solid #b9cde2;color:#315775;font-weight:900;box-shadow:0 3px 0 #c3d3e7,inset 0 1px #fff}
+.extraTextCard [data-remove]{min-width:34px;min-height:34px;border-radius:10px}
+.extraTextCard label{display:grid;grid-template-columns:minmax(95px,1fr) minmax(0,1.6fr);align-items:center;gap:9px}
+.extraTextCard label span{font-size:12px;color:#4d657d}
+.extraTextCard input[type=range]{width:100%;min-width:0}
+.extraTextCard input[type=text],.extraTextCard select{min-width:0;width:100%;max-width:100%}
 </style>
 <div id="studioHeader">
   <div class="studioBrand">
@@ -1576,8 +1588,9 @@ function renderExtraTextLayerControls(){
   root.appendChild(card);
   card.querySelector('[data-field="text"]').value=layer.text||'';
   card.querySelectorAll('[data-field]').forEach(control=>{const key=control.dataset.field;if(control.type==='checkbox')control.checked=!!layer[key];else control.value=layer[key]??'';
+   control.addEventListener('focus',()=>snap());control.addEventListener('pointerdown',()=>snap());
    control.addEventListener('input',()=>{layer[key]=control.type==='checkbox'?control.checked:control.type==='range'?Number(control.value):control.value;});
-   control.addEventListener('change',()=>{layer[key]=control.type==='checkbox'?control.checked:control.type==='range'?Number(control.value):control.value;snap();});
+   control.addEventListener('change',()=>{layer[key]=control.type==='checkbox'?control.checked:control.type==='range'?Number(control.value):control.value;});
   });
   card.querySelector('[data-focus]').onclick=()=>card.querySelector('[data-field="text"]').focus();
   card.querySelector('[data-remove]').onclick=()=>{snap();extraTextLayers=extraTextLayers.filter(item=>item.id!==layer.id);renderExtraTextLayerControls();};
