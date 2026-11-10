@@ -163,7 +163,7 @@ assert(html.includes('const waveY=specWaveY')&&html.includes('waveY[i+1]')&&html
 assert(html.includes("specGlowMode==='neon'")&&html.includes('specGlowIntensitySync?'), 'glow mode and audio intensity sync must affect spectrum rendering');
 assert(html.includes('specTrailBuffers.forEach(frame=>frame.fill(0))'), 'disabling or restoring trail must clear stale frame history');
 assert(!html.includes('return {autoOn,autoEvery,lockChip:'), 'removed Auto + Lock controls must not be saved into new projects');
-assert(html.includes('function restoreVISOAutoState(_d){/* Removed legacy Auto + Lock controls are intentionally ignored when opening older projects. */}'), 'legacy Auto + Lock project data must be safely ignored');
+assert(html.includes('function restoreVISOAutoState(_d){/* Legacy Auto/Lock project fields are ignored; no such controls are shown in the editor. */}'), 'legacy Auto + Lock project data must be safely ignored');
 assert(html.includes("$('bLoop').onclick=()=>{snap();loopSong=!loopSong"), 'song loop toggle must participate in undo history');
 assert(html.includes('exportSettings:{aspect,baseRes,FPS,quality,formatChoice,loopSong,stopAtSongEnd,customW,customH}'), 'export profile, resolution, FPS, format and playback toggles must be saved');
 assert(html.includes('customW,customH},bgVizMask,colors'), 'custom canvas dimensions and background visualizer mask toggle must be saved');
