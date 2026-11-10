@@ -1740,7 +1740,8 @@ bind('sSpeed',v=>{speed=v;applySpeedPitch();});bind('sPitch',v=>{pitchSemis=v;ap
 bind('s8w',v=>{eightW=v;apply8d();});bind('s8s',v=>{eightS=v;apply8d();});bind('s8r',v=>{eightR=v;apply8d();});
 $('b8d').onclick=e=>{eightD=!eightD;e.currentTarget.textContent='8D audio: '+(eightD?'ON':'OFF');e.currentTarget.classList.toggle('on',eightD);apply8d();};
 $('bPreserve').onclick=e=>{pitchLock=!pitchLock;e.currentTarget.textContent='Pitch lock: '+(pitchLock?'ON':'OFF');e.currentTarget.classList.toggle('on',pitchLock);applySpeedPitch();};
-function updateBpm(){$('bpmInfo').textContent='BPM: '+(bpm||'—')+' · '+(bpm?'synced':'tap or detect');const slider=$('sTempoBpm');if(slider)slider.value=Math.max(0,Math.min(240,Math.round(bpm||0)));}\n$('sTempoBpm').oninput=e=>{bpm=Math.max(0,Math.min(240,Math.round(Number(e.target.value)||0)));updateBpm();};
+function updateBpm(){$('bpmInfo').textContent='BPM: '+(bpm||'—')+' · '+(bpm?'synced':'tap or detect');const slider=$('sTempoBpm');if(slider)slider.value=Math.max(0,Math.min(240,Math.round(bpm||0)));}
+$('sTempoBpm').oninput=e=>{bpm=Math.max(0,Math.min(240,Math.round(Number(e.target.value)||0)));updateBpm();};
 function tapTempo(){const n=performance.now();
   if(lastOnset){const g=n-lastOnset;if(g>200&&g<1400){onsetGaps.push(g);if(onsetGaps.length>8)onsetGaps.shift();}}
   lastOnset=n;
