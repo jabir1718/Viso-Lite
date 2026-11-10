@@ -602,4 +602,7 @@ assert(html.includes("r.addEventListener('pointerdown',()=>snap())"),'Visual mod
 assert(html.includes("$('bar').addEventListener('pointerdown',e=>{if(e.target.matches('input,select,textarea'))snap();},true)"),'all current and dynamically added editor controls must snapshot before pointer edits');
 assert(html.includes("$('bar').addEventListener('focusin',e=>{if(e.target.matches('input,select,textarea'))snap();},true)"),'keyboard edits to editor controls must snapshot before focus changes');
 assert(html.includes('function bind(id,fn){const el=$(id);el.oninput=e=>fn(+e.target.value);}'),'generic slider binding must not snapshot after the value has already changed');
+
+assert(html.includes("MODES.findIndex(mode=>mode.name===name)"),'Elements controls must resolve mode objects by their name, not array string lookup');
+assert(html.includes("MODES.findIndex(mode=>mode.name==='Dust')")&&html.includes("MODES.findIndex(mode=>mode.name==='Sparkle')"),'particle and sparkle amount controls must sync against the actual mode objects');
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
