@@ -77,6 +77,12 @@
     <label><span>Beat power</span><input id="ctPower" type="range" min="20" max="260" value="120"></label>
     <label><span>Glow</span><input id="ctGlow" type="range" min="0" max="80" value="32"></label>
     <label><span>Spin speed</span><input id="ctSpin" type="range" min="0" max="100" value="24"></label>
+     <div class="row"><button id="ctLogoPick">Center photo / PNG</button><button id="ctLogoClear">Remove logo</button><button class="chip on" data-ctshape="circle">Circle</button><button class="chip" data-ctshape="heart">Heart</button><button class="chip" data-ctshape="hex">Hex</button><button class="chip" data-ctshape="star">Star</button></div>
+     <label><span>Spectrum thickness</span><input id="ctThick" type="range" min="1" max="24" value="8"></label>
+     <label><span>Beat sensitivity</span><input id="ctBeat" type="range" min="20" max="300" value="160"></label>
+     <label><span>Heartbeat pulse</span><input id="ctPulse" type="range" min="0" max="100" value="65"></label>
+     <label><span>Shadow strength</span><input id="ctShadow" type="range" min="0" max="100" value="70"></label>
+     <label><span>Shadow colour</span><input id="ctShadowColor" type="color" value="#a020f0"></label>
     <label><span>Position X</span><input id="ctX" type="range" min="-30" max="30" value="0"></label>
     <label><span>Position Y</span><input id="ctY" type="range" min="-30" max="30" value="0"></label>
   </div>
@@ -174,7 +180,7 @@
     <div class="row"><button id="bShot">Save frame PNG</button><button id="bRec" class="prim">Record video</button></div>
   </div>
 </div>
-<input id="fA" type="file" accept="audio/*"><input id="fI" type="file" accept="image/*">
+<input id="fCenterLogo" type="file" accept="image/*"><input id="fA" type="file" accept="audio/*"><input id="fI" type="file" accept="image/*">
 <input id="fV" type="file" accept="video/*"><input id="fO" type="file" accept="image/*" multiple>
 <input id="fBgI" type="file" accept="image/*"><input id="fBgV" type="file" accept="video/*">
 <video id="vid" playsinline muted loop style="display:none"></video>
@@ -252,6 +258,7 @@ let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,di
 let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,bvp=140;
 let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
 let centerVizOn=true,centerVizStyle='bars',centerVizSize=22,centerVizPower=120,centerVizGlow=32,centerVizSpin=24,centerVizAngle=0,centerVizX=0,centerVizY=0;
+let centerLogo=null,centerLogoShape='circle',centerVizThick=8,centerBeatSense=160,centerHeartbeat=65,centerShadow=70,centerShadowColor='#a020f0',centerBeatEnv=0;
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
@@ -338,11 +345,15 @@ bind('sBri',v=>bri=v);bind('sCon',v=>con=v);bind('sSat',v=>sat=v);bind('sHue',v=
 bind('sDim',v=>dim=v);bind('sSplit',v=>split=v);bind('sBgb',v=>bgb=v);
 bind('sBvo',v=>bvo=v);bind('sBvp',v=>bvp=v);
 bind('sMsc',v=>{mSc=v/100;maskDirty=true;});bind('sLint',v=>lint=v);bind('sLsz',v=>lsz=v);
-['ctSize','ctPower','ctGlow','ctSpin','ctX','ctY'].forEach(id=>$(id).oninput=e=>{
+['ctSize','ctPower','ctGlow','ctSpin','ctX','ctY','ctThick','ctBeat','ctPulse','ctShadow'].forEach(id=>$(id).oninput=e=>{
   const v=+e.target.value;if(id==='ctSize')centerVizSize=v;else if(id==='ctPower')centerVizPower=v;
   else if(id==='ctGlow')centerVizGlow=v;else if(id==='ctSpin')centerVizSpin=v;
-  else if(id==='ctX')centerVizX=v;else centerVizY=v;
+  else if(id==='ctX')centerVizX=v;else if(id==='ctY')centerVizY=v;else if(id==='ctThick')centerVizThick=v;else if(id==='ctBeat')centerBeatSense=v;else if(id==='ctPulse')centerHeartbeat=v;else centerShadow=v;
 });
+$('ctShadowColor').oninput=e=>centerShadowColor=e.target.value;
+document.querySelectorAll('[data-ctshape]').forEach(q=>q.onclick=()=>{centerLogoShape=q.dataset.ctshape;document.querySelectorAll('[data-ctshape]').forEach(z=>z.classList.toggle('on',z===q));});
+$('ctLogoPick').onclick=()=>$('fCenterLogo').click();$('ctLogoClear').onclick=()=>{centerLogo=null;$('fCenterLogo').value='';};
+$('fCenterLogo').onchange=e=>{const file=e.target.files[0];if(!file)return;const im=new Image();im.onload=()=>{centerLogo=im;};im.src=URL.createObjectURL(file);};
 document.querySelectorAll('[data-ctstyle]').forEach(q=>q.onclick=()=>{centerVizStyle=q.dataset.ctstyle;
   document.querySelectorAll('[data-ctstyle]').forEach(z=>z.classList.toggle('on',z===q));});
 $('ctViz').onclick=()=>{centerVizOn=!centerVizOn;$('ctViz').classList.toggle('on',centerVizOn);
@@ -821,60 +832,40 @@ function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
 
 function drawCenterSpectrum(ctx,b,dt){
   if(!centerVizOn)return;
-  const base=H*(centerVizSize/100),power=centerVizPower/100;
-  const n=96,step=Math.PI*2/n,spin=centerVizSpin/100;
-  centerVizAngle+=dt*.00045*spin;
-  let bins=null;
-  if(an&&playing&&buf){an.getByteFrequencyData(buf);bins=buf;}
-  const hueA=colors[0]||190,hueB=colors[1]||285;
-  const colorAt=(v)=>'hsl('+((hueA+(hueB-hueA)*v+360)%360)+' 100% 66%)';
+  const base=Math.max(18,H*(centerVizSize/100)),power=centerVizPower/100,n=128,step=Math.PI*2/n;
+  centerVizAngle+=dt*.00045*(centerVizSpin/100);
+  let bins=null,energy=0;
+  if(an&&playing&&buf){an.getByteFrequencyData(buf);bins=buf;const lim=Math.min(42,buf.length);for(let i=2;i<lim;i++)energy+=buf[i];energy/=Math.max(1,lim-2)*255;}
+  else energy=.08+b[0]*.3;
+  const smooth=Math.min(1,energy*(centerBeatSense/100));centerBeatEnv=centerBeatEnv*.72+smooth*.28;
+  const pulse=1+centerBeatEnv*(centerHeartbeat/100)*.34,logoR=base*.72;
+  const hueA=colors[0]||190,hueB=colors[1]||285,colorAt=v=>'hsl('+((hueA+(hueB-hueA)*v+360)%360)+' 100% 66%)';
+  const thick=Math.max(1,H*.00075*centerVizThick),shadowAlpha=centerShadow/100;
+  const getK=i=>bins?Math.min(1,bins[Math.floor((i/n)*Math.min(bins.length,256))]/210):Math.min(1,.12+b[(i%6)]*.22);
   ctx.save();ctx.translate(cx+W*centerVizX/100,cy+H*centerVizY/100);ctx.rotate(centerVizAngle);
-  ctx.globalCompositeOperation='lighter';
-  ctx.lineCap='round';
+  ctx.globalCompositeOperation='lighter';ctx.lineCap='round';ctx.lineJoin='round';ctx.shadowColor=centerShadowColor;ctx.shadowBlur=centerVizGlow+centerShadow*.45;
   if(centerVizStyle==='bars'){
-    for(let i=0;i<n;i++){
-      const k=bins?Math.min(1,bins[Math.floor(i/n*bins.length)]/190):(.08+b[0]*.28);
-      const len=(8+k*H*.075*power);
-      const a=i*step,inner=base,outer=base+len;
-      ctx.strokeStyle=colorAt(i/n);ctx.globalAlpha=.55+k*.45;
-      ctx.lineWidth=Math.max(2,H*.0024);
-      ctx.beginPath();ctx.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);
-      ctx.lineTo(Math.cos(a)*outer,Math.sin(a)*outer);ctx.stroke();
-    }
-  }else if(centerVizStyle==='pulse'){
-    const k=bins?Math.min(1,bins[8]/180):(.08+b[0]*.25);
-    const radius=base*(1+k*.24*power);
-    ctx.strokeStyle=colorAt(.5);ctx.lineWidth=Math.max(3,H*.004);ctx.globalAlpha=.9;
-    ctx.beginPath();ctx.arc(0,0,radius,0,Math.PI*2);ctx.stroke();
-    ctx.globalAlpha=.55;ctx.lineWidth=Math.max(2,H*.002);
-    ctx.beginPath();ctx.arc(0,0,radius*(.78+k*.08),0,Math.PI*2);ctx.stroke();
-  }else if(centerVizStyle==='star'){
-    const spikes=12;ctx.beginPath();
-    for(let i=0;i<=spikes*2;i++){const a=i*Math.PI/spikes;
-      const k=bins?Math.min(1,bins[Math.floor((i/(spikes*2))*bins.length)]/180):(.08+b[i%6]*.25);
-      const rr=base*(i%2?1.04:1.32+k*.28*power);
-      const px=Math.cos(a)*rr,py=Math.sin(a)*rr;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
-    ctx.closePath();ctx.strokeStyle=colorAt(.45);ctx.lineWidth=Math.max(3,H*.0035);ctx.globalAlpha=.9;ctx.stroke();
+    for(let i=0;i<n;i++){const a=i*step,k=getK(i),len=base*(.16+k*.42*power)*pulse;
+      ctx.strokeStyle=colorAt(i/n);ctx.globalAlpha=.38+k*.62;ctx.lineWidth=thick;
+      ctx.beginPath();ctx.moveTo(Math.cos(a)*logoR,Math.sin(a)*logoR);ctx.lineTo(Math.cos(a)*(logoR+len),Math.sin(a)*(logoR+len));ctx.stroke();}
   }else{
-    const rings=centerVizStyle==='double'?2:1;
-    for(let ring=0;ring<rings;ring++){
-      const radius=base*(ring?1.28:1),direction=ring?-1:1;
-      ctx.beginPath();
-      for(let i=0;i<=n;i++){
-        const k=bins?Math.min(1,bins[Math.floor((i%n)/n*bins.length)]/180):(.08+b[(i%6)]*.25);
-        const a=i*step,amp=centerVizStyle==='wave'?k*H*.045*power:k*H*.028*power;
-        const rr=radius+amp;
-        const px=Math.cos(a)*rr,py=Math.sin(a)*rr;
-        if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
-      }
-      ctx.closePath();ctx.strokeStyle=colorAt(ring/(rings||1));ctx.lineWidth=Math.max(3,H*.0035);
-      ctx.globalAlpha=.82;ctx.stroke();
-    }
+    const layers=centerVizStyle==='double'?2:1;
+    for(let ring=0;ring<layers;ring++){ctx.beginPath();const rad=logoR*(ring?1.48:1);
+      for(let i=0;i<=n;i++){const k=getK(i%n),a=i*step,amount=centerVizStyle==='wave'?.30:.22,rr=rad*(1+k*amount*power*pulse);
+        const px=Math.cos(a)*rr,py=Math.sin(a)*rr;if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);}
+      ctx.closePath();ctx.strokeStyle=colorAt(ring?1:.35);ctx.lineWidth=thick*(ring?.75:1);ctx.globalAlpha=.9;ctx.stroke();}
   }
-  ctx.globalAlpha=1;ctx.shadowColor=colorAt(.35);ctx.shadowBlur=centerVizGlow;
-  ctx.strokeStyle=colorAt(.35);ctx.lineWidth=Math.max(2,H*.002);
-  ctx.beginPath();ctx.arc(0,0,base*.82,0,Math.PI*2);ctx.stroke();
-  ctx.shadowBlur=0;ctx.fillStyle='rgba(4,3,12,.34)';ctx.beginPath();ctx.arc(0,0,base*.77,0,Math.PI*2);ctx.fill();
+  ctx.globalCompositeOperation='source-over';ctx.shadowColor=centerShadowColor;ctx.shadowBlur=centerShadow*.65;ctx.globalAlpha=shadowAlpha;ctx.fillStyle=centerShadowColor;
+  function centerShapePath(){
+    ctx.beginPath();
+    if(centerLogoShape==='heart'){const r=logoR*.88;ctx.moveTo(0,r*.78);ctx.bezierCurveTo(-r*1.55,-r*.15,-r*.85,-r*1.15,0,-r*.48);ctx.bezierCurveTo(r*.85,-r*1.15,r*1.55,-r*.15,0,r*.78);ctx.closePath();}
+    else if(centerLogoShape==='hex'){for(let i=0;i<6;i++){const a=i*Math.PI/3-Math.PI/6,px=Math.cos(a)*logoR,py=Math.sin(a)*logoR;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.closePath();}
+    else if(centerLogoShape==='star'){for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,r=logoR*(i%2?.52:1),px=Math.cos(a)*r,py=Math.sin(a)*r;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.closePath();}
+    else ctx.arc(0,0,logoR,0,Math.PI*2);
+  }
+  centerShapePath();ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=1;
+  if(centerLogo){ctx.save();centerShapePath();ctx.clip();const side=logoR*2;ctx.drawImage(centerLogo,-side/2,-side/2,side,side);ctx.restore();}
+  else{ctx.fillStyle='rgba(5,5,12,.78)';ctx.beginPath();ctx.arc(0,0,logoR*.78,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold '+Math.max(18,logoR*.48)+'px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('V',0,0);}
   ctx.restore();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
 }
 
