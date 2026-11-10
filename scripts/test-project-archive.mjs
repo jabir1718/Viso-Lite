@@ -27,6 +27,9 @@ assert(spectrumSource.includes('stride=Math.max(1,Math.ceil(n/32))'), 'Tunnel sp
 assert(spectrumSource.includes('const rows=10'), 'LED spectrum must use a mobile-friendly dot grid');
 assert(spectrumSource.includes('ctx.fillRect(cx-len,yl,len,bh*.86);ctx.fillRect(cx,yr,len,bh*.86)'), 'Dual spectrum bars must extend horizontally from the centre');
 assert(html.includes('id="sLogoPulse"'), 'custom logo audio-reactive size control must exist');
+assert(html.includes('autoOn,autoEvery,lockChip:{...lockChip}'), 'auto mode timing and lock toggles must be saved in project and undo state');
+assert(html.includes('restoreVISOAutoState(d)'), 'auto mode and lock controls must restore from saved projects');
+assert(html.includes('autoEvery=3;Object.keys(lockChip).forEach(key=>lockChip[key]=false)'), 'reset must restore auto mode timing and unlocked defaults');
 assert(html.includes('logoPulse,logoRotation'), 'logo pulse must be included in saved advanced state');
 assert(html.includes('sync(\'sLogoPulse\',logoPulse)'), 'logo pulse must restore its UI value');
 assert(html.includes('pulseScale=1+b*logoPulse/100*.18'), 'logo pulse must react to audio level in the renderer');
@@ -245,5 +248,23 @@ registry.registerVISOEffectTool({
 registry.renderVISOStage('overlay', {}, new Float32Array(3), 16);
 assert.deepEqual(renderOrder, ['early', 'late'], 'effect modules render in declared order');
 assert.deepEqual(JSON.parse(JSON.stringify(registry.cache.overlay.map(tool => tool.id))), ['early-render', 'late-render'], 'render stage cache stays sorted after registration');
+
+
+const autoStart = html.indexOf('function restoreVISOAutoState(');
+const autoEnd = html.indexOf('function captureProjectState', autoStart);
+assert(autoStart >= 0 && autoEnd > autoStart, 'auto state restore helper must exist');
+const autoControls = Object.fromEntries(['bAuto','sAuto','kCol','kVis','kShp','kSwy'].map(id => [id, { value: '', classList: { values: new Set(), toggle(name, on) { if (on) this.values.add(name); else this.values.delete(name); } } }]));
+const autoSandbox = { autoOn:false, autoEvery:3, lockChip:{color:false,vis:false,shape:false,sway:false}, $: id => autoControls[id] };
+vm.runInNewContext(html.slice(autoStart, autoEnd) + '\\nglobalThis.__restoreAuto = restoreVISOAutoState;', autoSandbox, { timeout: 2000 });
+autoSandbox.__restoreAuto({ autoOn:true, autoEvery:7, lockChip:{color:true,vis:false,shape:true,sway:false} });
+assert.equal(autoSandbox.autoOn, true, 'auto mode restores as enabled');
+assert.equal(autoSandbox.autoEvery, 7, 'auto interval restores');
+assert.deepEqual({ ...autoSandbox.lockChip }, { color:true, vis:false, shape:true, sway:false }, 'individual auto locks restore');
+assert.equal(autoControls.sAuto.value, 7, 'auto interval slider synchronizes');
+assert(autoControls.kCol.classList.values.has('on') && !autoControls.kCol.classList.values.has('lock'), 'locked control UI synchronizes');
+autoSandbox.__restoreAuto({});
+assert.equal(autoSandbox.autoOn, false, 'older projects default auto mode off');
+assert.equal(autoSandbox.autoEvery, 3, 'older projects default auto interval');
+assert.deepEqual({ ...autoSandbox.lockChip }, { color:false, vis:false, shape:false, sway:false }, 'older projects default all auto locks off');
 
 console.log('VISO tests passed: archive integrity, project manifests, and registry serialize/restore hooks');
