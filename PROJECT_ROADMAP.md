@@ -349,3 +349,11 @@ The owner wants a modern, trend-aware visualizer that can create distinctive soc
 - Reduced the particle pool to a responsive mobile-safe budget and skip particle simulation when the Dust visualizer is disabled.
 - Added regression assertions for one spectrum render, one analyser read per frame and the mobile particle budget.
 - Source-level and CI validation only. Real spectrum smoothness, heat/battery behaviour, touch interaction and playback/export still require runtime testing on the target Android device.
+
+## 29. Template library browser — 2026-11-10
+
+- Replaced the five plain template buttons with a card-based template library.
+- Added separate Landscape and Portrait views, three-column portrait cards, template search, locally saved Likes and a Downloaded collection.
+- Expanded editable template presets to 14 styles. Selecting a card still applies the preset to the editor and downloads a complete editable .viso project package with its assets.
+- Added automated coverage for the gallery categories, local collections, successful-download tracking and portrait layout.
+- Thumbnail artwork is currently lightweight in-app artwork rather than downloaded reference-app media. The gallery interactions and editable project packaging are implemented; exact visual parity with every original Aspectrum template still needs further reference asset analysis.
