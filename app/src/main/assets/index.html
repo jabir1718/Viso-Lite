@@ -621,6 +621,7 @@ input[type=text],#customW,#customH{
     <label><span>Selected X position</span><input id="objectPosX" type="range" min="0" max="1080" value="540"></label>
     <label><span>Selected Y position</span><input id="objectPosY" type="range" min="0" max="1920" value="360"></label>
 
+    <div class="row"><button id="addTextLayerEntry" type="button" class="prim">＋ Add Text Layer</button></div>
     <div id="textLayerTools" class="mline" style="display:none;gap:7px;flex-direction:column">
       <strong style="font-size:11px">Text Layer · Screen Edit</strong>
       <input id="textLayerValue" type="text" maxlength="90" placeholder="Apna text likho" value="YOUR TEXT">
@@ -897,6 +898,7 @@ function makeTextLayerCanvas(value,color,size,font){
 }
 function updateTextLayerPanel(){const ob=selectedObject(),panel=$('textLayerTools');if(!panel)return;const show=!!(screenEditMode&&ob&&ob.kind==='text');panel.style.display=show?'flex':'none';if(show){$('textLayerValue').value=ob.textValue||'';$('textLayerColor').value=ob.textColor||'#ffffff';$('textLayerFont').value=ob.textFont||'Arial';$('textLayerFontSize').value=ob.textFontSize||100;}}
 function applyTextLayerToSelected(){const ob=selectedObject();if(!ob||ob.kind!=='text')return;ob.textValue=$('textLayerValue').value||' ';ob.textColor=$('textLayerColor').value;ob.textFont=$('textLayerFont').value;ob.textFontSize=+$('textLayerFontSize').value;ob.img=makeTextLayerCanvas(ob.textValue,ob.textColor,ob.textFontSize,ob.textFont);ob.originalImg=ob.img;syncSelectedObjectControls();}
+$('addTextLayerEntry').onclick=()=>{$('textLayerTools').style.display='flex';$('textLayerValue').focus();};
 $('addTextLayer').onclick=()=>{const value=$('textLayerValue').value.trim()||'YOUR TEXT',color=$('textLayerColor').value,font=$('textLayerFont').value,size=+$('textLayerFontSize').value,im=makeTextLayerCanvas(value,color,size,font);objects.push({img:im,originalImg:im,kind:'text',textValue:value,textColor:color,textFont:font,textFontSize:size,x:cx,y:cy,sc:1,rot:0,opacity:100,blendMode:'source-over',shake:false,motion:'Still',phase:0,dir:1});selObj=objects.length-1;screenEditMode=true;syncSelectedObjectControls();updateTextLayerPanel();};
 $('applyTextLayer').onclick=applyTextLayerToSelected;
 $('textLayerValue').addEventListener('keydown',e=>{if(e.key==='Enter')applyTextLayerToSelected();});
