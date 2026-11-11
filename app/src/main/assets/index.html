@@ -1324,7 +1324,7 @@ function deleteActiveTarget(){
  else if(t.type==='logo'){logoImg=null;logoOriginalImg=null;logoEmoji='';}
  else if(t.type==='background'){bgImg=null;bgUseVid=false;bvid.pause();bgX=bgY=bgRot=0;bgSc=1;}
  else if(t.type==='media'){img=null;useVid=false;vid.pause();ix=iy=irot=0;isc=1;maskDirty=true;}
- screenEditMode=false;screenHandles.innerHTML='';
+ screenEditMode=false;screenHandles.innerHTML='';updateTextLayerPanel();
 }
 
 function pos(e){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
@@ -1342,7 +1342,7 @@ function down(e){e.preventDefault();c.setPointerCapture(e.pointerId);const p=pos
    if(doubleTap){screenEditMode=true;const t=activeTarget();if(t)setSectionForTarget(t.type);}
    else if(screenEditMode){screenEditMode=false;screenHandles.innerHTML='';updateTextLayerPanel();}
   }
-  
+  updateTextLayerPanel();
   if(selObj>=0){const b=objects[selObj];start={m:'object',x:p.x,y:p.y,ox:b.x,oy:b.y,sc:b.sc,rot:b.rot};}
   else if(activeWorkSection.includes('logo')&&hitTemplateImage(p))start={m:'templateImage',x:p.x,y:p.y,x0:logoTemplateImageX,y0:logoTemplateImageY,sc:logoTemplateImageSize,rot:logoTemplateImageRotation};
   else if(activeWorkSection.includes('background'))start={m:'background',x:p.x,y:p.y,x0:bgX,y0:bgY,sc:bgSc,rot:bgRot};
