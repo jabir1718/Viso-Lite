@@ -662,10 +662,14 @@ $('fLogo').addEventListener('change',e=>{
 });
 $('logoClear').onclick=()=>{if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);logoImg=null;logoEmoji='';$('logoEmoji').value='';$('logoStatus').textContent='Logo cleared. Choose an emoji or upload another image.';};
 document.querySelectorAll('[data-logo-emoji]').forEach(b=>b.onclick=()=>{
-  logoEmoji=b.dataset.logoEmoji;$('logoEmoji').value=logoEmoji;
+  if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);
+  logoImg=null;logoEmoji=b.dataset.logoEmoji;$('logoEmoji').value=logoEmoji;
   $('logoStatus').textContent='Emoji logo selected · '+logoEmoji;
 });
-$('logoEmoji').oninput=e=>{logoEmoji=e.target.value;};
+$('logoEmoji').oninput=e=>{
+  if(e.target.value){if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);logoImg=null;}
+  logoEmoji=e.target.value;
+};
 document.querySelectorAll('[data-logo-shape]').forEach(b=>b.onclick=()=>{
   logoShape=b.dataset.logoShape;
   document.querySelectorAll('[data-logo-shape]').forEach(q=>q.classList.toggle('on',q===b));
