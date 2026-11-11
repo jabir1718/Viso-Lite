@@ -1185,7 +1185,7 @@ let rec=null,exportingFullSong=false,exportRaf=0,exportStream=null,exportCanvas=
 let exportSaveChain=Promise.resolve(),exportSaveFailed=false,exportChunks=[],nativeExport=false;
 function bytesToBase64(bytes){let binary='';for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(binary);}
 function queueExportChunk(blob){exportSaveChain=exportSaveChain.then(async()=>{const bytes=new Uint8Array(await blob.arrayBuffer());if(nativeExport&&window.AndroidSave&&AndroidSave.appendChunk(bytesToBase64(bytes)))return;exportSaveFailed=true;exportChunks.push(blob);});}
-function exportDimensions(shortSide){const rw=ratioW,rh=ratioH;if(rw>=rh)return [shortSide,Math.max(1,Math.round(shortSide*rh/rw))];return [Math.max(1,Math.round(shortSide*rw/rh)),shortSide];}
+function exportDimensions(shortSide){const rw=ratioW,rh=ratioH;if(rw>=rh)return [Math.max(1,Math.round(shortSide*rw/rh)),shortSide];return [shortSide,Math.max(1,Math.round(shortSide*rh/rw))];}
 function stopExportFrame(){if(exportRaf)cancelAnimationFrame(exportRaf);exportRaf=0;}
 function formatExportTime(sec){if(!Number.isFinite(sec)||sec<0)sec=0;const n=Math.floor(sec),h=Math.floor(n/3600),m=Math.floor((n%3600)/60),ss=n%60;return h?String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0'):String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');}
 let lastProgressPaint=0;
@@ -1210,21 +1210,23 @@ async function startFullSongExport(shortSide){
   exportCanvas=document.createElement('canvas');exportCanvas.width=outW;exportCanvas.height=outH;exportCtx=exportCanvas.getContext('2d',{alpha:false});
   if(!exportCtx){alert('Export canvas create nahi ho saka.');return;}
   const bitrate=Math.max(4000000,Math.min(100000000,Math.round(outW*outH*FPS*.13)));
-  const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')?'video/webm;codecs=vp9,opus':'video/webm';
+  const mp4Types=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4;codecs=avc1,mp4a.40.2','video/mp4'];
+  const mime=mp4Types.find(type=>MediaRecorder.isTypeSupported(type));
+  if(!mime){alert('Is phone ke WebView mein MP4 (H.264 + AAC) export supported nahi. TikTok-compatible file banane ke liye export roka gaya; WebM ko MP4 naam se save nahi karenge.');return;}
   exportStream=exportCanvas.captureStream(FPS);
   if(streamDest)streamDest.stream.getAudioTracks().forEach(t=>exportStream.addTrack(t));
-  try{rec=new MediaRecorder(exportStream,{mimeType:mime,videoBitsPerSecond:bitrate});}
+  try{rec=new MediaRecorder(exportStream,{mimeType:mime,videoBitsPerSecond:bitrate,audioBitsPerSecond:192000});}
   catch(e){exportStream.getTracks().forEach(t=>t.stop());exportStream=null;alert('Yeh quality tumhare phone ke encoder par supported nahi hai.');return;}
   exportChunks=[];exportSaveChain=Promise.resolve();exportSaveFailed=false;
-  const fileName='VISO_'+shortSide+'p_'+Date.now()+'.webm';
-  nativeExport=!!(window.AndroidSave&&typeof AndroidSave.beginSave==='function'&&AndroidSave.beginSave(fileName,'video/webm'));
+  const fileName='VISO_'+shortSide+'p_'+Date.now()+'.mp4';
+  nativeExport=!!(window.AndroidSave&&typeof AndroidSave.beginSave==='function'&&AndroidSave.beginSave(fileName,'video/mp4'));
   if(window.AndroidSave&&!nativeExport){exportStream.getTracks().forEach(t=>t.stop());exportStream=null;alert('Phone storage mein file create nahi ho saki.');return;}
   rec.ondataavailable=e=>{if(e.data&&e.data.size)queueExportChunk(e.data);};
   rec.onerror=()=>{exportSaveFailed=true;$('exportStatus').textContent='Export error — dobara try karo.';};
   rec.onstop=async()=>{
     try{await exportSaveChain;
       if(nativeExport&&!exportSaveFailed){if(AndroidSave.finishSave())finishExportUi('Saved: Movies / Viso · '+fileName);else{AndroidSave.cancelSave();finishExportUi('Save failed. Dobara try karo.');}}
-      else if(exportChunks.length){if(nativeExport)AndroidSave.cancelSave();dl(new Blob(exportChunks,{type:'video/webm'}),fileName);finishExportUi('Video download ready · '+fileName);}
+      else if(exportChunks.length){if(nativeExport)AndroidSave.cancelSave();dl(new Blob(exportChunks,{type:'video/mp4'}),fileName);finishExportUi('Video download ready · '+fileName);}
       else{if(nativeExport)AndroidSave.cancelSave();finishExportUi('Export save nahi ho saka.');}
     }catch(e){if(nativeExport)AndroidSave.cancelSave();finishExportUi('Export save error.');}
   };
