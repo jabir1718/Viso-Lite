@@ -1554,7 +1554,7 @@ function drawMode(ctx,m,b,scale){
   ctx.restore();ctx.globalAlpha=1;
 }
 
-function stepObject(ob,b,dt){if(ob.motion==='Still')return;const bass=b[0],hi=b[5];ob.phase+=dt*(.002+hi*.02);
+function stepObject(ob,b,dt){if(ob.motion==='Still')return;const bass=pulse,hi=mediaBeatEnergy;ob.phase+=dt*(.002+hi*.02);
   const w=ob.img.width*ob.sc,h=ob.img.height*ob.sc;
   if(ob.motion==='Drive'){ob.x+=(2+bass*26)*ob.dir;ob.y+=Math.sin(ob.phase*9)*(1+bass*5);
     ob.rot=Math.sin(ob.phase*3)*.03+(ob.dir<0?Math.PI:0);
@@ -1717,7 +1717,7 @@ function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
   ctx.restore();});}
 
 
-let curB=[0,0,0,0,0,0],curBbg=[0,0,0,0,0,0],last=0,avg=.1,frameN=0;
+let curB=[0,0,0,0,0,0],curBbg=[0,0,0,0,0,0],smoothBands=[0,0,0,0,0,0],smoothBgBands=[0,0,0,0,0,0],last=0,avg=.1,frameN=0;
 function paintLayer(scale,masked,bb){const cc=bb||curB;
   ox.clearRect(0,0,W,H);
   for(const m of mstate)if(m.on)drawMode(ox,m,cc,scale);
@@ -1729,8 +1729,10 @@ function paintLayer(scale,masked,bb){const cc=bb||curB;
 function frame(t){
   requestAnimationFrame(frame);
   const dt=Math.min(50,t-last||16);last=t;frameN++;
-  const b=bands();curB=b;curBbg=bands(bvp);
-  const bass=b[0];const mediaTarget=Math.min(1,b[0]*.55+b[2]*.3+b[5]*.15);mediaBeatEnergy+=(mediaTarget-mediaBeatEnergy)*.28;avg=avg*.92+bass*.08;
+  const rawBands=bands(),rawBgBands=bands(bvp);
+  for(let i=0;i<6;i++){smoothBands[i]+=(rawBands[i]-smoothBands[i])*(rawBands[i]>smoothBands[i]?.22:.085);smoothBgBands[i]+=(rawBgBands[i]-smoothBgBands[i])*(rawBgBands[i]>smoothBgBands[i]?.2:.08);}
+  const b=smoothBands;curB=b;curBbg=smoothBgBands;
+  const bass=b[0];const mediaTarget=Math.min(1,b[0]*.55+b[2]*.3+b[5]*.15);mediaBeatEnergy+=(mediaTarget-mediaBeatEnergy)*.15;avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
   pulse+=(bass-pulse)*(bass>pulse?.16:.055);hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
   if(useVid&&frameN%3===0)maskDirty=true;
