@@ -543,6 +543,12 @@ input[type=text],#customW,#customH{
       <button id="logoUpload" class="prim">📤 Upload Logo / PNG / Photo</button>
       <button id="logoClear">✕ Clear Logo</button>
     </div>
+    <div class="row" style="align-items:center">
+      <button id="logoRemoveBg" class="prim">✂️ Auto Remove Background</button>
+      <button id="logoRestoreOriginal">↩ Restore Original</button>
+    </div>
+    <label><span>Background removal strength</span><input id="logoBgTolerance" type="range" min="10" max="120" value="48"></label>
+    <div class="status">Transparent PNG alpha is preserved automatically. Auto cutout works best with a plain / single-colour background.</div>
     <div class="row" id="logoEmojiChoices">
       <button type="button" data-logo-emoji="🔥">🔥</button>
       <button type="button" data-logo-emoji="💜">💜</button>
@@ -681,7 +687,7 @@ let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
 const objects=[];let selObj=-1;
 // Separate Beat Logo Studio state: deliberately isolated from main media, mask, objects and undo stack.
-let logoImg=null,logoEmoji='💜',logoShape='none',logoBeatPower=230,logoBounce=110,
+let logoImg=null,logoOriginalImg=null,logoEmoji='💜',logoShape='none',logoBeatPower=230,logoBounce=110,
     logoShake=28,logoGlow=85,logoSize=260,logoOpacity=100,logoX=0,logoY=0,
     logoRotation=0,logoPulse=0,logoPhase=0,logoImpactStyle='drum',logoLaunchPower=190,
     logoLiftHeight=90,logoBackStyle='bars',logoBackPower=180,logoBackCount=72,
@@ -709,10 +715,35 @@ $('logoUpload').onclick=()=>$('fLogo').click();
 $('fLogo').addEventListener('change',e=>{
   const file=e.target.files&&e.target.files[0];if(!file)return;
   const url=URL.createObjectURL(file),im=new Image();
-  im.onload=()=>{if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);logoImg=im;logoImg._url=url;logoEmoji='';$('logoEmoji').value='';$('logoStatus').textContent='Logo loaded: '+file.name;};
+  im.onload=()=>{if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);logoImg=im;logoOriginalImg=im;logoImg._url=url;logoEmoji='';$('logoEmoji').value='';$('logoStatus').textContent=(file.type==='image/png'?'PNG loaded · existing transparency preserved · ':'Image loaded · ')+file.name;};
   im.onerror=()=>{URL.revokeObjectURL(url);$('logoStatus').textContent='Could not load this image. Try PNG or JPG.';};
   im.src=url;e.target.value='';
 });
+$('logoRestoreOriginal').onclick=()=>{if(logoOriginalImg){logoImg=logoOriginalImg;$('logoStatus').textContent='Original image restored.';}};
+$('logoRemoveBg').onclick=()=>{
+  if(!logoOriginalImg){$('logoStatus').textContent='Upload a photo or logo first.';return;}
+  try{
+    const src=logoOriginalImg,w0=src.naturalWidth||src.width,h0=src.naturalHeight||src.height;
+    const scale=Math.min(1,1600/Math.max(w0,h0)),w=Math.max(1,Math.round(w0*scale)),h=Math.max(1,Math.round(h0*scale));
+    const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+    const cc=cv.getContext('2d',{willReadFrequently:true});cc.drawImage(src,0,0,w,h);
+    const im=cc.getImageData(0,0,w,h),d=im.data,n=w*h,tol=+$('logoBgTolerance').value;
+    let rr=0,gg=0,bb=0,count=0;
+    const step=Math.max(1,Math.floor(Math.min(w,h)/100));
+    for(let xx=0;xx<w;xx+=step)for(const yy of [0,h-1]){const p=(yy*w+xx)*4;if(d[p+3]>16){rr+=d[p];gg+=d[p+1];bb+=d[p+2];count++;}}
+    for(let yy=0;yy<h;yy+=step)for(const xx of [0,w-1]){const p=(yy*w+xx)*4;if(d[p+3]>16){rr+=d[p];gg+=d[p+1];bb+=d[p+2];count++;}}
+    if(!count)throw new Error('No visible pixels found');
+    rr/=count;gg/=count;bb/=count;
+    const seen=new Uint8Array(n),q=new Int32Array(n),limit=tol*tol*3;let head=0,tail=0;
+    const add=p=>{if(p<0||p>=n||seen[p])return;const k=p*4;if(d[k+3]<12)return;const dr=d[k]-rr,dg=d[k+1]-gg,db=d[k+2]-bb;if(dr*dr+dg*dg+db*db<=limit){seen[p]=1;q[tail++]=p;}};
+    for(let xx=0;xx<w;xx++){add(xx);add((h-1)*w+xx);}
+    for(let yy=1;yy<h-1;yy++){add(yy*w);add(yy*w+w-1);}
+    while(head<tail){const p=q[head++],x0=p%w,y0=(p/w)|0;if(x0)add(p-1);if(x0<w-1)add(p+1);if(y0)add(p-w);if(y0<h-1)add(p+w);}
+    let removed=0;for(let p=0;p<n;p++)if(seen[p]){d[p*4+3]=0;removed++;}
+    cc.putImageData(im,0,0);
+    const cut=new Image();cut.onload=()=>{logoImg=cut;$('logoStatus').textContent='Background cutout ready · '+removed.toLocaleString()+' background pixels cleared. Adjust strength and retry from original if needed.';};cut.src=cv.toDataURL('image/png');
+  }catch(err){$('logoStatus').textContent='Auto cutout failed: '+err.message;}
+};
 $('logoClear').onclick=()=>{if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);logoImg=null;logoEmoji='';$('logoEmoji').value='';$('logoStatus').textContent='Logo cleared. Choose an emoji or upload another image.';};
 document.querySelectorAll('[data-logo-emoji]').forEach(b=>b.onclick=()=>{
   if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);
