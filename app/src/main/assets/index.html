@@ -475,6 +475,17 @@ input[type=text],#customW,#customH{
       <label><span>Beat reaction · Low to High</span><input id="mediaBeatReaction" type="range" min="0" max="200" value="100"></label>
       <div class="row"><button id="mediaBlendToggle" class="on">Blend ON</button><button id="mediaEffectsReset">Reset Media Effects</button></div>
       <div class="status" id="mediaPhotoStatus">These settings affect only the Photo layer selected with Media → Photo. Logo settings remain separate.</div>
+      <div class="row"><button id="bgRemoveToggle" class="prim">✂ BG Remove controls</button><button id="bgRemoveUseCurrent">Use current photo</button><button id="bgRemoveAutoWhite">Remove white</button></div>
+    <div id="bgRemoveTools" style="display:none">
+      <div class="status" id="bgRemoveStatus">Select a photo first. Background removal works directly on the main preview screen.</div>
+      <div class="row"><button id="bgRemovePick" class="on">🎯 Tap BG on screen</button><button id="bgRemoveErase">🖌 Erase</button><button id="bgRemoveRestore">↶ Restore</button><button id="bgRemoveReset">Reset photo</button></div>
+      <div class="row"><label><span>Selected color</span><input id="bgRemoveColor" type="color" value="#ffffff"></label><button id="bgRemoveApply" class="prim">Remove color</button></div>
+      <label><span>Color tolerance</span><input id="bgRemoveTolerance" type="range" min="0" max="255" value="72"></label>
+      <label><span>Edge softness</span><input id="bgRemoveSoftness" type="range" min="0" max="100" value="22"></label>
+      <label><span>Brush size</span><input id="bgRemoveBrush" type="range" min="5" max="300" value="65"></label>
+      <div class="row"><button id="bgRemoveClearBrush">Clear brush edits</button><button id="bgRemoveDownload" class="prim">⬇ Export transparent PNG</button></div>
+      <div class="status">Tap the visible background on the main VISO screen to sample it. Erase/Restore brush also works directly on that screen. The result becomes the active transparent photo layer.</div>
+    </div>
     </div>
   </div>
   <div class="sec"><h4>Social canvas / screen ratio</h4>
@@ -514,18 +525,7 @@ input[type=text],#customW,#customH{
     <label><span>BG viz mix</span><input id="sBvo" type="range" min="0" max="100" value="85"></label>
     <label><span>BG viz power</span><input id="sBvp" type="range" min="20" max="300" value="140"></label>
     <div class="row"><button id="tBvm" class="on">BG viz on BG shape</button></div>
-    <div class="row"><button id="bgRemoveToggle" class="prim">✂ BG Remove controls</button><button id="bgRemoveUseCurrent">Use current photo</button><button id="bgRemoveAutoWhite">Remove white</button></div>
-    <div id="bgRemoveTools" style="display:none">
-      <div class="status" id="bgRemoveStatus">Select a photo first. Background removal works directly on the main preview screen.</div>
-      <div class="row"><button id="bgRemovePick" class="on">🎯 Tap BG on screen</button><button id="bgRemoveErase">🖌 Erase</button><button id="bgRemoveRestore">↶ Restore</button><button id="bgRemoveReset">Reset photo</button></div>
-      <div class="row"><label><span>Selected color</span><input id="bgRemoveColor" type="color" value="#ffffff"></label><button id="bgRemoveApply" class="prim">Remove color</button></div>
-      <label><span>Color tolerance</span><input id="bgRemoveTolerance" type="range" min="0" max="255" value="72"></label>
-      <label><span>Edge softness</span><input id="bgRemoveSoftness" type="range" min="0" max="100" value="22"></label>
-      <label><span>Brush size</span><input id="bgRemoveBrush" type="range" min="5" max="300" value="65"></label>
-      <div class="row"><button id="bgRemoveClearBrush">Clear brush edits</button><button id="bgRemoveDownload" class="prim">⬇ Export transparent PNG</button></div>
-      <div class="status">Tap the visible background on the main VISO screen to sample it. Erase/Restore brush also works directly on that screen. The result becomes the active transparent photo layer.</div>
-    </div>
-  </div>
+      </div>
   <div class="sec"><h4>Look</h4>
     <div class="row" id="presets"></div>
     <div class="row"><button id="bMix">Auto mix</button><button id="bRand">Random</button></div>
