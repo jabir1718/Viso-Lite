@@ -502,6 +502,12 @@ input[type=text],#customW,#customH{
   <div class="sec"><h4>Background</h4>
     <div class="row"><button id="bBgI">BG image</button><button id="bBgV">BG video</button>
       <button id="bBgX">BG off</button><button id="bBgViz">BG visualizer</button></div>
+    <div class="status">Background transform · Background only (Media / Logo / PNG unaffected)</div>
+    <label><span>BG position X</span><input id="bgPosX" type="range" min="-1080" max="1080" value="0"></label>
+    <label><span>BG position Y</span><input id="bgPosY" type="range" min="-1920" max="1920" value="0"></label>
+    <label><span>BG zoom</span><input id="bgScale" type="range" min="20" max="400" value="100"></label>
+    <label><span>BG rotation</span><input id="bgRotation" type="range" min="-180" max="180" value="0"></label>
+    <div class="row"><button id="bgTransformReset">Reset BG transform</button></div>
     <label><span>BG split</span><input id="sSplit" type="range" min="0" max="100" value="100"></label>
     <label><span>BG dim</span><input id="sDim" type="range" min="0" max="100" value="25"></label>
     <label><span>BG blur</span><input id="sBgb" type="range" min="0" max="40" value="0"></label>
@@ -746,6 +752,7 @@ $('applyCustom').onclick=()=>{const w=+$('customW').value,h=+$('customH').value;
 updateBitrate();
 
 let img=null,bgImg=null,bgUseVid=false,bgViz=false,maskDirty=true;
+let bgX=0,bgY=0,bgSc=1,bgRot=0;
 let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
 let swy=0,spd=14,bri=100,con=100,sat=100,hueSh=0,dim=25,bgb=0,split=100,bvo=85,bvp=140;
@@ -1009,6 +1016,11 @@ $('mRot').onclick=()=>{mRot+=.26;};
 $('mRst').onclick=()=>{mX=0;mY=0;mSc=1;mRot=0;$('sMsc').value=100;};
 $('bZup').onclick=()=>{mediaFront=true;};$('bZdn').onclick=()=>{mediaFront=false;};
 
+$('bgPosX').oninput=e=>bgX=+e.target.value;
+$('bgPosY').oninput=e=>bgY=+e.target.value;
+$('bgScale').oninput=e=>bgSc=+e.target.value/100;
+$('bgRotation').oninput=e=>bgRot=+e.target.value*Math.PI/180;
+$('bgTransformReset').onclick=()=>{bgX=0;bgY=0;bgSc=1;bgRot=0;$('bgPosX').value=0;$('bgPosY').value=0;$('bgScale').value=100;$('bgRotation').value=0;};
 $('bBgI').onclick=()=>$('fBgI').click();
 $('fBgI').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();
   im.onload=()=>{bgImg=im;bgUseVid=false;bgViz=false;bvid.pause();maskDirty=true;};im.src=URL.createObjectURL(f);};
@@ -1183,6 +1195,7 @@ function cover(ctx,s,sw,sh,clipH){const k=Math.max(W/sw,H/sh),w=sw*k,h=sh*k;
   if(clipH<H){ctx.save();ctx.beginPath();ctx.rect(0,0,W,clipH);ctx.clip();}
   ctx.drawImage(s,(W-w)/2,(H-h)/2,w,h);
   if(clipH<H)ctx.restore();}
+function drawBgCover(ctx,source,sw,sh,clipH){ctx.save();ctx.translate(cx+bgX,cy+bgY);ctx.rotate(bgRot);ctx.scale(bgSc,bgSc);cover(ctx,source,sw,sh,clipH);ctx.restore();}
 
 function buildMask(){
   mx.clearRect(0,0,W,H);
@@ -1676,8 +1689,8 @@ function frame(t){
     x.save();x.beginPath();x.rect(0,0,W,clipH);x.clip();
     if(bgImg||(bgUseVid&&bvid.readyState>=2)){
       if(bgb>0)x.filter='blur('+bgb+'px)';
-      if(bgUseVid&&bvid.readyState>=2)cover(x,bvid,bvid.videoWidth||W,bvid.videoHeight||H,H);
-      else if(bgImg)cover(x,bgImg,bgImg.width,bgImg.height,H);
+      if(bgUseVid&&bvid.readyState>=2)drawBgCover(x,bvid,bvid.videoWidth||W,bvid.videoHeight||H,H);
+      else if(bgImg)drawBgCover(x,bgImg,bgImg.width,bgImg.height,H);
       x.filter='none';
       x.fillStyle='rgba(0,0,0,'+(dim/100*.75)+')';x.fillRect(0,0,W,clipH);
       if(bgViz){x.globalCompositeOperation='lighter';x.globalAlpha=bvo/100;
