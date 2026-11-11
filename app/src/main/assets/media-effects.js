@@ -5,7 +5,7 @@ function draw(ctx,p){
  if(!source||!enabled||photoOpacity<=0)return;
  ctx.save();
  applyTransform(ctx);
- const beatGain=1+(Math.max(0,Math.min(1,beatEnergy))-.0)*.45*(beatReaction/100);
+ const beatGain=1+(Math.max(0,Math.min(1,beatEnergy))-.0)*.22*(beatReaction/100);
  ctx.globalAlpha=(photoOpacity/100)*(blendEnabled?blendOpacity/100:1);
  ctx.globalCompositeOperation=blendEnabled?blendMode:'source-over';
  ctx.filter='brightness('+(brightness*beatGain)+'%) contrast('+contrast+'%) saturate('+saturation+'%) hue-rotate('+hue+'deg)';
