@@ -1,8 +1,8 @@
 (function(){
 "use strict";
 function draw(ctx,p){
- const {source,video,videoMode,photoOpacity,blendEnabled,blendMode,blendOpacity,brightness,contrast,saturation,hue,applyTransform,W,H}=p;
- if(!source||photoOpacity<=0)return;
+ const {source,video,videoMode,enabled,photoOpacity,blendEnabled,blendMode,blendOpacity,brightness,contrast,saturation,hue,applyTransform,W,H}=p;
+ if(!source||!enabled||photoOpacity<=0)return;
  ctx.save();
  applyTransform(ctx);
  ctx.globalAlpha=(photoOpacity/100)*(blendEnabled?blendOpacity/100:1);
