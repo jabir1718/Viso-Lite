@@ -1612,16 +1612,8 @@ function drawBeatLogo(ctx,dt,b){
   ctx.restore();ctx.globalAlpha=1;ctx.shadowBlur=0;
 }
 function drawCornerBrandMarks(ctx){
-  if(!logoCornerOn||(!logoImg&&!logoEmoji))return;
-  const size=Math.max(28,Math.min(W,H)*(logoCornerSize/100)),pad=Math.max(18,Math.min(W,H)*.035);
-  const pts=[[pad+size/2,pad+size/2],[W-pad-size/2,pad+size/2],[pad+size/2,H-pad-size/2],[W-pad-size/2,H-pad-size/2]];
-  ctx.save();ctx.globalAlpha=logoCornerOpacity/100;ctx.globalCompositeOperation='source-over';
-  for(const [px,py] of pts){ctx.save();ctx.translate(px,py);
-    if(logoImg&&logoImg.complete&&logoImg.naturalWidth){const iw=logoImg.naturalWidth,ih=logoImg.naturalHeight,fit=Math.min(size/iw,size/ih);ctx.drawImage(logoImg,-iw*fit/2,-ih*fit/2,iw*fit,ih*fit);}
-    else{ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 '+Math.round(size*.78)+'px system-ui';ctx.fillStyle='#fff';ctx.fillText(logoEmoji,0,0);}
-    ctx.restore();
-  }
-  ctx.restore();
+  // Legacy hook retained for workflow compatibility. User-added logos are drawn as independent editable objects.
+  return;
 }
 function drawCanvasTimer(ctx){
   if(!canvasTimerOn||!audio)return;
@@ -1722,7 +1714,7 @@ function frame(t){
   window.VisoLogoEffects.drawTemplate(x,{logoTemplate,logoTemplateOn,logoTemplateSpeed,logoPulse:logoTemplateEnergy,logoTemplateBeat,logoPhase,logoSize,logoTemplateSize,logoTemplateOpacity,logoTemplateThickness,cx,cy,logoX,logoY,logoLift,logoLiftHeight});
   drawBeatLogoBack(x,b,dt);
   drawBeatLogo(x,dt,b);
-  // Unlimited user-added corner logos are regular independently editable PNG objects.
+  drawCornerBrandMarks(x);
   drawCanvasTimer(x);
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
     x.drawImage(paintLayer(.7,false),0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;}
