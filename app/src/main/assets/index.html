@@ -7,33 +7,33 @@
   body{color:#e6e3ef;font:12px system-ui;
        background:radial-gradient(120% 60% at 50% 0%,#1a1030 0%,#0a0812 45%,#050409 100%);
        display:flex;flex-direction:column;height:100dvh;overflow:hidden}
-  #wrap{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:6px}
+  #wrap{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:7px 8px 5px}#wrap canvas{flex:1 1 auto;min-height:0;max-height:100%;width:auto;max-width:100%;object-fit:contain}#shapeMotionPanel{width:min(100%,720px);flex:0 0 auto;max-height:36%;overflow:auto;background:linear-gradient(145deg,#211632ee,#100d1bee);border:1px solid #a78bfa55;border-radius:13px;padding:7px;box-shadow:0 8px 24px #0005}#shapeMotionPanel>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;min-height:30px;padding:0 5px;color:#d9c9ff;font-size:11px;font-weight:700;letter-spacing:.06em}#shapeMotionPanel>summary::-webkit-details-marker{display:none}#shapeMotionPanel>summary::after{content:"＋";color:#c4b5fd;font-size:15px}#shapeMotionPanel[open]>summary::after{content:"－"}#shapeMotionPanel .shape-motion-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding-top:7px}#shapeMotionPanel .sec{min-width:0;padding:8px;background:#0d0a16;border-color:#ffffff20}#shapeMotionPanel .sec label span{width:58px}#shapeMotionPanel .sec button{font-size:10px;padding:0 9px}
   canvas{max-height:100%;max-width:100%;width:auto;height:auto;aspect-ratio:9/16;border-radius:16px;background:#000;
          touch-action:none;display:block;box-shadow:0 0 40px #7c3aed44,0 0 0 1px #ffffff14}
   .ratio-custom{width:74px;min-width:74px;background:#ffffff10;border:1px solid #ffffff20;border-radius:9px;
     color:#fff;padding:8px;font-size:11px;min-height:34px}
   .ratio-note{font-size:9px;color:#918aa6;padding:0 2px}
   .layer-stack{display:flex;flex-direction:column;gap:5px}.layer-item{display:flex;align-items:center;justify-content:space-between;min-height:36px;padding:0 10px;border:1px solid #ffffff20;border-radius:9px;background:#ffffff0b;color:#d9d5e6;touch-action:pan-y}.layer-item.selected{border-color:#a78bfa;background:#a78bfa22}.layer-item.dragging{opacity:.45;border-style:dashed}.layer-hint{font-size:9px;color:#918aa6}
-  #bar{flex:0 0 auto;max-height:40dvh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:8px 8px 10px;overscroll-behavior:contain}#bottomDock{flex:0 0 auto;display:flex;justify-content:center;gap:12px;padding:6px 12px calc(8px + env(safe-area-inset-bottom));background:#090711;border-top:1px solid #ffffff18}#bottomDock button{width:52px;height:42px;min-height:42px;border-radius:13px;font-size:20px;padding:0}#bottomDock #dockPlay{width:76px;background:#8b5cf6;color:#fff;border-color:#a78bfa}
+  #bar{flex:0 0 auto;max-height:43dvh;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:8px 8px 10px;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#8b5cf6 #100d17}#bottomDock{flex:0 0 auto;display:flex;justify-content:center;gap:12px;padding:6px 12px calc(8px + env(safe-area-inset-bottom));background:#090711;border-top:1px solid #ffffff18}#bottomDock button{width:52px;height:42px;min-height:42px;border-radius:13px;font-size:20px;padding:0}#bottomDock #dockPlay{width:76px;background:#8b5cf6;color:#fff;border-color:#a78bfa}
   .advanced-tools{display:flex;flex-direction:column;gap:6px;padding:6px 7px;border:1px solid #a78bfa22;border-radius:10px;background:#a78bfa08}
-  .sec{background:linear-gradient(180deg,#ffffff0d,#ffffff05);border:1px solid #ffffff14;border-radius:14px;
-       padding:8px;display:flex;flex-direction:column;gap:7px;flex:0 0 auto}
-  .sec h4{font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:#a78bfa;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:22px}\n  .sec h4::after{content:"−";font-size:16px;line-height:1;color:#c4b5fd}
+  .sec{background:linear-gradient(155deg,#171320f2,#0e0c14f5);border:1px solid #ffffff1b;border-radius:15px;
+       padding:10px;display:flex;flex-direction:column;gap:8px;flex:0 0 auto;box-shadow:0 5px 16px #0002}
+  .sec h4{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#c4a8ff;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:25px;border-bottom:1px solid #ffffff10;padding:0 1px 5px}\n  .sec h4::after{content:"−";font-size:16px;line-height:1;color:#c4b5fd}
   .sec.collapsed>*:not(h4){display:none!important}
   .sec.collapsed h4::after{content:"+"}
   .sec h4:focus-visible{outline:2px solid #a78bfa;outline-offset:3px;border-radius:4px}
   .row{display:flex;gap:6px;overflow-x:auto;flex:0 0 auto;align-items:center;padding-bottom:1px}
   select{background:#171225;color:#fff;border:1px solid #ffffff26;border-radius:8px;padding:7px;min-height:32px;font-size:10px;max-width:130px}
-  button{background:#ffffff0f;color:#d9d5e6;border:1px solid #ffffff1f;border-radius:11px;min-height:37px;
+  button{background:linear-gradient(180deg,#ffffff12,#ffffff08);color:#e2deed;border:1px solid #ffffff24;border-radius:11px;min-height:39px;
          padding:0 13px;font-size:11.5px;white-space:nowrap;flex:0 0 auto;font-weight:500}
   button:active{background:#ffffff24}
   button.on{background:#7c3aed40;border-color:#a78bfa;color:#fff}
   button.lock{background:#16a34a30;border-color:#4ade80;color:#bbf7d0}
   button.prim{background:linear-gradient(180deg,#8b5cf6,#6d28d9);border-color:#a78bfa;color:#fff}
   button.nudge{min-width:42px;font-size:14px;padding:0 9px}
-  label{display:flex;align-items:center;gap:9px;font-size:10.5px;color:#a29db6}
-  label span{width:78px;flex:0 0 auto}
-  input[type=range]{flex:1;accent-color:#a78bfa;height:26px}
+  label{display:flex;align-items:center;gap:10px;font-size:11px;color:#b6b0c8;min-height:29px}
+  label span{width:86px;flex:0 0 auto}
+  input[type=range]{flex:1;accent-color:#a78bfa;height:28px;min-width:40px}
   input[type=file]{position:fixed;left:-10000px;top:0;width:1px;height:1px;opacity:0;display:block}
   input[type=text]{flex:1;background:#ffffff10;border:1px solid #ffffff20;border-radius:9px;
     color:#fff;padding:9px 11px;font-size:12px;min-height:36px}
@@ -45,20 +45,20 @@
   .template-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
   .template-grid button{min-width:0;min-height:42px;text-align:left;padding:0 10px}
 </style>
-<div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
-<div id="bar">
-<div class="sec"><h4>Shape</h4>
+<div id="wrap"><details id="shapeMotionPanel"><summary>Shape &amp; Motion Controls</summary><div class="shape-motion-grid"><div class="sec"><h4>Shape</h4>
     <label><span>Cut</span><input id="sCut" type="range" min="40" max="230" value="140"></label>
     <label><span>Feather</span><input id="sFea" type="range" min="0" max="30" value="12"></label>
-    <label><span>Media</span><input id="sPho" type="range" min="0" max="100" value="14"></label><div class="advanced-tools"><label><span>Edge softness</span><input id="advEdgeSoftness" type="range" min="0" max="200" value="100"></label><label><span>Mask threshold</span><input id="advMaskThreshold" type="range" min="40" max="230" value="140"></label></div></div>
-<div class="sec"><h4>Motion</h4>
+    <label><span>Media</span><input id="sPho" type="range" min="0" max="100" value="14"></label><div class="advanced-tools"><label><span>Edge softness</span><input id="advEdgeSoftness" type="range" min="0" max="200" value="100"></label><label><span>Mask threshold</span><input id="advMaskThreshold" type="range" min="40" max="230" value="140"></label></div></div><div class="sec"><h4>Motion</h4>
     <label><span>Power</span><input id="sPow" type="range" min="10" max="300" value="140"></label>
     <label><span>Depth</span><input id="sDep" type="range" min="0" max="100" value="70"></label>
     <label><span>Trail</span><input id="sTrl" type="range" min="0" max="90" value="28"></label>
     <label><span>Shake</span><input id="sShk" type="range" min="0" max="100" value="45"></label>
     <label><span>Punch</span><input id="sPnc" type="range" min="0" max="100" value="40"></label>
     <label><span>Colour flow</span><input id="sCyc" type="range" min="0" max="100" value="18"></label>
-    <label><span>Gradient</span><input id="sDir" type="range" min="0" max="100" value="0"></label><div class="advanced-tools"><label><span>Gravity</span><input id="advGravity" type="range" min="0" max="250" value="100"></label><label><span>Turbulence</span><input id="advTurbulence" type="range" min="0" max="250" value="100"></label></div></div>
+    <label><span>Gradient</span><input id="sDir" type="range" min="0" max="100" value="0"></label><div class="advanced-tools"><label><span>Gravity</span><input id="advGravity" type="range" min="0" max="250" value="100"></label><label><span>Turbulence</span><input id="advTurbulence" type="range" min="0" max="250" value="100"></label></div></div></div></details><canvas id="c" width="1080" height="1920"></canvas></div>
+<div id="bar">
+
+
   <div class="sec"><h4>Social canvas / screen ratio</h4>
     <div class="row" id="ratios">
       <button class="on" data-ratio="9:16">TikTok / Reels 9:16</button>
