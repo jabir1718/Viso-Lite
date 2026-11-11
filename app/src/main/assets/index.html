@@ -1456,8 +1456,6 @@ function drawBeatLogo(ctx,dt,b){
   else if(logoImpactStyle==='slam'){sx*=1+impact*.18+logoSquash*.5;sy*=1+impact*.5-logoSquash*.65;rot+=Math.sin(logoPhase*4)*impact*.05;}
   const shake=Math.sin(logoPhase*19)*logoHit*(logoShake/100)*10,px=cx+logoX+shake,py=cy+logoY-lift*liftFactor+Math.sin(logoPhase*2)*logoPulse*(logoBounce/100)*3,size=base*bounce,glow=logoGlow/100*(.25+logoPulse*1.8);
   ctx.save();
-  const groundY=cy+logoY+size*.43;ctx.save();ctx.translate(px,groundY);ctx.scale(Math.max(.25,1-lift/220),Math.max(.2,.22-lift/520));
-  const shadow=ctx.createRadialGradient(0,0,2,0,0,size*.58);shadow.addColorStop(0,'rgba(0,0,0,'+(.42*(1-Math.min(1,lift/150)))+')');shadow.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=shadow;ctx.beginPath();ctx.ellipse(0,0,size*.58,size*.22,0,0,Math.PI*2);ctx.fill();ctx.restore();
   if(logoImpactStyle==='rocket'&&impact>.04){ctx.globalAlpha=logoOpacity/100*.48;ctx.strokeStyle=grad(.6);ctx.lineWidth=4+impact*14;ctx.shadowColor=grad(.5);ctx.shadowBlur=25;ctx.beginPath();ctx.moveTo(px,py+size*.35);ctx.lineTo(px,py+size*.9+impact*35);ctx.stroke();}
   ctx.translate(px,py);ctx.rotate(rot);const depth=1+logoDrive*(logoDepthPush/100)*.08+impact*(logoDepthPush/100)*.12;ctx.scale(sx*depth,sy*depth);ctx.globalAlpha=logoOpacity/100;ctx.shadowColor=gradAt(px,py);ctx.shadowBlur=glow*(18+logoPulse*55);
   const r=size/2;
