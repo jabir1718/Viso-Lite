@@ -493,6 +493,7 @@ input[type=text],#customW,#customH{
     <div id="ratioStatus" class="status">Canvas 1080 × 1920 · 9:16</div>
     <div class="row"><strong style="font-size:10px;color:#aeeaff">VIDEO TIMER · INSIDE THE CANVAS</strong></div>
     <div class="row"><button id="canvasTimerToggle" class="on">Timer ON</button><button id="canvasTimerStyle" class="chip">Style · Clean</button></div>
+    <div class="status" id="timerStyleInfo">8 animated timer looks · select Style to cycle.</div>
     <label><span>Timer size</span><input id="canvasTimerSize" type="range" min="50" max="160" value="100"></label>
   </div>
   <div class="sec"><h4>History</h4>
@@ -585,10 +586,15 @@ input[type=text],#customW,#customH{
       <button id="logoRestoreOriginal">↩ Restore Original</button>
     </div>
     <label><span>Background removal strength</span><input id="logoBgTolerance" type="range" min="10" max="120" value="48"></label>
-    <div class="row"><strong style="font-size:10px;color:#aeeaff">CORNER BRANDING · SAME LOGO, SEPARATE FROM CENTER</strong></div>
-    <div class="row"><button id="logoCornerToggle">Corner logos OFF</button></div>
-    <label><span>Corner logo size</span><input id="logoCornerSize" type="range" min="3" max="14" value="7"></label>
-    <label><span>Corner opacity</span><input id="logoCornerOpacity" type="range" min="10" max="100" value="72"></label>
+    <div class="row"><strong style="font-size:10px;color:#aeeaff">UNLIMITED LOGOS · ANY POSITION</strong></div>
+    <div class="row"><button id="addCornerLogos" class="prim">＋ Add multiple logos / PNG</button><button id="duplicateObject">Duplicate selected</button><button id="deleteObject">Delete selected</button></div>
+    <div class="row"><button id="objectShakeToggle">Shake OFF</button><button id="objectBlendToggle">Overlay OFF</button></div>
+    <label><span>Selected size</span><input id="objectSize" type="range" min="5" max="600" value="32"></label>
+    <label><span>Selected opacity</span><input id="objectOpacity" type="range" min="0" max="100" value="100"></label>
+    <label><span>Selected rotation</span><input id="objectRotation" type="range" min="-180" max="180" value="0"></label>
+    <label><span>Selected X position</span><input id="objectPosX" type="range" min="0" max="1080" value="540"></label>
+    <label><span>Selected Y position</span><input id="objectPosY" type="range" min="0" max="1920" value="360"></label>
+    <div class="status" id="objectStatus">Upload as many logos as you want. Drag, pinch, rotate, duplicate, move or delete each selected logo independently.</div>
     <div class="status">Transparent PNG alpha is preserved automatically. Auto cutout works best with a plain / single-colour background.</div>
     <div class="row" id="logoEmojiChoices">
       <button type="button" data-logo-emoji="🔥">🔥</button>
@@ -661,12 +667,16 @@ input[type=text],#customW,#customH{
       </div>
       <label><span>Template opacity</span><input id="logoTemplateOpacity" type="range" min="0" max="100" value="82"></label>
       <label><span>Template size</span><input id="logoTemplateSize" type="range" min="60" max="220" value="125"></label>
+      <label><span>Template thickness · 3D</span><input id="logoTemplateThickness" type="range" min="60" max="400" value="240"></label>
       <label><span>Animation speed</span><input id="logoTemplateSpeed" type="range" min="0" max="200" value="100"></label>
       <label><span>Audio reaction</span><input id="logoTemplateBeat" type="range" min="0" max="200" value="100"></label>
-      <div class="row"><label style="flex:1"><span>Logo blend</span><select id="logoBlendMode"><option value="screen">Screen</option><option value="source-over">Normal</option><option value="lighten">Lighten</option><option value="lighter">Add / Glow</option><option value="multiply">Multiply</option><option value="overlay">Overlay</option><option value="soft-light">Soft Light</option></select></label></div>
-      <label><span>Logo blend opacity</span><input id="logoBlendOpacity" type="range" min="0" max="100" value="100"></label>
-      <div class="row"><button id="logoBlendToggle" class="on">Logo Blend ON</button></div>
       <div class="status" id="logoTemplateStatus">Template background appears only behind the logo. Other editor controls stay independent.</div>
+    </div>
+    <div class="logo-effect-group" id="logoBlendPanel">
+      <h4>🧩 Logo Blend / Overlay · Logo Only</h4>
+      <div class="row"><label style="flex:1"><span>Blend mode</span><select id="logoBlendMode"><option value="screen">Screen</option><option value="source-over">Normal</option><option value="lighten">Lighten</option><option value="lighter">Add / Glow</option><option value="multiply">Multiply</option><option value="overlay">Overlay</option><option value="soft-light">Soft Light</option></select></label></div>
+      <label><span>Blend opacity</span><input id="logoBlendOpacity" type="range" min="0" max="100" value="100"></label>
+      <div class="row"><button id="logoBlendToggle" class="on">Logo Blend ON</button></div>
     </div>
     <div class="status" id="logoStatus">Independent logo layer · Upload a PNG/photo or choose an emoji. Beat controls do not change the main visualizer.</div>
   </div>
@@ -695,7 +705,7 @@ input[type=text],#customW,#customH{
 <input id="fA" type="file" accept="audio/*"><input id="fI" type="file" accept="image/*">
 <input id="fV" type="file" accept="video/*"><input id="fO" type="file" accept="image/*" multiple>
 <input id="fBgI" type="file" accept="image/*"><input id="fBgV" type="file" accept="video/*">
-<input id="fLogo" type="file" accept="image/*">
+<input id="fLogo" type="file" accept="image/*"><input id="fCornerLogos" type="file" accept="image/*" multiple>
 
 <video id="vid" playsinline muted loop style="display:none"></video>
 <video id="bvid" playsinline muted loop style="display:none"></video>
@@ -747,7 +757,7 @@ const objects=[];let selObj=-1;
 // Independent logo template renderer; does not touch visualizer, media, masks, objects or history.
 let logoTemplate='neon',logoTemplateOn=true,logoTemplateOpacity=82,logoTemplateSize=125,logoTemplateSpeed=100,logoTemplateBeat=100,logoTemplateEnergy=0;
 let logoBlendMode='screen',logoBlendOpacity=100,logoBlendEnabled=true,logoCornerOn=false,logoCornerSize=7,logoCornerOpacity=72;
-let canvasTimerOn=true,canvasTimerStyle=0,canvasTimerSize=100;
+let canvasTimerOn=true,canvasTimerStyle=0,canvasTimerSize=100,logoTemplateThickness=240;
 // Separate Beat Logo Studio state: deliberately isolated from main media, mask, objects and undo stack.
 let logoImg=null,logoOriginalImg=null,logoEmoji='💜',logoShape='circle',logoBeatPower=230,logoBounce=110,
     logoShake=28,logoGlow=85,logoSize=260,logoOpacity=100,logoX=0,logoY=0,
@@ -783,14 +793,44 @@ $('logoTemplateBeat').oninput=e=>logoTemplateBeat=+e.target.value;
 $('logoBlendMode').onchange=e=>logoBlendMode=e.target.value;
 $('logoBlendOpacity').oninput=e=>logoBlendOpacity=+e.target.value;
 $('logoBlendToggle').onclick=()=>{logoBlendEnabled=!logoBlendEnabled;$('logoBlendToggle').textContent=logoBlendEnabled?'Logo Blend ON':'Logo Blend OFF';$('logoBlendToggle').classList.toggle('on',logoBlendEnabled);};
-$('logoCornerToggle').onclick=()=>{logoCornerOn=!logoCornerOn;$('logoCornerToggle').textContent=logoCornerOn?'Corner logos ON':'Corner logos OFF';$('logoCornerToggle').classList.toggle('on',logoCornerOn);};
-$('logoCornerSize').oninput=e=>logoCornerSize=+e.target.value;
-$('logoCornerOpacity').oninput=e=>logoCornerOpacity=+e.target.value;
+$('logoTemplateThickness').oninput=e=>logoTemplateThickness=+e.target.value;
+const timerNames=['Clean 3D','Neon Glow','Minimal','Digital LED','Pulse Ring','Gradient Glass','Orbit Dots','Aura Frame'];
+$('canvasTimerStyle').onclick=()=>{canvasTimerStyle=(canvasTimerStyle+1)%timerNames.length;$('canvasTimerStyle').textContent='Style · '+timerNames[canvasTimerStyle];$('timerStyleInfo').textContent=timerNames[canvasTimerStyle]+' timer selected.';};
+
 $('canvasTimerToggle').onclick=()=>{canvasTimerOn=!canvasTimerOn;$('canvasTimerToggle').textContent=canvasTimerOn?'Timer ON':'Timer OFF';$('canvasTimerToggle').classList.toggle('on',canvasTimerOn);};
-$('canvasTimerStyle').onclick=()=>{canvasTimerStyle=(canvasTimerStyle+1)%3;$('canvasTimerStyle').textContent='Style · '+['Clean','Glow','Minimal'][canvasTimerStyle];};
+
 $('canvasTimerSize').oninput=e=>canvasTimerSize=+e.target.value;
 // Beat Logo Studio: its own upload, emoji, shape and audio-reactive controls.
 $('logoUpload').onclick=()=>$('fLogo').click();
+$('addCornerLogos').onclick=()=>$('fCornerLogos').click();
+$('fCornerLogos').onchange=e=>{
+  [...(e.target.files||[])].forEach((file,n)=>{const url=URL.createObjectURL(file),im=new Image();
+    im.onload=()=>{objects.push({img:im,x:W*(.18+(objects.length%4)*.21),y:H*(.18+Math.floor(objects.length/4)*.13),sc:.32,rot:0,motion:'Static',dir:1,phase:0,opacity:100,blendMode:'source-over',shake:false,cornerLogo:true});
+      selObj=objects.length-1;syncSelectedObjectControls();$('objectStatus').textContent=(objects.length)+' PNG/logo layers loaded · selected one is editable.';};
+    im.onerror=()=>URL.revokeObjectURL(url);im.src=url;
+  });e.target.value='';
+};
+function syncSelectedObjectControls(){
+  const ob=selObj>=0?objects[selObj]:null;if(!ob)return;
+  $('objectSize').value=Math.max(5,Math.min(600,Math.round(ob.sc*100)));
+  $('objectOpacity').value=ob.opacity==null?100:ob.opacity;
+  $('objectRotation').value=Math.round(ob.rot*180/Math.PI);
+  $('objectPosX').value=Math.max(0,Math.min(W,Math.round(ob.x)));
+  $('objectPosY').value=Math.max(0,Math.min(H,Math.round(ob.y)));
+  $('objectShakeToggle').textContent=ob.shake?'Shake ON':'Shake OFF';
+  $('objectBlendToggle').textContent=ob.blendMode&&ob.blendMode!=='source-over'?'Overlay ON':'Overlay OFF';
+}
+function selectedObject(){return selObj>=0?objects[selObj]:null;}
+$('duplicateObject').onclick=()=>{const ob=selectedObject();if(!ob)return;const copy={...ob,x:ob.x+45,y:ob.y+45};objects.push(copy);selObj=objects.length-1;syncSelectedObjectControls();};
+$('deleteObject').onclick=()=>{if(selObj<0)return;objects.splice(selObj,1);selObj=Math.min(objects.length-1,selObj);if(selObj>=0)syncSelectedObjectControls();};
+$('objectShakeToggle').onclick=()=>{const ob=selectedObject();if(!ob)return;ob.shake=!ob.shake;syncSelectedObjectControls();};
+$('objectBlendToggle').onclick=()=>{const ob=selectedObject();if(!ob)return;ob.blendMode=ob.blendMode&&ob.blendMode!=='source-over'?'source-over':'screen';syncSelectedObjectControls();};
+$('objectSize').oninput=e=>{const ob=selectedObject();if(ob)ob.sc=+e.target.value/100;};
+$('objectOpacity').oninput=e=>{const ob=selectedObject();if(ob)ob.opacity=+e.target.value;};
+$('objectRotation').oninput=e=>{const ob=selectedObject();if(ob)ob.rot=+e.target.value*Math.PI/180;};
+$('objectPosX').oninput=e=>{const ob=selectedObject();if(ob)ob.x=+e.target.value;};
+$('objectPosY').oninput=e=>{const ob=selectedObject();if(ob)ob.y=+e.target.value;};
+
 $('fLogo').addEventListener('change',e=>{
   const file=e.target.files&&e.target.files[0];if(!file)return;
   const url=URL.createObjectURL(file),im=new Image();
@@ -1120,7 +1160,7 @@ function hitObj(p){for(let i=objects.length-1;i>=0;i--){const b=objects[i],w=b.i
   if(p.x>b.x-w/2&&p.x<b.x+w/2&&p.y>b.y-h/2&&p.y<b.y+h/2)return i;}return -1;}
 const ptr=new Map();let start=null;
 function down(e){e.preventDefault();c.setPointerCapture(e.pointerId);const p=pos(e);ptr.set(e.pointerId,p);
-  if(ptr.size===1){selObj=hitObj(p);
+  if(ptr.size===1){selObj=hitObj(p);if(selObj>=0)syncSelectedObjectControls();
     if(selObj>=0){const b=objects[selObj];start={m:'o',x:p.x,y:p.y,ox:b.x,oy:b.y};}
     else start={m:'p',x:p.x,y:p.y,ix,iy};}
   if(ptr.size===2){const a=[...ptr.values()];const b=selObj>=0?objects[selObj]:null;
@@ -1134,7 +1174,7 @@ function move(e){if(!ptr.has(e.pointerId))return;e.preventDefault();const p=pos(
     const ang=Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x);const k=Math.max(.08,Math.min(6,d/Math.max(1,start.d)));
     if(start.m==='o2'&&b){b.sc=start.sc*k;b.rot=start.rot+(ang-start.ang);}
     else if(start.m==='p2'){isc=Math.max(.15,Math.min(5,start.sc*k));irot=start.rot+(ang-start.ang);}}}
-function up(e){ptr.delete(e.pointerId);if(!ptr.size){start=null;snap();}}
+function up(e){ptr.delete(e.pointerId);if(!ptr.size){start=null;snap();if(selObj>=0)syncSelectedObjectControls();}}
 c.addEventListener('pointerdown',down);c.addEventListener('pointermove',move);
 c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up);
 
@@ -1587,17 +1627,25 @@ function drawCanvasTimer(ctx){
   if(!canvasTimerOn||!audio)return;
   const seconds=Math.max(0,Math.floor(audio.currentTime||0)),mm=String(Math.floor(seconds/60)).padStart(2,'0'),ss=String(seconds%60).padStart(2,'0'),label=mm+':'+ss;
   const fs=Math.max(20,Math.min(72,H*.022*(canvasTimerSize/100))),y=H*.91;
-  ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='800 '+fs+'px system-ui';
-  if(canvasTimerStyle===0){ctx.fillStyle='rgba(3,10,20,.72)';const w=fs*3.5,h=fs*1.55;ctx.beginPath();ctx.roundRect(W/2-w/2,y-h/2,w,h,h/2);ctx.fill();ctx.fillStyle='#fff';}
-  else if(canvasTimerStyle===1){ctx.fillStyle='#dff8ff';ctx.shadowColor='#45dfff';ctx.shadowBlur=18;}
-  else{ctx.fillStyle='#d7e8f5';ctx.globalAlpha=.78;}
-  ctx.fillText(label,W/2,y);ctx.restore();
+  ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 '+fs+'px system-ui';
+  const w=fs*3.8,h=fs*1.75,beat=1+Math.min(.12,pulse*.08),yy=y+Math.sin(swayT*.004)*2;
+  if(canvasTimerStyle===0){ctx.translate(W/2,yy);ctx.scale(beat,beat);ctx.fillStyle='rgba(3,10,20,.82)';ctx.shadowColor='#36dfff';ctx.shadowBlur=14;ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,h/2);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(label,0,0);}
+  else if(canvasTimerStyle===1){ctx.fillStyle='#dff8ff';ctx.shadowColor='#45dfff';ctx.shadowBlur=22+pulse*22;ctx.fillText(label,W/2,yy);}
+  else if(canvasTimerStyle===2){ctx.fillStyle='#d7e8f5';ctx.globalAlpha=.82;ctx.fillText(label,W/2,yy);}
+  else if(canvasTimerStyle===3){ctx.fillStyle='#a7f3ff';ctx.shadowColor='#00eaff';ctx.shadowBlur=18;ctx.letterSpacing='5px';ctx.fillText(label,W/2,yy);}
+  else if(canvasTimerStyle===4){ctx.strokeStyle='#60eaff';ctx.lineWidth=4;ctx.shadowColor='#00d9ff';ctx.shadowBlur=18;ctx.beginPath();ctx.arc(W/2,yy,fs*1.35+Math.sin(swayT*.008)*4,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#fff';ctx.fillText(label,W/2,yy);}
+  else if(canvasTimerStyle===5){const g=ctx.createLinearGradient(W/2-w/2,yy,W/2+w/2,yy);g.addColorStop(0,'#7c3aed');g.addColorStop(.5,'#22d3ee');g.addColorStop(1,'#f0abfc');ctx.fillStyle=g;ctx.shadowColor='#22d3ee';ctx.shadowBlur=20;ctx.fillText(label,W/2,yy);}
+  else if(canvasTimerStyle===6){ctx.fillStyle='#fff';ctx.shadowColor='#c084fc';ctx.shadowBlur=16;for(let n=0;n<8;n++){const a=n*Math.PI/4+swayT*.001;ctx.beginPath();ctx.arc(W/2+Math.cos(a)*fs*2.1,yy+Math.sin(a)*fs*.7,3+pulse*4,0,Math.PI*2);ctx.fill();}ctx.fillText(label,W/2,yy);}
+  else{ctx.fillStyle='rgba(3,10,20,.7)';ctx.fillRect(W/2-w/2,yy-h/2,w,h);ctx.strokeStyle='#a78bfa';ctx.lineWidth=3;ctx.shadowColor='#8b5cf6';ctx.shadowBlur=18;ctx.strokeRect(W/2-w/2,yy-h/2,w,h);ctx.fillStyle='#fff';ctx.fillText(label,W/2,yy);}
+  ctx.restore();
 }
 function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
-  ctx.save();ctx.translate(ob.x,ob.y);ctx.rotate(ob.rot);const s=ob.sc*(1+pulse*.12);ctx.scale(s,s);
+  ctx.save();const shake=ob.shake?Math.min(22,pulse*ob.sc*28):0;ctx.translate(ob.x+(Math.random()-.5)*shake,ob.y+(Math.random()-.5)*shake);ctx.rotate(ob.rot);const s=ob.sc*(1+pulse*.12);ctx.scale(s,s);
+  ctx.globalAlpha=(ob.opacity==null?100:ob.opacity)/100;ctx.globalCompositeOperation=ob.blendMode||'source-over';
   ctx.shadowColor=gradAt(ob.x,ob.y);ctx.shadowBlur=16+pulse*55;
   ctx.drawImage(ob.img,-ob.img.width/2,-ob.img.height/2);
-  if(i===selObj){ctx.shadowBlur=0;ctx.strokeStyle='#b054f0';ctx.lineWidth=3/s;
+  ctx.globalCompositeOperation='source-over';
+  if(i===selObj){ctx.globalAlpha=1;ctx.shadowBlur=0;ctx.strokeStyle='#b054f0';ctx.lineWidth=3/s;
     ctx.strokeRect(-ob.img.width/2,-ob.img.height/2,ob.img.width,ob.img.height);}
   ctx.restore();});}
 
@@ -1674,7 +1722,7 @@ function frame(t){
   window.VisoLogoEffects.drawTemplate(x,{logoTemplate,logoTemplateOn,logoTemplateSpeed,logoPulse:logoTemplateEnergy,logoTemplateBeat,logoPhase,logoSize,logoTemplateSize,logoTemplateOpacity,cx,cy,logoX,logoY,logoLift,logoLiftHeight});
   drawBeatLogoBack(x,b,dt);
   drawBeatLogo(x,dt,b);
-  drawCornerBrandMarks(x);
+  // Unlimited user-added corner logos are regular independently editable PNG objects.
   drawCanvasTimer(x);
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
     x.drawImage(paintLayer(.7,false),0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;}
