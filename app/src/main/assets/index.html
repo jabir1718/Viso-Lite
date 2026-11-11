@@ -690,7 +690,7 @@ const $=id=>document.getElementById(id);
 const vid=$('vid'),bvid=$('bvid');
 
 let FPS=30,BIT=8000000,ratioW=9,ratioH=16;
-let mediaBlendMode='source-over',mediaBlendOpacity=100,mediaBlendEnabled=true,mediaBeatReaction=100;
+let mediaBlendMode='source-over',mediaBlendOpacity=100,mediaBlendEnabled=true,mediaBeatReaction=100,mediaBeatEnergy=0;
 
 function updateBitrate(w=W,h=H){BIT=Math.max(4000000,Math.min(100000000,Math.round(w*h*FPS*0.13)));}
 function setRes(w,h){
@@ -722,7 +722,7 @@ let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
 const objects=[];let selObj=-1;
 // Independent logo template renderer; does not touch visualizer, media, masks, objects or history.
-let logoTemplate='neon',logoTemplateOn=true,logoTemplateOpacity=82,logoTemplateSize=125,logoTemplateSpeed=100,logoTemplateBeat=100,logoScreenBlend=true;
+let logoTemplate='neon',logoTemplateOn=true,logoTemplateOpacity=82,logoTemplateSize=125,logoTemplateSpeed=100,logoTemplateBeat=100,logoScreenBlend=true,logoTemplateEnergy=0;
 // Separate Beat Logo Studio state: deliberately isolated from main media, mask, objects and undo stack.
 let logoImg=null,logoOriginalImg=null,logoEmoji='💜',logoShape='circle',logoBeatPower=230,logoBounce=110,
     logoShake=28,logoGlow=85,logoSize=260,logoOpacity=100,logoX=0,logoY=0,
@@ -1466,6 +1466,8 @@ function updateBeatLogoMotion(dt,b){
     logoVelocity+=Math.min(75,hit*(logoLaunchPower/100)*27*(.65+kick*.55));
     logoSquash=Math.max(logoSquash,hit*.24);
   }
+  const templateTarget=active?Math.min(1,energy*.55+low*.3+Math.min(1,flux*4)*.15):0;
+  logoTemplateEnergy+=(templateTarget-logoTemplateEnergy)*(active?.32:.12);
   logoEnergyAvg=logoEnergyAvg*.965+energy*.035;
   logoPrevEnergy=energy;
   logoDrive+=(energy-logoDrive)*(energy>logoDrive?.42:.12);
@@ -1558,7 +1560,7 @@ function frame(t){
   requestAnimationFrame(frame);
   const dt=Math.min(50,t-last||16);last=t;frameN++;
   const b=bands();curB=b;curBbg=bands(bvp);
-  const bass=b[0];avg=avg*.92+bass*.08;
+  const bass=b[0];const mediaTarget=Math.min(1,b[0]*.55+b[2]*.3+b[5]*.15);mediaBeatEnergy+=(mediaTarget-mediaBeatEnergy)*.28;avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
   pulse=Math.max(pulse*.85,bass);hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
   if(useVid&&frameN%3===0)maskDirty=true;
@@ -1614,7 +1616,7 @@ function frame(t){
 
   drawObjects(x,b,dt);
   updateBeatLogoMotion(dt,b);
-  window.VisoLogoEffects.drawTemplate(x,{logoTemplate,logoTemplateOn,logoTemplateSpeed,logoPulse,logoTemplateBeat,logoPhase,logoSize,logoTemplateSize,logoTemplateOpacity,cx,cy,logoX,logoY,logoLift,logoLiftHeight});
+  window.VisoLogoEffects.drawTemplate(x,{logoTemplate,logoTemplateOn,logoTemplateSpeed,logoPulse:logoTemplateEnergy,logoTemplateBeat,logoPhase,logoSize,logoTemplateSize,logoTemplateOpacity,cx,cy,logoX,logoY,logoLift,logoLiftHeight});
   drawBeatLogoBack(x,b,dt);
   drawBeatLogo(x,dt,b);
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
