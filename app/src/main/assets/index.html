@@ -620,6 +620,14 @@ input[type=text],#customW,#customH{
     <label><span>Selected rotation</span><input id="objectRotation" type="range" min="-180" max="180" value="0"></label>
     <label><span>Selected X position</span><input id="objectPosX" type="range" min="0" max="1080" value="540"></label>
     <label><span>Selected Y position</span><input id="objectPosY" type="range" min="0" max="1920" value="360"></label>
+
+    <div id="textLayerTools" class="mline" style="display:none;gap:7px;flex-direction:column">
+      <strong style="font-size:11px">Text Layer · Screen Edit</strong>
+      <input id="textLayerValue" type="text" maxlength="90" placeholder="Apna text likho" value="YOUR TEXT">
+      <div class="row"><input id="textLayerColor" type="color" value="#ffffff" aria-label="Text colour"><select id="textLayerFont" aria-label="Text font"><option value="Arial">Modern</option><option value="Georgia">Classic</option><option value="Impact">Bold</option><option value="system-ui">System</option></select><input id="textLayerFontSize" type="range" min="24" max="220" value="100" aria-label="Text size"></div>
+      <div class="row"><button id="addTextLayer" class="prim" type="button">Add Text</button><button id="applyTextLayer" type="button">Apply to selected</button></div>
+      <small style="color:#b8d5ec">Text bhi PNG/logo ki tarah select, move, pinch, rotate aur delete hoga.</small>
+    </div>
     <div class="status" id="objectStatus">Upload as many logos as you want. Drag, pinch, rotate, duplicate, move or delete each selected logo independently.</div>
     <div class="status">Transparent PNG alpha is preserved automatically. Auto cutout works best with a plain / single-colour background.</div>
     <div class="row" id="logoEmojiChoices">
@@ -876,8 +884,25 @@ function syncSelectedObjectControls(){
   $('objectPosY').value=Math.max(0,Math.min(H,Math.round(ob.y)));
   $('objectShakeToggle').textContent=ob.shake?'Shake ON':'Shake OFF';
   $('objectBlendToggle').textContent=ob.blendMode&&ob.blendMode!=='source-over'?'Overlay ON':'Overlay OFF';
+  updateTextLayerPanel();
 }
 function selectedObject(){return selObj>=0?objects[selObj]:null;}
+function makeTextLayerCanvas(value,color,size,font){
+ const cv=document.createElement('canvas'),cx2=cv.getContext('2d');
+ const px=Math.max(24,Math.min(220,+size||100)),family=font||'Arial';
+ cx2.font='900 '+px+'px "'+family.replace(/[^a-zA-Z0-9 ,_-]/g,'')+'"';
+ const width=Math.ceil(cx2.measureText(value||' ').width)+px*.7,height=Math.ceil(px*1.65);
+ cv.width=Math.max(120,Math.min(2400,width));cv.height=height;
+ const g=cv.getContext('2d');g.font='900 '+px+'px "'+family.replace(/[^a-zA-Z0-9 ,_-]/g,'')+'"';g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';g.shadowColor=color||'#fff';g.shadowBlur=px*.12;g.strokeStyle='rgba(0,0,0,.72)';g.lineWidth=Math.max(2,px*.055);g.strokeText(value||' ',cv.width/2,cv.height/2,cv.width-px*.2);g.fillStyle=color||'#fff';g.fillText(value||' ',cv.width/2,cv.height/2,cv.width-px*.2);return cv;
+}
+function updateTextLayerPanel(){const ob=selectedObject(),panel=$('textLayerTools');if(!panel)return;const show=!!(screenEditMode&&ob&&ob.kind==='text');panel.style.display=show?'flex':'none';if(show){$('textLayerValue').value=ob.textValue||'';$('textLayerColor').value=ob.textColor||'#ffffff';$('textLayerFont').value=ob.textFont||'Arial';$('textLayerFontSize').value=ob.textFontSize||100;}}
+function applyTextLayerToSelected(){const ob=selectedObject();if(!ob||ob.kind!=='text')return;ob.textValue=$('textLayerValue').value||' ';ob.textColor=$('textLayerColor').value;ob.textFont=$('textLayerFont').value;ob.textFontSize=+$('textLayerFontSize').value;ob.img=makeTextLayerCanvas(ob.textValue,ob.textColor,ob.textFontSize,ob.textFont);ob.originalImg=ob.img;syncSelectedObjectControls();}
+$('addTextLayer').onclick=()=>{const value=$('textLayerValue').value.trim()||'YOUR TEXT',color=$('textLayerColor').value,font=$('textLayerFont').value,size=+$('textLayerFontSize').value,im=makeTextLayerCanvas(value,color,size,font);objects.push({img:im,originalImg:im,kind:'text',textValue:value,textColor:color,textFont:font,textFontSize:size,x:cx,y:cy,sc:1,rot:0,opacity:100,blendMode:'source-over',shake:false,motion:'Still',phase:0,dir:1});selObj=objects.length-1;screenEditMode=true;syncSelectedObjectControls();updateTextLayerPanel();};
+$('applyTextLayer').onclick=applyTextLayerToSelected;
+$('textLayerValue').addEventListener('keydown',e=>{if(e.key==='Enter')applyTextLayerToSelected();});
+$('textLayerColor').addEventListener('input',()=>{if(selectedObject()?.kind==='text')applyTextLayerToSelected();});
+$('textLayerFont').addEventListener('change',()=>{if(selectedObject()?.kind==='text')applyTextLayerToSelected();});
+$('textLayerFontSize').addEventListener('input',()=>{if(selectedObject()?.kind==='text')applyTextLayerToSelected();});
 $('duplicateObject').onclick=()=>{const ob=selectedObject();if(!ob)return;const copy={...ob,x:ob.x+45,y:ob.y+45};objects.push(copy);selObj=objects.length-1;syncSelectedObjectControls();};
 $('deleteObject').onclick=()=>{if(selObj<0)return;objects.splice(selObj,1);selObj=Math.min(objects.length-1,selObj);if(selObj>=0)syncSelectedObjectControls();};
 $('objectShakeToggle').onclick=()=>{const ob=selectedObject();if(!ob)return;ob.shake=!ob.shake;syncSelectedObjectControls();};
@@ -1252,16 +1277,16 @@ $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
 let screenEditMode=false,lastTapAt=0,lastTapX=0,lastTapY=0,rotateDrag=null;
 const screenHandles=document.getElementById('screenHandles');
 function activeTarget(){
- if(selObj>=0&&objects[selObj])return {type:'object',ob:objects[selObj],cx:objects[selObj].x,cy:objects[selObj].y,w:objects[selObj].img.width*objects[selObj].sc,h:objects[selObj].img.height*objects[selObj].sc,rot:objects[selObj].rot||0};
+ if(selObj>=0&&objects[selObj])return {type:objects[selObj].kind==='text'?'textObject':'object',ob:objects[selObj],cx:objects[selObj].x,cy:objects[selObj].y,w:objects[selObj].img.width*objects[selObj].sc,h:objects[selObj].img.height*objects[selObj].sc,rot:objects[selObj].rot||0};
  if(activeWorkSection.includes('logo')&&logoTemplateImg){const fit=Math.min(logoSize*.82/logoTemplateImg.width,logoSize*.82/logoTemplateImg.height)*logoTemplateImageSize/100;return {type:'templateImage',cx:cx+logoTemplateImageX,cy:cy+logoTemplateImageY,w:logoTemplateImg.width*fit,h:logoTemplateImg.height*fit,rot:logoTemplateImageRotation||0};}
- if(activeWorkSection.includes('logo')&&(logoImg||logoEmoji)){return {type:'logo',cx:cx+logoX,cy:cy+logoY,w:logoSize*.82,h:logoSize*.82,rot:logoRotation||0};}
+ if(activeWorkSection.includes('logo')&&(logoImg||logoEmoji)){return {type:'logo',cx:cx+logoX,cy:cy+logoY,w:logoSize*.82,h:logoSize*.82,rot:(logoRotation||0)*Math.PI/180};}
  if(activeWorkSection.includes('background')&&(bgImg||bgUseVid)){return {type:'background',cx:cx+bgX,cy:cy+bgY,w:W*bgSc,h:H*bgSc,rot:bgRot||0};}
  if(activeWorkSection.includes('media')&&(img||useVid)){return {type:'media',cx:cx+ix,cy:cy+iy,w:W*isc,h:H*isc,rot:irot||0};}
  return null;
 }
 function setSectionForTarget(type){
  const sections=Array.from(document.querySelectorAll('#bar>.sec'));
- const sec=type==='object'||type==='templateImage'||type==='logo'
+ const sec=type==='object'||type==='textObject'||type==='templateImage'||type==='logo'
   ?document.getElementById('duplicateObject')?.closest('.sec')
   :type==='background'
    ?sections.find(q=>(q.querySelector('h4')?.textContent||'').toLowerCase().includes('background'))
@@ -1290,10 +1315,10 @@ function renderScreenHandles(){
  const frame=screenHandles.firstElementChild;
  frame.style.left=left+'px';frame.style.top=top+'px';frame.style.width=width+'px';frame.style.height=height+'px';frame.style.transform='rotate('+t.rot+'rad)';
 }
-function setTargetRotation(type,value){if(type==='object'&&selectedObject())selectedObject().rot=value;else if(type==='templateImage')logoTemplateImageRotation=value;else if(type==='logo')logoRotation=value;else if(type==='background')bgRot=value;else if(type==='media')irot=value;}
+function setTargetRotation(type,value){if((type==='object'||type==='textObject')&&selectedObject())selectedObject().rot=value;else if(type==='templateImage')logoTemplateImageRotation=value;else if(type==='logo')logoRotation=value*180/Math.PI;else if(type==='background')bgRot=value;else if(type==='media')irot=value;}
 function deleteActiveTarget(){
  const t=activeTarget();if(!t)return;
- if(t.type==='object'){$('deleteObject').click();selObj=-1;}
+ if(t.type==='object'||t.type==='textObject'){$('deleteObject').click();selObj=-1;}
  else if(t.type==='templateImage'){logoTemplateImg=null;logoTemplateOriginalImg=null;logoTemplateImageX=logoTemplateImageY=logoTemplateImageRotation=0;}
  else if(t.type==='logo'){logoImg=null;logoOriginalImg=null;logoEmoji='';}
  else if(t.type==='background'){bgImg=null;bgUseVid=false;bvid.pause();bgX=bgY=bgRot=0;bgSc=1;}
@@ -1309,12 +1334,12 @@ function down(e){e.preventDefault();c.setPointerCapture(e.pointerId);const p=pos
  if(ptr.size===1){const now=Date.now(),doubleTap=now-lastTapAt<360&&Math.hypot(p.x-lastTapX,p.y-lastTapY)<34;lastTapAt=now;lastTapX=p.x;lastTapY=p.y;
   const canSelect=activeWorkSection.includes('media')||activeWorkSection.includes('logo');const hit=canSelect?hitObj(p):-1;
   if(hit>=0){
-   selObj=hit;syncSelectedObjectControls();screenEditMode=doubleTap;
+   selObj=hit;screenEditMode=doubleTap;syncSelectedObjectControls();updateTextLayerPanel();
    if(doubleTap){const sec=$('duplicateObject')?.closest('.sec');if(sec){document.querySelectorAll('#bar>.sec').forEach(q=>q.classList.toggle('is-open',q===sec));activeWorkSection=sec.dataset.workSection||'logo';}}
   }else{
    selObj=-1;
    if(doubleTap){screenEditMode=true;const t=activeTarget();if(t)setSectionForTarget(t.type);}
-   else if(screenEditMode){screenEditMode=false;screenHandles.innerHTML='';}
+   else if(screenEditMode){screenEditMode=false;screenHandles.innerHTML='';updateTextLayerPanel();}
   }
   
   if(selObj>=0){const b=objects[selObj];start={m:'object',x:p.x,y:p.y,ox:b.x,oy:b.y,sc:b.sc,rot:b.rot};}
