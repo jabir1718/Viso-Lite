@@ -6,9 +6,9 @@ function draw(ctx,p){
  ctx.save();
  applyTransform(ctx);
  const beatGain=1+(Math.max(0,Math.min(1,beatEnergy))-.0)*.45*(beatReaction/100);
- ctx.globalAlpha=(photoOpacity/100)*(blendEnabled?blendOpacity/100:1)*beatGain;
+ ctx.globalAlpha=(photoOpacity/100)*(blendEnabled?blendOpacity/100:1);
  ctx.globalCompositeOperation=blendEnabled?blendMode:'source-over';
- ctx.filter='brightness('+brightness+'%) contrast('+contrast+'%) saturate('+saturation+'%) hue-rotate('+hue+'deg)';
+ ctx.filter='brightness('+(brightness*beatGain)+'%) contrast('+contrast+'%) saturate('+saturation+'%) hue-rotate('+hue+'deg)';
  ctx.drawImage(videoMode?video:source,-W/2,-H/2,W,H);
  ctx.filter='none';
  ctx.globalCompositeOperation='source-over';
