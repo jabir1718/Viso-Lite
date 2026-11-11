@@ -1467,7 +1467,7 @@ function updateBeatLogoMotion(dt,b){
     logoSquash=Math.max(logoSquash,hit*.24);
   }
   const templateTarget=active?Math.min(1,energy*.55+low*.3+Math.min(1,flux*4)*.15):0;
-  logoTemplateEnergy+=(templateTarget-logoTemplateEnergy)*(active?.32:.12);
+  logoTemplateEnergy+=(templateTarget-logoTemplateEnergy)*(active ? .32 : .12);
   logoEnergyAvg=logoEnergyAvg*.965+energy*.035;
   logoPrevEnergy=energy;
   logoDrive+=(energy-logoDrive)*(energy>logoDrive?.42:.12);
