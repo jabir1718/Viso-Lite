@@ -121,7 +121,7 @@
     <label><span>Contrast</span><input id="sCon" type="range" min="20" max="200" value="100"></label>
     <label><span>Saturate</span><input id="sSat" type="range" min="0" max="260" value="100"></label>
     <label><span>Hue shift</span><input id="sHue" type="range" min="0" max="360" value="0"></label><div class="advanced-tools"><label><span>Sepia tone</span><input id="advSepia" type="range" min="0" max="100" value="0"></label><label><span>Vignette</span><input id="advVignette" type="range" min="0" max="100" value="0"></label></div></div><div class="sec"><h4>Export</h4>
-    <div class="row"><button id="bShot">Save frame PNG</button><span class="ratio-note">Full song video exports to Movies / Viso</span></div><div class="advanced-tools"><div class="row"><button id="advGuidesExport">Export safe guides OFF</button></div><div class="ratio-note">Enable only when guides should appear in the rendered video.</div></div></div><div class="sec"><h4>Export quality</h4>
+    <div class="row"><button id="bShot">Save frame PNG</button><span class="ratio-note">Full song video exports to Movies / Viso</span></div><div id="exportStatus" class="ratio-note">Ready — choose export quality at the bottom.</div><div class="advanced-tools"><div class="row"><button id="advGuidesExport">Export safe guides OFF</button></div><div class="ratio-note">Enable only when guides should appear in the rendered video.</div></div></div><div class="sec"><h4>Export quality</h4>
     <div class="row" id="res"></div>
     <div class="row" id="fps"></div><div class="advanced-tools"><label><span>Bitrate power</span><input id="advBitrate" type="range" min="50" max="250" value="100"></label><div class="ratio-note">Higher bitrate improves detail but increases file size and device load.</div></div></div>
 </div>
@@ -289,7 +289,7 @@ function clearAllMedia(){
  playing=false;an=null;buf=null;streamDest=null;
  vid.pause();vid.removeAttribute('src');vid.load();useVid=false;img=null;
  bvid.pause();bvid.removeAttribute('src');bvid.load();bgUseVid=false;bgImg=null;bgViz=false;
- objects.length=0;selObj=-1;mediaFront=false;maskDirty=true;
+ objects.length=0;selObj=-1;mediaFront=false;phOn=true;$('tPh').classList.add('on');maskDirty=true;
  ['fMaskMedia','fA','fI','fV','fO','fBgI','fBgV'].forEach(id=>{const el=$(id);if(el)el.value='';});
  $('dockPlay').textContent='▶';$('layerStack').innerHTML='';
 }
@@ -315,13 +315,13 @@ $('bBgViz').onclick=e=>{bgViz=!bgViz;e.currentTarget.classList.toggle('on',bgViz
 
 function chooseFile(id){const input=$(id);if(!input)return;input.value='';input.click();}
 $('bMaskMedia').onclick=()=>chooseFile('fMaskMedia');
-$('fMaskMedia').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{img=im;useVid=false;vid.pause();vid.removeAttribute('src');vid.load();maskDirty=true;renderLayerStack();};im.onerror=()=>alert('Mask image load nahi hui.');im.src=URL.createObjectURL(f);};
+$('fMaskMedia').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{img=im;useVid=false;phOn=true;$('tPh').classList.add('on');vid.pause();vid.removeAttribute('src');vid.load();maskDirty=true;renderLayerStack();};im.onerror=()=>alert('Mask image load nahi hui.');im.src=URL.createObjectURL(f);};
 $('bI').onclick=()=>chooseFile('fI');
 $('fI').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const im=new Image();
   im.onload=()=>{img=im;useVid=false;vid.pause();vid.removeAttribute('src');vid.load();maskDirty=true;renderLayerStack();};im.onerror=()=>alert('Photo load nahi hui. Doosri image try karein.');im.src=URL.createObjectURL(f);};
 $('bV').onclick=()=>chooseFile('fV');
 $('fV').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;
-  vid.src=URL.createObjectURL(f);vid.muted=true;vid.playsInline=true;vid.onloadeddata=()=>{useVid=true;img=null;maskDirty=true;vid.play().catch(()=>{});renderLayerStack();};vid.onerror=()=>alert('Video load nahi hui. Doosri video try karein.');};
+  vid.src=URL.createObjectURL(f);vid.muted=true;vid.playsInline=true;vid.onloadeddata=()=>{useVid=true;img=null;phOn=true;$('tPh').classList.add('on');maskDirty=true;vid.play().catch(()=>{});renderLayerStack();};vid.onerror=()=>alert('Video load nahi hui. Doosri video try karein.');};
 $('bO').onclick=()=>chooseFile('fO');
 $('fO').onchange=e=>{[...e.target.files].forEach(f=>{const im=new Image();
   im.onload=()=>{objects.push({img:im,x:Math.random()*W,y:Math.random()*H,sc:.32,rot:0,
