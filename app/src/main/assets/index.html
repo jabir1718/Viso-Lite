@@ -1284,14 +1284,15 @@ function activeTarget(){
  if(activeWorkSection.includes('media')&&(img||useVid)){return {type:'media',cx:cx+ix,cy:cy+iy,w:W*isc,h:H*isc,rot:irot||0};}
  return null;
 }
+function topLevelWorkSection(el){let q=el;while(q&&q.parentElement&&q.parentElement.id!=='bar')q=q.parentElement;return q&&q.parentElement?.id==='bar'?q:null;}
 function setSectionForTarget(type){
  const sections=Array.from(document.querySelectorAll('#bar>.sec'));
  const sec=type==='object'||type==='textObject'||type==='templateImage'||type==='logo'
-  ?document.getElementById('duplicateObject')?.closest('.sec')
+  ?topLevelWorkSection(document.getElementById('duplicateObject'))
   :type==='background'
    ?sections.find(q=>(q.querySelector('h4')?.textContent||'').toLowerCase().includes('background'))
    :sections.find(q=>(q.querySelector('h4')?.textContent||'').toLowerCase()==='media');
- if(sec){sections.forEach(q=>q.classList.toggle('is-open',q===sec));activeWorkSection=type==='background'?'background':type==='media'?'media':(sec.querySelector('h4')?.textContent||'logo').toLowerCase();}
+ if(sec){sections.forEach(q=>q.classList.toggle('is-open',q===sec));activeWorkSection=sec.dataset.workSection||(type==='background'?'background':type==='media'?'media':'logo');}
 }
 function renderScreenHandles(){
  const t=screenEditMode?activeTarget():null;
@@ -1332,10 +1333,10 @@ function hitTemplateImage(p){if(!logoTemplateImg)return false;const iw=logoTempl
 const ptr=new Map();let start=null;
 function down(e){e.preventDefault();c.setPointerCapture(e.pointerId);const p=pos(e);ptr.set(e.pointerId,p);
  if(ptr.size===1){const now=Date.now(),doubleTap=now-lastTapAt<360&&Math.hypot(p.x-lastTapX,p.y-lastTapY)<34;lastTapAt=now;lastTapX=p.x;lastTapY=p.y;
-  const canSelect=activeWorkSection.includes('media')||activeWorkSection.includes('logo');const hit=canSelect?hitObj(p):-1;
+  const hit=hitObj(p);
   if(hit>=0){
    selObj=hit;screenEditMode=doubleTap;syncSelectedObjectControls();updateTextLayerPanel();
-   if(doubleTap){const sec=$('duplicateObject')?.closest('.sec');if(sec){document.querySelectorAll('#bar>.sec').forEach(q=>q.classList.toggle('is-open',q===sec));activeWorkSection=sec.dataset.workSection||'logo';}}
+   if(doubleTap){const sec=topLevelWorkSection($('duplicateObject'));if(sec){document.querySelectorAll('#bar>.sec').forEach(q=>q.classList.toggle('is-open',q===sec));activeWorkSection=sec.dataset.workSection||'logo';}}
   }else{
    selObj=-1;
    if(doubleTap){screenEditMode=true;const t=activeTarget();if(t)setSectionForTarget(t.type);}
