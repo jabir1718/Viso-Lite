@@ -465,9 +465,6 @@ input[type=text],#customW,#customH{
       <button id="bA">MP3</button><button id="bI">Photo</button><button id="bV">Video</button>
       <button id="bO">+ PNG</button><button id="bDel">× PNG</button>
       <button id="bP" class="prim">Play</button><button id="bR">Center</button>
-    </div>
-  </div>
-
     <div id="mediaPhotoTools">
       <h4>🖼 Photo / PNG Effects · Media Only</h4>
       <div class="row"><button id="mediaBgRemove" class="prim">✂ Background Remove</button><button id="mediaRestoreOriginal">↶ Restore Original</button></div>
@@ -477,6 +474,7 @@ input[type=text],#customW,#customH{
       <div class="row"><button id="mediaBlendToggle" class="on">Blend ON</button><button id="mediaEffectsReset">Reset Media Effects</button></div>
       <div class="status" id="mediaPhotoStatus">These settings affect only the Photo layer selected with Media → Photo. Logo settings remain separate.</div>
     </div>
+  </div>
   <div class="sec"><h4>Social canvas / screen ratio</h4>
     <div class="row" id="ratios">
       <button class="on" data-ratio="9:16">TikTok / Reels 9:16</button>
@@ -595,6 +593,7 @@ input[type=text],#customW,#customH{
     <div class="row"><strong style="font-size:10px;color:#aeeaff">UNLIMITED LOGOS · ANY POSITION</strong></div>
     <div class="row"><button id="addCornerLogos" class="prim">＋ Add multiple logos / PNG</button><button id="duplicateObject">Duplicate selected</button><button id="deleteObject">Delete selected</button></div>
     <div class="row"><button id="objectShakeToggle">Shake OFF</button><button id="objectBlendToggle">Overlay OFF</button></div>
+    <div class="row"><button id="objectRemoveBg" class="prim">✂ Remove selected PNG BG</button><button id="objectRestoreBg">Restore PNG</button></div>
     <label><span>Selected size</span><input id="objectSize" type="range" min="5" max="600" value="32"></label>
     <label><span>Selected opacity</span><input id="objectOpacity" type="range" min="0" max="100" value="100"></label>
     <label><span>Selected rotation</span><input id="objectRotation" type="range" min="-180" max="180" value="0"></label>
@@ -660,6 +659,10 @@ input[type=text],#customW,#customH{
     <div class="logo-effect-group" id="logoTemplatePanel">
       <h4>🎨 Logo Background Effects & Templates</h4>
       <div class="row"><button id="logoTemplateToggle" class="prim">● Templates ON</button><button id="logoTemplateRemove">✕ Remove Template</button></div>
+      <div class="row"><button id="logoTemplateUpload" class="prim">＋ Upload PNG / Photo Template</button><button id="logoTemplateRemoveBg">✂ Remove BG</button><button id="logoTemplateRestore">↶ Restore</button></div>
+      <div class="row"><label style="flex:1"><span>Template blend</span><select id="logoTemplateBlendMode"><option value="source-over">Normal</option><option value="screen">Screen</option><option value="lighten">Lighten</option><option value="lighter">Add / Glow</option><option value="multiply">Multiply</option><option value="overlay">Overlay</option><option value="soft-light">Soft Light</option></select></label></div>
+      <label><span>Image opacity</span><input id="logoTemplateImageOpacity" type="range" min="0" max="100" value="100"></label>
+      <label><span>Image size</span><input id="logoTemplateImageSize" type="range" min="20" max="250" value="100"></label>
       <div class="row"><strong style="font-size:10px;color:#aeeaff">CHOOSE A BACKGROUND DESIGN</strong></div>
       <div class="tpl-grid" id="logoTemplateGrid">
         <button class="tpl-card on" data-logo-template="neon">💚 Neon <small>Electric glow waves</small></button><button class="tpl-card" data-logo-template="halloween">🔥 Halloween <small>Fire + dark sparks</small></button>
@@ -722,7 +725,7 @@ input[type=text],#customW,#customH{
 <input id="fA" type="file" accept="audio/*"><input id="fI" type="file" accept="image/*">
 <input id="fV" type="file" accept="video/*"><input id="fO" type="file" accept="image/*" multiple>
 <input id="fBgI" type="file" accept="image/*"><input id="fBgV" type="file" accept="video/*">
-<input id="fLogo" type="file" accept="image/*"><input id="fCornerLogos" type="file" accept="image/*" multiple>
+<input id="fLogo" type="file" accept="image/*"><input id="fCornerLogos" type="file" accept="image/*" multiple><input id="fTemplateImage" type="file" accept="image/*">
 
 <video id="vid" playsinline muted loop style="display:none"></video>
 <video id="bvid" playsinline muted loop style="display:none"></video>
@@ -763,6 +766,7 @@ $('applyCustom').onclick=()=>{const w=+$('customW').value,h=+$('customH').value;
 updateBitrate();
 
 let img=null,bgImg=null,bgUseVid=false,bgViz=false,maskDirty=true;
+let activeWorkSection='media',logoTemplateImg=null,logoTemplateOriginalImg=null,logoTemplateBlendMode='source-over',logoTemplateImageOpacity=100,logoTemplateImageSize=100;
 let bgX=0,bgY=0,bgSc=1,bgRot=0;
 let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
@@ -835,12 +839,9 @@ $('canvasTimerSize').oninput=e=>canvasTimerSize=+e.target.value;
 // Beat Logo Studio: its own upload, emoji, shape and audio-reactive controls.
 $('logoUpload').onclick=()=>$('fLogo').click();
 $('addCornerLogos').onclick=()=>$('fCornerLogos').click();
-$('fCornerLogos').onchange=e=>{
-  [...(e.target.files||[])].forEach((file,n)=>{const url=URL.createObjectURL(file),im=new Image();
-    im.onload=()=>{const corners=[[.13,.13],[.87,.13],[.13,.87],[.87,.87]],pt=corners[objects.length%4];objects.push({img:im,x:W*pt[0],y:H*pt[1],sc:.32,rot:0,motion:'Still',dir:1,phase:0,opacity:100,blendMode:'source-over',shake:false,cornerLogo:true});
-      selObj=objects.length-1;syncSelectedObjectControls();$('objectStatus').textContent=(objects.length)+' PNG/logo layers loaded · selected one is editable.';};
-    im.onerror=()=>URL.revokeObjectURL(url);im.src=url;
-  });e.target.value='';
+$('fCornerLogos').onchange=async e=>{
+  for(const file of [...(e.target.files||[])]){try{const im=await decodeOrientedImage(file);const corners=[[.13,.13],[.87,.13],[.13,.87],[.87,.87]],pt=corners[objects.length%4];objects.push({img:im,originalImg:im,x:W*pt[0],y:H*pt[1],sc:Math.min(.42,Math.min(W/im.width,H/im.height)*.28),rot:0,motion:'Still',dir:1,phase:0,opacity:100,blendMode:'source-over',shake:false,cornerLogo:true});selObj=objects.length-1;syncSelectedObjectControls();$('objectStatus').textContent=(objects.length)+' PNG/logo layers loaded · selected one is editable.';}catch(err){$('objectStatus').textContent='Logo load failed: '+err.message;}}
+  e.target.value='';
 };
 function syncSelectedObjectControls(){
   const ob=selObj>=0?objects[selObj]:null;if(!ob)return;
@@ -863,12 +864,11 @@ $('objectRotation').oninput=e=>{const ob=selectedObject();if(ob)ob.rot=+e.target
 $('objectPosX').oninput=e=>{const ob=selectedObject();if(ob)ob.x=+e.target.value;};
 $('objectPosY').oninput=e=>{const ob=selectedObject();if(ob)ob.y=+e.target.value;};
 
-$('fLogo').addEventListener('change',e=>{
+$('fLogo').addEventListener('change',async e=>{
   const file=e.target.files&&e.target.files[0];if(!file)return;
-  const url=URL.createObjectURL(file),im=new Image();
-  im.onload=()=>{if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);logoImg=im;logoOriginalImg=im;pickLogoAccent(im);logoShadowCanvas=null;logoShadowSource=null;logoImg._url=url;logoEmoji='';$('logoEmoji').value='';$('logoStatus').textContent=(file.type==='image/png'?'PNG loaded · existing transparency preserved · ':'Image loaded · ')+file.name;};
-  im.onerror=()=>{URL.revokeObjectURL(url);$('logoStatus').textContent='Could not load this image. Try PNG or JPG.';};
-  im.src=url;e.target.value='';
+  try{const im=await decodeOrientedImage(file);logoImg=im;logoOriginalImg=im;pickLogoAccent(im);logoShadowCanvas=null;logoShadowSource=null;logoEmoji='';$('logoEmoji').value='';$('logoStatus').textContent=(file.type==='image/png'?'PNG loaded · transparency preserved · ':'Image loaded · ')+file.name;}
+  catch(err){$('logoStatus').textContent='Could not load this image: '+err.message;}
+  e.target.value='';
 });
 $('logoRestoreOriginal').onclick=()=>{if(logoOriginalImg){logoImg=logoOriginalImg;logoShadowCanvas=null;logoShadowSource=null;$('logoStatus').textContent='Original image restored.';}};
 $('logoRemoveBg').onclick=()=>{
@@ -1064,16 +1064,12 @@ $('mediaBgRemove').onclick=()=>{if(!img||useVid){$('mediaPhotoStatus').textConte
 $('mediaRestoreOriginal').onclick=()=>{if($('bgRemoveTools').style.display==='none')$('bgRemoveToggle').click();$('bgRemoveUseCurrent').click();$('mediaPhotoStatus').textContent='Original uploaded photo restored.';};
 $('mediaEffectsReset').onclick=()=>{mediaBlendMode='source-over';mediaBlendOpacity=100;mediaBlendEnabled=true;mediaBeatReaction=100;$('mediaBeatReaction').value=100;$('mediaBlendMode').value='source-over';$('mediaBlendOpacity').value=100;$('mediaBlendToggle').textContent='Blend ON';$('mediaBlendToggle').classList.add('on');$('mediaPhotoStatus').textContent='Media photo effects reset. Uploaded image and Logo settings are unchanged.';};
 $('bI').onclick=()=>$('fI').click();
-$('fI').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();
-  im.onload=()=>{img=im;useVid=false;vid.pause();maskDirty=true;if(window.__visoBgLoad)window.__visoBgLoad(im);};im.src=URL.createObjectURL(f);};
+$('fI').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const im=await decodeOrientedImage(f);img=im;useVid=false;vid.pause();maskDirty=true;ix=0;iy=0;isc=1;irot=0;if(window.__visoBgLoad)window.__visoBgLoad(im);}catch(err){$('mediaPhotoStatus').textContent='Photo load failed: '+err.message;}e.target.value='';};
 $('bV').onclick=()=>$('fV').click();
 $('fV').onchange=e=>{const f=e.target.files[0];if(!f)return;
   vid.src=URL.createObjectURL(f);vid.play();useVid=true;img=null;maskDirty=true;};
 $('bO').onclick=()=>$('fO').click();
-$('fO').onchange=e=>{[...e.target.files].forEach(f=>{const im=new Image();
-  im.onload=()=>{objects.push({img:im,x:Math.random()*W,y:Math.random()*H,sc:.32,rot:0,
-    motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28,opacity:100,blendMode:'source-over'});selObj=objects.length-1;syncSelectedObjectControls();};
-  im.src=URL.createObjectURL(f);});};
+$('fO').onchange=async e=>{for(const f of [...e.target.files]){try{const im=await decodeOrientedImage(f);objects.push({img:im,originalImg:im,x:W/2,y:H/2,sc:Math.min(.7,Math.min(W/im.width,H/im.height)*.72),rot:0,motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28,opacity:100,blendMode:'source-over'});selObj=objects.length-1;syncSelectedObjectControls();}catch(err){$('objectStatus').textContent='PNG load failed: '+err.message;}}e.target.value='';};
 function guessMotion(n){n=(n||'').toLowerCase();
   if(/car|truck|bike|bus|taxi|train|plane|rocket/.test(n))return'Drive';
   if(/walk|man|woman|girl|boy|human|person|people|kid/.test(n))return'Walk';
