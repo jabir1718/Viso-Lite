@@ -628,7 +628,7 @@ input[type=text],#customW,#customH{
       <button type="button" data-logo-impact="drum" class="on">🥁 Drum launch</button><button type="button" data-logo-impact="dice">🎲 Dice pop</button>
       <button type="button" data-logo-impact="spring">Spring</button><button type="button" data-logo-impact="punch">Punch</button>
       <button type="button" data-logo-impact="flip">3D flip</button><button type="button" data-logo-impact="rocket">Rocket</button>
-      <button type="button" data-logo-impact="elastic">Elastic</button><button type="button" data-logo-impact="slam">Hard slam</button>
+      <button type="button" data-logo-impact="elastic">Elastic</button><button type="button" data-logo-impact="rubber">🫧 Soft Rubber</button><button type="button" data-logo-impact="slam">Hard slam</button>
     </div>
     <div class="row"><strong style="font-size:10px;color:#aeeaff">AUDIO FOLLOW · ALL INSTRUMENTS + VOCALS</strong></div>
     <div class="row" id="logoAudioModes">
@@ -670,12 +670,23 @@ input[type=text],#customW,#customH{
         <button class="tpl-card" data-logo-template="pride">🌈 Pride <small>Rainbow wave</small></button><button class="tpl-card" data-logo-template="holiday">🌟 Holiday Glow <small>Warm bokeh</small></button>
         <button class="tpl-card" data-logo-template="snow">❄️ Snowfall Serenity <small>Snow + blue pulse</small></button><button class="tpl-card" data-logo-template="cherry">🌸 Cherry Moon <small>Pink moon aura</small></button>
         <button class="tpl-card" data-logo-template="horizon">🌅 Pink Horizon <small>Sunset glow</small></button>
+        <button class="tpl-card" data-logo-template="gangster">🖤 Gangster <small>Wide chrome street frame</small></button>
+        <button class="tpl-card" data-logo-template="action">⚔️ Action Strike <small>Long sharp impact trails</small></button>
+        <button class="tpl-card" data-logo-template="longbar">〰️ Long Pulse <small>Extra-wide rubber beat waves</small></button>
+        <button class="tpl-card" data-logo-template="redline">🔻 Redline Fury <small>Long red action streaks</small></button>
+        <button class="tpl-card" data-logo-template="chrome">💿 Chrome Edge <small>Metallic 3D logo frame</small></button>
       </div>
       <label><span>Template opacity</span><input id="logoTemplateOpacity" type="range" min="0" max="100" value="82"></label>
       <label><span>Template size</span><input id="logoTemplateSize" type="range" min="60" max="220" value="125"></label>
       <label><span>Template thickness · 3D</span><input id="logoTemplateThickness" type="range" min="60" max="400" value="240"></label>
       <label><span>Animation speed</span><input id="logoTemplateSpeed" type="range" min="0" max="200" value="100"></label>
       <label><span>Audio reaction</span><input id="logoTemplateBeat" type="range" min="0" max="200" value="100"></label>
+      <div class="logo-effect-group" id="logoBeatFeelPanel" style="margin-top:8px">
+        <h4>🫧 Beat Feel & Light Color · Logo Only</h4>
+        <div class="row"><label style="flex:1"><span>Light color source</span><select id="logoTemplateColorMode"><option value="auto">Auto · pick from logo photo</option><option value="manual">Manual color</option></select></label><input id="logoTemplateColor" type="color" value="#35dfff" aria-label="Logo template light color" style="width:42px;height:36px;flex:0 0 42px"></div>
+        <label><span>Rubber softness</span><input id="logoRubberSoftness" type="range" min="0" max="100" value="75"></label>
+        <div class="status">Soft low-beat movement, stronger squash and glow on loud beats. This panel changes only Logo templates.</div>
+      </div>
       <div class="status" id="logoTemplateStatus">Template background appears only behind the logo. Other editor controls stay independent.</div>
     </div>
     <div class="logo-effect-group" id="logoBlendPanel">
@@ -763,6 +774,7 @@ let colors=[190,285],selColor=0,hueShift=0;
 const objects=[];let selObj=-1;
 // Independent logo template renderer; does not touch visualizer, media, masks, objects or history.
 let logoTemplate='neon',logoTemplateOn=true,logoTemplateOpacity=82,logoTemplateSize=125,logoTemplateSpeed=100,logoTemplateBeat=100,logoTemplateEnergy=0;
+let logoTemplateColorMode='auto',logoTemplateManualColor='#35dfff',logoTemplateAutoColor='#35dfff',logoRubberSoftness=75;
 let logoBlendMode='screen',logoBlendOpacity=100,logoBlendEnabled=true,logoCornerOn=false,logoCornerSize=7,logoCornerOpacity=72;
 let canvasTimerOn=true,canvasTimerStyle=0,canvasTimerSize=100,logoTemplateThickness=240;
 // Separate Beat Logo Studio state: deliberately isolated from main media, mask, objects and undo stack.
@@ -797,6 +809,19 @@ $('logoTemplateOpacity').oninput=e=>logoTemplateOpacity=+e.target.value;
 $('logoTemplateSize').oninput=e=>logoTemplateSize=+e.target.value;
 $('logoTemplateSpeed').oninput=e=>logoTemplateSpeed=+e.target.value;
 $('logoTemplateBeat').oninput=e=>logoTemplateBeat=+e.target.value;
+$('logoTemplateColorMode').onchange=e=>logoTemplateColorMode=e.target.value;
+$('logoTemplateColor').oninput=e=>logoTemplateManualColor=e.target.value;
+$('logoRubberSoftness').oninput=e=>logoRubberSoftness=+e.target.value;
+function pickLogoAccent(source){
+  if(!source)return;
+  try{
+    const cv=document.createElement('canvas');cv.width=cv.height=20;
+    const cc=cv.getContext('2d',{willReadFrequently:true});cc.drawImage(source,0,0,20,20);
+    const d=cc.getImageData(0,0,20,20).data;let best=-1,chosen=[53,223,255],count=0;
+    for(let i=0;i<d.length;i+=4){if(d[i+3]<90)continue;count++;const hi=Math.max(d[i],d[i+1],d[i+2]),lo=Math.min(d[i],d[i+1],d[i+2]),score=(hi-lo)+hi*.12;if(score>best){best=score;chosen=[d[i],d[i+1],d[i+2]];}}
+    if(count)logoTemplateAutoColor='#'+chosen.map(v=>v.toString(16).padStart(2,'0')).join('');
+  }catch(e){}
+}
 $('logoBlendMode').onchange=e=>logoBlendMode=e.target.value;
 $('logoBlendOpacity').oninput=e=>logoBlendOpacity=+e.target.value;
 $('logoBlendToggle').onclick=()=>{logoBlendEnabled=!logoBlendEnabled;$('logoBlendToggle').textContent=logoBlendEnabled?'Logo Blend ON':'Logo Blend OFF';$('logoBlendToggle').classList.toggle('on',logoBlendEnabled);};
@@ -841,7 +866,7 @@ $('objectPosY').oninput=e=>{const ob=selectedObject();if(ob)ob.y=+e.target.value
 $('fLogo').addEventListener('change',e=>{
   const file=e.target.files&&e.target.files[0];if(!file)return;
   const url=URL.createObjectURL(file),im=new Image();
-  im.onload=()=>{if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);logoImg=im;logoOriginalImg=im;logoShadowCanvas=null;logoShadowSource=null;logoImg._url=url;logoEmoji='';$('logoEmoji').value='';$('logoStatus').textContent=(file.type==='image/png'?'PNG loaded · existing transparency preserved · ':'Image loaded · ')+file.name;};
+  im.onload=()=>{if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);logoImg=im;logoOriginalImg=im;pickLogoAccent(im);logoShadowCanvas=null;logoShadowSource=null;logoImg._url=url;logoEmoji='';$('logoEmoji').value='';$('logoStatus').textContent=(file.type==='image/png'?'PNG loaded · existing transparency preserved · ':'Image loaded · ')+file.name;};
   im.onerror=()=>{URL.revokeObjectURL(url);$('logoStatus').textContent='Could not load this image. Try PNG or JPG.';};
   im.src=url;e.target.value='';
 });
@@ -1606,6 +1631,7 @@ function drawBeatLogo(ctx,dt,b){
   else if(logoImpactStyle==='flip'){rot+=Math.sin(logoPhase*2)*impact*.38+lift*.012;sx*=1+impact*.12;}
   else if(logoImpactStyle==='rocket'){liftFactor=1.45;sx*=1+impact*.12;sy*=1+impact*.2;}
   else if(logoImpactStyle==='elastic'){sx*=1+impact*.32+logoSquash*.35;sy*=1-impact*.3+logoSquash*.48;}
+  else if(logoImpactStyle==='rubber'){const soft=logoRubberSoftness/100;sx*=1+impact*.42*soft+logoSquash*.32*soft;sy*=1-impact*.28*soft-logoSquash*.42*soft;}
   else if(logoImpactStyle==='slam'){sx*=1+impact*.18+logoSquash*.5;sy*=1+impact*.5-logoSquash*.65;rot+=Math.sin(logoPhase*4)*impact*.05;}
   const shake=Math.sin(logoPhase*19)*logoHit*(logoShake/100)*10,px=cx+logoX+shake,py=cy+logoY-lift*liftFactor+Math.sin(logoPhase*2)*logoPulse*(logoBounce/100)*3,size=base*bounce,glow=logoGlow/100*(.25+logoPulse*1.8);
   ctx.save();
@@ -1724,7 +1750,7 @@ function frame(t){
 
   drawObjects(x,b,dt);
   updateBeatLogoMotion(dt,b);
-  window.VisoLogoEffects.drawTemplate(x,{logoTemplate,logoTemplateOn,logoTemplateSpeed,logoPulse:logoTemplateEnergy,logoTemplateBeat,logoPhase,logoSize,logoTemplateSize,logoTemplateOpacity,logoTemplateThickness,cx,cy,logoX,logoY,logoLift,logoLiftHeight});
+  window.VisoLogoEffects.drawTemplate(x,{logoTemplate,logoTemplateOn,logoTemplateSpeed,logoPulse:logoTemplateEnergy,logoTemplateBeat,logoPhase,logoSize,logoTemplateSize,logoTemplateOpacity,logoTemplateThickness,accentColor:logoTemplateColorMode==='auto'?logoTemplateAutoColor:logoTemplateManualColor,rubberSoftness:logoRubberSoftness,cx,cy,logoX,logoY,logoLift,logoLiftHeight});
   drawBeatLogoBack(x,b,dt);
   drawBeatLogo(x,dt,b);
   drawCornerBrandMarks(x);
