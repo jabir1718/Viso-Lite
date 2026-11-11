@@ -13,6 +13,7 @@
   .ratio-custom{width:74px;min-width:74px;background:#ffffff10;border:1px solid #ffffff20;border-radius:9px;
     color:#fff;padding:8px;font-size:11px;min-height:34px}
   .ratio-note{font-size:9px;color:#918aa6;padding:0 2px}
+  .layer-stack{display:flex;flex-direction:column;gap:5px}.layer-item{display:flex;align-items:center;justify-content:space-between;min-height:36px;padding:0 10px;border:1px solid #ffffff20;border-radius:9px;background:#ffffff0b;color:#d9d5e6;touch-action:pan-y}.layer-item.selected{border-color:#a78bfa;background:#a78bfa22}.layer-item.dragging{opacity:.45;border-style:dashed}.layer-hint{font-size:9px;color:#918aa6}
   #bar{flex:0 0 auto;max-height:40dvh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:8px 8px 10px;overscroll-behavior:contain}#bottomDock{flex:0 0 auto;display:flex;justify-content:center;gap:12px;padding:6px 12px calc(8px + env(safe-area-inset-bottom));background:#090711;border-top:1px solid #ffffff18}#bottomDock button{width:52px;height:42px;min-height:42px;border-radius:13px;font-size:20px;padding:0}#bottomDock #dockPlay{width:76px;background:#8b5cf6;color:#fff;border-color:#a78bfa}
   .advanced-tools{display:flex;flex-direction:column;gap:6px;padding:6px 7px;border:1px solid #a78bfa22;border-radius:10px;background:#a78bfa08}
   .sec{background:linear-gradient(180deg,#ffffff0d,#ffffff05);border:1px solid #ffffff14;border-radius:14px;
@@ -108,7 +109,7 @@
       <button id="tBg">BG viz</button><button id="tFr">Front viz</button>
       <button id="tPh" class="on">Media</button><button id="tMask" class="on">Mask</button>
     </div>
-    <div id="layerStack" class="layer-stack"></div><div class="advanced-tools"><label><span>BG layer opacity</span><input id="advBgLayerOpacity" type="range" min="0" max="100" value="100"></label><label><span>Front layer opacity</span><input id="advFrontOpacity" type="range" min="0" max="100" value="100"></label><label><span>Media opacity</span><input id="advMediaOpacity" type="range" min="0" max="100" value="100"></label></div></div><div class="sec"><h4>Position</h4>
+    <div id="layerStack" class="layer-stack"></div><div class="layer-hint">Layer ko long-press karke upar / neeche move karo</div><div class="advanced-tools"><label><span>BG layer opacity</span><input id="advBgLayerOpacity" type="range" min="0" max="100" value="100"></label><label><span>Front layer opacity</span><input id="advFrontOpacity" type="range" min="0" max="100" value="100"></label><label><span>Media opacity</span><input id="advMediaOpacity" type="range" min="0" max="100" value="100"></label></div></div><div class="sec"><h4>Position</h4>
     <div class="row">
       <button class="nudge" id="bL">◀</button><button class="nudge" id="bRt">▶</button>
       <button class="nudge" id="bU">▲</button><button class="nudge" id="bD">▼</button>
@@ -282,7 +283,19 @@ $('bR').onclick=()=>{snap();ix=0;iy=0;isc=1;irot=0;};
 $('bL').onclick=()=>{ix-=70;};$('bRt').onclick=()=>{ix+=70;};
 $('bU').onclick=()=>{iy-=70;};$('bD').onclick=()=>{iy+=70;};
 $('bBig').onclick=()=>{isc=Math.min(5,isc*1.12);};$('bSm').onclick=()=>{isc=Math.max(.15,isc/1.12);};
-$('bDel').onclick=()=>{if(selObj>=0){objects.splice(selObj,1);selObj=-1;}};
+function clearAllMedia(){
+ if(audio){audio.pause();audio.src='';audio=null;}
+ if(ctxA&&ctxA.state==='running')ctxA.suspend().catch(()=>{});
+ playing=false;an=null;buf=null;streamDest=null;
+ vid.pause();vid.removeAttribute('src');vid.load();useVid=false;img=null;
+ bvid.pause();bvid.removeAttribute('src');bvid.load();bgUseVid=false;bgImg=null;bgViz=false;
+ objects.length=0;selObj=-1;mediaFront=false;maskDirty=true;
+ ['fA','fI','fV','fO','fBgI','fBgV'].forEach(id=>{const el=$(id);if(el)el.value='';});
+ $('dockPlay').textContent='▶';$('layerStack').innerHTML='';
+}
+$('bClearMedia').onclick=()=>{clearAllMedia();};
+$('bDel').onclick=()=>{if(selObj>=0){objects.splice(selObj,1);selObj=-1;}else if(objects.length){objects.pop();}renderLayerStack();};
+
 $('mL').onclick=()=>{mX-=60;};$('mR').onclick=()=>{mX+=60;};
 $('mU').onclick=()=>{mY-=60;};$('mD').onclick=()=>{mY+=60;};
 $('mBig').onclick=()=>{mSc=Math.min(3,mSc*1.1);$('sMsc').value=mSc*100;};
@@ -303,15 +316,35 @@ $('bBgViz').onclick=e=>{bgViz=!bgViz;e.currentTarget.classList.toggle('on',bgViz
 function chooseFile(id){const input=$(id);if(!input)return;input.value='';input.click();}
 $('bI').onclick=()=>chooseFile('fI');
 $('fI').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const im=new Image();
-  im.onload=()=>{img=im;useVid=false;vid.pause();vid.removeAttribute('src');vid.load();maskDirty=true;};im.onerror=()=>alert('Photo load nahi hui. Doosri image try karein.');im.src=URL.createObjectURL(f);};
+  im.onload=()=>{img=im;useVid=false;vid.pause();vid.removeAttribute('src');vid.load();maskDirty=true;renderLayerStack();};im.onerror=()=>alert('Photo load nahi hui. Doosri image try karein.');im.src=URL.createObjectURL(f);};
 $('bV').onclick=()=>chooseFile('fV');
 $('fV').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;
-  vid.src=URL.createObjectURL(f);vid.muted=true;vid.playsInline=true;vid.onloadeddata=()=>{useVid=true;img=null;maskDirty=true;vid.play().catch(()=>{});};vid.onerror=()=>alert('Video load nahi hui. Doosri video try karein.');};
+  vid.src=URL.createObjectURL(f);vid.muted=true;vid.playsInline=true;vid.onloadeddata=()=>{useVid=true;img=null;maskDirty=true;vid.play().catch(()=>{});renderLayerStack();};vid.onerror=()=>alert('Video load nahi hui. Doosri video try karein.');};
 $('bO').onclick=()=>chooseFile('fO');
 $('fO').onchange=e=>{[...e.target.files].forEach(f=>{const im=new Image();
   im.onload=()=>{objects.push({img:im,x:Math.random()*W,y:Math.random()*H,sc:.32,rot:0,
-    motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28});selObj=objects.length-1;};
+    motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28});selObj=objects.length-1;renderLayerStack();};
   im.onerror=()=>alert('PNG load nahi hui.');im.src=URL.createObjectURL(f);});};
+
+function renderLayerStack(){
+ const host=$('layerStack');if(!host)return;host.innerHTML='';
+ const main=document.createElement('button');main.className='layer-item'+(selObj===-1?' selected':'');
+ main.textContent=(useVid?'Video':img?'Photo':'Main media')+' · '+(mediaFront?'Front':'Back');
+ main.dataset.main='1';host.appendChild(main);
+ main.onclick=()=>{selObj=-1;renderLayerStack();};
+ main.addEventListener('pointerdown',()=>{main.dataset.hold='1';});
+ objects.forEach((ob,i)=>{const idx=objects.length-1-i;const item=document.createElement('button');
+  item.className='layer-item'+(selObj===idx?' selected':'');item.textContent='PNG layer '+(idx+1);
+  item.dataset.obj=String(idx);host.appendChild(item);
+  item.onclick=()=>{if(!item.dataset.dragged){selObj=idx;renderLayerStack();}};
+  let timer=null,dragging=false;
+  item.addEventListener('pointerdown',e=>{dragging=false;item.dataset.dragged='';timer=setTimeout(()=>{dragging=true;item.classList.add('dragging');selObj=idx;},380);});
+  item.addEventListener('pointermove',e=>{if(timer&&!dragging&&Math.abs(e.movementY)>8){clearTimeout(timer);timer=null;}});
+  item.addEventListener('pointerup',()=>{if(timer)clearTimeout(timer);timer=null;if(dragging){item.classList.remove('dragging');item.dataset.dragged='1';renderLayerStack();}});
+  item.addEventListener('pointercancel',()=>{if(timer)clearTimeout(timer);timer=null;});
+ });
+}
+renderLayerStack();
 function guessMotion(n){n=(n||'').toLowerCase();
   if(/car|truck|bike|bus|taxi|train|plane|rocket/.test(n))return'Drive';
   if(/walk|man|woman|girl|boy|human|person|people|kid/.test(n))return'Walk';
@@ -443,6 +476,7 @@ function doReset(){snap();colors=[190,285];selColor=0;drawPals();
   $('sSwy').value=0;$('sSpd').value=14;$('sBri').value=100;$('sCon').value=100;$('sSat').value=100;
   $('sHue').value=0;$('sDim').value=25;$('sSplit').value=100;$('sBgb').value=0;$('txtMask').value=txt;
   $('sMsc').value=100;drawMixers();}
+$('dockUndo').onclick=doUndo;$('dockRedo').onclick=doRedo;$('dockReset').onclick=doReset;
 
 function pos(e){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
 function hitObj(p){for(let i=objects.length-1;i>=0;i--){const b=objects[i],w=b.img.width*b.sc,h=b.img.height*b.sc;
