@@ -1249,8 +1249,13 @@ function activeTarget(){
  return null;
 }
 function setSectionForTarget(type){
- const sec=type==='object'||type==='templateImage'||type==='logo'?document.getElementById('duplicateObject')?.closest('.sec'):type==='background'?Array.from(document.querySelectorAll('#bar>.sec')).find(q=>q.dataset.workSection?.includes('background')):Array.from(document.querySelectorAll('#bar>.sec')).find(q=>q.dataset.workSection?.includes('media'));
- if(sec){document.querySelectorAll('#bar>.sec').forEach(q=>q.classList.toggle('is-open',q===sec));activeWorkSection=sec.dataset.workSection||activeWorkSection;}
+ const sections=Array.from(document.querySelectorAll('#bar>.sec'));
+ const sec=type==='object'||type==='templateImage'||type==='logo'
+  ?document.getElementById('duplicateObject')?.closest('.sec')
+  :type==='background'
+   ?sections.find(q=>(q.querySelector('h4')?.textContent||'').toLowerCase().includes('background'))
+   :sections.find(q=>(q.querySelector('h4')?.textContent||'').toLowerCase()==='media');
+ if(sec){sections.forEach(q=>q.classList.toggle('is-open',q===sec));activeWorkSection=type==='background'?'background':type==='media'?'media':(sec.querySelector('h4')?.textContent||'logo').toLowerCase();}
 }
 function renderScreenHandles(){
  const t=screenEditMode?activeTarget():null;
