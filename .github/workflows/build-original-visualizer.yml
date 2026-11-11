@@ -38,6 +38,8 @@ jobs:
           print("Social ratio controls and script blocks verified")
           PY
           node --check /tmp/viso-original.js
+          node --check app/src/main/assets/logo-effects.js
+          node --check app/src/main/assets/media-effects.js
       - name: Build APK
         run: |
           chmod +x ./gradlew
