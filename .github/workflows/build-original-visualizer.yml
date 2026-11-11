@@ -35,7 +35,22 @@ jobs:
           scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, re.S)
           assert scripts, "No JavaScript found"
           Path("/tmp/viso-original.js").write_text("\n".join(scripts), encoding="utf-8")
-          print("Social ratio controls and script blocks verified")
+          required = [
+              "function drawCornerBrandMarks(ctx)",
+              "function drawCanvasTimer(ctx)",
+              "drawCornerBrandMarks(x);",
+              "drawCanvasTimer(x);",
+              "logoBlendMode",
+              "logoBlendOpacity",
+              "logoBlendEnabled",
+              "logoRemoveBg",
+              "logoBgTolerance",
+              "mediaBlendMode",
+              "mediaBlendOpacity",
+          ]
+          missing = [item for item in required if item not in html]
+          assert not missing, "Required logo/timer/media features missing: " + ", ".join(missing)
+          print("Social ratio, logo BG/blend isolation, corner branding, timer render calls and script blocks verified")
           PY
           node --check /tmp/viso-original.js
           node --check app/src/main/assets/logo-effects.js
