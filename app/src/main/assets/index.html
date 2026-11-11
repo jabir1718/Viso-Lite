@@ -1519,7 +1519,7 @@ function drawBeatLogo(ctx,dt,b){
   if(hasImage){const iw=logoImg.naturalWidth||logoImg.width,ih=logoImg.naturalHeight||logoImg.height,fit=Math.min(size*.82/iw,size*.82/ih),dw=iw*fit,dh=ih*fit;
     const cache=getLogoShadowCache(),sm=logoShadowMetrics;
     if(cache&&sm){ctx.save();ctx.globalAlpha=.5;ctx.shadowBlur=0;ctx.drawImage(cache,-dw/2-dw*sm.pad/sm.w,-dh/2-dh*sm.pad/sm.h,dw*(1+2*sm.pad/sm.w),dh*(1+2*sm.pad/sm.h));ctx.restore();}
-    ctx.save();ctx.beginPath();ctx.arc(0,0,r*.78,0,Math.PI*2);ctx.clip();ctx.drawImage(logoImg,-dw/2,-dh/2,dw,dh);ctx.restore();
+    ctx.save();ctx.beginPath();ctx.arc(0,0,r*.78,0,Math.PI*2);ctx.clip();ctx.globalCompositeOperation=logoScreenBlend?'screen':'source-over';ctx.drawImage(logoImg,-dw/2,-dh/2,dw,dh);ctx.restore();
   }else{ctx.shadowBlur+=12;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 '+Math.round(size*.72)+'px "Apple Color Emoji","Noto Color Emoji",system-ui';ctx.fillStyle='#fff';ctx.fillText(logoEmoji,0,0);}
   ctx.restore();ctx.globalAlpha=1;ctx.shadowBlur=0;
 }
