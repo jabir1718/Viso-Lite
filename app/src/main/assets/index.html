@@ -665,6 +665,7 @@ input[type=text],#customW,#customH{
       <div class="row"><label style="flex:1"><span>Template blend</span><select id="logoTemplateBlendMode"><option value="source-over">Normal</option><option value="screen">Screen</option><option value="lighten">Lighten</option><option value="lighter">Add / Glow</option><option value="multiply">Multiply</option><option value="overlay">Overlay</option><option value="soft-light">Soft Light</option></select></label></div>
       <label><span>Image opacity</span><input id="logoTemplateImageOpacity" type="range" min="0" max="100" value="100"></label>
       <label><span>Image size</span><input id="logoTemplateImageSize" type="range" min="20" max="250" value="100"></label>
+      <div class="row"><button id="logoTemplateImageReset">↺ Reset image position</button></div>
       <div class="row"><strong style="font-size:10px;color:#aeeaff">CHOOSE A BACKGROUND DESIGN</strong></div>
       <div class="tpl-grid" id="logoTemplateGrid">
         <button class="tpl-card on" data-logo-template="neon">💚 Neon <small>Electric glow waves</small></button><button class="tpl-card" data-logo-template="halloween">🔥 Halloween <small>Fire + dark sparks</small></button>
@@ -768,7 +769,7 @@ $('applyCustom').onclick=()=>{const w=+$('customW').value,h=+$('customH').value;
 updateBitrate();
 
 let img=null,bgImg=null,bgUseVid=false,bgViz=false,maskDirty=true;
-let activeWorkSection='media',logoTemplateImg=null,logoTemplateOriginalImg=null,logoTemplateBlendMode='source-over',logoTemplateImageOpacity=100,logoTemplateImageSize=100;
+let activeWorkSection='media',logoTemplateImg=null,logoTemplateOriginalImg=null,logoTemplateBlendMode='source-over',logoTemplateImageOpacity=100,logoTemplateImageSize=100,logoTemplateImageX=0,logoTemplateImageY=0,logoTemplateImageRotation=0;
 let bgX=0,bgY=0,bgSc=1,bgRot=0;
 let audio=null,ctxA=null,an=null,buf=null,streamDest=null;
 let pulse=0,pow=140,cut=140,fea=12,pho=14,dep=70,trla=28,shk=45,pnc=40,cyc=18,dirG=0;
@@ -1087,7 +1088,7 @@ function removeEdgeBackground(source,tolerance){
 }
 function drawLogoTemplateImage(ctx){
  if(!logoTemplateOn||!logoTemplateImg)return;const iw=logoTemplateImg.width,ih=logoTemplateImg.height,fit=Math.min(logoSize*.82/iw,logoSize*.82/ih)*logoTemplateImageSize/100;
- ctx.save();ctx.translate(cx+logoX,cy+logoY);ctx.rotate(logoRotation);ctx.globalAlpha=logoOpacity/100*logoTemplateImageOpacity/100;ctx.globalCompositeOperation=logoTemplateBlendMode;
+ ctx.save();ctx.translate(cx+logoTemplateImageX,cy+logoTemplateImageY);ctx.rotate(logoTemplateImageRotation);ctx.globalAlpha=logoOpacity/100*logoTemplateImageOpacity/100;ctx.globalCompositeOperation=logoTemplateBlendMode;
  ctx.shadowColor=logoTemplateColorMode==='auto'?logoTemplateAutoColor:logoTemplateManualColor;ctx.shadowBlur=10+logoTemplateEnergy*25;ctx.drawImage(logoTemplateImg,-iw*fit/2,-ih*fit/2,iw*fit,ih*fit);ctx.restore();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
 }
 $('logoTemplateUpload').onclick=()=>$('fTemplateImage').click();
@@ -1097,6 +1098,7 @@ $('logoTemplateRestore').onclick=()=>{logoTemplateImg=logoTemplateOriginalImg;$(
 $('logoTemplateBlendMode').onchange=e=>logoTemplateBlendMode=e.target.value;
 $('logoTemplateImageOpacity').oninput=e=>logoTemplateImageOpacity=+e.target.value;
 $('logoTemplateImageSize').oninput=e=>logoTemplateImageSize=+e.target.value;
+$('logoTemplateImageReset').onclick=()=>{logoTemplateImageX=0;logoTemplateImageY=0;logoTemplateImageRotation=0;logoTemplateImageSize=100;$('logoTemplateImageSize').value=100;};
 $('objectRemoveBg').onclick=()=>{const ob=selectedObject();if(!ob){$('objectStatus').textContent='Select an uploaded PNG/logo first.';return;}try{ob.originalImg=ob.originalImg||ob.img;ob.img=removeEdgeBackground(ob.originalImg,Math.max(10,+$('logoBgTolerance').value));$('objectStatus').textContent='Selected PNG background removed; original saved.';}catch(err){$('objectStatus').textContent='Cutout failed: '+err.message;}};
 $('objectRestoreBg').onclick=()=>{const ob=selectedObject();if(ob&&ob.originalImg){ob.img=ob.originalImg;$('objectStatus').textContent='Selected PNG restored.';}};
 $('mediaObjectRemoveBg').onclick=()=>{const ob=selectedObject();if(!ob){$('mediaPhotoStatus').textContent='Select a PNG layer first (tap it on preview).';return;}try{ob.originalImg=ob.originalImg||ob.img;ob.img=removeEdgeBackground(ob.originalImg,Math.max(10,+$('logoBgTolerance').value));$('mediaPhotoStatus').textContent='Selected PNG background removed; original saved.';}catch(err){$('mediaPhotoStatus').textContent='PNG cutout failed: '+err.message;}};
@@ -1228,25 +1230,29 @@ $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
 
 function pos(e){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
 function hitObj(p){for(let i=objects.length-1;i>=0;i--){const b=objects[i],w=b.img.width*b.sc,h=b.img.height*b.sc;if(p.x>b.x-w/2&&p.x<b.x+w/2&&p.y>b.y-h/2&&p.y<b.y+h/2)return i;}return -1;}
+function hitTemplateImage(p){if(!logoTemplateImg)return false;const iw=logoTemplateImg.width,ih=logoTemplateImg.height,fit=Math.min(logoSize*.82/iw,logoSize*.82/ih)*logoTemplateImageSize/100,w=iw*fit,h=ih*fit;return Math.abs(p.x-(cx+logoTemplateImageX))<w*.55&&Math.abs(p.y-(cy+logoTemplateImageY))<h*.55;}
 const ptr=new Map();let start=null;
 function down(e){e.preventDefault();c.setPointerCapture(e.pointerId);const p=pos(e);ptr.set(e.pointerId,p);
  if(ptr.size===1){const canSelect=activeWorkSection.includes('media')||activeWorkSection.includes('logo');selObj=canSelect?hitObj(p):-1;if(selObj>=0)syncSelectedObjectControls();
   if(selObj>=0){const b=objects[selObj];start={m:'object',x:p.x,y:p.y,ox:b.x,oy:b.y,sc:b.sc,rot:b.rot};}
+  else if(activeWorkSection.includes('logo')&&hitTemplateImage(p))start={m:'templateImage',x:p.x,y:p.y,x0:logoTemplateImageX,y0:logoTemplateImageY,sc:logoTemplateImageSize,rot:logoTemplateImageRotation};
   else if(activeWorkSection.includes('background'))start={m:'background',x:p.x,y:p.y,x0:bgX,y0:bgY,sc:bgSc,rot:bgRot};
   else if(activeWorkSection.includes('logo'))start={m:'logo',x:p.x,y:p.y,x0:logoX,y0:logoY,sc:logoSize,rot:logoRotation};
   else if(activeWorkSection.includes('media'))start={m:'media',x:p.x,y:p.y,x0:ix,y0:iy,sc:isc,rot:irot};
   else start={m:'visualizer',x:p.x,y:p.y,x0:ix,y0:iy,sc:isc,rot:irot};}
- if(ptr.size===2){const a=[...ptr.values()],b=selObj>=0?objects[selObj]:null,m=b?'object':start&&start.m==='background'?'background':start&&start.m==='logo'?'logo':start&&start.m==='media'?'media':'visualizer';
-  start={m:m+'2',d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),ang:Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x),sc:b?b.sc:m==='background'?bgSc:m==='logo'?logoSize:isc,rot:b?b.rot:m==='background'?bgRot:m==='logo'?logoRotation:irot,x0:m==='background'?bgX:m==='logo'?logoX:ix,y0:m==='background'?bgY:m==='logo'?logoY:iy};}}
+ if(ptr.size===2){const a=[...ptr.values()],b=selObj>=0?objects[selObj]:null,m=b?'object':start&&start.m==='templateImage'?'templateImage':start&&start.m==='background'?'background':start&&start.m==='logo'?'logo':start&&start.m==='media'?'media':'visualizer';
+  start={m:m+'2',d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),ang:Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x),sc:b?b.sc:m==='background'?bgSc:m==='logo'?logoSize:m==='templateImage'?logoTemplateImageSize:isc,rot:b?b.rot:m==='background'?bgRot:m==='logo'?logoRotation:m==='templateImage'?logoTemplateImageRotation:irot,x0:m==='background'?bgX:m==='logo'?logoX:m==='templateImage'?logoTemplateImageX:ix,y0:m==='background'?bgY:m==='logo'?logoY:m==='templateImage'?logoTemplateImageY:iy};}}
 function move(e){if(!ptr.has(e.pointerId)||!start)return;e.preventDefault();const p=pos(e);ptr.set(e.pointerId,p);const a=[...ptr.values()],m=start.m.replace(/2$/,''),b=selObj>=0?objects[selObj]:null;
  if(ptr.size===1){const dx=a[0].x-start.x,dy=a[0].y-start.y;
   if(m==='object'&&b){b.x=start.ox+dx;b.y=start.oy+dy;}
   else if(m==='background'){bgX=start.x0+dx;bgY=start.y0+dy;}
+  else if(m==='templateImage'){logoTemplateImageX=start.x0+dx;logoTemplateImageY=start.y0+dy;}
   else if(m==='logo'){logoX=start.x0+dx;logoY=start.y0+dy;$('logoX').value=logoX;$('logoY').value=logoY;}
   else{ix=start.x0+dx;iy=start.y0+dy;}}
  else if(ptr.size===2){const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),ang=Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x),k=Math.max(.08,Math.min(6,d/Math.max(1,start.d)));
   if(m==='object'&&b){b.sc=Math.max(.03,Math.min(5,start.sc*k));b.rot=start.rot+(ang-start.ang);}
   else if(m==='background'){bgSc=Math.max(.15,Math.min(6,start.sc*k));bgRot=start.rot+(ang-start.ang);}
+  else if(m==='templateImage'){logoTemplateImageSize=Math.max(20,Math.min(250,start.sc*k));logoTemplateImageRotation=start.rot+(ang-start.ang);$('logoTemplateImageSize').value=logoTemplateImageSize;}
   else if(m==='logo'){logoSize=Math.max(40,Math.min(700,start.sc*k));logoRotation=start.rot+(ang-start.ang);$('logoSize').value=logoSize;$('logoRotation').value=logoRotation*180/Math.PI;}
   else{isc=Math.max(.15,Math.min(5,start.sc*k));irot=start.rot+(ang-start.ang);}}}
 function up(e){ptr.delete(e.pointerId);if(!ptr.size){start=null;snap();if(selObj>=0)syncSelectedObjectControls();}}
