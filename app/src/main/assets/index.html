@@ -443,6 +443,20 @@ input[type=text],#customW,#customH{
 #mediaPhotoTools{margin-top:9px;padding:10px;border:1px solid #8bdcff66;border-radius:12px;background:linear-gradient(145deg,#142c48,#0c172a);box-shadow:0 2px 8px #0008 inset}
 #mediaPhotoTools label span{width:112px}
 #mediaPhotoTools select{min-width:0;flex:1;background:#142943;color:#fff;border:1px solid #8bdcff66;border-radius:8px;padding:8px}
+
+/* Compact tool accordion: keeps every original control in its own work section. */
+#bar>.sec{gap:8px;padding:9px 10px;border-radius:14px}
+#bar>.sec>h4{cursor:pointer;user-select:none;min-height:25px}
+#bar>.sec>h4:after{content:'＋';margin-left:auto;font-size:14px;color:#8feaff}
+#bar>.sec.is-open>h4:after{content:'－'}
+#bar>.sec>.viso-section-body{display:flex;flex-direction:column;gap:8px;min-width:0}
+#bar>.sec:not(.is-open)>.viso-section-body{display:none}
+#mediaPhotoTools{padding:8px 9px;gap:7px}
+#logoBlendMode,#mediaBlendMode{min-width:0;flex:1;background:#142943;color:#fff;border:1px solid #8bdcff66;border-radius:8px;padding:7px}
+#beatLogoPanel .tpl-grid{gap:7px}
+#beatLogoPanel .tpl-card{min-height:64px;padding:8px;font-size:10px}
+#beatLogoPanel label span{width:104px}
+@media(max-width:420px){#bar>.sec{padding:8px}#beatLogoPanel label span{width:94px}}
 </style>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
 <div id="bar">
@@ -477,6 +491,9 @@ input[type=text],#customW,#customH{
       <button id="applyCustom" class="chip">Apply size</button>
     </div>
     <div id="ratioStatus" class="status">Canvas 1080 × 1920 · 9:16</div>
+    <div class="row"><strong style="font-size:10px;color:#aeeaff">VIDEO TIMER · INSIDE THE CANVAS</strong></div>
+    <div class="row"><button id="canvasTimerToggle" class="on">Timer ON</button><button id="canvasTimerStyle" class="chip">Style · Clean</button></div>
+    <label><span>Timer size</span><input id="canvasTimerSize" type="range" min="50" max="160" value="100"></label>
   </div>
   <div class="sec"><h4>History</h4>
     <div class="row"><button id="bUndo">⟲ Undo</button><button id="bRedo">Redo ⟳</button><button id="bReset">Reset all</button></div>
@@ -568,6 +585,10 @@ input[type=text],#customW,#customH{
       <button id="logoRestoreOriginal">↩ Restore Original</button>
     </div>
     <label><span>Background removal strength</span><input id="logoBgTolerance" type="range" min="10" max="120" value="48"></label>
+    <div class="row"><strong style="font-size:10px;color:#aeeaff">CORNER BRANDING · SAME LOGO, SEPARATE FROM CENTER</strong></div>
+    <div class="row"><button id="logoCornerToggle">Corner logos OFF</button></div>
+    <label><span>Corner logo size</span><input id="logoCornerSize" type="range" min="3" max="14" value="7"></label>
+    <label><span>Corner opacity</span><input id="logoCornerOpacity" type="range" min="10" max="100" value="72"></label>
     <div class="status">Transparent PNG alpha is preserved automatically. Auto cutout works best with a plain / single-colour background.</div>
     <div class="row" id="logoEmojiChoices">
       <button type="button" data-logo-emoji="🔥">🔥</button>
@@ -642,7 +663,9 @@ input[type=text],#customW,#customH{
       <label><span>Template size</span><input id="logoTemplateSize" type="range" min="60" max="220" value="125"></label>
       <label><span>Animation speed</span><input id="logoTemplateSpeed" type="range" min="0" max="200" value="100"></label>
       <label><span>Audio reaction</span><input id="logoTemplateBeat" type="range" min="0" max="200" value="100"></label>
-      <label><span>Screen Blend · Remove dark background</span><input id="logoScreenBlend" type="checkbox" checked></label>
+      <div class="row"><label style="flex:1"><span>Logo blend</span><select id="logoBlendMode"><option value="screen">Screen</option><option value="source-over">Normal</option><option value="lighten">Lighten</option><option value="lighter">Add / Glow</option><option value="multiply">Multiply</option><option value="overlay">Overlay</option><option value="soft-light">Soft Light</option></select></label></div>
+      <label><span>Logo blend opacity</span><input id="logoBlendOpacity" type="range" min="0" max="100" value="100"></label>
+      <div class="row"><button id="logoBlendToggle" class="on">Logo Blend ON</button></div>
       <div class="status" id="logoTemplateStatus">Template background appears only behind the logo. Other editor controls stay independent.</div>
     </div>
     <div class="status" id="logoStatus">Independent logo layer · Upload a PNG/photo or choose an emoji. Beat controls do not change the main visualizer.</div>
@@ -722,7 +745,9 @@ let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
 const objects=[];let selObj=-1;
 // Independent logo template renderer; does not touch visualizer, media, masks, objects or history.
-let logoTemplate='neon',logoTemplateOn=true,logoTemplateOpacity=82,logoTemplateSize=125,logoTemplateSpeed=100,logoTemplateBeat=100,logoScreenBlend=true,logoTemplateEnergy=0;
+let logoTemplate='neon',logoTemplateOn=true,logoTemplateOpacity=82,logoTemplateSize=125,logoTemplateSpeed=100,logoTemplateBeat=100,logoTemplateEnergy=0;
+let logoBlendMode='screen',logoBlendOpacity=100,logoBlendEnabled=true,logoCornerOn=false,logoCornerSize=7,logoCornerOpacity=72;
+let canvasTimerOn=true,canvasTimerStyle=0,canvasTimerSize=100;
 // Separate Beat Logo Studio state: deliberately isolated from main media, mask, objects and undo stack.
 let logoImg=null,logoOriginalImg=null,logoEmoji='💜',logoShape='circle',logoBeatPower=230,logoBounce=110,
     logoShake=28,logoGlow=85,logoSize=260,logoOpacity=100,logoX=0,logoY=0,
@@ -755,7 +780,15 @@ $('logoTemplateOpacity').oninput=e=>logoTemplateOpacity=+e.target.value;
 $('logoTemplateSize').oninput=e=>logoTemplateSize=+e.target.value;
 $('logoTemplateSpeed').oninput=e=>logoTemplateSpeed=+e.target.value;
 $('logoTemplateBeat').oninput=e=>logoTemplateBeat=+e.target.value;
-$('logoScreenBlend').onchange=e=>logoScreenBlend=!!e.target.checked;
+$('logoBlendMode').onchange=e=>logoBlendMode=e.target.value;
+$('logoBlendOpacity').oninput=e=>logoBlendOpacity=+e.target.value;
+$('logoBlendToggle').onclick=()=>{logoBlendEnabled=!logoBlendEnabled;$('logoBlendToggle').textContent=logoBlendEnabled?'Logo Blend ON':'Logo Blend OFF';$('logoBlendToggle').classList.toggle('on',logoBlendEnabled);};
+$('logoCornerToggle').onclick=()=>{logoCornerOn=!logoCornerOn;$('logoCornerToggle').textContent=logoCornerOn?'Corner logos ON':'Corner logos OFF';$('logoCornerToggle').classList.toggle('on',logoCornerOn);};
+$('logoCornerSize').oninput=e=>logoCornerSize=+e.target.value;
+$('logoCornerOpacity').oninput=e=>logoCornerOpacity=+e.target.value;
+$('canvasTimerToggle').onclick=()=>{canvasTimerOn=!canvasTimerOn;$('canvasTimerToggle').textContent=canvasTimerOn?'Timer ON':'Timer OFF';$('canvasTimerToggle').classList.toggle('on',canvasTimerOn);};
+$('canvasTimerStyle').onclick=()=>{canvasTimerStyle=(canvasTimerStyle+1)%3;$('canvasTimerStyle').textContent='Style · '+['Clean','Glow','Minimal'][canvasTimerStyle];};
+$('canvasTimerSize').oninput=e=>canvasTimerSize=+e.target.value;
 // Beat Logo Studio: its own upload, emoji, shape and audio-reactive controls.
 $('logoUpload').onclick=()=>$('fLogo').click();
 $('fLogo').addEventListener('change',e=>{
@@ -1534,9 +1567,31 @@ function drawBeatLogo(ctx,dt,b){
   if(hasImage){const iw=logoImg.naturalWidth||logoImg.width,ih=logoImg.naturalHeight||logoImg.height,fit=Math.min(size*.82/iw,size*.82/ih),dw=iw*fit,dh=ih*fit;
     const cache=getLogoShadowCache(),sm=logoShadowMetrics;
     if(cache&&sm){ctx.save();ctx.globalAlpha=.5;ctx.shadowBlur=0;ctx.drawImage(cache,-dw/2-dw*sm.pad/sm.w,-dh/2-dh*sm.pad/sm.h,dw*(1+2*sm.pad/sm.w),dh*(1+2*sm.pad/sm.h));ctx.restore();}
-    ctx.save();ctx.beginPath();ctx.arc(0,0,r*.78,0,Math.PI*2);ctx.clip();ctx.globalCompositeOperation=logoScreenBlend?'screen':'source-over';ctx.drawImage(logoImg,-dw/2,-dh/2,dw,dh);ctx.restore();
+    ctx.save();ctx.beginPath();ctx.arc(0,0,r*.78,0,Math.PI*2);ctx.clip();ctx.globalCompositeOperation=logoBlendEnabled?logoBlendMode:'source-over';ctx.globalAlpha=logoOpacity/100*(logoBlendEnabled?logoBlendOpacity/100:1);ctx.drawImage(logoImg,-dw/2,-dh/2,dw,dh);ctx.restore();
   }else{ctx.shadowBlur+=12;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 '+Math.round(size*.72)+'px "Apple Color Emoji","Noto Color Emoji",system-ui';ctx.fillStyle='#fff';ctx.fillText(logoEmoji,0,0);}
   ctx.restore();ctx.globalAlpha=1;ctx.shadowBlur=0;
+}
+function drawCornerBrandMarks(ctx){
+  if(!logoCornerOn||(!logoImg&&!logoEmoji))return;
+  const size=Math.max(28,Math.min(W,H)*(logoCornerSize/100)),pad=Math.max(18,Math.min(W,H)*.035);
+  const pts=[[pad+size/2,pad+size/2],[W-pad-size/2,pad+size/2],[pad+size/2,H-pad-size/2],[W-pad-size/2,H-pad-size/2]];
+  ctx.save();ctx.globalAlpha=logoCornerOpacity/100;ctx.globalCompositeOperation='source-over';
+  for(const [px,py] of pts){ctx.save();ctx.translate(px,py);
+    if(logoImg&&logoImg.complete&&logoImg.naturalWidth){const iw=logoImg.naturalWidth,ih=logoImg.naturalHeight,fit=Math.min(size/iw,size/ih);ctx.drawImage(logoImg,-iw*fit/2,-ih*fit/2,iw*fit,ih*fit);}
+    else{ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 '+Math.round(size*.78)+'px system-ui';ctx.fillStyle='#fff';ctx.fillText(logoEmoji,0,0);}
+    ctx.restore();
+  }
+  ctx.restore();
+}
+function drawCanvasTimer(ctx){
+  if(!canvasTimerOn||!audio)return;
+  const seconds=Math.max(0,Math.floor(audio.currentTime||0)),mm=String(Math.floor(seconds/60)).padStart(2,'0'),ss=String(seconds%60).padStart(2,'0'),label=mm+':'+ss;
+  const fs=Math.max(20,Math.min(72,H*.022*(canvasTimerSize/100))),y=H*.91;
+  ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='800 '+fs+'px system-ui';
+  if(canvasTimerStyle===0){ctx.fillStyle='rgba(3,10,20,.72)';const w=fs*3.5,h=fs*1.55;ctx.beginPath();ctx.roundRect(W/2-w/2,y-h/2,w,h,h/2);ctx.fill();ctx.fillStyle='#fff';}
+  else if(canvasTimerStyle===1){ctx.fillStyle='#dff8ff';ctx.shadowColor='#45dfff';ctx.shadowBlur=18;}
+  else{ctx.fillStyle='#d7e8f5';ctx.globalAlpha=.78;}
+  ctx.fillText(label,W/2,y);ctx.restore();
 }
 function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
   ctx.save();ctx.translate(ob.x,ob.y);ctx.rotate(ob.rot);const s=ob.sc*(1+pulse*.12);ctx.scale(s,s);
@@ -1619,6 +1674,8 @@ function frame(t){
   window.VisoLogoEffects.drawTemplate(x,{logoTemplate,logoTemplateOn,logoTemplateSpeed,logoPulse:logoTemplateEnergy,logoTemplateBeat,logoPhase,logoSize,logoTemplateSize,logoTemplateOpacity,cx,cy,logoX,logoY,logoLift,logoLiftHeight});
   drawBeatLogoBack(x,b,dt);
   drawBeatLogo(x,dt,b);
+  drawCornerBrandMarks(x);
+  drawCanvasTimer(x);
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
     x.drawImage(paintLayer(.7,false),0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;}
   bx.clearRect(0,0,bl.width,bl.height);
@@ -1631,4 +1688,17 @@ function frame(t){
     x.fillText('Photo / Video / PNG chuno',cx,cy);}
 }
 requestAnimationFrame(frame);
+
+// Compact, independent work areas: collapse only top-level tool sections; no controls or handlers are removed.
+document.querySelectorAll('#bar>.sec').forEach((sec,i)=>{
+  const heading=sec.querySelector(':scope > h4');if(!heading)return;
+  const body=document.createElement('div');body.className='viso-section-body';
+  while(heading.nextSibling)body.appendChild(heading.nextSibling);
+  sec.appendChild(body);
+  if(i===0)sec.classList.add('is-open');
+  heading.setAttribute('role','button');heading.setAttribute('tabindex','0');
+  const toggle=()=>sec.classList.toggle('is-open');
+  heading.addEventListener('click',toggle);
+  heading.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+});
 </script>
