@@ -590,20 +590,10 @@ input[type=text],#customW,#customH{
     <label><span>3D screen push</span><input id="logoDepthPush" type="range" min="0" max="200" value="100"></label>
     <label><span>Launch power</span><input id="logoLaunchPower" type="range" min="0" max="300" value="220"></label>
     <label><span>Lift height</span><input id="logoLiftHeight" type="range" min="0" max="200" value="90"></label>
-    <div class="row"><strong style="font-size:10px;color:#aeeaff">BACK-SIDE BEAT SPECTRUM</strong></div>
-    <div class="row" id="logoBackStyles">
-      <button type="button" data-logo-back="bars" class="on">Bars halo</button><button type="button" data-logo-back="burst">Radial burst</button>
-      <button type="button" data-logo-back="rings">Shock rings</button><button type="button" data-logo-back="crown">Audio crown</button>
-      <button type="button" data-logo-back="tunnel">3D tunnel</button><button type="button" data-logo-back="vortex">Vortex</button>
-      <button type="button" data-logo-back="wave">Wave orbit</button><button type="button" data-logo-back="heart">Heart meter</button>
-      <button type="button" data-logo-back="clock">Timer pulse</button><button type="button" data-logo-back="meter">EQ meter</button>
-      <button type="button" data-logo-back="orbit">Orbit dots</button><button type="button" data-logo-back="needles">Beat needles</button>
-      <button type="button" data-logo-back="starburst">Star burst</button><button type="button" data-logo-back="off">Off</button>
-    </div>
-    <label><span>Back beat power</span><input id="logoBackPower" type="range" min="0" max="300" value="180"></label>
-    <label><span>Spectrum count</span><input id="logoBackCount" type="range" min="12" max="144" value="72"></label>
-    <label><span>Spread distance</span><input id="logoBackSpread" type="range" min="10" max="260" value="130"></label>
-    <label><span>Spectrum opacity</span><input id="logoBackOpacity" type="range" min="0" max="100" value="88"></label>
+    <div class="row"><strong style="font-size:10px;color:#aeeaff">LOGO SHADOW + SINGLE BEAT RING</strong></div>
+    <div class="status">Logo ke peeche 30px soft shadow · 50% opacity · har beat par sirf ek halki ring</div>
+    <label><span>Beat ring strength</span><input id="logoBackPower" type="range" min="0" max="150" value="55"></label>
+    <label><span>Ring visibility</span><input id="logoBackOpacity" type="range" min="0" max="100" value="55"></label>
     <label><span>Beat power</span><input id="logoBeatPower" type="range" min="0" max="300" value="230"></label>
     <label><span>Beat bounce</span><input id="logoBounce" type="range" min="0" max="200" value="110"></label>
     <label><span>Beat shake</span><input id="logoShake" type="range" min="0" max="100" value="28"></label>
@@ -687,14 +677,14 @@ let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
 const objects=[];let selObj=-1;
 // Separate Beat Logo Studio state: deliberately isolated from main media, mask, objects and undo stack.
-let logoImg=null,logoOriginalImg=null,logoEmoji='💜',logoShape='none',logoBeatPower=230,logoBounce=110,
+let logoImg=null,logoOriginalImg=null,logoEmoji='💜',logoShape='circle',logoBeatPower=230,logoBounce=110,
     logoShake=28,logoGlow=85,logoSize=260,logoOpacity=100,logoX=0,logoY=0,
     logoRotation=0,logoPulse=0,logoPhase=0,logoImpactStyle='drum',logoLaunchPower=190,
     logoLiftHeight=90,logoBackStyle='bars',logoBackPower=180,logoBackCount=72,
     logoBackSpread=130,logoBackOpacity=88,logoEnergyAvg=0,logoPrevEnergy=0,
     logoHit=0,logoLift=0,logoVelocity=0,logoSquash=0,
     logoAudioRange='all',logoSensitivity=125,logoSustain=78,logoKickBoost=145,
-    logoDepthPush=100,logoLastHit=0,logoDrive=0,logoFlux=0,logoPrevBins=null;
+    logoDepthPush=100,logoLastHit=0,logoDrive=0,logoFlux=0,logoPrevBins=null,logoAnalyser=null,logoBuffer=null,logoMute=null,logoShadowCanvas=null,logoShadowSource=null,logoShadowMetrics=null;
 
 const undo=[],redo=[];
 
@@ -715,11 +705,11 @@ $('logoUpload').onclick=()=>$('fLogo').click();
 $('fLogo').addEventListener('change',e=>{
   const file=e.target.files&&e.target.files[0];if(!file)return;
   const url=URL.createObjectURL(file),im=new Image();
-  im.onload=()=>{if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);logoImg=im;logoOriginalImg=im;logoImg._url=url;logoEmoji='';$('logoEmoji').value='';$('logoStatus').textContent=(file.type==='image/png'?'PNG loaded · existing transparency preserved · ':'Image loaded · ')+file.name;};
+  im.onload=()=>{if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);logoImg=im;logoOriginalImg=im;logoShadowCanvas=null;logoShadowSource=null;logoImg._url=url;logoEmoji='';$('logoEmoji').value='';$('logoStatus').textContent=(file.type==='image/png'?'PNG loaded · existing transparency preserved · ':'Image loaded · ')+file.name;};
   im.onerror=()=>{URL.revokeObjectURL(url);$('logoStatus').textContent='Could not load this image. Try PNG or JPG.';};
   im.src=url;e.target.value='';
 });
-$('logoRestoreOriginal').onclick=()=>{if(logoOriginalImg){logoImg=logoOriginalImg;$('logoStatus').textContent='Original image restored.';}};
+$('logoRestoreOriginal').onclick=()=>{if(logoOriginalImg){logoImg=logoOriginalImg;logoShadowCanvas=null;logoShadowSource=null;$('logoStatus').textContent='Original image restored.';}};
 $('logoRemoveBg').onclick=()=>{
   if(!logoOriginalImg){$('logoStatus').textContent='Upload a photo or logo first.';return;}
   try{
@@ -741,7 +731,7 @@ $('logoRemoveBg').onclick=()=>{
     while(head<tail){const p=q[head++],x0=p%w,y0=(p/w)|0;if(x0)add(p-1);if(x0<w-1)add(p+1);if(y0)add(p-w);if(y0<h-1)add(p+w);}
     let removed=0;for(let p=0;p<n;p++)if(seen[p]){d[p*4+3]=0;removed++;}
     cc.putImageData(im,0,0);
-    const cut=new Image();cut.onload=()=>{logoImg=cut;$('logoStatus').textContent='Background cutout ready · '+removed.toLocaleString()+' background pixels cleared. Adjust strength and retry from original if needed.';};cut.src=cv.toDataURL('image/png');
+    const cut=new Image();cut.onload=()=>{logoImg=cut;logoShadowCanvas=null;logoShadowSource=null;$('logoStatus').textContent='Background cutout ready · '+removed.toLocaleString()+' background pixels cleared. Adjust strength and retry from original if needed.';};cut.src=cv.toDataURL('image/png');
   }catch(err){$('logoStatus').textContent='Auto cutout failed: '+err.message;}
 };
 $('logoClear').onclick=()=>{if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);logoImg=null;logoEmoji='';$('logoEmoji').value='';$('logoStatus').textContent='Logo cleared. Choose an emoji or upload another image.';};
@@ -759,12 +749,12 @@ document.querySelectorAll('[data-logo-shape]').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('[data-logo-shape]').forEach(q=>q.classList.toggle('on',q===b));
 });
 function logoBind(id,key){$(id).oninput=e=>{const v=+e.target.value;
-  if(key==='logoBeatPower')logoBeatPower=v;else if(key==='logoBounce')logoBounce=v;else if(key==='logoShake')logoShake=v;else if(key==='logoGlow')logoGlow=v;else if(key==='logoSize')logoSize=v;else if(key==='logoOpacity')logoOpacity=v;else if(key==='logoX')logoX=v;else if(key==='logoY')logoY=v;else if(key==='logoRotation')logoRotation=v;else if(key==='logoLaunchPower')logoLaunchPower=v;else if(key==='logoLiftHeight')logoLiftHeight=v;else if(key==='logoBackPower')logoBackPower=v;else if(key==='logoBackCount')logoBackCount=v;else if(key==='logoBackSpread')logoBackSpread=v;else if(key==='logoBackOpacity')logoBackOpacity=v;else if(key==='logoSensitivity')logoSensitivity=v;else if(key==='logoSustain')logoSustain=v;else if(key==='logoKickBoost')logoKickBoost=v;else if(key==='logoDepthPush')logoDepthPush=v;
+  if(key==='logoBeatPower')logoBeatPower=v;else if(key==='logoBounce')logoBounce=v;else if(key==='logoShake')logoShake=v;else if(key==='logoGlow')logoGlow=v;else if(key==='logoSize')logoSize=v;else if(key==='logoOpacity')logoOpacity=v;else if(key==='logoX')logoX=v;else if(key==='logoY')logoY=v;else if(key==='logoRotation')logoRotation=v;else if(key==='logoLaunchPower')logoLaunchPower=v;else if(key==='logoLiftHeight')logoLiftHeight=v;else if(key==='logoBackPower')logoBackPower=v;else if(key==='logoBackOpacity')logoBackOpacity=v;else if(key==='logoSensitivity')logoSensitivity=v;else if(key==='logoSustain')logoSustain=v;else if(key==='logoKickBoost')logoKickBoost=v;else if(key==='logoDepthPush')logoDepthPush=v;
 };}
 [['logoBeatPower','logoBeatPower'],['logoBounce','logoBounce'],['logoShake','logoShake'],['logoGlow','logoGlow'],['logoSize','logoSize'],['logoOpacity','logoOpacity'],['logoX','logoX'],['logoY','logoY'],['logoRotation','logoRotation'],['logoLaunchPower','logoLaunchPower'],['logoLiftHeight','logoLiftHeight'],['logoBackPower','logoBackPower'],['logoBackCount','logoBackCount'],['logoBackSpread','logoBackSpread'],['logoBackOpacity','logoBackOpacity'],['logoSensitivity','logoSensitivity'],['logoSustain','logoSustain'],['logoKickBoost','logoKickBoost'],['logoDepthPush','logoDepthPush']].forEach(a=>logoBind(a[0],a[1]));
 document.querySelectorAll('[data-logo-audio]').forEach(b=>b.onclick=()=>{logoAudioRange=b.dataset.logoAudio;document.querySelectorAll('[data-logo-audio]').forEach(q=>q.classList.toggle('on',q===b));});
 document.querySelectorAll('[data-logo-impact]').forEach(b=>b.onclick=()=>{logoImpactStyle=b.dataset.logoImpact;document.querySelectorAll('[data-logo-impact]').forEach(q=>q.classList.toggle('on',q===b));});
-document.querySelectorAll('[data-logo-back]').forEach(b=>b.onclick=()=>{logoBackStyle=b.dataset.logoBack;document.querySelectorAll('[data-logo-back]').forEach(q=>q.classList.toggle('on',q===b));});
+
 
 // BG removal operates on the active photo and main VISO canvas; no separate workspace.
 (()=>{
@@ -923,6 +913,9 @@ $('fA').onchange=e=>{const f=e.target.files[0];if(!f)return;
   const s=ctxA.createMediaElementSource(audio);
   an=ctxA.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.7;
   s.connect(an);an.connect(ctxA.destination);
+  logoAnalyser=ctxA.createAnalyser();logoAnalyser.fftSize=1024;logoAnalyser.smoothingTimeConstant=.85;
+  logoBuffer=new Uint8Array(logoAnalyser.frequencyBinCount);s.connect(logoAnalyser);
+  logoMute=ctxA.createGain();logoMute.gain.value=0;logoAnalyser.connect(logoMute);logoMute.connect(ctxA.destination);
   streamDest=ctxA.createMediaStreamDestination();an.connect(streamDest);
   buf=new Uint8Array(an.frequencyBinCount);playing=false;$('bP').textContent='Play';};
 $('bP').onclick=async()=>{if(!audio)return;
@@ -1365,31 +1358,32 @@ function stepObject(ob,b,dt){const bass=b[0],hi=b[5];ob.phase+=dt*(.002+hi*.02);
     ob.rot=Math.sin(ob.phase)*.12;if(ob.x<-w)ob.x=W;if(ob.x>W)ob.x=-w;
     if(ob.y<-h)ob.y=H;if(ob.y>H)ob.y=-h;}}
 function logoFrequencyRange(){
-  const rate=ctxA&&ctxA.sampleRate?ctxA.sampleRate:44100,fft=an&&an.fftSize?an.fftSize:2048,ny=rate/2;
+  const rate=ctxA&&ctxA.sampleRate?ctxA.sampleRate:44100,ny=rate/2;
   const ranges={all:[35,Math.min(14000,ny)],bass:[35,250],kick:[35,110],drums:[40,520],perc:[520,9000],vocal:[180,4200],melody:[250,7000],treble:[2500,Math.min(14000,ny)]};
-  const r=ranges[logoAudioRange]||ranges.all;return [Math.max(0,Math.floor(r[0]/ny*buf.length)),Math.min(buf.length-1,Math.ceil(r[1]/ny*buf.length))];
+  const r=ranges[logoAudioRange]||ranges.all;const n=logoBuffer&&logoBuffer.length?logoBuffer.length:512;return [Math.max(0,Math.floor(r[0]/ny*n)),Math.min(n-1,Math.ceil(r[1]/ny*n))];
 }
 function logoSpectrumValue(pos,total){
-  if(!buf||!buf.length)return 0;const [lo,hi]=logoFrequencyRange(),span=Math.max(1,hi-lo);
+  if(!logoBuffer||!logoBuffer.length)return 0;const [lo,hi]=logoFrequencyRange(),span=Math.max(1,hi-lo);
   const idx=Math.min(hi,lo+Math.floor(Math.max(0,Math.min(.999,pos/Math.max(1,total)))*span));
-  return buf[idx]/255;
+  return logoBuffer[idx]/255;
 }
 function updateBeatLogoMotion(dt,b){
-  const fs=Math.max(.35,Math.min(2.5,dt/16.67)),active=!!(playing&&an&&buf&&buf.length);
+  const fs=Math.max(.35,Math.min(2.5,dt/16.67)),active=!!(playing&&logoAnalyser&&logoBuffer&&logoBuffer.length);
   let energy=0,low=0,flux=0;
   if(active){
-    an.getByteFrequencyData(buf);
-    const [lo,hi]=logoFrequencyRange(),count=Math.max(1,hi-lo+1);
+    logoAnalyser.getByteFrequencyData(logoBuffer);
+    const [lo,hi]=logoFrequencyRange(),count=Math.max(1,hi-lo+1),stride=Math.max(1,Math.ceil(count/64));
     let sumSq=0,lowSum=0,positive=0;
-    if(!logoPrevBins||logoPrevBins.length!==buf.length)logoPrevBins=new Uint8Array(buf.length);
-    for(let i=lo;i<=hi;i++){
-      const v=buf[i]/255;sumSq+=v*v;
-      if(i<=Math.min(hi,lo+Math.max(3,Math.floor(count*.12))))lowSum+=v;
-      const rise=Math.max(0,buf[i]-logoPrevBins[i])/255;positive+=rise;
+    if(!logoPrevBins||logoPrevBins.length!==logoBuffer.length)logoPrevBins=new Uint8Array(logoBuffer.length);
+    let samples=0,lowSamples=0;const lowEnd=Math.min(hi,lo+Math.max(3,Math.floor(count*.12)));
+    for(let i=lo;i<=hi;i+=stride){
+      const v=logoBuffer[i]/255;sumSq+=v*v;samples++;
+      if(i<=lowEnd){lowSum+=v;lowSamples++;}
+      const rise=Math.max(0,logoBuffer[i]-logoPrevBins[i])/255;positive+=rise;
     }
-    energy=Math.sqrt(sumSq/count);low=lowSum/Math.max(1,Math.min(hi,lo+Math.max(3,Math.floor(count*.12))-lo+1));
-    flux=positive/Math.sqrt(count);
-    logoPrevBins.set(buf);
+    energy=Math.sqrt(sumSq/Math.max(1,samples));low=lowSum/Math.max(1,lowSamples);
+    flux=positive/Math.sqrt(Math.max(1,samples));
+    logoPrevBins.set(logoBuffer);
   }else{
     energy=0;low=0;flux=0;logoPrevBins=null;
   }
@@ -1427,51 +1421,26 @@ function updateBeatLogoMotion(dt,b){
   logoHit*=Math.pow(.84,fs);
 }
 function drawBeatLogoBack(ctx,b,dt){
-  if((!logoImg&&!logoEmoji)||logoBackStyle==='off'||logoBackPower<=0||logoBackOpacity<=0)return;
-  const px=cx+logoX,py=cy+logoY-logoLift*(logoLiftHeight/100),base=logoSize*.58,power=logoBackPower/100,alpha=logoBackOpacity/100,spread=logoBackSpread;
-  const count=Math.max(12,Math.min(144,Math.round(logoBackCount))),impact=logoHit,drive=Math.max(logoDrive,logoPulse*.65),push=logoKickBoost/100;
-  ctx.save();ctx.translate(px,py);ctx.globalCompositeOperation='lighter';ctx.lineCap='round';ctx.lineJoin='round';
-  if(logoBackStyle==='bars'||logoBackStyle==='burst'||logoBackStyle==='crown'){
-    for(let i=0;i<count;i++){const a=i/count*Math.PI*2-Math.PI/2;if(logoBackStyle==='crown'&&(a>Math.PI*.08&&a<Math.PI*.92))continue;
-      const fi=playing&&buf&&buf.length?Math.min(buf.length-1,Math.floor(i/count*buf.length*.48)):i%6;
-      const spectrum=playing&&buf&&buf.length?logoSpectrumValue(i,count):(b[i%6]||0),v=Math.max(.025,spectrum*.8,(b[i%6]||0)*.28,drive*.42);
-      const len=(5+v*spread*power)*(1+impact*.9+drive*.35),inner=base*(logoBackStyle==='crown'?.72:1),outer=inner+len,col=grad(i/Math.max(1,count-1));
-      ctx.strokeStyle=col;ctx.lineWidth=Math.max(2,logoSize*.009+v*5);ctx.globalAlpha=alpha*(.25+v*.72);ctx.shadowColor=col;ctx.shadowBlur=8+impact*22;
-      ctx.beginPath();ctx.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);ctx.lineTo(Math.cos(a)*outer,Math.sin(a)*outer);ctx.stroke();
-      if(logoBackStyle==='burst'&&i%3===0){ctx.globalAlpha=alpha*(.12+v*.45);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(Math.cos(a)*outer,Math.sin(a)*outer);ctx.lineTo(Math.cos(a)*(outer+spread*.22),Math.sin(a)*(outer+spread*.22));ctx.stroke();}
-    }
-  }else if(logoBackStyle==='rings'){
-    for(let i=0;i<5;i++){const rr=base*(.82+i*.18)+(1-impact)*i*13;ctx.beginPath();ctx.ellipse(0,0,rr*(1+impact*.16),rr*(.72+impact*.12),0,0,Math.PI*2);ctx.strokeStyle=grad(i/4);ctx.lineWidth=2+impact*8;ctx.globalAlpha=alpha*(.12+impact*.52)*(1-i*.12);ctx.shadowColor=grad(i/4);ctx.shadowBlur=18+impact*30;ctx.stroke();}
-  }else if(logoBackStyle==='tunnel'){
-    for(let k=0;k<9;k++){const z=(k+1)/9,rr=base*(.65+z*1.35)*(1+impact*.18);ctx.beginPath();for(let j=0;j<=6;j++){const a=j*Math.PI/3+logoPhase*.15+k*.06,xp=Math.cos(a)*rr,yp=Math.sin(a)*rr*.8;j?ctx.lineTo(xp,yp):ctx.moveTo(xp,yp);}ctx.closePath();ctx.strokeStyle=grad(z);ctx.lineWidth=1.5+impact*5;ctx.globalAlpha=alpha*(.08+impact*.36)*(1-z*.45);ctx.shadowColor=grad(z);ctx.shadowBlur=22;ctx.stroke();}
-  }else if(logoBackStyle==='vortex'){
-    for(let arm=0;arm<5;arm++){ctx.beginPath();ctx.strokeStyle=grad(arm/5);ctx.lineWidth=3+impact*9;ctx.globalAlpha=alpha*(.1+impact*.4);ctx.shadowColor=grad(arm/5);ctx.shadowBlur=24;for(let j=0;j<90;j++){const t=j/89,a=logoPhase*.5+arm*1.256+t*4.8,rr=base*(.35+t*1.4)*(1+impact*.2),xx=Math.cos(a)*rr,yy=Math.sin(a)*rr;j?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.stroke();}
-  }else if(logoBackStyle==='heart'){
-    const beat=1+drive*.28+impact*.24;ctx.save();ctx.scale(beat,beat);ctx.beginPath();
-    ctx.moveTo(0,base*.38);ctx.bezierCurveTo(-base*.12,base*.16,-base*.78,-base*.16,-base*.72,-base*.55);
-    ctx.bezierCurveTo(-base*.64,-base*1.02,-base*.12,-base*.95,0,-base*.58);
-    ctx.bezierCurveTo(base*.12,-base*.95,base*.64,-base*1.02,base*.72,-base*.55);
-    ctx.bezierCurveTo(base*.78,-base*.16,base*.12,base*.16,0,base*.38);
-    ctx.strokeStyle=grad(.7);ctx.lineWidth=3+impact*8;ctx.globalAlpha=alpha*(.3+drive*.5+impact*.2);ctx.shadowColor=grad(.6);ctx.shadowBlur=24+impact*30;ctx.stroke();ctx.restore();
-    ctx.beginPath();ctx.moveTo(-base*.95,0);ctx.lineTo(-base*.45,0);ctx.lineTo(-base*.28,-base*.12);ctx.lineTo(-base*.1,base*.16);ctx.lineTo(base*.08,-base*.3);ctx.lineTo(base*.24,base*.06);ctx.lineTo(base*.4,0);ctx.lineTo(base*.95,0);
-    ctx.strokeStyle=grad(.2);ctx.lineWidth=2+impact*4;ctx.globalAlpha=alpha*(.28+drive*.45);ctx.shadowBlur=16;ctx.stroke();
-  }else if(logoBackStyle==='clock'){
-    for(let ring=0;ring<4;ring++){const rr=base*(.7+ring*.17),phase=logoPhase*(.7+ring*.1);
-      ctx.beginPath();ctx.arc(0,0,rr,-Math.PI/2,-Math.PI/2+Math.PI*2*(.2+drive*.8));ctx.strokeStyle=grad(ring/3);ctx.lineWidth=3+impact*5;ctx.globalAlpha=alpha*(.25+drive*.5);ctx.shadowColor=grad(ring/3);ctx.shadowBlur=18+impact*24;ctx.stroke();}
-    for(let n=0;n<12;n++){const a=n*Math.PI/6-Math.PI/2,r1=base*.9,r2=base*(1.02+(n%3===0?.12:0));ctx.beginPath();ctx.moveTo(Math.cos(a)*r1,Math.sin(a)*r1);ctx.lineTo(Math.cos(a)*r2,Math.sin(a)*r2);ctx.strokeStyle=grad(n/12);ctx.lineWidth=n%3===0?4:2;ctx.globalAlpha=alpha*(.3+drive*.5);ctx.stroke();}
-  }else if(logoBackStyle==='meter'){
-    for(let i=0;i<count;i++){const a=i/count*Math.PI*2-Math.PI/2,v=playing&&buf&&buf.length?logoSpectrumValue(i,count):drive*.3;
-      const h=8+v*spread*power*(1+impact*.5),r=base*.82;ctx.strokeStyle=grad(i/count);ctx.lineWidth=Math.max(2,logoSize*.012);ctx.globalAlpha=alpha*(.25+v*.7);ctx.shadowColor=grad(i/count);ctx.shadowBlur=10+impact*15;ctx.beginPath();ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r);ctx.lineTo(Math.cos(a)*(r+h),Math.sin(a)*(r+h));ctx.stroke();}
-  }else if(logoBackStyle==='orbit'){
-    for(let i=0;i<Math.min(48,count);i++){const a=logoPhase*(.5+i%3*.15)+i/count*Math.PI*2,v=playing&&buf&&buf.length?logoSpectrumValue(i,count):drive*.3,r=base*(.95+v*.4+impact*.25),dot=2+v*7+impact*3;ctx.beginPath();ctx.arc(Math.cos(a)*r,Math.sin(a)*r,dot,0,Math.PI*2);ctx.fillStyle=grad(i/count);ctx.globalAlpha=alpha*(.25+v*.7);ctx.shadowColor=grad(i/count);ctx.shadowBlur=14;ctx.fill();}
-  }else if(logoBackStyle==='needles'){
-    for(let i=0;i<count;i++){const a=i/count*Math.PI*2-Math.PI/2,v=playing&&buf&&buf.length?logoSpectrumValue(i,count):drive*.3,r1=base*.78,r2=r1+spread*(.12+v*power/100);ctx.beginPath();ctx.moveTo(Math.cos(a)*r1,Math.sin(a)*r1);ctx.lineTo(Math.cos(a)*r2,Math.sin(a)*r2);ctx.strokeStyle=grad(i/count);ctx.lineWidth=1.5+v*5;ctx.globalAlpha=alpha*(.2+v*.7);ctx.shadowColor=grad(i/count);ctx.shadowBlur=12+impact*18;ctx.stroke();}
-  }else if(logoBackStyle==='starburst'){
-    for(let i=0;i<count;i++){const a=i/count*Math.PI*2-Math.PI/2,v=playing&&buf&&buf.length?logoSpectrumValue(i,count):drive*.3,r1=base*.72,r2=r1+spread*(.18+v*power/90+impact*.2);ctx.beginPath();ctx.moveTo(Math.cos(a)*r1,Math.sin(a)*r1);ctx.lineTo(Math.cos(a)*r2,Math.sin(a)*r2);ctx.strokeStyle=grad(i/count);ctx.lineWidth=2+v*4;ctx.globalAlpha=alpha*(.2+v*.65);ctx.shadowColor=grad(i/count);ctx.shadowBlur=18+impact*20;ctx.stroke();}
-  }else if(logoBackStyle==='wave'){
-    for(let ring=0;ring<4;ring++){const rr=base*(.8+ring*.22);ctx.beginPath();for(let i=0;i<=count;i++){const a=i/count*Math.PI*2,v=b[i%6]||0,r=rr+Math.sin(a*8+logoPhase*2+ring)*spread*.18*v+impact*spread*.18,xx=Math.cos(a)*r,yy=Math.sin(a)*r*.8;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.closePath();ctx.strokeStyle=grad(ring/4);ctx.lineWidth=2+impact*5;ctx.globalAlpha=alpha*(.16+impact*.4);ctx.shadowColor=grad(ring/4);ctx.shadowBlur=22;ctx.stroke();}
-  }
-  ctx.restore();ctx.globalAlpha=1;ctx.shadowBlur=0;ctx.globalCompositeOperation='source-over';
+  if((!logoImg&&!logoEmoji)||logoBackPower<=0||logoBackOpacity<=0||logoHit<.035)return;
+  const px=cx+logoX,py=cy+logoY-logoLift*(logoLiftHeight/100);
+  const impact=Math.min(1,logoHit),progress=1-impact;
+  const radius=logoSize*.47+progress*logoSize*.32;
+  ctx.save();ctx.globalCompositeOperation='source-over';
+  ctx.beginPath();ctx.arc(px,py,radius,0,Math.PI*2);
+  ctx.strokeStyle='rgba(170,220,255,'+(.28*impact*logoBackOpacity/100*logoBackPower/100)+')';
+  ctx.lineWidth=Math.max(1.5,logoSize*.008);ctx.shadowColor='rgba(150,210,255,.28)';
+  ctx.shadowBlur=5;ctx.stroke();ctx.restore();
+}
+function getLogoShadowCache(){
+  if(!logoImg||!logoImg.complete||!logoImg.naturalWidth)return null;
+  if(logoShadowSource===logoImg&&logoShadowCanvas)return logoShadowCanvas;
+  const iw=logoImg.naturalWidth,ih=logoImg.naturalHeight,scale=Math.min(1,512/Math.max(iw,ih));
+  const w=Math.max(1,Math.round(iw*scale)),h=Math.max(1,Math.round(ih*scale)),pad=42;
+  const cv=document.createElement('canvas');cv.width=w+pad*2;cv.height=h+pad*2;
+  const sc=cv.getContext('2d');sc.clearRect(0,0,cv.width,cv.height);sc.filter='blur(30px)';
+  sc.drawImage(logoImg,pad,pad,w,h);sc.filter='none';
+  logoShadowSource=logoImg;logoShadowCanvas=cv;logoShadowMetrics={w,h,pad};
+  return cv;
 }
 function drawBeatLogo(ctx,dt,b){
   const hasImage=!!logoImg&&logoImg.complete&&logoImg.naturalWidth>0,hasEmoji=!!logoEmoji;if(!hasImage&&!hasEmoji)return;
@@ -1498,8 +1467,9 @@ function drawBeatLogo(ctx,dt,b){
     else if(logoShape==='rounded'){const q=r*.68;ctx.roundRect(-q,-q,q*2,q*2,q*.22);}};
   if(logoShape!=='none'){pathShape();ctx.fillStyle='rgba(35,190,255,.14)';ctx.fill();ctx.lineWidth=Math.max(2,size*.012);ctx.strokeStyle=gradAt(px,py);ctx.stroke();if(logoShape==='ring'){ctx.beginPath();ctx.arc(0,0,r*.62,0,Math.PI*2);ctx.stroke();}}
   if(hasImage){const iw=logoImg.naturalWidth||logoImg.width,ih=logoImg.naturalHeight||logoImg.height,fit=Math.min(size*.82/iw,size*.82/ih),dw=iw*fit,dh=ih*fit;
-    if(['circle','ring','heart','star','hex','diamond','rounded'].includes(logoShape)){ctx.save();pathShape();ctx.clip();}
-    ctx.drawImage(logoImg,-dw/2,-dh/2,dw,dh);if(logoShape!=='none')ctx.restore();
+    const cache=getLogoShadowCache(),sm=logoShadowMetrics;
+    if(cache&&sm){ctx.save();ctx.globalAlpha=.5;ctx.shadowBlur=0;ctx.drawImage(cache,-dw/2-dw*sm.pad/sm.w,-dh/2-dh*sm.pad/sm.h,dw*(1+2*sm.pad/sm.w),dh*(1+2*sm.pad/sm.h));ctx.restore();}
+    ctx.save();ctx.beginPath();ctx.arc(0,0,r*.78,0,Math.PI*2);ctx.clip();ctx.drawImage(logoImg,-dw/2,-dh/2,dw,dh);ctx.restore();
   }else{ctx.shadowBlur+=12;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 '+Math.round(size*.72)+'px "Apple Color Emoji","Noto Color Emoji",system-ui';ctx.fillStyle='#fff';ctx.fillText(logoEmoji,0,0);}
   ctx.restore();ctx.globalAlpha=1;ctx.shadowBlur=0;
 }
