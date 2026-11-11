@@ -236,6 +236,11 @@ input[type=text],#customW,#customH{
 @media(max-height:650px){#bar{max-height:50dvh}.sec{padding:9px;gap:7px}button{min-height:35px}}
 
 
+#beatLogoPanel{border-color:#a6eaff99;background:linear-gradient(145deg,#28506b 0%,#263b5a 38%,#17263e 100%);box-shadow:0 1px 0 #ffffff55 inset,0 0 18px #34d8ff22,0 6px 14px #0009}
+#beatLogoPanel h4:before{content:"💠";background:linear-gradient(145deg,#7ff7ff,#287dc8 60%,#4b3da5)}
+#beatLogoPanel input[type=text]{min-width:80px}
+#logoEmojiChoices button{min-width:43px;font-size:20px;padding:0 8px}
+#logoShapes button.on{border-color:#9df5ff;background:linear-gradient(180deg,#51d9ed,#17618f);box-shadow:0 0 12px #49dfff66}
 /* VISO Ultra Premium 3D Studio — visual-only skin; controls and JS remain untouched */
 :root{color-scheme:dark;--edge:#8deaff66;--ink:#eaf5ff;--muted:#a9bfd6}
 body{
@@ -518,6 +523,45 @@ input[type=text],#customW,#customH{
     <label><span>Colour flow</span><input id="sCyc" type="range" min="0" max="100" value="18"></label>
     <label><span>Gradient</span><input id="sDir" type="range" min="0" max="100" value="0"></label>
   </div>
+  <div class="sec" id="beatLogoPanel">
+    <h4>Beat Logo Studio · Independent</h4>
+    <div class="row">
+      <button id="logoUpload" class="prim">📤 Upload Logo / PNG / Photo</button>
+      <button id="logoClear">✕ Clear Logo</button>
+    </div>
+    <div class="row" id="logoEmojiChoices">
+      <button type="button" data-logo-emoji="🔥">🔥</button>
+      <button type="button" data-logo-emoji="💜">💜</button>
+      <button type="button" data-logo-emoji="👑">👑</button>
+      <button type="button" data-logo-emoji="⚡">⚡</button>
+      <button type="button" data-logo-emoji="🐺">🐺</button>
+      <button type="button" data-logo-emoji="💀">💀</button>
+      <button type="button" data-logo-emoji="❤️">❤️</button>
+      <button type="button" data-logo-emoji="🎧">🎧</button>
+      <button type="button" data-logo-emoji="🌟">🌟</button>
+    </div>
+    <label><span>Custom emoji</span><input id="logoEmoji" type="text" value="💜" maxlength="8" aria-label="Custom logo emoji"></label>
+    <div class="row" id="logoShapes">
+      <button type="button" data-logo-shape="none" class="on">Original</button>
+      <button type="button" data-logo-shape="circle">Circle</button>
+      <button type="button" data-logo-shape="ring">Ring</button>
+      <button type="button" data-logo-shape="heart">Heart</button>
+      <button type="button" data-logo-shape="star">Star</button>
+      <button type="button" data-logo-shape="hex">Hexagon</button>
+      <button type="button" data-logo-shape="diamond">Diamond</button>
+      <button type="button" data-logo-shape="rounded">Rounded</button>
+    </div>
+    <label><span>Beat power</span><input id="logoBeatPower" type="range" min="0" max="300" value="230"></label>
+    <label><span>Beat bounce</span><input id="logoBounce" type="range" min="0" max="200" value="110"></label>
+    <label><span>Beat shake</span><input id="logoShake" type="range" min="0" max="100" value="28"></label>
+    <label><span>Glow power</span><input id="logoGlow" type="range" min="0" max="100" value="85"></label>
+    <label><span>Logo size</span><input id="logoSize" type="range" min="40" max="700" value="260"></label>
+    <label><span>Opacity</span><input id="logoOpacity" type="range" min="0" max="100" value="100"></label>
+    <label><span>Position X</span><input id="logoX" type="range" min="-500" max="500" value="0"></label>
+    <label><span>Position Y</span><input id="logoY" type="range" min="-850" max="850" value="0"></label>
+    <label><span>Rotation</span><input id="logoRotation" type="range" min="-180" max="180" value="0"></label>
+    <div class="status" id="logoStatus">Independent logo layer · Upload a PNG/photo or choose an emoji. Beat controls do not change the main visualizer.</div>
+  </div>
   <div class="sec" id="exportPanel"><h4>Export video · Full song</h4>
     <div class="row"><button id="qualityMenuButton" class="prim">Quality ▾</button></div>
     <div class="row" id="qualityMenu" style="display:none;flex-wrap:wrap">
@@ -543,6 +587,7 @@ input[type=text],#customW,#customH{
 <input id="fA" type="file" accept="audio/*"><input id="fI" type="file" accept="image/*">
 <input id="fV" type="file" accept="video/*"><input id="fO" type="file" accept="image/*" multiple>
 <input id="fBgI" type="file" accept="image/*"><input id="fBgV" type="file" accept="video/*">
+<input id="fLogo" type="file" accept="image/*">
 <video id="vid" playsinline muted loop style="display:none"></video>
 <video id="bvid" playsinline muted loop style="display:none"></video>
 
@@ -587,6 +632,11 @@ let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=fa
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
 const objects=[];let selObj=-1;
+// Separate Beat Logo Studio state: deliberately isolated from main media, mask, objects and undo stack.
+let logoImg=null,logoEmoji='💜',logoShape='none',logoBeatPower=230,logoBounce=110,
+    logoShake=28,logoGlow=85,logoSize=260,logoOpacity=100,logoX=0,logoY=0,
+    logoRotation=0,logoPulse=0,logoPhase=0;
+
 const undo=[],redo=[];
 
 const MODES=['Dust','Aurora','Beams','Bars','Ripple','Grid','Sparkle','Vortex','Ribbon','Bokeh','Neon','Confetti','Comet','Hex','Orbitals','Mirage','Cube3D','Hyper','Depth','Warp3D','Orbit3D','Tunnel3D','Voxel','Parallax','Galaxy','Nebula'];
@@ -600,6 +650,28 @@ function drawMixers(){$('mixers').innerHTML='';mstate.forEach(m=>{if(!m.on)retur
   const r=document.createElement('input');r.type='range';r.min=0;r.max=100;r.value=m.op*100;
   r.oninput=()=>{m.op=+r.value/100;};d.appendChild(r);$('mixers').appendChild(d);});}
 drawMixers();
+
+// Beat Logo Studio: its own upload, emoji, shape and audio-reactive controls.
+$('logoUpload').onclick=()=>$('fLogo').click();
+$('fLogo').addEventListener('change',e=>{
+  const file=e.target.files&&e.target.files[0];if(!file)return;
+  const url=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);logoImg=im;logoImg._url=url;logoEmoji='';$('logoEmoji').value='';$('logoStatus').textContent='Logo loaded: '+file.name;};
+  im.onerror=()=>{URL.revokeObjectURL(url);$('logoStatus').textContent='Could not load this image. Try PNG or JPG.';};
+  im.src=url;e.target.value='';
+});
+$('logoClear').onclick=()=>{if(logoImg&&logoImg._url)URL.revokeObjectURL(logoImg._url);logoImg=null;logoEmoji='';$('logoEmoji').value='';$('logoStatus').textContent='Logo cleared. Choose an emoji or upload another image.';};
+document.querySelectorAll('[data-logo-emoji]').forEach(b=>b.onclick=()=>{
+  logoEmoji=b.dataset.logoEmoji;$('logoEmoji').value=logoEmoji;
+  $('logoStatus').textContent='Emoji logo selected · '+logoEmoji;
+});
+$('logoEmoji').oninput=e=>{logoEmoji=e.target.value;};
+document.querySelectorAll('[data-logo-shape]').forEach(b=>b.onclick=()=>{
+  logoShape=b.dataset.logoShape;
+  document.querySelectorAll('[data-logo-shape]').forEach(q=>q.classList.toggle('on',q===b));
+});
+function logoBind(id,key){$(id).oninput=e=>{const v=+e.target.value; if(key==='logoBeatPower')logoBeatPower=v;else if(key==='logoBounce')logoBounce=v;else if(key==='logoShake')logoShake=v;else if(key==='logoGlow')logoGlow=v;else if(key==='logoSize')logoSize=v;else if(key==='logoOpacity')logoOpacity=v;else if(key==='logoX')logoX=v;else if(key==='logoY')logoY=v;else if(key==='logoRotation')logoRotation=v;};}
+[['logoBeatPower','logoBeatPower'],['logoBounce','logoBounce'],['logoShake','logoShake'],['logoGlow','logoGlow'],['logoSize','logoSize'],['logoOpacity','logoOpacity'],['logoX','logoX'],['logoY','logoY'],['logoRotation','logoRotation']].forEach(a=>logoBind(a[0],a[1]));
 
 const SHAPES=[['media','Media'],['circle','Circle'],['ring','Ring'],['blob','Blob'],['frame','Frame'],['text','Text']];
 SHAPES.forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;
@@ -1139,6 +1211,65 @@ function stepObject(ob,b,dt){const bass=b[0],hi=b[5];ob.phase+=dt*(.002+hi*.02);
   else{ob.x+=Math.cos(ob.phase)*(1+b[2]*8);ob.y+=Math.sin(ob.phase*1.4)*(1+b[2]*8);
     ob.rot=Math.sin(ob.phase)*.12;if(ob.x<-w)ob.x=W;if(ob.x>W)ob.x=-w;
     if(ob.y<-h)ob.y=H;if(ob.y>H)ob.y=-h;}}
+function drawBeatLogo(ctx,dt){
+  const hasImage=!!logoImg&&logoImg.complete&&logoImg.naturalWidth>0;
+  const hasEmoji=!!logoEmoji;
+  if(!hasImage&&!hasEmoji)return;
+  // Read low-frequency energy independently; never uses the main Power/Shake/Punch sliders.
+  let raw=0;
+  if(an&&playing&&buf&&buf.length){
+    const n=Math.max(1,Math.floor(buf.length*.035));let sum=0;
+    for(let i=0;i<n;i++)sum+=buf[i];
+    raw=sum/n/255;
+  }
+  const target=Math.max(0,Math.min(1,(raw-.045)*5.2));
+  logoPulse+=(target-logoPulse)*(target>logoPulse?.72:.17);
+  logoPhase+=dt*(.0015+logoPulse*.012);
+  const beat=logoPulse*(logoBeatPower/100);
+  const base=logoSize, bounce=1+beat*.72+(logoPulse*logoBounce/100)*.32;
+  const jitter=(Math.random()-.5)*logoPulse*(logoShake/100)*22;
+  const size=base*bounce,px=cx+logoX+jitter,py=cy+logoY+Math.sin(logoPhase*2)*logoPulse*(logoBounce/100)*7;
+  ctx.save();ctx.translate(px,py);ctx.rotate(logoRotation*Math.PI/180+Math.sin(logoPhase)*logoPulse*.025);
+  ctx.globalAlpha=logoOpacity/100;
+  const glow=logoGlow/100*(.25+logoPulse*1.8);
+  ctx.shadowColor=gradAt(px,py);ctx.shadowBlur=glow*(18+logoPulse*55);
+  const r=size/2;
+  const pathShape=()=>{
+    ctx.beginPath();
+    if(logoShape==='circle'||logoShape==='ring'){ctx.arc(0,0,r*.78,0,Math.PI*2);}
+    else if(logoShape==='heart'){
+      ctx.moveTo(0,r*.72);ctx.bezierCurveTo(-r*.18,r*.48,-r*.95,r*.05,-r*.72,-r*.42);
+      ctx.bezierCurveTo(-r*.48,-r*.9,-r*.08,-r*.72,0,-r*.42);
+      ctx.bezierCurveTo(r*.08,-r*.72,r*.48,-r*.9,r*.72,-r*.42);
+      ctx.bezierCurveTo(r*.95,r*.05,r*.18,r*.48,0,r*.72);ctx.closePath();
+    } else if(logoShape==='star'||logoShape==='hex'||logoShape==='diamond'){
+      const count=logoShape==='star'?10:logoShape==='hex'?6:4;
+      for(let i=0;i<count;i++){const a=-Math.PI/2+i*Math.PI*2/count;
+        const rr=logoShape==='star'&&i%2?r*.48:r*.78;
+        const xx=Math.cos(a)*rr,yy=Math.sin(a)*rr;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}
+      ctx.closePath();
+    } else if(logoShape==='rounded'){const q=r*.68;ctx.roundRect(-q,-q,q*2,q*2,q*.22);}
+  };
+  if(logoShape!=='none'){
+    pathShape();ctx.fillStyle='rgba(35,190,255,.14)';ctx.fill();
+    ctx.lineWidth=Math.max(2,size*.012);ctx.strokeStyle=gradAt(px,py);ctx.stroke();
+    if(logoShape==='ring') {ctx.beginPath();ctx.arc(0,0,r*.62,0,Math.PI*2);ctx.stroke();}
+  }
+  if(hasImage){
+    const iw=logoImg.naturalWidth,ih=logoImg.naturalHeight;
+    const fit=Math.min(size*.82/iw,size*.82/ih),dw=iw*fit,dh=ih*fit;
+    if(logoShape==='circle'||logoShape==='ring'||logoShape==='heart'||logoShape==='star'||logoShape==='hex'||logoShape==='diamond'||logoShape==='rounded'){
+      ctx.save();pathShape();ctx.clip();
+    }
+    ctx.drawImage(logoImg,-dw/2,-dh/2,dw,dh);
+    if(logoShape!=='none')ctx.restore();
+  } else {
+    ctx.shadowBlur+=12;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='900 '+Math.round(size*.72)+'px "Apple Color Emoji","Noto Color Emoji",system-ui';
+    ctx.fillStyle='#fff';ctx.fillText(logoEmoji,0,0);
+  }
+  ctx.restore();ctx.globalAlpha=1;ctx.shadowBlur=0;
+}
 function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
   ctx.save();ctx.translate(ob.x,ob.y);ctx.rotate(ob.rot);const s=ob.sc*(1+pulse*.12);ctx.scale(s,s);
   ctx.shadowColor=gradAt(ob.x,ob.y);ctx.shadowBlur=16+pulse*55;
@@ -1219,6 +1350,7 @@ function frame(t){
   }
 
   drawObjects(x,b,dt);
+  drawBeatLogo(x,dt);
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
     x.drawImage(paintLayer(.7,false),0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;}
   bx.clearRect(0,0,bl.width,bl.height);
