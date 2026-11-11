@@ -439,6 +439,10 @@ input[type=text],#customW,#customH{
   #logoTemplatePanel .tpl-card{min-width:0;white-space:normal;min-height:58px;padding:8px 7px;border-radius:10px;text-align:left;line-height:1.25;background:linear-gradient(145deg,#172b48,#0b1325);border:1px solid #ffffff28}
   #logoTemplatePanel .tpl-card.on{border:2px solid #56e5ff;background:linear-gradient(145deg,#174e70,#182c4b);box-shadow:0 0 12px #38bdf855}
   #logoTemplatePanel .tpl-card small{display:block;color:#a9c9df;font-size:9px;margin-top:3px}
+
+#mediaPhotoTools{margin-top:9px;padding:10px;border:1px solid #8bdcff66;border-radius:12px;background:linear-gradient(145deg,#142c48,#0c172a);box-shadow:0 2px 8px #0008 inset}
+#mediaPhotoTools label span{width:112px}
+#mediaPhotoTools select{min-width:0;flex:1;background:#142943;color:#fff;border:1px solid #8bdcff66;border-radius:8px;padding:8px}
 </style>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
 <div id="bar">
@@ -449,6 +453,15 @@ input[type=text],#customW,#customH{
       <button id="bP" class="prim">Play</button><button id="bR">Center</button>
     </div>
   </div>
+
+    <div id="mediaPhotoTools">
+      <h4>🖼 Photo / PNG Effects · Media Only</h4>
+      <div class="row"><button id="mediaBgRemove" class="prim">✂ Background Remove</button><button id="mediaRestoreOriginal">↶ Restore Original</button></div>
+      <div class="row"><label style="flex:1"><span>Blend mode</span><select id="mediaBlendMode"><option value="source-over">Normal</option><option value="screen">Screen · Black blend</option><option value="lighten">Lighten</option><option value="lighter">Add / Glow</option><option value="multiply">Multiply</option><option value="overlay">Overlay</option><option value="soft-light">Soft Light</option></select></label></div>
+      <label><span>Blend opacity</span><input id="mediaBlendOpacity" type="range" min="0" max="100" value="100"></label>
+      <div class="row"><button id="mediaBlendToggle" class="on">Blend ON</button><button id="mediaEffectsReset">Reset Media Effects</button></div>
+      <div class="status" id="mediaPhotoStatus">These settings affect only the Photo layer selected with Media → Photo. Logo settings remain separate.</div>
+    </div>
   <div class="sec"><h4>Social canvas / screen ratio</h4>
     <div class="row" id="ratios">
       <button class="on" data-ratio="9:16">TikTok / Reels 9:16</button>
@@ -675,6 +688,8 @@ const $=id=>document.getElementById(id);
 const vid=$('vid'),bvid=$('bvid');
 
 let FPS=30,BIT=8000000,ratioW=9,ratioH=16;
+let mediaBlendMode='source-over',mediaBlendOpacity=100,mediaBlendEnabled=true;
+
 function updateBitrate(w=W,h=H){BIT=Math.max(4000000,Math.min(100000000,Math.round(w*h*FPS*0.13)));}
 function setRes(w,h){
   W=Math.max(128,Math.min(7680,Math.round(w)));H=Math.max(128,Math.min(7680,Math.round(h)));cx=W/2;cy=H/2;
@@ -928,6 +943,13 @@ $('fBgV').onchange=e=>{const f=e.target.files[0];if(!f)return;
 $('bBgX').onclick=()=>{bgImg=null;bgUseVid=false;bgViz=false;bvid.pause();bvid.removeAttribute('src');};
 $('bBgViz').onclick=e=>{bgViz=!bgViz;e.currentTarget.classList.toggle('on',bgViz);};
 
+
+$('mediaBlendMode').onchange=e=>{mediaBlendMode=e.target.value;$('mediaPhotoStatus').textContent='Media blend: '+e.target.options[e.target.selectedIndex].text+'. Logo layer is unaffected.';};
+$('mediaBlendOpacity').oninput=e=>mediaBlendOpacity=+e.target.value;
+$('mediaBlendToggle').onclick=()=>{mediaBlendEnabled=!mediaBlendEnabled;$('mediaBlendToggle').textContent=mediaBlendEnabled?'Blend ON':'Blend OFF';$('mediaBlendToggle').classList.toggle('on',mediaBlendEnabled);};
+$('mediaBgRemove').onclick=()=>{if(!img||useVid){$('mediaPhotoStatus').textContent='Pehle Media → Photo se image select karo. Video par photo background removal nahi.';return;}if($('bgRemoveTools').style.display==='none')$('bgRemoveToggle').click();$('bgRemoveUseCurrent').click();$('mediaPhotoStatus').textContent='Background removal tools Background section mein active hain; tap, erase, restore aur tolerance wahan control karo.';};
+$('mediaRestoreOriginal').onclick=()=>{if($('bgRemoveTools').style.display==='none')$('bgRemoveToggle').click();$('bgRemoveUseCurrent').click();$('mediaPhotoStatus').textContent='Original uploaded photo restored.';};
+$('mediaEffectsReset').onclick=()=>{mediaBlendMode='source-over';mediaBlendOpacity=100;mediaBlendEnabled=true;$('mediaBlendMode').value='source-over';$('mediaBlendOpacity').value=100;$('mediaBlendToggle').textContent='Blend ON';$('mediaBlendToggle').classList.add('on');$('mediaPhotoStatus').textContent='Media photo effects reset. Uploaded image and Logo settings are unchanged.';};
 $('bI').onclick=()=>$('fI').click();
 $('fI').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();
   im.onload=()=>{img=im;useVid=false;vid.pause();maskDirty=true;if(window.__visoBgLoad)window.__visoBgLoad(im);};im.src=URL.createObjectURL(f);};
@@ -1585,10 +1607,11 @@ function frame(t){
   const s0=src();
   const drawMedia=()=>{
     if(!s0||!phOn)return;
-    x.save();applyT(x);x.globalAlpha=pho/100;
+    x.save();applyT(x);x.globalAlpha=(pho/100)*(mediaBlendEnabled?mediaBlendOpacity/100:1);
+    x.globalCompositeOperation=mediaBlendEnabled?mediaBlendMode:'source-over';
     x.filter='brightness('+bri+'%) contrast('+con+'%) saturate('+sat+'%) hue-rotate('+hueSh+'deg)';
     if(useVid)x.drawImage(vid,-W/2,-H/2,W,H);else x.drawImage(img,-W/2,-H/2,W,H);
-    x.filter='none';x.restore();x.globalAlpha=1;
+    x.filter='none';x.globalCompositeOperation='source-over';x.restore();x.globalAlpha=1;
   };
 
   if(mediaFront){
