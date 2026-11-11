@@ -1,5 +1,7 @@
 name: Build original Good Working Visualizer APK
 on:
+  workflow_dispatch:
+
   push:
     branches:
       - viso/good-working-visualizer
