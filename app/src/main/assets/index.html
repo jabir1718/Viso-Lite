@@ -433,6 +433,11 @@ input[type=text],#customW,#customH{
 #bgRemoveTools{padding:9px;margin-top:8px;border:1px solid #9af4c966;border-radius:13px;background:linear-gradient(145deg,#122f3a,#172b43);box-shadow:0 2px 8px #0008 inset}
 #bgRemoveTools label span{width:104px}
 #bgRemoveToggle.on{border-color:#a2ffd4;background:linear-gradient(180deg,#43c99c,#176b62)}
+
+  #logoTemplatePanel .tpl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  #logoTemplatePanel .tpl-card{min-width:0;white-space:normal;min-height:58px;padding:8px 7px;border-radius:10px;text-align:left;line-height:1.25;background:linear-gradient(145deg,#172b48,#0b1325);border:1px solid #ffffff28}
+  #logoTemplatePanel .tpl-card.on{border:2px solid #56e5ff;background:linear-gradient(145deg,#174e70,#182c4b);box-shadow:0 0 12px #38bdf855}
+  #logoTemplatePanel .tpl-card small{display:block;color:#a9c9df;font-size:9px;margin-top:3px}
 </style>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
 <div id="bar">
@@ -603,6 +608,28 @@ input[type=text],#customW,#customH{
     <label><span>Position X</span><input id="logoX" type="range" min="-500" max="500" value="0"></label>
     <label><span>Position Y</span><input id="logoY" type="range" min="-850" max="850" value="0"></label>
     <label><span>Rotation</span><input id="logoRotation" type="range" min="-180" max="180" value="0"></label>
+
+    <div class="sec" id="logoTemplatePanel">
+      <h4>🎨 Logo Background Templates · Independent</h4>
+      <div class="row"><button id="logoTemplateToggle" class="prim">● Templates ON</button><button id="logoTemplateRemove">✕ Remove Template</button></div>
+      <div class="row"><strong style="font-size:10px;color:#aeeaff">CHOOSE A BACKGROUND DESIGN</strong></div>
+      <div class="tpl-grid" id="logoTemplateGrid">
+        <button class="tpl-card on" data-logo-template="neon">💚 Neon <small>Electric glow waves</small></button><button class="tpl-card" data-logo-template="halloween">🔥 Halloween <small>Fire + dark sparks</small></button>
+        <button class="tpl-card" data-logo-template="algo">〰️ Algo <small>Audio waveform</small></button><button class="tpl-card" data-logo-template="city">🌃 ASP City <small>City lights + orb</small></button>
+        <button class="tpl-card" data-logo-template="sirium">🌈 Sirium <small>RGB light streak</small></button><button class="tpl-card" data-logo-template="sparks">✨ Sparks <small>Golden particle aura</small></button>
+        <button class="tpl-card" data-logo-template="rose">🌹 Rose <small>Soft floral glow</small></button><button class="tpl-card" data-logo-template="greyline">🏙️ Greyline <small>Urban light tunnel</small></button>
+        <button class="tpl-card" data-logo-template="diamond">💎 Diamond Fire <small>Crystal orbit</small></button><button class="tpl-card" data-logo-template="storm">⚡ Spark Storm <small>Energy trails</small></button>
+        <button class="tpl-card" data-logo-template="pride">🌈 Pride <small>Rainbow wave</small></button><button class="tpl-card" data-logo-template="holiday">🌟 Holiday Glow <small>Warm bokeh</small></button>
+        <button class="tpl-card" data-logo-template="snow">❄️ Snowfall Serenity <small>Snow + blue pulse</small></button><button class="tpl-card" data-logo-template="cherry">🌸 Cherry Moon <small>Pink moon aura</small></button>
+        <button class="tpl-card" data-logo-template="horizon">🌅 Pink Horizon <small>Sunset glow</small></button>
+      </div>
+      <label><span>Template opacity</span><input id="logoTemplateOpacity" type="range" min="0" max="100" value="82"></label>
+      <label><span>Template size</span><input id="logoTemplateSize" type="range" min="60" max="220" value="125"></label>
+      <label><span>Animation speed</span><input id="logoTemplateSpeed" type="range" min="0" max="200" value="100"></label>
+      <label><span>Audio reaction</span><input id="logoTemplateBeat" type="range" min="0" max="200" value="100"></label>
+      <label><span>Screen Blend · Remove dark background</span><input id="logoScreenBlend" type="checkbox" checked></label>
+      <div class="status" id="logoTemplateStatus">Template background appears only behind the logo. Other editor controls stay independent.</div>
+    </div>
     <div class="status" id="logoStatus">Independent logo layer · Upload a PNG/photo or choose an emoji. Beat controls do not change the main visualizer.</div>
   </div>
   <div class="sec" id="exportPanel"><h4>Export video · Full song</h4>
@@ -676,6 +703,8 @@ let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=fa
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
 const objects=[];let selObj=-1;
+// Independent logo template renderer; does not touch visualizer, media, masks, objects or history.
+let logoTemplate='neon',logoTemplateOn=true,logoTemplateOpacity=82,logoTemplateSize=125,logoTemplateSpeed=100,logoTemplateBeat=100,logoScreenBlend=true;
 // Separate Beat Logo Studio state: deliberately isolated from main media, mask, objects and undo stack.
 let logoImg=null,logoOriginalImg=null,logoEmoji='💜',logoShape='circle',logoBeatPower=230,logoBounce=110,
     logoShake=28,logoGlow=85,logoSize=260,logoOpacity=100,logoX=0,logoY=0,
@@ -700,6 +729,15 @@ function drawMixers(){$('mixers').innerHTML='';mstate.forEach(m=>{if(!m.on)retur
   r.oninput=()=>{m.op=+r.value/100;};d.appendChild(r);$('mixers').appendChild(d);});}
 drawMixers();
 
+// Independent logo template controls.
+$('logoTemplateToggle').onclick=()=>{logoTemplateOn=!logoTemplateOn;$('logoTemplateToggle').textContent=logoTemplateOn?'● Templates ON':'○ Templates OFF';$('logoTemplateToggle').classList.toggle('on',logoTemplateOn);$('logoTemplateStatus').textContent=logoTemplateOn?'Selected template is active behind the logo.':'Template hidden; old logo controls remain active.';};
+$('logoTemplateRemove').onclick=()=>{logoTemplateOn=false;logoTemplate='';$('logoTemplateToggle').textContent='○ Templates OFF';$('logoTemplateToggle').classList.remove('on');document.querySelectorAll('[data-logo-template]').forEach(b=>b.classList.remove('on'));$('logoTemplateStatus').textContent='Template removed. Logo / Emoji is unchanged.';};
+document.querySelectorAll('[data-logo-template]').forEach(b=>b.onclick=()=>{logoTemplate=b.dataset.logoTemplate;logoTemplateOn=true;$('logoTemplateToggle').textContent='● Templates ON';$('logoTemplateToggle').classList.add('on');document.querySelectorAll('[data-logo-template]').forEach(q=>q.classList.toggle('on',q===b));$('logoTemplateStatus').textContent=b.textContent.trim()+' selected · controls are independent.';});
+$('logoTemplateOpacity').oninput=e=>logoTemplateOpacity=+e.target.value;
+$('logoTemplateSize').oninput=e=>logoTemplateSize=+e.target.value;
+$('logoTemplateSpeed').oninput=e=>logoTemplateSpeed=+e.target.value;
+$('logoTemplateBeat').oninput=e=>logoTemplateBeat=+e.target.value;
+$('logoScreenBlend').onchange=e=>logoScreenBlend=!!e.target.checked;
 // Beat Logo Studio: its own upload, emoji, shape and audio-reactive controls.
 $('logoUpload').onclick=()=>$('fLogo').click();
 $('fLogo').addEventListener('change',e=>{
@@ -1420,6 +1458,20 @@ function updateBeatLogoMotion(dt,b){
   logoSquash*=Math.pow(.76,fs);
   logoHit*=Math.pow(.84,fs);
 }
+function drawLogoTemplate(ctx,dt){
+ if(!logoTemplateOn||!logoTemplate)return;const speed=logoTemplateSpeed/100,energy=Math.min(1,logoPulse*logoTemplateBeat/100),t=logoPhase*speed,radius=logoSize*(logoTemplateSize/100)*1.08,alpha=logoTemplateOpacity/100,px=cx+logoX,py=cy+logoY-logoLift*(logoLiftHeight/100),TAU=Math.PI*2;
+ ctx.save();ctx.translate(px,py);ctx.globalAlpha=alpha;ctx.lineCap='round';ctx.lineJoin='round';
+ const glow=(c,b)=>{ctx.shadowColor=c;ctx.shadowBlur=b;},stroke=(c,w)=>{ctx.strokeStyle=c;ctx.lineWidth=w;ctx.stroke();},dots=(n,c,spread)=>{ctx.fillStyle=c;for(let i=0;i<n;i++){const a=i*2.399+t*.13,rr=radius*(.38+((i*37)%100)/100*spread);ctx.beginPath();ctx.arc(Math.cos(a)*rr,Math.sin(a)*rr,1+(i%3)*.7,0,TAU);ctx.fill();}};
+ if(['neon','storm','diamond'].includes(logoTemplate)){const cols=logoTemplate==='neon'?['#35ff68','#00f5d4']:logoTemplate==='storm'?['#e879ff','#32d9ff','#7c3aed']:['#ffe94a','#ffb52e','#fef08a'];for(let k=0;k<(logoTemplate==='diamond'?3:2);k++){ctx.beginPath();const rr=radius*(.58+k*.18+energy*.08);for(let i=0;i<=120;i++){const a=i/120*TAU,v=rr+(logoTemplate==='diamond'?Math.sin(a*6+t)*radius*.035:Math.sin(a*7+t*1.5+k)*radius*.045),xx=Math.cos(a)*v,yy=Math.sin(a)*v;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}glow(cols[k%cols.length],15+energy*25);stroke(cols[k%cols.length],2.2-k*.35);}}
+ else if(logoTemplate==='halloween'){glow('#ff4b16',22);for(let i=0;i<18;i++){const a=i/18*TAU+t*.15,rr=radius*(.62+Math.sin(t*2+i)*.08);ctx.beginPath();ctx.moveTo(Math.cos(a)*rr,Math.sin(a)*rr);ctx.quadraticCurveTo(Math.cos(a+.18)*rr*.8,Math.sin(a+.18)*rr*.8,Math.cos(a+.3)*rr*1.22,Math.sin(a+.3)*rr*1.22);stroke(i%2?'#ff6b22':'#ffbd45',2+i%3);}dots(32,'#ffad38',.45);}
+ else if(logoTemplate==='algo'||logoTemplate==='pride'){const cols=logoTemplate==='pride'?['#ff4d6d','#ffb703','#f9f871','#55efc4','#48cae4','#9b5de5']:['#37ff9b','#35e7ff'];for(let k=0;k<(logoTemplate==='pride'?6:3);k++){ctx.beginPath();for(let i=0;i<=100;i++){const xx=(i/100-.5)*radius*2.35,yy=Math.sin(i*.17+t*2+k*.45)*radius*(.12+energy*.13)+Math.sin(i*.055+t+k)*radius*.08+k*(logoTemplate==='pride'?5:7)-12;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}glow(cols[k%cols.length],10);stroke(cols[k%cols.length],logoTemplate==='pride'?2:3);}}
+ else if(logoTemplate==='city'||logoTemplate==='greyline'){const col=logoTemplate==='city'?'#48eaff':'#d7e5ef';glow(col,14);ctx.lineWidth=1.2;for(let i=0;i<16;i++){const xx=(i/15-.5)*radius*2.3,h=radius*(.18+((i*29)%80)/100*.55);ctx.beginPath();ctx.moveTo(xx,radius*.65);ctx.lineTo(xx,-h);ctx.stroke();for(let y=-h+8;y<radius*.5;y+=12){ctx.fillStyle=col;ctx.fillRect(xx-2,y,2,3);}}if(logoTemplate==='greyline'){for(let i=0;i<7;i++){ctx.beginPath();ctx.moveTo(-radius*.95,-radius*.5+i*radius*.12);ctx.lineTo(0,-radius*.12+i*radius*.04);ctx.lineTo(radius*.95,-radius*.5+i*radius*.12);stroke('#b7c9d8',1.5);}}}
+ else if(logoTemplate==='sirium'){const cols=['#ff286e','#ff9d00','#38ff5b','#19dfff','#476bff','#e84bff'];for(let k=0;k<6;k++){ctx.beginPath();for(let i=0;i<=100;i++){const xx=(i/100-.5)*radius*2.3,yy=Math.sin(i*.13+t*1.5)*radius*.07+k*5;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}glow(cols[k],8);stroke(cols[k],2.3);}}
+ else if(['sparks','holiday','rose'].includes(logoTemplate)){const col=logoTemplate==='rose'?'#ff83bb':'#ffd76a';glow(col,18);dots(logoTemplate==='rose'?38:70,col,.8);if(logoTemplate==='rose'){for(let i=0;i<9;i++){const a=i/9*TAU+t*.05;ctx.beginPath();ctx.ellipse(Math.cos(a)*radius*.78,Math.sin(a)*radius*.78,7,16,a,0,TAU);stroke('#ff9acb',1.5);}}}
+ else if(logoTemplate==='snow'){dots(55,'#b9eaff',.9);glow('#8bdcff',16);ctx.beginPath();ctx.arc(0,0,radius*(.8+energy*.08),0,TAU);stroke('#9bdcff',2);}
+ else if(logoTemplate==='cherry'||logoTemplate==='horizon'){const col=logoTemplate==='cherry'?'#ff86bd':'#ff7d86';glow(col,22);ctx.beginPath();ctx.arc(radius*.55,-radius*.55,radius*.34,0,TAU);ctx.fillStyle=col;ctx.fill();dots(35,logoTemplate==='cherry'?'#ff9bc9':'#ffb3a1',.8);ctx.beginPath();ctx.moveTo(-radius*1.1,radius*.62);ctx.quadraticCurveTo(0,radius*.35,radius*1.1,radius*.62);stroke(col,3);}
+ ctx.restore();ctx.globalAlpha=1;ctx.shadowBlur=0;
+}
 function drawBeatLogoBack(ctx,b,dt){
   if((!logoImg&&!logoEmoji)||logoBackPower<=0||logoBackOpacity<=0||logoHit<.035)return;
   const px=cx+logoX,py=cy+logoY-logoLift*(logoLiftHeight/100);
@@ -1552,6 +1604,7 @@ function frame(t){
 
   drawObjects(x,b,dt);
   updateBeatLogoMotion(dt,b);
+  drawLogoTemplate(x,dt);
   drawBeatLogoBack(x,b,dt);
   drawBeatLogo(x,dt,b);
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
