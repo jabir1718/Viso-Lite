@@ -747,7 +747,7 @@ document.querySelectorAll('[data-logo-back]').forEach(b=>b.onclick=()=>{logoBack
     }
     og.putImageData(out,0,0);img=output;useVid=false;vid.pause();maskDirty=true;$('bgRemoveColor').value=hex(selected);
   }
-  $('bgRemoveToggle').onclick=()=>{const tools=$('bgRemoveTools'),open=tools.style.display==='none';tools.style.display=open?'block':'none';$('bgRemoveToggle').classList.toggle('on',open);if(!open)setMode('off');else if(!basePixels&&img&&!useVid)loadImage(img);};
+  $('bgRemoveToggle').onclick=()=>{const tools=$('bgRemoveTools'),open=tools.style.display==='none';tools.style.display=open?'block':'none';$('bgRemoveToggle').classList.toggle('on',open);if(!open)setMode('off');else if(!basePixels&&img&&!useVid)loadImage(img);else if(basePixels)setMode('pick');};
   $('bgRemoveUseCurrent').onclick=()=>{if(!img||useVid){status('Pehle Media > Photo se ek photo select karo. Video par static BG removal available nahi.');return;}loadImage(sourceImage||img);};
   $('bgRemovePick').onclick=()=>{if(!basePixels){status('Pehle current photo select karo.');return;}setMode('pick');status('Main screen par photo ke background ko tap karo.');};
   $('bgRemoveErase').onclick=()=>{if(!basePixels){status('Pehle current photo select karo.');return;}setMode('erase');status('Main screen par finger se background erase karo.');};
@@ -1320,9 +1320,9 @@ function updateBeatLogoMotion(dt,b){
   const energy=Math.max(0,Math.min(1,(b&&b[0]||0)*.9+(b&&b[1]||0)*.16)),rise=Math.max(0,energy-logoPrevEnergy);
   logoEnergyAvg=logoEnergyAvg*.94+energy*.06;
   const onset=Math.max(0,energy-logoEnergyAvg-.025),hit=Math.min(1,Math.max(rise*3.1,onset*2.4)),fs=Math.max(.35,Math.min(2.5,dt/16.67));
-  logoHit=Math.max(hit,logoHit*Math.pow(.79,fs));if(hit>.095)logoVelocity+=hit*(logoLaunchPower/100)*5.1;
+  logoHit=Math.max(hit,logoHit*Math.pow(.79,fs));if(hit>.095)logoVelocity+=Math.min(24,hit*(logoLaunchPower/100)*11.5);
   logoPrevEnergy=energy;logoPulse+=(energy-logoPulse)*(energy>logoPulse?.58:.12);logoPhase+=dt*(.0015+energy*.014);
-  const was=logoLift;logoVelocity-=.58*fs;logoLift+=logoVelocity*fs;
+  const was=logoLift;logoVelocity-=.58*fs;logoLift=Math.min(logoSize*.8,logoLift+logoVelocity*fs);
   if(logoLift<0){if(was>0)logoSquash=Math.min(1,was*.035+logoHit*.22);logoLift=0;logoVelocity=Math.abs(logoVelocity)*.24;}
   logoVelocity*=Math.pow(.91,fs);logoSquash*=Math.pow(.78,fs);
 }
