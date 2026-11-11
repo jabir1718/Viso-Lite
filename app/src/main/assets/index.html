@@ -805,7 +805,7 @@ $('logoUpload').onclick=()=>$('fLogo').click();
 $('addCornerLogos').onclick=()=>$('fCornerLogos').click();
 $('fCornerLogos').onchange=e=>{
   [...(e.target.files||[])].forEach((file,n)=>{const url=URL.createObjectURL(file),im=new Image();
-    im.onload=()=>{objects.push({img:im,x:W*(.18+(objects.length%4)*.21),y:H*(.18+Math.floor(objects.length/4)*.13),sc:.32,rot:0,motion:'Static',dir:1,phase:0,opacity:100,blendMode:'source-over',shake:false,cornerLogo:true});
+    im.onload=()=>{const corners=[[.13,.13],[.87,.13],[.13,.87],[.87,.87]],pt=corners[objects.length%4];objects.push({img:im,x:W*pt[0],y:H*pt[1],sc:.32,rot:0,motion:'Still',dir:1,phase:0,opacity:100,blendMode:'source-over',shake:false,cornerLogo:true});
       selObj=objects.length-1;syncSelectedObjectControls();$('objectStatus').textContent=(objects.length)+' PNG/logo layers loaded · selected one is editable.';};
     im.onerror=()=>URL.revokeObjectURL(url);im.src=url;
   });e.target.value='';
@@ -1035,7 +1035,7 @@ $('fV').onchange=e=>{const f=e.target.files[0];if(!f)return;
 $('bO').onclick=()=>$('fO').click();
 $('fO').onchange=e=>{[...e.target.files].forEach(f=>{const im=new Image();
   im.onload=()=>{objects.push({img:im,x:Math.random()*W,y:Math.random()*H,sc:.32,rot:0,
-    motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28});selObj=objects.length-1;};
+    motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28,opacity:100,blendMode:'source-over'});selObj=objects.length-1;syncSelectedObjectControls();};
   im.src=URL.createObjectURL(f);});};
 function guessMotion(n){n=(n||'').toLowerCase();
   if(/car|truck|bike|bus|taxi|train|plane|rocket/.test(n))return'Drive';
@@ -1480,7 +1480,7 @@ function drawMode(ctx,m,b,scale){
   ctx.restore();ctx.globalAlpha=1;
 }
 
-function stepObject(ob,b,dt){const bass=b[0],hi=b[5];ob.phase+=dt*(.002+hi*.02);
+function stepObject(ob,b,dt){if(ob.motion==='Still')return;const bass=b[0],hi=b[5];ob.phase+=dt*(.002+hi*.02);
   const w=ob.img.width*ob.sc,h=ob.img.height*ob.sc;
   if(ob.motion==='Drive'){ob.x+=(2+bass*26)*ob.dir;ob.y+=Math.sin(ob.phase*9)*(1+bass*5);
     ob.rot=Math.sin(ob.phase*3)*.03+(ob.dir<0?Math.PI:0);
@@ -1745,7 +1745,7 @@ document.querySelectorAll('#bar>.sec').forEach((sec,i)=>{
   sec.appendChild(body);
   if(i===0)sec.classList.add('is-open');
   heading.setAttribute('role','button');heading.setAttribute('tabindex','0');
-  const toggle=()=>sec.classList.toggle('is-open');
+  const toggle=()=>{document.querySelectorAll('#bar>.sec').forEach(other=>{if(other!==sec)other.classList.remove('is-open');});sec.classList.toggle('is-open');};
   heading.addEventListener('click',toggle);
   heading.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
 });
