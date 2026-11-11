@@ -82,7 +82,7 @@
     <div class="row">
       <button id="bA">MP3</button><button id="bI">Photo</button><button id="bV">Video</button>
       <button id="bO">+ PNG</button><button id="bDel">× PNG</button><button id="bClearMedia">Clear all</button>
-      <button id="bP" class="prim">Play</button><button id="bR">Center</button></div><div class="advanced-tools"><label><span>Music volume</span><input id="advVolume" type="range" min="0" max="100" value="100"></label><label><span>Playback speed</span><input id="advRate" type="range" min="50" max="150" value="100"></label></div></div><div class="sec"><h4>Background</h4>
+      <button id="bR">Center</button></div><div class="advanced-tools"><label><span>Music volume</span><input id="advVolume" type="range" min="0" max="100" value="100"></label><label><span>Playback speed</span><input id="advRate" type="range" min="50" max="150" value="100"></label></div></div><div class="sec"><h4>Background</h4>
     <div class="row"><button id="bBgI">BG image</button><button id="bBgV">BG video</button>
       <button id="bBgX">BG off</button><button id="bBgViz">BG visualizer</button></div>
     <label><span>BG split</span><input id="sSplit" type="range" min="0" max="100" value="100"></label>
@@ -108,7 +108,7 @@
       <button id="tBg">BG viz</button><button id="tFr">Front viz</button>
       <button id="tPh" class="on">Media</button><button id="tMask" class="on">Mask</button>
     </div>
-    <div class="row"><button id="bZup">Media ⬆ front</button><button id="bZdn">Media ⬇ back</button></div><div class="advanced-tools"><label><span>BG layer opacity</span><input id="advBgLayerOpacity" type="range" min="0" max="100" value="100"></label><label><span>Front layer opacity</span><input id="advFrontOpacity" type="range" min="0" max="100" value="100"></label><label><span>Media opacity</span><input id="advMediaOpacity" type="range" min="0" max="100" value="100"></label></div></div><div class="sec"><h4>Position</h4>
+    <div id="layerStack" class="layer-stack"></div><div class="advanced-tools"><label><span>BG layer opacity</span><input id="advBgLayerOpacity" type="range" min="0" max="100" value="100"></label><label><span>Front layer opacity</span><input id="advFrontOpacity" type="range" min="0" max="100" value="100"></label><label><span>Media opacity</span><input id="advMediaOpacity" type="range" min="0" max="100" value="100"></label></div></div><div class="sec"><h4>Position</h4>
     <div class="row">
       <button class="nudge" id="bL">◀</button><button class="nudge" id="bRt">▶</button>
       <button class="nudge" id="bU">▲</button><button class="nudge" id="bD">▼</button>
@@ -221,10 +221,7 @@ let playing=false,bloom=.5,shape='media',swayT=0,txt='VISO';
 let ix=0,iy=0,isc=1,irot=0,bgOn=false,frOn=false,phOn=true,maskOn=true,useVid=false;
 let mX=0,mY=0,mSc=1,mRot=0,mediaFront=false,bgVizMask=true;
 let colors=[190,285],selColor=0,hueShift=0;
-let autoOn=false,autoT=0,autoEvery=3;
-const lockChip={color:false,vis:false,shape:false,sway:false};
 const objects=[];let selObj=-1;
-const lights=[];let selLight=-1;let lint=60,lsz=100;
 const undo=[],redo=[];
 
 const MODES=['Dust','Aurora','Beams','Bars','Ripple','Grid','Sparkle','Vortex','Ribbon','Bokeh','Neon','Confetti','Comet','Hex','Orbitals','Mirage','Cube3D','Hyper','Depth','Warp3D','Orbit3D','Tunnel3D','Voxel','Parallax','Galaxy','Nebula'];
@@ -294,32 +291,33 @@ $('mRot').onclick=()=>{mRot+=.26;};
 $('mRst').onclick=()=>{mX=0;mY=0;mSc=1;mRot=0;$('sMsc').value=100;};
 
 
-$('bBgI').onclick=()=>$('fBgI').click();
+$('bBgI').onclick=()=>chooseFile('fBgI');
 $('fBgI').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();
-  im.onload=()=>{bgImg=im;bgUseVid=false;bgViz=false;bvid.pause();maskDirty=true;};im.src=URL.createObjectURL(f);};
-$('bBgV').onclick=()=>$('fBgV').click();
+  im.onload=()=>{bgImg=im;bgUseVid=false;bgViz=false;bvid.pause();bvid.removeAttribute('src');bvid.load();maskDirty=true;};im.onerror=()=>alert('Background image load nahi hui.');im.src=URL.createObjectURL(f);};
+$('bBgV').onclick=()=>chooseFile('fBgV');
 $('fBgV').onchange=e=>{const f=e.target.files[0];if(!f)return;
-  bvid.src=URL.createObjectURL(f);bvid.play();bgUseVid=true;bgViz=false;bgImg=null;maskDirty=true;};
+  bvid.src=URL.createObjectURL(f);bvid.muted=true;bvid.playsInline=true;bvid.onloadeddata=()=>{bgUseVid=true;bgViz=false;bgImg=null;maskDirty=true;bvid.play().catch(()=>{});};};
 $('bBgX').onclick=()=>{bgImg=null;bgUseVid=false;bgViz=false;bvid.pause();bvid.removeAttribute('src');};
 $('bBgViz').onclick=e=>{bgViz=!bgViz;e.currentTarget.classList.toggle('on',bgViz);};
 
-$('bI').onclick=()=>$('fI').click();
-$('fI').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();
-  im.onload=()=>{img=im;useVid=false;vid.pause();maskDirty=true;};im.src=URL.createObjectURL(f);};
-$('bV').onclick=()=>$('fV').click();
-$('fV').onchange=e=>{const f=e.target.files[0];if(!f)return;
-  vid.src=URL.createObjectURL(f);vid.play();useVid=true;img=null;maskDirty=true;};
-$('bO').onclick=()=>$('fO').click();
+function chooseFile(id){const input=$(id);if(!input)return;input.value='';input.click();}
+$('bI').onclick=()=>chooseFile('fI');
+$('fI').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const im=new Image();
+  im.onload=()=>{img=im;useVid=false;vid.pause();vid.removeAttribute('src');vid.load();maskDirty=true;};im.onerror=()=>alert('Photo load nahi hui. Doosri image try karein.');im.src=URL.createObjectURL(f);};
+$('bV').onclick=()=>chooseFile('fV');
+$('fV').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;
+  vid.src=URL.createObjectURL(f);vid.muted=true;vid.playsInline=true;vid.onloadeddata=()=>{useVid=true;img=null;maskDirty=true;vid.play().catch(()=>{});};vid.onerror=()=>alert('Video load nahi hui. Doosri video try karein.');};
+$('bO').onclick=()=>chooseFile('fO');
 $('fO').onchange=e=>{[...e.target.files].forEach(f=>{const im=new Image();
   im.onload=()=>{objects.push({img:im,x:Math.random()*W,y:Math.random()*H,sc:.32,rot:0,
     motion:guessMotion(f.name),dir:Math.random()<.5?1:-1,phase:Math.random()*6.28});selObj=objects.length-1;};
-  im.src=URL.createObjectURL(f);});};
+  im.onerror=()=>alert('PNG load nahi hui.');im.src=URL.createObjectURL(f);});};
 function guessMotion(n){n=(n||'').toLowerCase();
   if(/car|truck|bike|bus|taxi|train|plane|rocket/.test(n))return'Drive';
   if(/walk|man|woman|girl|boy|human|person|people|kid/.test(n))return'Walk';
   if(/money|cash|coin|note|dollar|rupee|gold|star/.test(n))return'Rain';return'Float';}
 
-$('bA').onclick=()=>$('fA').click();
+$('bA').onclick=()=>chooseFile('fA');
 $('fA').onchange=e=>{const f=e.target.files[0];if(!f)return;
   if(!ctxA)ctxA=new(window.AudioContext||window.webkitAudioContext)();
   if(audio)audio.pause();
@@ -332,7 +330,7 @@ $('fA').onchange=e=>{const f=e.target.files[0];if(!f)return;
   audio.onended=()=>{if(exportingFullSong&&rec&&rec.state==='recording')rec.stop();playing=false;if(!exportingFullSong)$('dockPlay').textContent='▶';};};
 $('dockPlay').onclick=async()=>{if(!audio)return;
   if(ctxA.state==='suspended')await ctxA.resume();
-  if(playing){audio.pause();vid.pause();bvid.pause();playing=false;$('bP').textContent='Play';}
+  if(playing){audio.pause();vid.pause();bvid.pause();playing=false;$('dockPlay').textContent='▶';}
   else{await audio.play();if(useVid)vid.play();if(bgUseVid)bvid.play();playing=true;$('dockPlay').textContent='Ⅱ';}};
 
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);
@@ -389,7 +387,7 @@ async function startFullSongExport(){
   exportingFullSong=true;
   document.querySelectorAll('#res button').forEach(button=>button.disabled=true);
   $('exportStatus').textContent='Full song export ho raha hai…';
-  $('bP').textContent='Exporting…';
+  $('dockPlay').textContent='Ⅱ';
   try{
     rec.start(1000);
     await audio.play();
@@ -408,10 +406,9 @@ async function startFullSongExport(){
 
 $('advGuides').onclick=e=>{advGuides=!advGuides;e.currentTarget.textContent='Safe guides '+(advGuides?'ON':'OFF');e.currentTarget.classList.toggle('on',advGuides);};$('advGuidesExport').onclick=e=>{advGuidesExport=!advGuidesExport;e.currentTarget.textContent='Export safe guides '+(advGuidesExport?'ON':'OFF');e.currentTarget.classList.toggle('on',advGuidesExport);};$('advGuideMargin').oninput=e=>advGuideMargin=+e.target.value;
 $('advVolume').oninput=e=>{advVolume=+e.target.value/100;if(audio)audio.volume=advVolume;};$('advRate').oninput=e=>{advRate=+e.target.value/100;if(audio)audio.playbackRate=advRate;};
-$('advCenterRadius').oninput=e=>advCenterRadius=+e.target.value/100;$('advLogoOpacity').oninput=e=>advLogoOpacity=+e.target.value/100;$('advSpScale').oninput=e=>advSpScale=+e.target.value/100;$('advSpX').oninput=e=>advSpX=+e.target.value;$('advSpAngle').oninput=e=>advSpAngle=+e.target.value;
-$('advBitrate').oninput=e=>{advBitrate=+e.target.value/100;updateBitrate();};$('advBgZoom').oninput=e=>advBgZoom=+e.target.value/100;$('advBgOpacity').oninput=e=>advBgOpacity=+e.target.value/100;$('advAutoVariety').oninput=e=>advAutoVariety=+e.target.value/100;$('advBloom').oninput=e=>bloom=+e.target.value/100;$('advColorFlow').oninput=e=>advColorFlow=+e.target.value/100;
+$('advBitrate').oninput=e=>{advBitrate=+e.target.value/100;updateBitrate();};$('advBgZoom').oninput=e=>advBgZoom=+e.target.value/100;$('advBgOpacity').oninput=e=>advBgOpacity=+e.target.value/100;$('advBloom').oninput=e=>bloom=+e.target.value/100;$('advColorFlow').oninput=e=>advColorFlow=+e.target.value/100;
 $('advModeOpacity').oninput=e=>advModeOpacity=+e.target.value/100;$('advModeScale').oninput=e=>advModeScale=+e.target.value/100;$('advHueOffset').oninput=e=>advHueOffset=+e.target.value;$('advPaletteDrift').oninput=e=>advPaletteDrift=+e.target.value/100;
-$('advMaskInvert').onclick=e=>{advMaskInvert=!advMaskInvert;maskDirty=true;e.currentTarget.textContent='Invert mask '+(advMaskInvert?'ON':'OFF');e.currentTarget.classList.toggle('on',advMaskInvert);};$('advMaskScale').oninput=e=>advMaskScale=+e.target.value/100;$('advLightFlicker').oninput=e=>advLightFlicker=+e.target.value/100;$('advLightSpread').oninput=e=>advLightSpread=+e.target.value/100;
+$('advMaskInvert').onclick=e=>{advMaskInvert=!advMaskInvert;maskDirty=true;e.currentTarget.textContent='Invert mask '+(advMaskInvert?'ON':'OFF');e.currentTarget.classList.toggle('on',advMaskInvert);};$('advMaskScale').oninput=e=>advMaskScale=+e.target.value/100;
 $('advBgLayerOpacity').oninput=e=>advBgLayerOpacity=+e.target.value/100;$('advFrontOpacity').oninput=e=>advFrontOpacity=+e.target.value/100;$('advMediaOpacity').oninput=e=>advMediaOpacity=+e.target.value/100;$('advMediaRotation').oninput=e=>advMediaRotation=+e.target.value;$('advSwayPhase').oninput=e=>advSwayPhase=+e.target.value;
 $('advEdgeSoftness').oninput=e=>{advEdgeSoftness=+e.target.value/100;maskDirty=true;};$('advMaskThreshold').oninput=e=>{advMaskThreshold=+e.target.value;cut=advMaskThreshold;$('sCut').value=cut;maskDirty=true;};$('advSepia').oninput=e=>advSepia=+e.target.value;$('advVignette').oninput=e=>advVignette=+e.target.value;$('advGravity').oninput=e=>advGravity=+e.target.value/100;$('advTurbulence').oninput=e=>advTurbulence=+e.target.value/100;
 
