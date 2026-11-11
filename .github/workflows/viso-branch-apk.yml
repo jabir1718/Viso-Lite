@@ -32,6 +32,35 @@ jobs:
         run: sdkmanager "platforms;android-36"
       - name: Generate Gradle wrapper
         run: gradle :wrapper --gradle-version 8.11.1
+      - name: Validate inline JavaScript and UI references
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          import re, subprocess, tempfile
+          source = Path('app/src/main/assets/index.html').read_text(encoding='utf-8')
+          class Scripts(HTMLParser):
+              def __init__(self): super().__init__(); self.inline=[]; self.active=False; self.external=False; self.buf=[]
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower()=='script':
+                      self.active=True; self.external=any(k.lower()=='src' for k,v in attrs); self.buf=[]
+              def handle_data(self, data):
+                  if self.active and not self.external: self.buf.append(data)
+              def handle_endtag(self, tag):
+                  if tag.lower()=='script' and self.active:
+                      if not self.external: self.inline.append(''.join(self.buf))
+                      self.active=False; self.external=False
+          parser=Scripts(); parser.feed(source)
+          if not parser.inline: raise SystemExit('No inline JavaScript found')
+          with tempfile.NamedTemporaryFile('w',suffix='.js',delete=False,encoding='utf-8') as out:
+              out.write('\\n'.join(parser.inline)); js_path=out.name
+          subprocess.run(['node','--check',js_path],check=True)
+          ids=set(re.findall(r'\\bid=[\\\"\\\']([^\\\"\\\']+)[\\\"\\\']',source))
+          refs=set(re.findall(r"\\$\\(['\\\"]([^'\\\"]+)['\\\"]\\)",source))
+          missing=sorted(refs-ids)
+          if missing: raise SystemExit('Missing DOM IDs: '+', '.join(missing))
+          print(f'Validated {len(parser.inline)} inline script blocks and {len(refs)} literal DOM references')
+          PY
       - name: Build APK
         run: ./gradlew assembleDebug --stacktrace
       - name: Upload VISO APK
