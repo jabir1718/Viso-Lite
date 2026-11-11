@@ -9,7 +9,9 @@ function draw(ctx,p){
  ctx.globalAlpha=(photoOpacity/100)*(blendEnabled?blendOpacity/100:1);
  ctx.globalCompositeOperation=blendEnabled?blendMode:'source-over';
  ctx.filter='brightness('+(brightness*beatGain)+'%) contrast('+contrast+'%) saturate('+saturation+'%) hue-rotate('+hue+'deg)';
- ctx.drawImage(videoMode?video:source,-W/2,-H/2,W,H);
+ const mediaSource=videoMode?video:source,sw=videoMode?(video.videoWidth||W):(source.naturalWidth||source.width||W),sh=videoMode?(video.videoHeight||H):(source.naturalHeight||source.height||H);
+ const fit=Math.max(W/Math.max(1,sw),H/Math.max(1,sh)),dw=sw*fit,dh=sh*fit;
+ ctx.drawImage(mediaSource,-dw/2,-dh/2,dw,dh);
  ctx.filter='none';
  ctx.globalCompositeOperation='source-over';
  ctx.restore();
