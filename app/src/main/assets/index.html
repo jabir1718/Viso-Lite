@@ -1594,8 +1594,8 @@ function frame(t){
 
   const s0=src();
   const drawMedia=()=>{
-    const source=useVid?vid:img;
-    window.VisoMediaEffects.draw(x,{source,video:vid,videoMode:useVid,photoOpacity:pho,blendEnabled:mediaBlendEnabled,blendMode:mediaBlendMode,blendOpacity:mediaBlendOpacity,brightness:bri,contrast:con,saturation:sat,hue:hueSh,applyTransform:applyT,W,H});
+    const source=src();
+    window.VisoMediaEffects.draw(x,{source,video:vid,videoMode:useVid,enabled:phOn,photoOpacity:pho,blendEnabled:mediaBlendEnabled,blendMode:mediaBlendMode,blendOpacity:mediaBlendOpacity,brightness:bri,contrast:con,saturation:sat,hue:hueSh,applyTransform:applyT,W,H});
   };
 
   if(mediaFront){
