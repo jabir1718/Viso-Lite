@@ -1597,26 +1597,26 @@ function updateBeatLogoMotion(dt,b){
   const adaptive=Math.max(.012,logoEnergyAvg*.16);
   const energyRise=Math.max(0,energy-logoPrevEnergy);
   const transient=Math.max(0,energy-logoEnergyAvg-adaptive);
-  const rawHit=Math.max(transient*5.4,energyRise*7.2,flux*10.5);
-  const threshold=.055/Math.max(.2,sensitivity);
-  const hit=active&&rawHit>threshold&&performance.now()-logoLastHit>105
-    ?Math.min(1,(rawHit-threshold)*2.8*sensitivity+rawHit*.25):0;
+  const rawHit=Math.max(transient*2.8,energyRise*3.4,flux*4.8);
+  const threshold=.075/Math.max(.2,sensitivity);
+  const hit=active&&rawHit>threshold&&performance.now()-logoLastHit>135
+    ?Math.min(.72,(rawHit-threshold)*1.55*sensitivity+rawHit*.12):0;
   if(hit>0){
     logoLastHit=performance.now();
     const kick=logoAudioRange==='all'||logoAudioRange==='bass'||logoAudioRange==='kick'||logoAudioRange==='drums'?low*logoKickBoost/100:1;
     logoHit=Math.max(logoHit,Math.min(1,hit));
-    logoVelocity+=Math.min(75,hit*(logoLaunchPower/100)*27*(.65+kick*.55));
-    logoSquash=Math.max(logoSquash,hit*.24);
+    logoVelocity+=Math.min(28,hit*(logoLaunchPower/100)*10*(.65+kick*.35));
+    logoSquash=Math.max(logoSquash,hit*.12);
   }
   const templateTarget=active?Math.min(1,energy*.55+low*.3+Math.min(1,flux*4)*.15):0;
-  logoTemplateEnergy+=(templateTarget-logoTemplateEnergy)*(active ? .32 : .12);
+  logoTemplateEnergy+=(templateTarget-logoTemplateEnergy)*(active ? .16 : .08);
   logoEnergyAvg=logoEnergyAvg*.965+energy*.035;
   logoPrevEnergy=energy;
-  logoDrive+=(energy-logoDrive)*(energy>logoDrive?.42:.12);
+  logoDrive+=(energy-logoDrive)*(energy>logoDrive?.22:.08);
   logoFlux=logoFlux*.7+flux*.3;
-  logoPulse+=(Math.max(energy,logoDrive*.85)-logoPulse)*(energy>logoPulse?.52:.1);
-  logoPhase+=dt*(.0015+energy*.025+logoHit*.012);
-  const gravity=.72,retain=Math.pow(logoSustain/100,fs*.12);
+  logoPulse+=(Math.max(energy,logoDrive*.85)-logoPulse)*(energy>logoPulse?.2:.075);
+  logoPhase+=dt*(.0015+energy*.014+logoHit*.006);
+  const gravity=.48,retain=Math.pow(logoSustain/100,fs*.12);
   const was=logoLift;
   logoVelocity-=gravity*fs;
   logoLift=Math.min(logoSize*.95,logoLift+logoVelocity*fs);
@@ -1625,8 +1625,8 @@ function updateBeatLogoMotion(dt,b){
     logoLift=0;logoVelocity=Math.abs(logoVelocity)*(.22+(logoSustain/100)*.48);
   }
   logoVelocity*=Math.pow(.965,fs)*retain;
-  logoSquash*=Math.pow(.76,fs);
-  logoHit*=Math.pow(.84,fs);
+  logoSquash*=Math.pow(.88,fs);
+  logoHit*=Math.pow(.91,fs);
 }
 
 function drawBeatLogoBack(ctx,b,dt){
@@ -1653,7 +1653,7 @@ function getLogoShadowCache(){
 }
 function drawBeatLogo(ctx,dt,b){
   const hasImage=!!logoImg&&logoImg.complete&&logoImg.naturalWidth>0,hasEmoji=!!logoEmoji;if(!hasImage&&!hasEmoji)return;
-  const impact=logoHit,lift=logoLift*(logoLiftHeight/100),base=logoSize,bounce=1+impact*(logoBeatPower/100)*.16+(logoPulse*logoBounce/100)*.1+logoDrive*(logoBounce/100)*.12;
+  const impact=logoHit,lift=logoLift*(logoLiftHeight/100),base=logoSize,bounce=1+impact*(logoBeatPower/100)*.08+(logoPulse*logoBounce/100)*.075+logoDrive*(logoBounce/100)*.07;
   let sx=bounce,sy=bounce,rot=logoRotation*Math.PI/180+Math.sin(logoPhase)*logoPulse*.018,liftFactor=1;
   if(logoImpactStyle==='drum'){sx*=1+impact*.28+logoSquash*.18;sy*=1+impact*.38-logoSquash*.42;}
   else if(logoImpactStyle==='dice'){sx*=1+impact*.2+logoSquash*.24;sy*=1+impact*.22-logoSquash*.34;rot+=Math.sin(logoPhase*2)*impact*.22+logoVelocity*.012;}
@@ -1664,7 +1664,7 @@ function drawBeatLogo(ctx,dt,b){
   else if(logoImpactStyle==='elastic'){sx*=1+impact*.32+logoSquash*.35;sy*=1-impact*.3+logoSquash*.48;}
   else if(logoImpactStyle==='rubber'){const soft=logoRubberSoftness/100;sx*=1+impact*.42*soft+logoSquash*.32*soft;sy*=1-impact*.28*soft-logoSquash*.42*soft;}
   else if(logoImpactStyle==='slam'){sx*=1+impact*.18+logoSquash*.5;sy*=1+impact*.5-logoSquash*.65;rot+=Math.sin(logoPhase*4)*impact*.05;}
-  const shake=Math.sin(logoPhase*19)*logoHit*(logoShake/100)*10,px=cx+logoX+shake,py=cy+logoY-lift*liftFactor+Math.sin(logoPhase*2)*logoPulse*(logoBounce/100)*3,size=base*bounce,glow=logoGlow/100*(.25+logoPulse*1.8);
+  const shake=Math.sin(logoPhase*19)*logoHit*(logoShake/100)*4,px=cx+logoX+shake,py=cy+logoY-lift*liftFactor+Math.sin(logoPhase*2)*logoPulse*(logoBounce/100)*3,size=base*bounce,glow=logoGlow/100*(.25+logoPulse*1.8);
   ctx.save();
   if(logoImpactStyle==='rocket'&&impact>.04){ctx.globalAlpha=logoOpacity/100*.48;ctx.strokeStyle=grad(.6);ctx.lineWidth=4+impact*14;ctx.shadowColor=grad(.5);ctx.shadowBlur=25;ctx.beginPath();ctx.moveTo(px,py+size*.35);ctx.lineTo(px,py+size*.9+impact*35);ctx.stroke();}
   ctx.translate(px,py);ctx.rotate(rot);const depth=1+logoDrive*(logoDepthPush/100)*.08+impact*(logoDepthPush/100)*.12;ctx.scale(sx*depth,sy*depth);ctx.globalAlpha=logoOpacity/100;ctx.shadowColor=gradAt(px,py);ctx.shadowBlur=glow*(18+logoPulse*55);
