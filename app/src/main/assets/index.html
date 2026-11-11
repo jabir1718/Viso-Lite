@@ -1065,7 +1065,12 @@ $('mediaBgRemove').onclick=()=>{if(!img||useVid){$('mediaPhotoStatus').textConte
 $('mediaRestoreOriginal').onclick=()=>{if($('bgRemoveTools').style.display==='none')$('bgRemoveToggle').click();$('bgRemoveUseCurrent').click();$('mediaPhotoStatus').textContent='Original uploaded photo restored.';};
 $('mediaEffectsReset').onclick=()=>{mediaBlendMode='source-over';mediaBlendOpacity=100;mediaBlendEnabled=true;mediaBeatReaction=100;$('mediaBeatReaction').value=100;$('mediaBlendMode').value='source-over';$('mediaBlendOpacity').value=100;$('mediaBlendToggle').textContent='Blend ON';$('mediaBlendToggle').classList.add('on');$('mediaPhotoStatus').textContent='Media photo effects reset. Uploaded image and Logo settings are unchanged.';};
 async function decodeOrientedImage(file){
- if(window.createImageBitmap){try{return await createImageBitmap(file,{imageOrientation:'from-image'});}catch(e){try{return await createImageBitmap(file);}catch(_){}}}
+ if(window.createImageBitmap){try{
+   const bitmap=await createImageBitmap(file,{imageOrientation:'from-image'}),cv=document.createElement('canvas');cv.width=bitmap.width;cv.height=bitmap.height;
+   cv.getContext('2d').drawImage(bitmap,0,0);if(bitmap.close)bitmap.close();
+   const blob=await new Promise((resolve,reject)=>cv.toBlob(b=>b?resolve(b):reject(new Error('Image conversion failed')),'image/png'));
+   return await new Promise((resolve,reject)=>{const u=URL.createObjectURL(blob),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);resolve(im);};im.onerror=()=>{URL.revokeObjectURL(u);reject(new Error('Oriented image could not be loaded'));};im.src=u;});
+ }catch(e){/* fall through to the browser image decoder */}}
  return await new Promise((resolve,reject)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);resolve(im);};im.onerror=()=>{URL.revokeObjectURL(u);reject(new Error('Image decode failed'));};im.src=u;});
 }
 function removeEdgeBackground(source,tolerance){
