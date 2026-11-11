@@ -1336,7 +1336,7 @@ function stepObject(ob,b,dt){const bass=b[0],hi=b[5];ob.phase+=dt*(.002+hi*.02);
 function logoFrequencyRange(){
   const rate=ctxA&&ctxA.sampleRate?ctxA.sampleRate:44100,fft=an&&an.fftSize?an.fftSize:2048,ny=rate/2;
   const ranges={all:[35,Math.min(14000,ny)],bass:[35,250],kick:[35,110],drums:[40,520],perc:[520,9000],vocal:[180,4200],melody:[250,7000],treble:[2500,Math.min(14000,ny)]};
-  const r=ranges[logoAudioRange]||ranges.all;return [Math.max(0,Math.floor(r[0]/ny*buf.length*2)),Math.min(buf.length-1,Math.ceil(r[1]/ny*buf.length*2))];
+  const r=ranges[logoAudioRange]||ranges.all;return [Math.max(0,Math.floor(r[0]/ny*buf.length)),Math.min(buf.length-1,Math.ceil(r[1]/ny*buf.length))];
 }
 function logoSpectrumValue(pos,total){
   if(!buf||!buf.length)return 0;const [lo,hi]=logoFrequencyRange(),span=Math.max(1,hi-lo);
@@ -1349,15 +1349,15 @@ function updateBeatLogoMotion(dt,b){
   if(active){
     an.getByteFrequencyData(buf);
     const [lo,hi]=logoFrequencyRange(),count=Math.max(1,hi-lo+1);
-    let sum=0,lowSum=0,positive=0;
+    let sumSq=0,lowSum=0,positive=0;
     if(!logoPrevBins||logoPrevBins.length!==buf.length)logoPrevBins=new Uint8Array(buf.length);
     for(let i=lo;i<=hi;i++){
-      const v=buf[i]/255;sum+=v;
+      const v=buf[i]/255;sumSq+=v*v;
       if(i<=Math.min(hi,lo+Math.max(3,Math.floor(count*.12))))lowSum+=v;
       const rise=Math.max(0,buf[i]-logoPrevBins[i])/255;positive+=rise;
     }
-    energy=sum/count;low=lowSum/Math.max(1,Math.min(hi,lo+Math.max(3,Math.floor(count*.12))-lo+1));
-    flux=positive/count;
+    energy=Math.sqrt(sumSq/count);low=lowSum/Math.max(1,Math.min(hi,lo+Math.max(3,Math.floor(count*.12))-lo+1));
+    flux=positive/Math.sqrt(count);
     logoPrevBins.set(buf);
   }else{
     energy=0;low=0;flux=0;logoPrevBins=null;
