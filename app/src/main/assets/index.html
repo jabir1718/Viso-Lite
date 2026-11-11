@@ -430,11 +430,9 @@ input[type=text],#customW,#customH{
   .sec{padding:14px 16px}
 }
 
-#bgRemovePanel{border-color:#9af4c999;background:linear-gradient(145deg,#24534f 0%,#253e54 48%,#182b42 100%);box-shadow:0 1px 0 #ffffff55 inset,0 0 18px #41f0c322,0 6px 14px #0009}
-#bgRemovePanel h4:before{content:"✂️";background:linear-gradient(145deg,#9af4c9,#269eaa 60%,#24558c)}
-#bgRemovePreviewWrap{width:100%;max-height:360px;overflow:hidden;border:1px solid #b9e8f088;border-radius:12px;background-color:#fff;background-image:linear-gradient(45deg,#c7c7c7 25%,transparent 25%),linear-gradient(-45deg,#c7c7c7 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#c7c7c7 75%),linear-gradient(-45deg,transparent 75%,#c7c7c7 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0}
-#bgRemoveCanvas{display:block;width:100%;height:auto;max-height:360px;object-fit:contain;touch-action:none}
-#bgRemovePanel label span{width:104px}
+#bgRemoveTools{padding:9px;margin-top:8px;border:1px solid #9af4c966;border-radius:13px;background:linear-gradient(145deg,#122f3a,#172b43);box-shadow:0 2px 8px #0008 inset}
+#bgRemoveTools label span{width:104px}
+#bgRemoveToggle.on{border-color:#a2ffd4;background:linear-gradient(180deg,#43c99c,#176b62)}
 </style>
 <div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
 <div id="bar">
@@ -472,6 +470,17 @@ input[type=text],#customW,#customH{
     <label><span>BG viz mix</span><input id="sBvo" type="range" min="0" max="100" value="85"></label>
     <label><span>BG viz power</span><input id="sBvp" type="range" min="20" max="300" value="140"></label>
     <div class="row"><button id="tBvm" class="on">BG viz on BG shape</button></div>
+    <div class="row"><button id="bgRemoveToggle" class="prim">✂ BG Remove controls</button><button id="bgRemoveUseCurrent">Use current photo</button><button id="bgRemoveAutoWhite">Remove white</button></div>
+    <div id="bgRemoveTools" style="display:none">
+      <div class="status" id="bgRemoveStatus">Select a photo first. Background removal works directly on the main preview screen.</div>
+      <div class="row"><button id="bgRemovePick" class="on">🎯 Tap BG on screen</button><button id="bgRemoveErase">🖌 Erase</button><button id="bgRemoveRestore">↶ Restore</button><button id="bgRemoveReset">Reset photo</button></div>
+      <div class="row"><label><span>Selected color</span><input id="bgRemoveColor" type="color" value="#ffffff"></label><button id="bgRemoveApply" class="prim">Remove color</button></div>
+      <label><span>Color tolerance</span><input id="bgRemoveTolerance" type="range" min="0" max="255" value="72"></label>
+      <label><span>Edge softness</span><input id="bgRemoveSoftness" type="range" min="0" max="100" value="22"></label>
+      <label><span>Brush size</span><input id="bgRemoveBrush" type="range" min="5" max="300" value="65"></label>
+      <div class="row"><button id="bgRemoveClearBrush">Clear brush edits</button><button id="bgRemoveDownload" class="prim">⬇ Export transparent PNG</button></div>
+      <div class="status">Tap the visible background on the main VISO screen to sample it. Erase/Restore brush also works directly on that screen. The result becomes the active transparent photo layer.</div>
+    </div>
   </div>
   <div class="sec"><h4>Look</h4>
     <div class="row" id="presets"></div>
@@ -556,6 +565,25 @@ input[type=text],#customW,#customH{
       <button type="button" data-logo-shape="diamond">Diamond</button>
       <button type="button" data-logo-shape="rounded">Rounded</button>
     </div>
+    <div class="row" id="logoImpactStyles">
+      <button type="button" data-logo-impact="drum" class="on">🥁 Drum launch</button><button type="button" data-logo-impact="dice">🎲 Dice pop</button>
+      <button type="button" data-logo-impact="spring">Spring</button><button type="button" data-logo-impact="punch">Punch</button>
+      <button type="button" data-logo-impact="flip">3D flip</button><button type="button" data-logo-impact="rocket">Rocket</button>
+      <button type="button" data-logo-impact="elastic">Elastic</button><button type="button" data-logo-impact="slam">Hard slam</button>
+    </div>
+    <label><span>Launch power</span><input id="logoLaunchPower" type="range" min="0" max="300" value="190"></label>
+    <label><span>Lift height</span><input id="logoLiftHeight" type="range" min="0" max="200" value="90"></label>
+    <div class="row"><strong style="font-size:10px;color:#aeeaff">BACK-SIDE BEAT SPECTRUM</strong></div>
+    <div class="row" id="logoBackStyles">
+      <button type="button" data-logo-back="bars" class="on">Bars halo</button><button type="button" data-logo-back="burst">Radial burst</button>
+      <button type="button" data-logo-back="rings">Shock rings</button><button type="button" data-logo-back="crown">Audio crown</button>
+      <button type="button" data-logo-back="tunnel">3D tunnel</button><button type="button" data-logo-back="vortex">Vortex</button>
+      <button type="button" data-logo-back="wave">Wave orbit</button><button type="button" data-logo-back="off">Off</button>
+    </div>
+    <label><span>Back beat power</span><input id="logoBackPower" type="range" min="0" max="300" value="180"></label>
+    <label><span>Spectrum count</span><input id="logoBackCount" type="range" min="12" max="144" value="72"></label>
+    <label><span>Spread distance</span><input id="logoBackSpread" type="range" min="10" max="260" value="130"></label>
+    <label><span>Spectrum opacity</span><input id="logoBackOpacity" type="range" min="0" max="100" value="88"></label>
     <label><span>Beat power</span><input id="logoBeatPower" type="range" min="0" max="300" value="230"></label>
     <label><span>Beat bounce</span><input id="logoBounce" type="range" min="0" max="200" value="110"></label>
     <label><span>Beat shake</span><input id="logoShake" type="range" min="0" max="100" value="28"></label>
@@ -566,33 +594,6 @@ input[type=text],#customW,#customH{
     <label><span>Position Y</span><input id="logoY" type="range" min="-850" max="850" value="0"></label>
     <label><span>Rotation</span><input id="logoRotation" type="range" min="-180" max="180" value="0"></label>
     <div class="status" id="logoStatus">Independent logo layer · Upload a PNG/photo or choose an emoji. Beat controls do not change the main visualizer.</div>
-  </div>
-  <div class="sec" id="bgRemovePanel">
-    <h4>BG Remove Studio · Independent</h4>
-    <div class="row">
-      <button id="bgRemoveUpload" class="prim">📤 Upload Photo / PNG</button>
-      <button id="bgRemoveAutoWhite">⚪ Remove White BG</button>
-      <button id="bgRemoveReset">↺ Reset</button>
-    </div>
-    <div class="status" id="bgRemoveStatus">Upload an image, then tap its background color in the preview to select it.</div>
-    <div id="bgRemovePreviewWrap"><canvas id="bgRemoveCanvas" width="640" height="360"></canvas></div>
-    <div class="row">
-      <button id="bgRemovePick" class="on">🎯 Pick BG Color</button>
-      <button id="bgRemoveErase">🖌 Erase Brush</button>
-      <button id="bgRemoveRestore">↶ Restore Brush</button>
-    </div>
-    <div class="row">
-      <label><span>Selected color</span><input id="bgRemoveColor" type="color" value="#ffffff"></label>
-      <button id="bgRemoveApply" class="prim">Remove Selected Color</button>
-    </div>
-    <label><span>Color tolerance</span><input id="bgRemoveTolerance" type="range" min="0" max="255" value="72"></label>
-    <label><span>Edge softness</span><input id="bgRemoveSoftness" type="range" min="0" max="100" value="22"></label>
-    <label><span>Brush size</span><input id="bgRemoveBrush" type="range" min="5" max="300" value="65"></label>
-    <div class="row">
-      <button id="bgRemoveClearBrush">Clear brush edits</button>
-      <button id="bgRemoveDownload" class="prim">⬇ Export Transparent PNG</button>
-    </div>
-    <div class="status">Independent workspace · Original visualizer image, masks, logo tools and history are not changed. Transparent checkerboard is preview only.</div>
   </div>
   <div class="sec" id="exportPanel"><h4>Export video · Full song</h4>
     <div class="row"><button id="qualityMenuButton" class="prim">Quality ▾</button></div>
@@ -620,7 +621,7 @@ input[type=text],#customW,#customH{
 <input id="fV" type="file" accept="video/*"><input id="fO" type="file" accept="image/*" multiple>
 <input id="fBgI" type="file" accept="image/*"><input id="fBgV" type="file" accept="video/*">
 <input id="fLogo" type="file" accept="image/*">
-<input id="bgRemoveFile" type="file" accept="image/*">
+
 <video id="vid" playsinline muted loop style="display:none"></video>
 <video id="bvid" playsinline muted loop style="display:none"></video>
 
@@ -668,7 +669,10 @@ const objects=[];let selObj=-1;
 // Separate Beat Logo Studio state: deliberately isolated from main media, mask, objects and undo stack.
 let logoImg=null,logoEmoji='💜',logoShape='none',logoBeatPower=230,logoBounce=110,
     logoShake=28,logoGlow=85,logoSize=260,logoOpacity=100,logoX=0,logoY=0,
-    logoRotation=0,logoPulse=0,logoPhase=0;
+    logoRotation=0,logoPulse=0,logoPhase=0,logoImpactStyle='drum',logoLaunchPower=190,
+    logoLiftHeight=90,logoBackStyle='bars',logoBackPower=180,logoBackCount=72,
+    logoBackSpread=130,logoBackOpacity=88,logoEnergyAvg=0,logoPrevEnergy=0,
+    logoHit=0,logoLift=0,logoVelocity=0,logoSquash=0;
 
 const undo=[],redo=[];
 
@@ -707,77 +711,72 @@ document.querySelectorAll('[data-logo-shape]').forEach(b=>b.onclick=()=>{
   logoShape=b.dataset.logoShape;
   document.querySelectorAll('[data-logo-shape]').forEach(q=>q.classList.toggle('on',q===b));
 });
-function logoBind(id,key){$(id).oninput=e=>{const v=+e.target.value; if(key==='logoBeatPower')logoBeatPower=v;else if(key==='logoBounce')logoBounce=v;else if(key==='logoShake')logoShake=v;else if(key==='logoGlow')logoGlow=v;else if(key==='logoSize')logoSize=v;else if(key==='logoOpacity')logoOpacity=v;else if(key==='logoX')logoX=v;else if(key==='logoY')logoY=v;else if(key==='logoRotation')logoRotation=v;};}
-[['logoBeatPower','logoBeatPower'],['logoBounce','logoBounce'],['logoShake','logoShake'],['logoGlow','logoGlow'],['logoSize','logoSize'],['logoOpacity','logoOpacity'],['logoX','logoX'],['logoY','logoY'],['logoRotation','logoRotation']].forEach(a=>logoBind(a[0],a[1]));
+function logoBind(id,key){$(id).oninput=e=>{const v=+e.target.value;
+  if(key==='logoBeatPower')logoBeatPower=v;else if(key==='logoBounce')logoBounce=v;else if(key==='logoShake')logoShake=v;else if(key==='logoGlow')logoGlow=v;else if(key==='logoSize')logoSize=v;else if(key==='logoOpacity')logoOpacity=v;else if(key==='logoX')logoX=v;else if(key==='logoY')logoY=v;else if(key==='logoRotation')logoRotation=v;else if(key==='logoLaunchPower')logoLaunchPower=v;else if(key==='logoLiftHeight')logoLiftHeight=v;else if(key==='logoBackPower')logoBackPower=v;else if(key==='logoBackCount')logoBackCount=v;else if(key==='logoBackSpread')logoBackSpread=v;else if(key==='logoBackOpacity')logoBackOpacity=v;
+};}
+[['logoBeatPower','logoBeatPower'],['logoBounce','logoBounce'],['logoShake','logoShake'],['logoGlow','logoGlow'],['logoSize','logoSize'],['logoOpacity','logoOpacity'],['logoX','logoX'],['logoY','logoY'],['logoRotation','logoRotation'],['logoLaunchPower','logoLaunchPower'],['logoLiftHeight','logoLiftHeight'],['logoBackPower','logoBackPower'],['logoBackCount','logoBackCount'],['logoBackSpread','logoBackSpread'],['logoBackOpacity','logoBackOpacity']].forEach(a=>logoBind(a[0],a[1]));
+document.querySelectorAll('[data-logo-impact]').forEach(b=>b.onclick=()=>{logoImpactStyle=b.dataset.logoImpact;document.querySelectorAll('[data-logo-impact]').forEach(q=>q.classList.toggle('on',q===b));});
+document.querySelectorAll('[data-logo-back]').forEach(b=>b.onclick=()=>{logoBackStyle=b.dataset.logoBack;document.querySelectorAll('[data-logo-back]').forEach(q=>q.classList.toggle('on',q===b));});
 
-// Independent BG Remove Studio. Uses its own image/canvas and never touches VISO's main media or masks.
+// BG removal operates on the active photo and main VISO canvas; no separate workspace.
 (()=>{
-  const file=$('bgRemoveFile'),cv=$('bgRemoveCanvas'),g=cv.getContext('2d',{willReadFrequently:true});
   const work=document.createElement('canvas'),wg=work.getContext('2d',{willReadFrequently:true});
-  let source=null,sourceURL=null,basePixels=null,manual=null,mode='pick',isDown=false,lastPoint=null;
-  let selected={r:255,g:255,b:255},tolerance=72,softness=22,brush=65;
-  const status=t=>$('bgRemoveStatus').textContent=t;
+  const output=document.createElement('canvas'),og=output.getContext('2d');
+  let sourceImage=null,basePixels=null,manual=null,mode='off',tolerance=72,softness=22,brush=65,selected={r:255,g:255,b:255};
+  const status=t=>{const el=$('bgRemoveStatus');if(el)el.textContent=t;};
   const hex=v=>'#'+[v.r,v.g,v.b].map(n=>Math.round(n).toString(16).padStart(2,'0')).join('');
   const setMode=m=>{mode=m;['bgRemovePick','bgRemoveErase','bgRemoveRestore'].forEach(id=>$(id).classList.toggle('on',id===({pick:'bgRemovePick',erase:'bgRemoveErase',restore:'bgRemoveRestore'}[m])));};
+  function loadImage(im){
+    if(!im||!im.width||!im.height)return;
+    sourceImage=im;const scale=Math.min(1,2000/Math.max(im.width,im.height));
+    work.width=Math.max(1,Math.round(im.width*scale));work.height=Math.max(1,Math.round(im.height*scale));
+    wg.clearRect(0,0,work.width,work.height);wg.drawImage(im,0,0,work.width,work.height);
+    basePixels=wg.getImageData(0,0,work.width,work.height);manual=new Uint8ClampedArray(work.width*work.height);manual.fill(255);
+    output.width=work.width;output.height=work.height;og.putImageData(basePixels,0,0);
+    selected={r:255,g:255,b:255};$('bgRemoveTolerance').value=tolerance;$('bgRemoveSoftness').value=softness;
+    setMode('pick');status('Photo ready on the main screen. Tap its background to sample a color, or use Erase/Restore.');
+  }
   function render(){
     if(!basePixels)return;
-    const out=new ImageData(new Uint8ClampedArray(basePixels.data),basePixels.width,basePixels.height);
-    const d=out.data;
+    const out=new ImageData(new Uint8ClampedArray(basePixels.data),basePixels.width,basePixels.height),d=out.data;
+    const edge=Math.max(0,tolerance-softness*2.55),span=Math.max(1,tolerance-edge);
     for(let i=0,p=0;i<d.length;i+=4,p++){
-      const rr=d[i]-selected.r,gg=d[i+1]-selected.g,bb=d[i+2]-selected.b;
-      const dist=Math.sqrt(rr*rr+gg*gg+bb*bb);
-      const edge=Math.max(0,tolerance-softness*2.55),alpha=dist<=edge?0:dist>=tolerance?255:Math.round((dist-edge)/Math.max(1,tolerance-edge)*255);
+      const rr=d[i]-selected.r,gg=d[i+1]-selected.g,bb=d[i+2]-selected.b,dist=Math.sqrt(rr*rr+gg*gg+bb*bb);
+      const alpha=dist<=edge?0:dist>=tolerance?255:Math.round((dist-edge)/span*255);
       d[i+3]=Math.round(d[i+3]*alpha/255*manual[p]/255);
     }
-    cv.width=out.width;cv.height=out.height;g.putImageData(out,0,0);
-    $('bgRemoveColor').value=hex(selected);
+    og.putImageData(out,0,0);img=output;useVid=false;vid.pause();maskDirty=true;$('bgRemoveColor').value=hex(selected);
   }
-  function loadImage(fileObj){
-    if(!fileObj)return;
-    const url=URL.createObjectURL(fileObj),im=new Image();
-    im.onload=()=>{
-      if(sourceURL)URL.revokeObjectURL(sourceURL);sourceURL=url;source=im;
-      const scale=Math.min(1,3000/Math.max(im.naturalWidth,im.naturalHeight));
-      work.width=Math.max(1,Math.round(im.naturalWidth*scale));work.height=Math.max(1,Math.round(im.naturalHeight*scale));
-      wg.clearRect(0,0,work.width,work.height);wg.drawImage(im,0,0,work.width,work.height);
-      basePixels=wg.getImageData(0,0,work.width,work.height);manual=new Uint8ClampedArray(work.width*work.height);manual.fill(255);
-      cv.width=work.width;cv.height=work.height;g.putImageData(basePixels,0,0);
-      selected={r:255,g:255,b:255};$('bgRemoveTolerance').value=tolerance;$('bgRemoveSoftness').value=softness;
-      setMode('pick');status('Loaded '+im.naturalWidth+' × '+im.naturalHeight+'. Tap the background in the preview to sample its color. Processing size: '+work.width+' × '+work.height+'.');
-    };
-    im.onerror=()=>{URL.revokeObjectURL(url);status('Image could not be opened. Try JPG or PNG.');};
-    im.src=url;
-  }
-  function sample(e){
-    const rect=cv.getBoundingClientRect(),x=Math.max(0,Math.min(cv.width-1,Math.floor((e.clientX-rect.left)/rect.width*cv.width))),y=Math.max(0,Math.min(cv.height-1,Math.floor((e.clientY-rect.top)/rect.height*cv.height)));
-    const p=g.getImageData(x,y,1,1).data;selected={r:p[0],g:p[1],b:p[2]};
-    $('bgRemoveColor').value=hex(selected);render();status('Background color sampled: '+hex(selected)+'. Adjust tolerance and edge softness, then refine with the brush.');
-  }
-  function brushAt(e){
-    const rect=cv.getBoundingClientRect(),px=(e.clientX-rect.left)/rect.width*cv.width,py=(e.clientY-rect.top)/rect.height*cv.height;
-    const rad=brush/2,x0=Math.max(0,Math.floor(px-rad)),x1=Math.min(cv.width-1,Math.ceil(px+rad)),y0=Math.max(0,Math.floor(py-rad)),y1=Math.min(cv.height-1,Math.ceil(py+rad));
-    const value=mode==='erase'?0:255;
-    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if((x-px)*(x-px)+(y-py)*(y-py)<=rad*rad)manual[y*cv.width+x]=value;
-    render();
-  }
-  file.onchange=e=>{loadImage(e.target.files&&e.target.files[0]);e.target.value='';};
-  $('bgRemoveUpload').onclick=()=>file.click();
-  $('bgRemovePick').onclick=()=>{setMode('pick');status('Tap the image background to sample the color to remove.');};
-  $('bgRemoveErase').onclick=()=>{setMode('erase');status('Brush mode: paint over any remaining background to erase it.');};
-  $('bgRemoveRestore').onclick=()=>{setMode('restore');status('Restore mode: paint over the subject to bring pixels back.');};
-  $('bgRemoveAutoWhite').onclick=()=>{if(!basePixels){status('Upload an image first.');return;}selected={r:255,g:255,b:255};tolerance=72;$('bgRemoveTolerance').value=72;render();status('White background removal applied. Fine-tune tolerance and softness.');};
-  $('bgRemoveApply').onclick=()=>{if(!basePixels){status('Upload an image first.');return;}const c=$('bgRemoveColor').value;selected={r:parseInt(c.slice(1,3),16),g:parseInt(c.slice(3,5),16),b:parseInt(c.slice(5,7),16)};render();status('Selected background color removed. Use brush for detailed cleanup.');};
-  $('bgRemoveColor').oninput=e=>{const c=e.target.value;selected={r:parseInt(c.slice(1,3),16),g:parseInt(c.slice(3,5),16),b:parseInt(c.slice(5,7),16)};};
+  $('bgRemoveToggle').onclick=()=>{const tools=$('bgRemoveTools'),open=tools.style.display==='none';tools.style.display=open?'block':'none';$('bgRemoveToggle').classList.toggle('on',open);if(!open)setMode('off');else if(!basePixels&&img&&!useVid)loadImage(img);};
+  $('bgRemoveUseCurrent').onclick=()=>{if(!img||useVid){status('Pehle Media > Photo se ek photo select karo. Video par static BG removal available nahi.');return;}loadImage(sourceImage||img);};
+  $('bgRemovePick').onclick=()=>{if(!basePixels){status('Pehle current photo select karo.');return;}setMode('pick');status('Main screen par photo ke background ko tap karo.');};
+  $('bgRemoveErase').onclick=()=>{if(!basePixels){status('Pehle current photo select karo.');return;}setMode('erase');status('Main screen par finger se background erase karo.');};
+  $('bgRemoveRestore').onclick=()=>{if(!basePixels){status('Pehle current photo select karo.');return;}setMode('restore');status('Main screen par subject par paint karke pixels restore karo.');};
+  $('bgRemoveAutoWhite').onclick=()=>{if(!basePixels){if(img&&!useVid)loadImage(img);else{status('Pehle Media > Photo se photo select karo.');return;}}selected={r:255,g:255,b:255};tolerance=72;$('bgRemoveTolerance').value=72;render();status('White background removed on the main photo.');};
+  $('bgRemoveApply').onclick=()=>{if(!basePixels){status('Pehle current photo select karo.');return;}const v=$('bgRemoveColor').value;selected={r:parseInt(v.slice(1,3),16),g:parseInt(v.slice(3,5),16),b:parseInt(v.slice(5,7),16)};render();status('Selected color removed. Transparent photo is now active in VISO.');};
+  $('bgRemoveColor').oninput=e=>{const v=e.target.value;selected={r:parseInt(v.slice(1,3),16),g:parseInt(v.slice(3,5),16),b:parseInt(v.slice(5,7),16)};};
   $('bgRemoveTolerance').oninput=e=>{tolerance=+e.target.value;if(basePixels)render();};
   $('bgRemoveSoftness').oninput=e=>{softness=+e.target.value;if(basePixels)render();};
   $('bgRemoveBrush').oninput=e=>brush=+e.target.value;
-  cv.addEventListener('pointerdown',e=>{if(!basePixels)return;e.preventDefault();cv.setPointerCapture(e.pointerId);if(mode==='pick')sample(e);else{isDown=true;brushAt(e);}});
-  cv.addEventListener('pointermove',e=>{if(isDown&&mode!=='pick')brushAt(e);});
-  cv.addEventListener('pointerup',()=>{isDown=false;});
-  cv.addEventListener('pointercancel',()=>{isDown=false;});
-  $('bgRemoveClearBrush').onclick=()=>{if(!manual)return;manual.fill(255);render();status('Manual brush edits cleared.');};
-  $('bgRemoveReset').onclick=()=>{if(!basePixels){status('Upload an image first.');return;}manual.fill(255);selected={r:255,g:255,b:255};tolerance=72;softness=22;$('bgRemoveTolerance').value=tolerance;$('bgRemoveSoftness').value=softness;g.putImageData(basePixels,0,0);setMode('pick');status('Image reset. Tap the background to sample a color.');};
-  $('bgRemoveDownload').onclick=()=>{if(!basePixels){status('Upload an image first.');return;}render();cv.toBlob(blob=>{if(!blob){status('PNG export failed.');return;}const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='VISO-Background-Removed.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);status('Transparent PNG export started.');},'image/png');};
+  function point(e){
+    const rect=c.getBoundingClientRect(),px=(e.clientX-rect.left)/rect.width*W,py=(e.clientY-rect.top)/rect.height*H;
+    if(mode==='pick'){const p=x.getImageData(Math.max(0,Math.min(W-1,Math.floor(px))),Math.max(0,Math.min(H-1,Math.floor(py))),1,1).data;selected={r:p[0],g:p[1],b:p[2]};render();status('Screen color '+hex(selected)+' selected. Adjust tolerance or use Erase brush.');return;}
+    const sx=px-(cx+ix+Math.sin(swayT*spd/100)*swy*2.2),sy=py-(cy+iy),co=Math.cos(irot),si=Math.sin(irot);
+    const lx=(sx*co+sy*si)/Math.max(.001,isc),ly=(-sx*si+sy*co)/Math.max(.001,isc);
+    const ixp=Math.round((lx/W+.5)*work.width),iyp=Math.round((ly/H+.5)*work.height);
+    const rad=Math.max(2,brush/2*Math.min(work.width/W,work.height/H)/Math.max(.15,isc));
+    const x0=Math.max(0,Math.floor(ixp-rad)),x1=Math.min(work.width-1,Math.ceil(ixp+rad)),y0=Math.max(0,Math.floor(iyp-rad)),y1=Math.min(work.height-1,Math.ceil(iyp+rad)),val=mode==='erase'?0:255,rr=rad*rad;
+    for(let yy=y0;yy<=y1;yy++)for(let xx=x0;xx<=x1;xx++)if((xx-ixp)*(xx-ixp)+(yy-iyp)*(yy-iyp)<=rr)manual[yy*work.width+xx]=val;
+    render();
+  }
+  let brushDown=false;
+  c.addEventListener('pointerdown',e=>{if(mode==='off'||!basePixels)return;e.preventDefault();e.stopImmediatePropagation();c.setPointerCapture(e.pointerId);if(mode!=='pick')brushDown=true;point(e);},true);
+  c.addEventListener('pointermove',e=>{if(brushDown&&mode!=='off'){e.preventDefault();e.stopImmediatePropagation();point(e);}},true);
+  c.addEventListener('pointerup',()=>{brushDown=false;},true);c.addEventListener('pointercancel',()=>{brushDown=false;},true);
+  $('bgRemoveClearBrush').onclick=()=>{if(!manual)return;manual.fill(255);render();status('Manual brush changes cleared.');};
+  $('bgRemoveReset').onclick=()=>{if(!sourceImage){status('No source photo loaded.');return;}loadImage(sourceImage);img=sourceImage;setMode('pick');status('Original photo restored.');};
+  $('bgRemoveDownload').onclick=()=>{if(!basePixels){status('Select a photo first.');return;}render();output.toBlob(blob=>{if(!blob){status('PNG export failed.');return;}const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='VISO-Transparent-Photo.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);status('Transparent PNG export started.');},'image/png');};
+  window.__visoBgLoad=loadImage;
 })();
 const SHAPES=[['media','Media'],['circle','Circle'],['ring','Ring'],['blob','Blob'],['frame','Frame'],['text','Text']];
 SHAPES.forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;
@@ -854,7 +853,7 @@ $('bBgViz').onclick=e=>{bgViz=!bgViz;e.currentTarget.classList.toggle('on',bgViz
 
 $('bI').onclick=()=>$('fI').click();
 $('fI').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();
-  im.onload=()=>{img=im;useVid=false;vid.pause();maskDirty=true;};im.src=URL.createObjectURL(f);};
+  im.onload=()=>{img=im;useVid=false;vid.pause();maskDirty=true;if(window.__visoBgLoad)window.__visoBgLoad(im);};im.src=URL.createObjectURL(f);};
 $('bV').onclick=()=>$('fV').click();
 $('fV').onchange=e=>{const f=e.target.files[0];if(!f)return;
   vid.src=URL.createObjectURL(f);vid.play();useVid=true;img=null;maskDirty=true;};
@@ -1317,63 +1316,69 @@ function stepObject(ob,b,dt){const bass=b[0],hi=b[5];ob.phase+=dt*(.002+hi*.02);
   else{ob.x+=Math.cos(ob.phase)*(1+b[2]*8);ob.y+=Math.sin(ob.phase*1.4)*(1+b[2]*8);
     ob.rot=Math.sin(ob.phase)*.12;if(ob.x<-w)ob.x=W;if(ob.x>W)ob.x=-w;
     if(ob.y<-h)ob.y=H;if(ob.y>H)ob.y=-h;}}
-function drawBeatLogo(ctx,dt){
-  const hasImage=!!logoImg&&logoImg.complete&&logoImg.naturalWidth>0;
-  const hasEmoji=!!logoEmoji;
-  if(!hasImage&&!hasEmoji)return;
-  // Read low-frequency energy independently; never uses the main Power/Shake/Punch sliders.
-  let raw=0;
-  if(an&&playing&&buf&&buf.length){
-    const n=Math.max(1,Math.floor(buf.length*.035));let sum=0;
-    for(let i=0;i<n;i++)sum+=buf[i];
-    raw=sum/n/255;
-  }
-  const target=Math.max(0,Math.min(1,(raw-.045)*5.2));
-  logoPulse+=(target-logoPulse)*(target>logoPulse?.72:.17);
-  logoPhase+=dt*(.0015+logoPulse*.012);
-  const beat=logoPulse*(logoBeatPower/100);
-  const base=logoSize, bounce=1+beat*.72+(logoPulse*logoBounce/100)*.32;
-  const jitter=(Math.random()-.5)*logoPulse*(logoShake/100)*22;
-  const size=base*bounce,px=cx+logoX+jitter,py=cy+logoY+Math.sin(logoPhase*2)*logoPulse*(logoBounce/100)*7;
-  ctx.save();ctx.translate(px,py);ctx.rotate(logoRotation*Math.PI/180+Math.sin(logoPhase)*logoPulse*.025);
-  ctx.globalAlpha=logoOpacity/100;
-  const glow=logoGlow/100*(.25+logoPulse*1.8);
-  ctx.shadowColor=gradAt(px,py);ctx.shadowBlur=glow*(18+logoPulse*55);
-  const r=size/2;
-  const pathShape=()=>{
-    ctx.beginPath();
-    if(logoShape==='circle'||logoShape==='ring'){ctx.arc(0,0,r*.78,0,Math.PI*2);}
-    else if(logoShape==='heart'){
-      ctx.moveTo(0,r*.72);ctx.bezierCurveTo(-r*.18,r*.48,-r*.95,r*.05,-r*.72,-r*.42);
-      ctx.bezierCurveTo(-r*.48,-r*.9,-r*.08,-r*.72,0,-r*.42);
-      ctx.bezierCurveTo(r*.08,-r*.72,r*.48,-r*.9,r*.72,-r*.42);
-      ctx.bezierCurveTo(r*.95,r*.05,r*.18,r*.48,0,r*.72);ctx.closePath();
-    } else if(logoShape==='star'||logoShape==='hex'||logoShape==='diamond'){
-      const count=logoShape==='star'?10:logoShape==='hex'?6:4;
-      for(let i=0;i<count;i++){const a=-Math.PI/2+i*Math.PI*2/count;
-        const rr=logoShape==='star'&&i%2?r*.48:r*.78;
-        const xx=Math.cos(a)*rr,yy=Math.sin(a)*rr;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}
-      ctx.closePath();
-    } else if(logoShape==='rounded'){const q=r*.68;ctx.roundRect(-q,-q,q*2,q*2,q*.22);}
-  };
-  if(logoShape!=='none'){
-    pathShape();ctx.fillStyle='rgba(35,190,255,.14)';ctx.fill();
-    ctx.lineWidth=Math.max(2,size*.012);ctx.strokeStyle=gradAt(px,py);ctx.stroke();
-    if(logoShape==='ring') {ctx.beginPath();ctx.arc(0,0,r*.62,0,Math.PI*2);ctx.stroke();}
-  }
-  if(hasImage){
-    const iw=logoImg.naturalWidth,ih=logoImg.naturalHeight;
-    const fit=Math.min(size*.82/iw,size*.82/ih),dw=iw*fit,dh=ih*fit;
-    if(logoShape==='circle'||logoShape==='ring'||logoShape==='heart'||logoShape==='star'||logoShape==='hex'||logoShape==='diamond'||logoShape==='rounded'){
-      ctx.save();pathShape();ctx.clip();
+function updateBeatLogoMotion(dt,b){
+  const energy=Math.max(0,Math.min(1,(b&&b[0]||0)*.9+(b&&b[1]||0)*.16)),rise=Math.max(0,energy-logoPrevEnergy);
+  logoEnergyAvg=logoEnergyAvg*.94+energy*.06;
+  const onset=Math.max(0,energy-logoEnergyAvg-.025),hit=Math.min(1,Math.max(rise*3.1,onset*2.4)),fs=Math.max(.35,Math.min(2.5,dt/16.67));
+  logoHit=Math.max(hit,logoHit*Math.pow(.79,fs));if(hit>.095)logoVelocity+=hit*(logoLaunchPower/100)*5.1;
+  logoPrevEnergy=energy;logoPulse+=(energy-logoPulse)*(energy>logoPulse?.58:.12);logoPhase+=dt*(.0015+energy*.014);
+  const was=logoLift;logoVelocity-=.58*fs;logoLift+=logoVelocity*fs;
+  if(logoLift<0){if(was>0)logoSquash=Math.min(1,was*.035+logoHit*.22);logoLift=0;logoVelocity=Math.abs(logoVelocity)*.24;}
+  logoVelocity*=Math.pow(.91,fs);logoSquash*=Math.pow(.78,fs);
+}
+function drawBeatLogoBack(ctx,b,dt){
+  if((!logoImg&&!logoEmoji)||logoBackStyle==='off'||logoBackPower<=0||logoBackOpacity<=0)return;
+  const px=cx+logoX,py=cy+logoY-logoLift*(logoLiftHeight/100),base=logoSize*.58,power=logoBackPower/100,alpha=logoBackOpacity/100,spread=logoBackSpread;
+  const count=Math.max(12,Math.min(144,Math.round(logoBackCount))),impact=logoHit;
+  ctx.save();ctx.translate(px,py);ctx.globalCompositeOperation='lighter';ctx.lineCap='round';ctx.lineJoin='round';
+  if(logoBackStyle==='bars'||logoBackStyle==='burst'||logoBackStyle==='crown'){
+    for(let i=0;i<count;i++){const a=i/count*Math.PI*2-Math.PI/2;if(logoBackStyle==='crown'&&(a>Math.PI*.08&&a<Math.PI*.92))continue;
+      const fi=playing&&buf&&buf.length?Math.min(buf.length-1,Math.floor(i/count*buf.length*.48)):i%6;
+      const spectrum=playing&&buf&&buf.length?buf[fi]/255:(b[i%6]||0),v=Math.max(.025,spectrum*.8,(b[i%6]||0)*.28);
+      const len=(5+v*spread*power)*(1+impact*.9),inner=base*(logoBackStyle==='crown'?.72:1),outer=inner+len,col=grad(i/Math.max(1,count-1));
+      ctx.strokeStyle=col;ctx.lineWidth=Math.max(2,logoSize*.009+v*5);ctx.globalAlpha=alpha*(.25+v*.72);ctx.shadowColor=col;ctx.shadowBlur=8+impact*22;
+      ctx.beginPath();ctx.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);ctx.lineTo(Math.cos(a)*outer,Math.sin(a)*outer);ctx.stroke();
+      if(logoBackStyle==='burst'&&i%3===0){ctx.globalAlpha=alpha*(.12+v*.45);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(Math.cos(a)*outer,Math.sin(a)*outer);ctx.lineTo(Math.cos(a)*(outer+spread*.22),Math.sin(a)*(outer+spread*.22));ctx.stroke();}
     }
-    ctx.drawImage(logoImg,-dw/2,-dh/2,dw,dh);
-    if(logoShape!=='none')ctx.restore();
-  } else {
-    ctx.shadowBlur+=12;ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.font='900 '+Math.round(size*.72)+'px "Apple Color Emoji","Noto Color Emoji",system-ui';
-    ctx.fillStyle='#fff';ctx.fillText(logoEmoji,0,0);
+  }else if(logoBackStyle==='rings'){
+    for(let i=0;i<5;i++){const rr=base*(.82+i*.18)+(1-impact)*i*13;ctx.beginPath();ctx.ellipse(0,0,rr*(1+impact*.16),rr*(.72+impact*.12),0,0,Math.PI*2);ctx.strokeStyle=grad(i/4);ctx.lineWidth=2+impact*8;ctx.globalAlpha=alpha*(.12+impact*.52)*(1-i*.12);ctx.shadowColor=grad(i/4);ctx.shadowBlur=18+impact*30;ctx.stroke();}
+  }else if(logoBackStyle==='tunnel'){
+    for(let k=0;k<9;k++){const z=(k+1)/9,rr=base*(.65+z*1.35)*(1+impact*.18);ctx.beginPath();for(let j=0;j<=6;j++){const a=j*Math.PI/3+logoPhase*.15+k*.06,xp=Math.cos(a)*rr,yp=Math.sin(a)*rr*.8;j?ctx.lineTo(xp,yp):ctx.moveTo(xp,yp);}ctx.closePath();ctx.strokeStyle=grad(z);ctx.lineWidth=1.5+impact*5;ctx.globalAlpha=alpha*(.08+impact*.36)*(1-z*.45);ctx.shadowColor=grad(z);ctx.shadowBlur=22;ctx.stroke();}
+  }else if(logoBackStyle==='vortex'){
+    for(let arm=0;arm<5;arm++){ctx.beginPath();ctx.strokeStyle=grad(arm/5);ctx.lineWidth=3+impact*9;ctx.globalAlpha=alpha*(.1+impact*.4);ctx.shadowColor=grad(arm/5);ctx.shadowBlur=24;for(let j=0;j<90;j++){const t=j/89,a=logoPhase*.5+arm*1.256+t*4.8,rr=base*(.35+t*1.4)*(1+impact*.2),xx=Math.cos(a)*rr,yy=Math.sin(a)*rr;j?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.stroke();}
+  }else if(logoBackStyle==='wave'){
+    for(let ring=0;ring<4;ring++){const rr=base*(.8+ring*.22);ctx.beginPath();for(let i=0;i<=count;i++){const a=i/count*Math.PI*2,v=b[i%6]||0,r=rr+Math.sin(a*8+logoPhase*2+ring)*spread*.18*v+impact*spread*.18,xx=Math.cos(a)*r,yy=Math.sin(a)*r*.8;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.closePath();ctx.strokeStyle=grad(ring/4);ctx.lineWidth=2+impact*5;ctx.globalAlpha=alpha*(.16+impact*.4);ctx.shadowColor=grad(ring/4);ctx.shadowBlur=22;ctx.stroke();}
   }
+  ctx.restore();ctx.globalAlpha=1;ctx.shadowBlur=0;ctx.globalCompositeOperation='source-over';
+}
+function drawBeatLogo(ctx,dt,b){
+  const hasImage=!!logoImg&&logoImg.complete&&logoImg.naturalWidth>0,hasEmoji=!!logoEmoji;if(!hasImage&&!hasEmoji)return;
+  const impact=logoHit,lift=logoLift*(logoLiftHeight/100),base=logoSize,bounce=1+impact*(logoBeatPower/100)*.16+(logoPulse*logoBounce/100)*.1;
+  let sx=bounce,sy=bounce,rot=logoRotation*Math.PI/180+Math.sin(logoPhase)*logoPulse*.018,liftFactor=1;
+  if(logoImpactStyle==='drum'){sx*=1+impact*.28+logoSquash*.18;sy*=1+impact*.38-logoSquash*.42;}
+  else if(logoImpactStyle==='dice'){sx*=1+impact*.2+logoSquash*.24;sy*=1+impact*.22-logoSquash*.34;rot+=Math.sin(logoPhase*2)*impact*.22+logoVelocity*.012;}
+  else if(logoImpactStyle==='spring'){sx*=1+impact*.42-logoSquash*.25;sy*=1-impact*.2+logoSquash*.38;liftFactor=1.18;}
+  else if(logoImpactStyle==='punch'){sx*=1+impact*.58;sy*=1-impact*.32;rot+=Math.sin(logoPhase*3)*impact*.08;}
+  else if(logoImpactStyle==='flip'){rot+=Math.sin(logoPhase*2)*impact*.38+lift*.012;sx*=1+impact*.12;}
+  else if(logoImpactStyle==='rocket'){liftFactor=1.45;sx*=1+impact*.12;sy*=1+impact*.2;}
+  else if(logoImpactStyle==='elastic'){sx*=1+impact*.32+logoSquash*.35;sy*=1-impact*.3+logoSquash*.48;}
+  else if(logoImpactStyle==='slam'){sx*=1+impact*.18+logoSquash*.5;sy*=1+impact*.5-logoSquash*.65;rot+=Math.sin(logoPhase*4)*impact*.05;}
+  const px=cx+logoX+(Math.random()-.5)*logoPulse*(logoShake/100)*10,py=cy+logoY-lift*liftFactor+Math.sin(logoPhase*2)*logoPulse*(logoBounce/100)*3,size=base*bounce,glow=logoGlow/100*(.25+logoPulse*1.8);
+  ctx.save();
+  const groundY=cy+logoY+size*.43;ctx.save();ctx.translate(px,groundY);ctx.scale(Math.max(.25,1-lift/220),Math.max(.2,.22-lift/520));
+  const shadow=ctx.createRadialGradient(0,0,2,0,0,size*.58);shadow.addColorStop(0,'rgba(0,0,0,'+(.42*(1-Math.min(1,lift/150)))+')');shadow.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=shadow;ctx.beginPath();ctx.ellipse(0,0,size*.58,size*.22,0,0,Math.PI*2);ctx.fill();ctx.restore();
+  if(logoImpactStyle==='rocket'&&impact>.04){ctx.globalAlpha=logoOpacity/100*.48;ctx.strokeStyle=grad(.6);ctx.lineWidth=4+impact*14;ctx.shadowColor=grad(.5);ctx.shadowBlur=25;ctx.beginPath();ctx.moveTo(px,py+size*.35);ctx.lineTo(px,py+size*.9+impact*35);ctx.stroke();}
+  ctx.translate(px,py);ctx.rotate(rot);ctx.scale(sx,sy);ctx.globalAlpha=logoOpacity/100;ctx.shadowColor=gradAt(px,py);ctx.shadowBlur=glow*(18+logoPulse*55);
+  const r=size/2;
+  const pathShape=()=>{ctx.beginPath();if(logoShape==='circle'||logoShape==='ring')ctx.arc(0,0,r*.78,0,Math.PI*2);
+    else if(logoShape==='heart'){ctx.moveTo(0,r*.72);ctx.bezierCurveTo(-r*.18,r*.48,-r*.95,r*.05,-r*.72,-r*.42);ctx.bezierCurveTo(-r*.48,-r*.9,-r*.08,-r*.72,0,-r*.42);ctx.bezierCurveTo(r*.08,-r*.72,r*.48,-r*.9,r*.72,-r*.42);ctx.bezierCurveTo(r*.95,r*.05,r*.18,r*.48,0,r*.72);ctx.closePath();}
+    else if(logoShape==='star'||logoShape==='hex'||logoShape==='diamond'){const count=logoShape==='star'?10:logoShape==='hex'?6:4;for(let i=0;i<count;i++){const a=-Math.PI/2+i*Math.PI*2/count,rr=logoShape==='star'&&i%2?r*.48:r*.78,xx=Math.cos(a)*rr,yy=Math.sin(a)*rr;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}ctx.closePath();}
+    else if(logoShape==='rounded'){const q=r*.68;ctx.roundRect(-q,-q,q*2,q*2,q*.22);}};
+  if(logoShape!=='none'){pathShape();ctx.fillStyle='rgba(35,190,255,.14)';ctx.fill();ctx.lineWidth=Math.max(2,size*.012);ctx.strokeStyle=gradAt(px,py);ctx.stroke();if(logoShape==='ring'){ctx.beginPath();ctx.arc(0,0,r*.62,0,Math.PI*2);ctx.stroke();}}
+  if(hasImage){const iw=logoImg.naturalWidth||logoImg.width,ih=logoImg.naturalHeight||logoImg.height,fit=Math.min(size*.82/iw,size*.82/ih),dw=iw*fit,dh=ih*fit;
+    if(['circle','ring','heart','star','hex','diamond','rounded'].includes(logoShape)){ctx.save();pathShape();ctx.clip();}
+    ctx.drawImage(logoImg,-dw/2,-dh/2,dw,dh);if(logoShape!=='none')ctx.restore();
+  }else{ctx.shadowBlur+=12;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 '+Math.round(size*.72)+'px "Apple Color Emoji","Noto Color Emoji",system-ui';ctx.fillStyle='#fff';ctx.fillText(logoEmoji,0,0);}
   ctx.restore();ctx.globalAlpha=1;ctx.shadowBlur=0;
 }
 function drawObjects(ctx,b,dt){objects.forEach((ob,i)=>{stepObject(ob,b,dt);
@@ -1456,7 +1461,9 @@ function frame(t){
   }
 
   drawObjects(x,b,dt);
-  drawBeatLogo(x,dt);
+  updateBeatLogoMotion(dt,b);
+  drawBeatLogoBack(x,b,dt);
+  drawBeatLogo(x,dt,b);
   if(frOn){x.globalCompositeOperation='lighter';x.globalAlpha=.3;
     x.drawImage(paintLayer(.7,false),0,0);x.globalCompositeOperation='source-over';x.globalAlpha=1;}
   bx.clearRect(0,0,bl.width,bl.height);
