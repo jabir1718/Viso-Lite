@@ -1063,6 +1063,35 @@ $('mediaBlendToggle').onclick=()=>{mediaBlendEnabled=!mediaBlendEnabled;$('media
 $('mediaBgRemove').onclick=()=>{if(!img||useVid){$('mediaPhotoStatus').textContent='Pehle Media → Photo se image select karo. Video par photo background removal nahi.';return;}if($('bgRemoveTools').style.display==='none')$('bgRemoveToggle').click();$('bgRemoveUseCurrent').click();$('mediaPhotoStatus').textContent='Background removal tools Background section mein active hain; tap, erase, restore aur tolerance wahan control karo.';};
 $('mediaRestoreOriginal').onclick=()=>{if($('bgRemoveTools').style.display==='none')$('bgRemoveToggle').click();$('bgRemoveUseCurrent').click();$('mediaPhotoStatus').textContent='Original uploaded photo restored.';};
 $('mediaEffectsReset').onclick=()=>{mediaBlendMode='source-over';mediaBlendOpacity=100;mediaBlendEnabled=true;mediaBeatReaction=100;$('mediaBeatReaction').value=100;$('mediaBlendMode').value='source-over';$('mediaBlendOpacity').value=100;$('mediaBlendToggle').textContent='Blend ON';$('mediaBlendToggle').classList.add('on');$('mediaPhotoStatus').textContent='Media photo effects reset. Uploaded image and Logo settings are unchanged.';};
+async function decodeOrientedImage(file){
+ if(window.createImageBitmap){try{return await createImageBitmap(file,{imageOrientation:'from-image'});}catch(e){try{return await createImageBitmap(file);}catch(_){}}}
+ return await new Promise((resolve,reject)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);resolve(im);};im.onerror=()=>{URL.revokeObjectURL(u);reject(new Error('Image decode failed'));};im.src=u;});
+}
+function removeEdgeBackground(source,tolerance){
+ const w=source.naturalWidth||source.width,h=source.naturalHeight||source.height,scale=Math.min(1,1800/Math.max(w,h)),cw=Math.max(1,Math.round(w*scale)),ch=Math.max(1,Math.round(h*scale)),cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
+ const cc=cv.getContext('2d',{willReadFrequently:true});cc.drawImage(source,0,0,cw,ch);const im=cc.getImageData(0,0,cw,ch),d=im.data,n=cw*ch,seen=new Uint8Array(n),q=new Int32Array(n);let rr=0,gg=0,bb=0,count=0;
+ const step=Math.max(1,Math.floor(Math.min(cw,ch)/100));for(let xx=0;xx<cw;xx+=step)for(const yy of [0,ch-1]){const p=(yy*cw+xx)*4;if(d[p+3]>16){rr+=d[p];gg+=d[p+1];bb+=d[p+2];count++;}}
+ for(let yy=0;yy<ch;yy+=step)for(const xx of [0,cw-1]){const p=(yy*cw+xx)*4;if(d[p+3]>16){rr+=d[p];gg+=d[p+1];bb+=d[p+2];count++;}}
+ if(!count)throw new Error('No background pixels found');rr/=count;gg/=count;bb/=count;const limit=tolerance*tolerance*3;let head=0,tail=0;
+ const add=p=>{if(p<0||p>=n||seen[p])return;const k=p*4;if(d[k+3]<12)return;const dr=d[k]-rr,dg=d[k+1]-gg,db=d[k+2]-bb;if(dr*dr+dg*dg+db*db<=limit){seen[p]=1;q[tail++]=p;}};
+ for(let xx=0;xx<cw;xx++){add(xx);add((ch-1)*cw+xx);}for(let yy=1;yy<ch-1;yy++){add(yy*cw);add(yy*cw+cw-1);}
+ while(head<tail){const p=q[head++],xx=p%cw,yy=(p/cw)|0;if(xx)add(p-1);if(xx<cw-1)add(p+1);if(yy)add(p-cw);if(yy<ch-1)add(p+cw);}
+ for(let p=0;p<n;p++)if(seen[p])d[p*4+3]=0;cc.putImageData(im,0,0);return cv;
+}
+function drawLogoTemplateImage(ctx){
+ if(!logoTemplateImg)return;const iw=logoTemplateImg.width,ih=logoTemplateImg.height,fit=Math.min(logoSize*.82/iw,logoSize*.82/ih)*logoTemplateImageSize/100;
+ ctx.save();ctx.translate(cx+logoX,cy+logoY);ctx.rotate(logoRotation);ctx.globalAlpha=logoOpacity/100*logoTemplateImageOpacity/100;ctx.globalCompositeOperation=logoTemplateBlendMode;
+ ctx.shadowColor=logoTemplateColorMode==='auto'?logoTemplateAutoColor:logoTemplateManualColor;ctx.shadowBlur=10+logoTemplateEnergy*25;ctx.drawImage(logoTemplateImg,-iw*fit/2,-ih*fit/2,iw*fit,ih*fit);ctx.restore();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+}
+$('logoTemplateUpload').onclick=()=>$('fTemplateImage').click();
+$('fTemplateImage').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{logoTemplateImg=await decodeOrientedImage(f);logoTemplateOriginalImg=logoTemplateImg;$('logoTemplateStatus').textContent='Custom template loaded · touch to move, pinch to zoom/rotate.';}catch(err){$('logoTemplateStatus').textContent='Template load failed: '+err.message;}e.target.value='';};
+$('logoTemplateRemoveBg').onclick=()=>{if(!logoTemplateOriginalImg){$('logoTemplateStatus').textContent='Upload template PNG/photo first.';return;}try{logoTemplateImg=removeEdgeBackground(logoTemplateOriginalImg,Math.max(10,+$('logoBgTolerance').value));$('logoTemplateStatus').textContent='Template background removed; original saved.';}catch(err){$('logoTemplateStatus').textContent='Cutout failed: '+err.message;}};
+$('logoTemplateRestore').onclick=()=>{logoTemplateImg=logoTemplateOriginalImg;$('logoTemplateStatus').textContent='Original template restored.';};
+$('logoTemplateBlendMode').onchange=e=>logoTemplateBlendMode=e.target.value;
+$('logoTemplateImageOpacity').oninput=e=>logoTemplateImageOpacity=+e.target.value;
+$('logoTemplateImageSize').oninput=e=>logoTemplateImageSize=+e.target.value;
+$('objectRemoveBg').onclick=()=>{const ob=selectedObject();if(!ob){$('objectStatus').textContent='Select an uploaded PNG/logo first.';return;}try{ob.originalImg=ob.originalImg||ob.img;ob.img=removeEdgeBackground(ob.originalImg,Math.max(10,+$('logoBgTolerance').value));$('objectStatus').textContent='Selected PNG background removed; original saved.';}catch(err){$('objectStatus').textContent='Cutout failed: '+err.message;}};
+$('objectRestoreBg').onclick=()=>{const ob=selectedObject();if(ob&&ob.originalImg){ob.img=ob.originalImg;$('objectStatus').textContent='Selected PNG restored.';}};
 $('bI').onclick=()=>$('fI').click();
 $('fI').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const im=await decodeOrientedImage(f);img=im;useVid=false;vid.pause();maskDirty=true;ix=0;iy=0;isc=1;irot=0;if(window.__visoBgLoad)window.__visoBgLoad(im);}catch(err){$('mediaPhotoStatus').textContent='Photo load failed: '+err.message;}e.target.value='';};
 $('bV').onclick=()=>$('fV').click();
@@ -1189,27 +1218,30 @@ $('bReset').onclick=()=>{snap();colors=[190,285];selColor=0;drawPals();
   $('sMsc').value=100;drawMixers();};
 
 function pos(e){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
-function hitObj(p){for(let i=objects.length-1;i>=0;i--){const b=objects[i],w=b.img.width*b.sc,h=b.img.height*b.sc;
-  if(p.x>b.x-w/2&&p.x<b.x+w/2&&p.y>b.y-h/2&&p.y<b.y+h/2)return i;}return -1;}
+function hitObj(p){for(let i=objects.length-1;i>=0;i--){const b=objects[i],w=b.img.width*b.sc,h=b.img.height*b.sc;if(p.x>b.x-w/2&&p.x<b.x+w/2&&p.y>b.y-h/2&&p.y<b.y+h/2)return i;}return -1;}
 const ptr=new Map();let start=null;
 function down(e){e.preventDefault();c.setPointerCapture(e.pointerId);const p=pos(e);ptr.set(e.pointerId,p);
-  if(ptr.size===1){selObj=hitObj(p);if(selObj>=0)syncSelectedObjectControls();
-    if(selObj>=0){const b=objects[selObj];start={m:'o',x:p.x,y:p.y,ox:b.x,oy:b.y};}
-    else start={m:'p',x:p.x,y:p.y,ix,iy};}
-  if(ptr.size===2){const a=[...ptr.values()];const b=selObj>=0?objects[selObj]:null;
-    start={m:b?'o2':'p2',d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),
-      ang:Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x),sc:b?b.sc:isc,rot:b?b.rot:irot};}}
-function move(e){if(!ptr.has(e.pointerId))return;e.preventDefault();const p=pos(e);ptr.set(e.pointerId,p);
-  const a=[...ptr.values()];const b=selObj>=0?objects[selObj]:null;if(!start)return;
-  if(ptr.size===1&&start.m==='o'&&b){b.x=start.ox+(a[0].x-start.x);b.y=start.oy+(a[0].y-start.y);}
-  else if(ptr.size===1&&start.m==='p'){ix=start.ix+(a[0].x-start.x);iy=start.iy+(a[0].y-start.y);}
-  else if(ptr.size===2){const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);
-    const ang=Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x);const k=Math.max(.08,Math.min(6,d/Math.max(1,start.d)));
-    if(start.m==='o2'&&b){b.sc=start.sc*k;b.rot=start.rot+(ang-start.ang);}
-    else if(start.m==='p2'){isc=Math.max(.15,Math.min(5,start.sc*k));irot=start.rot+(ang-start.ang);}}}
+ if(ptr.size===1){const canSelect=activeWorkSection.includes('media')||activeWorkSection.includes('logo');selObj=canSelect?hitObj(p):-1;if(selObj>=0)syncSelectedObjectControls();
+  if(selObj>=0){const b=objects[selObj];start={m:'object',x:p.x,y:p.y,ox:b.x,oy:b.y,sc:b.sc,rot:b.rot};}
+  else if(activeWorkSection.includes('background'))start={m:'background',x:p.x,y:p.y,x0:bgX,y0:bgY,sc:bgSc,rot:bgRot};
+  else if(activeWorkSection.includes('logo'))start={m:'logo',x:p.x,y:p.y,x0:logoX,y0:logoY,sc:logoSize,rot:logoRotation};
+  else if(activeWorkSection.includes('media'))start={m:'media',x:p.x,y:p.y,x0:ix,y0:iy,sc:isc,rot:irot};
+  else start={m:'visualizer',x:p.x,y:p.y,x0:ix,y0:iy,sc:isc,rot:irot};}
+ if(ptr.size===2){const a=[...ptr.values()],b=selObj>=0?objects[selObj]:null,m=b?'object':start&&start.m==='background'?'background':start&&start.m==='logo'?'logo':start&&start.m==='media'?'media':'visualizer';
+  start={m:m+'2',d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),ang:Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x),sc:b?b.sc:m==='background'?bgSc:m==='logo'?logoSize:isc,rot:b?b.rot:m==='background'?bgRot:m==='logo'?logoRotation:irot,x0:m==='background'?bgX:m==='logo'?logoX:ix,y0:m==='background'?bgY:m==='logo'?logoY:iy};}}
+function move(e){if(!ptr.has(e.pointerId)||!start)return;e.preventDefault();const p=pos(e);ptr.set(e.pointerId,p);const a=[...ptr.values()],m=start.m.replace(/2$/,''),b=selObj>=0?objects[selObj]:null;
+ if(ptr.size===1){const dx=a[0].x-start.x,dy=a[0].y-start.y;
+  if(m==='object'&&b){b.x=start.ox+dx;b.y=start.oy+dy;}
+  else if(m==='background'){bgX=start.x0+dx;bgY=start.y0+dy;}
+  else if(m==='logo'){logoX=start.x0+dx;logoY=start.y0+dy;$('logoX').value=logoX;$('logoY').value=logoY;}
+  else{ix=start.x0+dx;iy=start.y0+dy;}}
+ else if(ptr.size===2){const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),ang=Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x),k=Math.max(.08,Math.min(6,d/Math.max(1,start.d)));
+  if(m==='object'&&b){b.sc=Math.max(.03,Math.min(5,start.sc*k));b.rot=start.rot+(ang-start.ang);}
+  else if(m==='background'){bgSc=Math.max(.15,Math.min(6,start.sc*k));bgRot=start.rot+(ang-start.ang);}
+  else if(m==='logo'){logoSize=Math.max(40,Math.min(700,start.sc*k));logoRotation=start.rot+(ang-start.ang);$('logoSize').value=logoSize;$('logoRotation').value=logoRotation*180/Math.PI;}
+  else{isc=Math.max(.15,Math.min(5,start.sc*k));irot=start.rot+(ang-start.ang);}}}
 function up(e){ptr.delete(e.pointerId);if(!ptr.size){start=null;snap();if(selObj>=0)syncSelectedObjectControls();}}
-c.addEventListener('pointerdown',down);c.addEventListener('pointermove',move);
-c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up);
+c.addEventListener('pointerdown',down);c.addEventListener('pointermove',move);c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up);
 
 function src(){return useVid&&vid.readyState>=2?vid:img;}
 function cover(ctx,s,sw,sh,clipH){const k=Math.max(W/sw,H/sh),w=sw*k,h=sh*k;
@@ -1692,13 +1724,13 @@ function frame(t){
   const b=bands();curB=b;curBbg=bands(bvp);
   const bass=b[0];const mediaTarget=Math.min(1,b[0]*.55+b[2]*.3+b[5]*.15);mediaBeatEnergy+=(mediaTarget-mediaBeatEnergy)*.28;avg=avg*.92+bass*.08;
   if(bass>avg*1.4&&bass>.32)scatter(170);
-  pulse=Math.max(pulse*.85,bass);hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
+  pulse+=(bass-pulse)*(bass>pulse?.16:.055);hueShift=(hueShift+cyc*.05)%360;swayT+=dt;
   if(useVid&&frameN%3===0)maskDirty=true;
   if(maskDirty){buildMask();maskDirty=false;}
   stepP(b,dt);
 
   x.save();
-  const amp=pulse*(shk/100)*26;
+  const amp=pulse*(shk/100)*12;
   if(amp>1)x.translate((Math.random()-.5)*amp,(Math.random()-.5)*amp);
   const punch=1+(pnc/100)*pulse*.06;
   if(punch>1){x.translate(cx,cy);x.scale(punch,punch);x.translate(-cx,-cy);}
@@ -1747,6 +1779,7 @@ function frame(t){
   drawObjects(x,b,dt);
   updateBeatLogoMotion(dt,b);
   window.VisoLogoEffects.drawTemplate(x,{logoTemplate,logoTemplateOn,logoTemplateSpeed,logoPulse:logoTemplateEnergy,logoTemplateBeat,logoPhase,logoSize,logoTemplateSize,logoTemplateOpacity,logoTemplateThickness,accentColor:logoTemplateColorMode==='auto'?logoTemplateAutoColor:logoTemplateManualColor,rubberSoftness:logoRubberSoftness,cx,cy,logoX,logoY,logoLift,logoLiftHeight});
+  drawLogoTemplateImage(x);
   drawBeatLogoBack(x,b,dt);
   drawBeatLogo(x,dt,b);
   drawCornerBrandMarks(x);
@@ -1767,12 +1800,13 @@ requestAnimationFrame(frame);
 // Compact, independent work areas: collapse only top-level tool sections; no controls or handlers are removed.
 document.querySelectorAll('#bar>.sec').forEach((sec,i)=>{
   const heading=sec.querySelector(':scope > h4');if(!heading)return;
+  sec.dataset.workSection=(heading.textContent||'').trim().toLowerCase();
   const body=document.createElement('div');body.className='viso-section-body';
   while(heading.nextSibling)body.appendChild(heading.nextSibling);
   sec.appendChild(body);
-  if(i===0)sec.classList.add('is-open');
+  if(i===0){sec.classList.add('is-open');activeWorkSection=sec.dataset.workSection;}
   heading.setAttribute('role','button');heading.setAttribute('tabindex','0');
-  const toggle=()=>{document.querySelectorAll('#bar>.sec').forEach(other=>{if(other!==sec)other.classList.remove('is-open');});sec.classList.toggle('is-open');};
+  const toggle=()=>{document.querySelectorAll('#bar>.sec').forEach(other=>{if(other!==sec)other.classList.remove('is-open');});sec.classList.toggle('is-open');if(sec.classList.contains('is-open'))activeWorkSection=sec.dataset.workSection;};
   heading.addEventListener('click',toggle);
   heading.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
 });
