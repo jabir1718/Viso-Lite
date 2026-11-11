@@ -55,8 +55,8 @@ jobs:
           with tempfile.NamedTemporaryFile('w',suffix='.js',delete=False,encoding='utf-8') as out:
               out.write('\\n'.join(parser.inline)); js_path=out.name
           subprocess.run(['node','--check',js_path],check=True)
-          ids=set(re.findall(r'\\bid=[\\\"\\\']([^\\\"\\\']+)[\\\"\\\']',source))
-          refs=set(re.findall(r"\\$\\(['\\\"]([^'\\\"]+)['\\\"]\\)",source))
+          ids=set(re.findall(r"""\bid=['"]([^'"]+)['"]""",source))
+          refs=set(re.findall(r"""\$\(['"]([^'"]+)['"]\)""",source))
           missing=sorted(refs-ids)
           if missing: raise SystemExit('Missing DOM IDs: '+', '.join(missing))
           print(f'Validated {len(parser.inline)} inline script blocks and {len(refs)} literal DOM references')
